@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ადმინ პანელი</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🏗️</div>
+    <h1>ადმინ პანელი</h1>
+    <p>შედი შენი ანგარიშით</p>
+    <input class="login-input" type="email" id="loginEmail" placeholder="ელ. ფოსტა" autocomplete="email" value="admin@unicraft.ge">
+    <input class="login-input" type="password" id="loginPass" placeholder="პაროლი" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter') doLogin()" value="unicraft2025">
+    <button class="login-btn" onclick="doLogin()">შესვლა</button>
+    <div class="login-error" id="loginError"></div>
+    <div style="margin-top:16px;padding:10px;background:#f5f3f0;border-radius:8px;font-size:12px;color:#6B6560;text-align:left">
+      <div style="font-weight:600;margin-bottom:4px;color:#2A2520">Demo წვდომა:</div>
+      <div>📧 admin@unicraft.ge</div>
+      <div>🔑 unicraft2025</div>
+    </div>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+
+  <!-- Mobile top bar -->
+  <div class="mobile-bar">
+    <button class="hamburger-btn" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-bar-title"><span>UNI</span>CRAFT · ადმინი</div>
+    <button onclick="doLogout()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">გამოსვლა</button>
+  </div>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <svg width="32" height="28" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 4 L97 36 L3 36 Z" fill="#E8541A"/>
+          <rect x="5" y="35" width="90" height="54" fill="none" stroke="#E8541A" stroke-width="4"/>
+          <rect x="7" y="37" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="46" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="55" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="64" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="73" width="23" height="15" fill="#C4400E" rx="1"/>
+          <rect x="38" y="63" width="22" height="26" fill="#E8541A" rx="1"/>
+          <rect x="67" y="42" width="5" height="28" fill="#E8541A" rx="2"/>
+          <rect x="61" y="38" width="17" height="9" fill="#C4400E" rx="2"/>
+          <rect x="80" y="44" width="5" height="20" fill="#E8541A" rx="2"/>
+          <path d="M78 44 Q82 38 86 44" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M78 64 Q82 70 86 64" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <rect x="90" y="40" width="4" height="26" fill="#C4400E" rx="1"/>
+          <path d="M88 40 L92 36 L96 40" fill="#C4400E"/>
+        </svg>
+        <span style="font-size:17px;font-weight:600;color:white;letter-spacing:0.5px"><span style="color:white">UNI</span><span style="color:#E8541A">CRAFT</span></span>
+      </div>
+      <div class="sidebar-subtitle">ადმინ პანელი</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> მიმოხილვა
+      </div>
+      <div class="nav-item" onclick="showPage('add-product')">
+        <span class="nav-icon">➕</span> პროდუქტის დამატება
+      </div>
+      <div class="nav-item" onclick="showPage('products')">
+        <span class="nav-icon">📦</span> პროდუქტები
+      </div>
+      <div class="nav-item" onclick="showPage('orders')">
+        <span class="nav-icon">🧾</span> შეკვეთები
+        <span id="newOrdersBadge" style="display:none;margin-left:auto;background:var(--orange);color:white;border-radius:20px;padding:1px 8px;font-size:12px"></span>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px" id="adminEmail"></div>
+      <button class="logout-btn" onclick="doLogout()">გამოსვლა</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Dashboard -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">გამარჯობა! 👋</div>
+          <div class="page-subtitle" id="todayDate"></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon orange">📦</div>
+          <div>
+            <div class="stat-value" id="statProducts">–</div>
+            <div class="stat-label">სულ პროდუქტი</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🧾</div>
+          <div>
+            <div class="stat-value" id="statOrders">–</div>
+            <div class="stat-label">სულ შეკვეთა</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">🆕</div>
+          <div>
+            <div class="stat-value" id="statNew">–</div>
+            <div class="stat-label">ახალი შეკვეთა</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">ბოლო შეკვეთები</span>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('orders')">ყველა →</button>
+        </div>
+        <div id="recentOrders"><div class="table-loading"><div class="spinner"></div> იტვირთება...</div></div>
+      </div>
+    </div>
+
+    <!-- Add Product -->
+    <div class="page" id="page-add-product">
+      <div class="page-header">
+        <div>
+          <div class="page-title">პროდუქტის დამატება</div>
+          <div class="page-subtitle">შეავსე ფორმა და დაამატე პროდუქტი კატალოგში</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="product-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
+              <input class="form-input" id="prodName" placeholder="მაგ: ცემენტი M400">
+            </div>
+            <div class="form-group">
+              <label class="form-label">კატეგორია <span class="required">*</span></label>
+              <select class="form-select" id="prodCategory">
+                <option value="">კატეგორია...</option>
+                <option>ცემენტი და ბეტონი</option>
+                <option>აგური და ბლოკი</option>
+                <option>კარამზიტი</option>
+                <option>ხე-ტყე</option>
+                <option>მეტალი</option>
+                <option>საიზოლაციო მასალა</option>
+                <option>სადახურე მასალა</option>
+                <option>მილები</option>
+                <option>ელ. მასალა</option>
+                <option>ინსტრუმენტი</option>
+                <option>სხვა</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">ფასი (₾) <span class="required">*</span></label>
+              <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">ერთეული</label>
+              <select class="form-select" id="prodUnit">
+                <option value="ც">ცალი</option>
+                <option value="კგ">კგ</option>
+                <option value="ტ">ტონა</option>
+                <option value="მ²">მ²</option>
+                <option value="მ³">მ³</option>
+                <option value="მ">მეტრი</option>
+                <option value="კონტ">კონტეინერი</option>
+                <option value="ტომ">ტომარა</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">აღწერა</label>
+              <textarea class="form-textarea" id="prodDesc" placeholder="პროდუქტის დეტალური აღწერა, სპეციფიკაცია..."></textarea>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">ფოტო</label>
+              <div class="dropzone" id="prodDropzone"
+                onclick="document.getElementById('prodFile').click()"
+                ondragover="event.preventDefault();this.classList.add('drag-over')"
+                ondragleave="this.classList.remove('drag-over')"
+                ondrop="handleDrop(event,'prod')">
+                <input type="file" id="prodFile" accept="image/*" style="display:none" onchange="handleFile(this,'prod')">
+                <div id="prodPreview">
+                  <div class="dropzone-icon">📷</div>
+                  <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
+                  <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">მარაგი (ცალი)</label>
+              <input class="form-input" id="prodStock" type="number" min="0" placeholder="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label">სტატუსი</label>
+              <select class="form-select" id="prodActive">
+                <option value="true">✓ აქტიური (ჩანს კატალოგში)</option>
+                <option value="false">✗ დამალული</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">მაღაზია</label>
+              <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="addProductBtn" onclick="addProduct()">
+              ✓ კატალოგში დამატება
+            </button>
+            <button class="btn btn-secondary" onclick="clearForm()">გასუფთავება</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products List -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <div>
+          <div class="page-title">პროდუქტები</div>
+          <div class="page-subtitle" id="productCountLabel"></div>
+        </div>
+        <button class="btn btn-primary" onclick="showPage('add-product')">+ დამატება</button>
+      </div>
+      <div class="card">
+        <div class="table-row table-header">
+          <span>ფოტო</span>
+          <span>პროდუქტი</span>
+          <span>კატეგორია</span>
+          <span>ფასი</span>
+          <span>მაღაზია</span>
+          <span>სტატუსი</span>
+          <span>მოქმედება</span>
+        </div>
+        <div id="productsList">
+          <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <div>
+          <div class="page-title">შეკვეთები</div>
+          <div class="page-subtitle" id="orderCountLabel"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="order-row table-header" style="grid-template-columns: 140px 1fr 120px 110px 110px;">
+          <span>თარიღი</span>
+          <span>მომხმარებელი</span>
+          <span>ტელეფონი</span>
+          <span>სულ</span>
+          <span>სტატუსი</span>
+        </div>
+        <div id="ordersList">
+          <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:var(--radius);width:100%;max-width:660px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
+    <div class="card-header">
+      <span class="card-title">პროდუქტის რედაქტირება</span>
+      <button onclick="closeEditModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray-mid);line-height:1">✕</button>
+    </div>
+    <div class="product-form">
+      <input type="hidden" id="editProdId">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
+          <input class="form-input" id="editName" placeholder="მაგ: ცემენტი M400">
+        </div>
+        <div class="form-group">
+          <label class="form-label">კატეგორია <span class="required">*</span></label>
+          <select class="form-select" id="editCategory">
+            <option value="">კატეგორია...</option>
+            <option>ცემენტი და ბეტონი</option>
+            <option>აგური და ბლოკი</option>
+            <option>კარამზიტი</option>
+            <option>ხე-ტყე</option>
+            <option>მეტალი</option>
+            <option>საიზოლაციო მასალა</option>
+            <option>სადახურე მასალა</option>
+            <option>მილები</option>
+            <option>ელ. მასალა</option>
+            <option>ინსტრუმენტი</option>
+            <option>სხვა</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ფასი (₾) <span class="required">*</span></label>
+          <input class="form-input" id="editPrice" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ერთეული</label>
+          <select class="form-select" id="editUnit">
+            <option value="ც">ცალი</option>
+            <option value="კგ">კგ</option>
+            <option value="ტ">ტონა</option>
+            <option value="მ²">მ²</option>
+            <option value="მ³">მ³</option>
+            <option value="მ">მეტრი</option>
+            <option value="კონტ">კონტეინერი</option>
+            <option value="ტომ">ტომარა</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">აღწერა</label>
+          <textarea class="form-textarea" id="editDesc" placeholder="პროდუქტის დეტალური აღწერა..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">ფოტო</label>
+          <input type="hidden" id="editExistingImage">
+          <div class="dropzone" id="editDropzone"
+            onclick="document.getElementById('editFile').click()"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event,'edit')">
+            <input type="file" id="editFile" accept="image/*" style="display:none" onchange="handleFile(this,'edit')">
+            <div id="editPreview">
+              <div class="dropzone-icon">📷</div>
+              <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
+              <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">მარაგი (ცალი)</label>
+          <input class="form-input" id="editStock" type="number" min="0" placeholder="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">სტატუსი</label>
+          <select class="form-select" id="editActive">
+            <option value="true">✓ აქტიური</option>
+            <option value="false">✗ დამალული</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">მაღაზია</label>
+          <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="saveEditBtn" onclick="saveProductEdit()">✓ შენახვა</button>
+        <button class="btn btn-secondary" onclick="closeEditModal()">გაუქმება</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { db, auth } from './firebase-config.js';
+import {
+  signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  collection, getDocs, addDoc, deleteDoc, doc,
+  serverTimestamp, query, orderBy, updateDoc, limit
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+// ─── Product cache for edit ───
+let productCache = {};
+let prodFileData = null;
+let editFileData = null;
+
+const DROPZONE_EMPTY = `
+  <div class="dropzone-icon">📷</div>
+  <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
+  <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>`;
+
+window.handleFile = function(input, prefix) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('ფაილი ძალიან დიდია (მაქს 5MB)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (prefix === 'prod') prodFileData = e.target.result;
+    else editFileData = e.target.result;
+    showDropPreview(prefix, e.target.result);
+  };
+  reader.readAsDataURL(file);
+};
+
+window.handleDrop = function(e, prefix) {
+  e.preventDefault();
+  document.getElementById(prefix + 'Dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('ფაილი ძალიან დიდია (მაქს 5MB)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    if (prefix === 'prod') prodFileData = ev.target.result;
+    else editFileData = ev.target.result;
+    showDropPreview(prefix, ev.target.result);
+  };
+  reader.readAsDataURL(file);
+};
+
+function showDropPreview(prefix, src) {
+  document.getElementById(prefix + 'Preview').innerHTML =
+    `<img src="${src}" class="dropzone-img-preview"><div class="dropzone-change-hint">სხვა ფოტოს ასარჩევად კვლავ დააჭირე</div>`;
+}
+
+// ─── Demo credentials (Firebase-ის გარეშე) ───
+const DEMO_EMAIL = 'admin@unicraft.ge';
+const DEMO_PASS  = 'unicraft2025';
+
+function showApp(email) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('adminEmail').textContent = email;
+  initApp();
+}
+
+// ─── Auth ───
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'შეავსე ყველა ველი'; return; }
+
+  // Demo login (Firebase-ის გარეშე)
+  if (email === DEMO_EMAIL && pass === DEMO_PASS) {
+    sessionStorage.setItem('uc_demo_admin', '1');
+    showApp(email);
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    errEl.textContent = 'არასწორი ელ. ფოსტა ან პაროლი';
+  }
+};
+
+window.doLogout = async function() {
+  sessionStorage.removeItem('uc_demo_admin');
+  try { await signOut(auth); } catch(e) {}
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+};
+
+// Firebase auth state
+onAuthStateChanged(auth, user => {
+  if (user) {
+    showApp(user.email);
+  } else if (!sessionStorage.getItem('uc_demo_admin')) {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+// Demo session restore
+if (sessionStorage.getItem('uc_demo_admin')) {
+  showApp(DEMO_EMAIL);
+}
+
+// ─── Mobile sidebar toggle ───
+window.toggleSidebar = function() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+};
+
+// ─── Pages ───
+window.showPage = function(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
+  });
+  if (name === 'products') loadProductsList();
+  if (name === 'orders') loadOrdersList();
+  // close sidebar on mobile after nav
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.remove('show');
+};
+
+// ─── Init ───
+async function initApp() {
+  const d = new Date();
+  document.getElementById('todayDate').textContent =
+    d.toLocaleDateString('ka-GE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Stats
+  try {
+    const [prodSnap, orderSnap] = await Promise.all([
+      getDocs(collection(db, 'products')),
+      getDocs(collection(db, 'orders'))
+    ]);
+    document.getElementById('statProducts').textContent = prodSnap.size;
+    document.getElementById('statOrders').textContent = orderSnap.size;
+    const newOrders = orderSnap.docs.filter(d => d.data().status === 'new').length;
+    document.getElementById('statNew').textContent = newOrders;
+    if (newOrders > 0) {
+      const badge = document.getElementById('newOrdersBadge');
+      badge.textContent = newOrders;
+      badge.style.display = 'inline';
+    }
+    // Recent orders
+    const recent = orderSnap.docs
+      .sort((a, b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0))
+      .slice(0, 5);
+    renderRecentOrders(recent);
+  } catch(e) { console.error(e); }
+}
+
+function renderRecentOrders(docs) {
+  const el = document.getElementById('recentOrders');
+  if (!docs.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთები ჯერ არ არის</p></div>'; return; }
+  el.innerHTML = docs.map(d => {
+    const o = d.data();
+    const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ka-GE') : '–';
+    return `<div class="order-row" style="grid-template-columns: 140px 1fr 120px 110px 110px;">
+      <span style="font-size:13px;color:var(--gray-mid)">${date}</span>
+      <span><div class="order-customer">${o.customer?.firstName} ${o.customer?.lastName}</div></span>
+      <span class="order-phone">${o.customer?.phone}</span>
+      <span style="font-weight:600">${o.total?.toFixed(2)} ₾</span>
+      <span><span class="order-status status-${o.status || 'new'}">${statusLabel(o.status)}</span></span>
+    </div>`;
+  }).join('');
+}
+
+// ─── Products ───
+window.addProduct = async function() {
+  const name = document.getElementById('prodName').value.trim();
+  const category = document.getElementById('prodCategory').value;
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  if (!name || !category || isNaN(price)) {
+    showToast('შეავსე სავალდებულო ველები', 'error'); return;
+  }
+  const btn = document.getElementById('addProductBtn');
+  btn.disabled = true; btn.textContent = 'ემატება...';
+  try {
+    await addDoc(collection(db, 'products'), {
+      name,
+      category,
+      price,
+      unit: document.getElementById('prodUnit').value,
+      description: document.getElementById('prodDesc').value.trim(),
+      imageUrl: prodFileData || '',
+      stock: parseInt(document.getElementById('prodStock').value) || 0,
+      active: document.getElementById('prodActive').value === 'true',
+      store: document.getElementById('prodStore').value.trim(),
+      createdAt: serverTimestamp()
+    });
+    showToast('✓ პროდუქტი დაემატა!', 'success');
+    clearForm();
+    initApp();
+  } catch(e) {
+    showToast('შეცდომა: ' + e.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება';
+};
+
+window.clearForm = function() {
+  ['prodName','prodDesc','prodStock','prodPrice','prodStore']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('prodCategory').value = '';
+  document.getElementById('prodUnit').value = 'ც';
+  document.getElementById('prodActive').value = 'true';
+  prodFileData = null;
+  document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
+  document.getElementById('prodFile').value = '';
+};
+
+async function loadProductsList() {
+  const el = document.getElementById('productsList');
+  el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
+  const snap = await getDocs(query(collection(db, 'products'), orderBy('createdAt', 'desc')));
+  document.getElementById('productCountLabel').textContent = snap.size + ' პროდუქტი';
+  productCache = {};
+  if (!snap.size) {
+    el.innerHTML = '<div class="table-empty"><div class="icon">📦</div><p>პროდუქტი არ დამატებია</p></div>';
+    return;
+  }
+  snap.docs.forEach(d => { productCache[d.id] = d.data(); });
+  el.innerHTML = snap.docs.map(d => {
+    const p = d.data();
+    return `<div class="table-row">
+      <div class="prod-img-thumb">
+        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="">` : (p.emoji || '📦')}
+      </div>
+      <div>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-cat">${p.unit || ''}</div>
+      </div>
+      <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
+      <span class="price-cell">${p.price} ₾</span>
+      <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
+      <span><span class="status-badge ${p.active ? 'status-active' : 'status-inactive'}">
+        ${p.active ? '✓ აქტიური' : '✗ დამალული'}
+      </span></span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-secondary btn-sm" onclick="editProduct('${d.id}')">✏ რედ.</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${d.id}')">🗑 წაშლა</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.editProduct = function(id) {
+  const p = productCache[id];
+  if (!p) return;
+  editFileData = null;
+  document.getElementById('editProdId').value = id;
+  document.getElementById('editName').value = p.name || '';
+  document.getElementById('editCategory').value = p.category || '';
+  document.getElementById('editPrice').value = p.price || '';
+  document.getElementById('editUnit').value = p.unit || 'ც';
+  document.getElementById('editDesc').value = p.description || '';
+  document.getElementById('editExistingImage').value = p.imageUrl || '';
+  document.getElementById('editStock').value = p.stock || '';
+  document.getElementById('editActive').value = p.active !== false ? 'true' : 'false';
+  document.getElementById('editStore').value = p.store || '';
+  document.getElementById('editFile').value = '';
+  if (p.imageUrl) {
+    showDropPreview('edit', p.imageUrl);
+  } else {
+    document.getElementById('editPreview').innerHTML = DROPZONE_EMPTY;
+  }
+  document.getElementById('editModal').style.display = 'flex';
+};
+
+window.closeEditModal = function() {
+  document.getElementById('editModal').style.display = 'none';
+};
+
+window.saveProductEdit = async function() {
+  const id = document.getElementById('editProdId').value;
+  const name = document.getElementById('editName').value.trim();
+  const category = document.getElementById('editCategory').value;
+  const price = parseFloat(document.getElementById('editPrice').value);
+  if (!name || !category || isNaN(price)) {
+    showToast('შეავსე სავალდებულო ველები', 'error'); return;
+  }
+  const btn = document.getElementById('saveEditBtn');
+  btn.disabled = true; btn.textContent = 'ინახება...';
+  try {
+    await updateDoc(doc(db, 'products', id), {
+      name, category, price,
+      unit: document.getElementById('editUnit').value,
+      description: document.getElementById('editDesc').value.trim(),
+      imageUrl: editFileData || document.getElementById('editExistingImage').value,
+      stock: parseInt(document.getElementById('editStock').value) || 0,
+      active: document.getElementById('editActive').value === 'true',
+      store: document.getElementById('editStore').value.trim(),
+    });
+    showToast('✓ პროდუქტი განახლდა!', 'success');
+    closeEditModal();
+    loadProductsList();
+  } catch(e) {
+    showToast('შეცდომა: ' + e.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = '✓ შენახვა';
+};
+
+window.deleteProduct = async function(id) {
+  if (!confirm('ნამდვილად წაშლა?')) return;
+  await deleteDoc(doc(db, 'products', id));
+  showToast('პროდუქტი წაიშალა', 'error');
+  loadProductsList();
+};
+
+// ─── Orders ───
+async function loadOrdersList() {
+  const el = document.getElementById('ordersList');
+  el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
+  const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')));
+  document.getElementById('orderCountLabel').textContent = snap.size + ' შეკვეთა';
+  if (!snap.size) {
+    el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთა ჯერ არ შემოსულა</p></div>';
+    return;
+  }
+  el.innerHTML = snap.docs.map(d => {
+    const o = d.data();
+    const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ka-GE') : '–';
+    return `<div class="order-row">
+      <span style="font-size:13px;color:var(--gray-mid)">${date}</span>
+      <div>
+        <div class="order-customer">${o.customer?.firstName} ${o.customer?.lastName}</div>
+        <div style="font-size:12px;color:var(--gray-mid);margin-top:2px">${o.customer?.address || ''}</div>
+      </div>
+      <span class="order-phone">${o.customer?.phone}</span>
+      <span style="font-weight:600">${o.total?.toFixed(2)} ₾</span>
+      <select class="order-status status-${o.status || 'new'}"
+        onchange="updateOrderStatus('${d.id}', this)">
+        <option value="new" ${o.status==='new'?'selected':''}>🆕 ახალი</option>
+        <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ დადასტურებული</option>
+        <option value="delivered" ${o.status==='delivered'?'selected':''}>📦 მიწოდებული</option>
+        <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ გაუქმებული</option>
+      </select>
+    </div>`;
+  }).join('');
+}
+
+window.updateOrderStatus = async function(id, sel) {
+  const status = sel.value;
+  sel.className = `order-status status-${status}`;
+  await updateDoc(doc(db, 'orders', id), { status });
+  showToast('სტატუსი განახლდა', 'success');
+};
+
+function statusLabel(s) {
+  return { new:'🆕 ახალი', confirmed:'✅ დადასტ.', delivered:'📦 მიწოდებული', cancelled:'❌ გაუქმ.' }[s] || s;
+}
+
+// ─── Toast ───
+window.showToast = function(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+};
+</script>
+
+<!-- Role Switcher -->
+<div style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+  <div style="background:#141210;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;font-weight:600">
+    ახლა: ადმინი
+  </div>
+  <a href="index.html" style="display:flex;align-items:center;gap:8px;background:#E8541A;color:white;font-size:12px;font-weight:700;padding:10px 16px;text-decoration:none;transition:background .2s" onmouseover="this.style.background='#C4400E'" onmouseout="this.style.background='#E8541A'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    მაღაზია →
+  </a>
+</div>
+</body>
+</html>

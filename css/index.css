@@ -1,0 +1,40 @@
+body { font-family: 'Noto Sans Georgian', sans-serif; }
+.font-display { font-family: 'Bebas Neue', sans-serif; }
+.hero-stripe {
+  background: repeating-linear-gradient(90deg,#E8541A 0,#E8541A 40px,transparent 40px,transparent 50px);
+  height: 3px;
+}
+.card-hover { transition: transform .2s, box-shadow .2s; }
+.card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
+.card-hover:hover .card-top-bar { transform: scaleX(1); }
+.card-top-bar { transition: transform .25s; transform: scaleX(0); transform-origin: left; }
+.drawer-enter { transform: translateX(0) !important; }
+.overlay-enter { opacity: 1 !important; pointer-events: all !important; }
+.toast-show { transform: translateX(-50%) translateY(0) !important; }
+.modal-enter { opacity: 1 !important; pointer-events: all !important; }
+.modal-enter .modal-box { transform: translateY(0) !important; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+@media (max-width: 767px) {
+  /* Cart drawer full width on mobile */
+  #cartDrawer { width: 100% !important; }
+
+  /* Order modal full screen on mobile */
+  #orderModal { padding: 0; align-items: flex-end; }
+  #orderModal .modal-box { border-radius: 16px 16px 0 0; max-height: 92vh; overflow-y: auto; }
+
+  /* Footer stacked */
+  .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+
+  /* Sync both search inputs */
+  #searchInput { display: none; }
+}
+
+/* 320px — very small screens */
+@media (max-width: 400px) {
+  /* Card bottom: stack price above button */
+  .card-bottom { flex-direction: column !important; align-items: flex-start !important; gap: 10px; }
+  .card-bottom button { width: 100%; justify-content: center; }
+}

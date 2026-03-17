@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniCraft — სამშენებლო მასალები</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        orange: { DEFAULT: '#E8541A', dark: '#C4400E', light: '#FDF0EB' },
+        dark:   { DEFAULT: '#1A1714', black: '#0E0C0A' },
+        cream:  { DEFAULT: '#F5F2EE', light: '#FEFCFA' },
+      },
+      fontFamily: {
+        display: ['Bebas Neue', 'sans-serif'],
+        body: ['Noto Sans Georgian', 'sans-serif'],
+      },
+    }
+  }
+}
+</script>
+<link rel="stylesheet" href="css/index.css">
+</head>
+<body class="bg-cream text-dark">
+
+<!-- ══ HEADER ══ -->
+<header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+
+    <!-- Main row: Logo | [desktop search] | Nav+Cart -->
+    <div class="flex items-center justify-between h-14 md:h-16">
+
+      <!-- Logo -->
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0 no-underline">
+        <svg width="36" height="32" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 4 L97 36 L3 36 Z" fill="#E8541A"/>
+          <rect x="5" y="35" width="90" height="54" fill="none" stroke="#E8541A" stroke-width="4"/>
+          <rect x="7" y="37" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="46" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="55" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="64" width="23" height="7" fill="#C4400E" rx="1"/>
+          <rect x="7" y="73" width="23" height="15" fill="#C4400E" rx="1"/>
+          <rect x="38" y="63" width="22" height="26" fill="#E8541A" rx="1"/>
+          <rect x="67" y="42" width="5" height="28" fill="#E8541A" rx="2"/>
+          <rect x="61" y="38" width="17" height="9" fill="#C4400E" rx="2"/>
+          <rect x="80" y="44" width="5" height="20" fill="#E8541A" rx="2"/>
+          <path d="M78 44 Q82 38 86 44" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M78 64 Q82 70 86 64" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <rect x="90" y="40" width="4" height="26" fill="#C4400E" rx="1"/>
+          <path d="M88 40 L92 36 L96 40" fill="#C4400E"/>
+        </svg>
+        <span class="font-display text-xl md:text-2xl tracking-wide leading-none">
+          <span class="text-white">UNI</span><span class="text-orange">CRAFT</span>
+        </span>
+      </a>
+
+      <!-- Desktop search -->
+      <div class="hidden md:flex flex-1 mx-8">
+        <input id="searchInput" type="text" placeholder="მოძებნე პროდუქტი..."
+          oninput="filterProducts()"
+          class="flex-1 bg-white/10 border border-white/15 border-r-0 px-4 py-2 text-white text-sm outline-none placeholder-white/30 focus:border-white/30 transition-colors">
+        <button class="bg-orange hover:bg-orange-dark px-4 text-white text-sm transition-colors flex-shrink-0">↗</button>
+      </div>
+
+      <!-- Nav + Cart -->
+      <div class="flex items-center gap-3 md:gap-6 flex-shrink-0">
+        <nav class="hidden md:flex items-center gap-6">
+          <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">მიწოდება</a>
+          <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">კონტაქტი</a>
+        </nav>
+        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors">
+          კალათა
+          <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile search row -->
+    <div class="flex md:hidden pb-1">
+      <input id="searchInputMobile" type="text" placeholder="მოძებნე პროდუქტი..."
+        oninput="filterProductsMobile()"
+        class="flex-1 bg-white/10 border border-white/15 border-r-0 px-3 py-2 text-white text-sm outline-none placeholder-white/30 focus:border-white/30 transition-colors">
+      <button class="bg-orange px-4 text-white text-sm flex-shrink-0">↗</button>
+    </div>
+
+    <!-- Mobile nav row -->
+    <div class="flex md:hidden items-center gap-4 pb-2 pt-1">
+      <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">მიწოდება</a>
+      <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">კონტაქტი</a>
+    </div>
+
+  </div>
+</header>
+
+<!-- ══ HERO ══ -->
+<section class="bg-dark relative overflow-hidden">
+  <div class="hero-stripe"></div>
+  <!-- Warm glow -->
+  <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at 50% 55%, rgba(232,84,26,0.22) 0%, rgba(232,84,26,0.07) 45%, transparent 72%);"></div>
+  <div class="max-w-7xl mx-auto px-6 py-20 flex flex-col items-center text-center relative">
+    <h1 class="font-display text-4xl sm:text-6xl md:text-7xl leading-none tracking-wide text-white mb-5">
+      სამშენებლო<br>მასალები
+    </h1>
+    <p class="text-white/40 text-sm tracking-widest uppercase">
+      საუკეთესო ხარისხი · სწრაფი მიტანა · კონკურენტული ფასები
+    </p>
+  </div>
+  <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-orange"></div>
+</section>
+
+
+<!-- ══ MOBILE FILTER BAR ══ -->
+<div class="lg:hidden bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-2 sticky top-[108px] z-40">
+  <button onclick="toggleMobileFilter()" id="filterToggleBtn"
+    class="flex items-center gap-2 text-sm font-semibold text-dark border border-gray-200 px-3 py-1.5 rounded-full bg-white">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+    ფილტრი
+    <svg id="filterArrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div id="mobileActiveFilters" class="flex gap-2 overflow-x-auto"></div>
+</div>
+
+<!-- Mobile filter drawer -->
+<div id="mobileFilterDrawer" class="lg:hidden hidden bg-white border-b border-gray-200 px-4 py-4">
+  <div class="mb-4">
+    <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">კატეგორია</div>
+    <div id="mobileFilterCats" class="flex flex-col gap-0 mt-1"></div>
+  </div>
+  <div>
+    <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">ფასი</div>
+    <div class="flex flex-wrap gap-2 mt-1">
+      <button onclick="setPrice(this,0,50)" class="price-tab text-sm text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:border-orange hover:text-orange transition-all">0 — 50 ₾</button>
+      <button onclick="setPrice(this,50,200)" class="price-tab text-sm text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:border-orange hover:text-orange transition-all">50 — 200 ₾</button>
+      <button onclick="setPrice(this,200,99999)" class="price-tab text-sm text-gray-500 border border-gray-200 px-3 py-1 rounded-full hover:border-orange hover:text-orange transition-all">200+ ₾</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN CONTENT ══ -->
+<div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 flex gap-6">
+
+  <!-- Sidebar -->
+  <aside class="w-48 flex-shrink-0 hidden lg:block sticky top-20 self-start max-h-[calc(100vh-5rem)] overflow-y-auto">
+
+    <!-- Categories -->
+    <div class="mb-6">
+      <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-3 pb-2 border-b-2 border-orange inline-block">კატეგორია</div>
+      <div id="sidebarCats" class="flex flex-col gap-0"></div>
+    </div>
+
+    <!-- Price -->
+    <div>
+      <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-3 pb-2 border-b-2 border-orange inline-block">ფასი</div>
+      <div class="flex flex-col gap-0">
+        <button onclick="setPrice(this,0,50)"     class="price-tab text-left px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange transition-all">0 — 50 ₾</button>
+        <button onclick="setPrice(this,50,200)"   class="price-tab text-left px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange transition-all">50 — 200 ₾</button>
+        <button onclick="setPrice(this,200,99999)" class="price-tab text-left px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange transition-all">200+ ₾</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Products -->
+  <div class="flex-1 min-w-0">
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="col-span-full flex items-center justify-center gap-3 py-20 text-gray-400">
+        <div class="w-5 h-5 border-2 border-gray-200 border-t-orange rounded-full animate-spin"></div>
+        იტვირთება...
+      </div>
+    </div>
+    <div id="pagination" class="flex items-center justify-center gap-2 mt-8"></div>
+  </div>
+
+</div>
+
+<!-- ══ TRUST BAR ══ -->
+<div class="bg-dark border-t-2 border-orange mt-8">
+  <div class="trust-bar-grid max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">24 საათში მიტანა</div><div class="text-white/30 text-xs mt-0.5">თბილისში</div></div></div>
+    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">გარანტირებული ხარისხი</div><div class="text-white/30 text-xs mt-0.5">პირდაპირ გამყიდველისგან</div></div></div>
+    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">უფასო კონსულტაცია</div><div class="text-white/30 text-xs mt-0.5">568 08 25 41</div></div></div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="bg-dark-black py-6 px-6">
+  <div class="footer-inner max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <svg width="28" height="26" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 4 L97 36 L3 36 Z" fill="#E8541A"/>
+        <rect x="5" y="35" width="90" height="54" fill="none" stroke="#E8541A" stroke-width="4"/>
+        <rect x="7" y="37" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="46" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="55" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="64" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="73" width="23" height="15" fill="#C4400E" rx="1"/>
+        <rect x="38" y="63" width="22" height="26" fill="#E8541A" rx="1"/>
+        <rect x="67" y="42" width="5" height="28" fill="#E8541A" rx="2"/>
+        <rect x="61" y="38" width="17" height="9" fill="#C4400E" rx="2"/>
+        <rect x="80" y="44" width="5" height="20" fill="#E8541A" rx="2"/>
+        <path d="M78 44 Q82 38 86 44" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M78 64 Q82 70 86 64" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <rect x="90" y="40" width="4" height="26" fill="#C4400E" rx="1"/>
+        <path d="M88 40 L92 36 L96 40" fill="#C4400E"/>
+      </svg>
+      <span class="font-display text-lg"><span class="text-white">UNI</span><span class="text-orange">CRAFT</span></span>
+      <span class="text-white/20 text-xs ml-3">unicraft.ge · info@unicraft.ge</span>
+  </div>
+</footer>
+
+<!-- ══ CART DRAWER ══ -->
+<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light z-50 border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full">
+  <div class="bg-dark-black px-6 py-4 flex items-center justify-between">
+    <h2 class="font-display text-2xl tracking-wide text-white">კალათა</h2>
+    <button onclick="toggleCart()" class="text-white/40 hover:text-orange text-2xl leading-none transition-colors">✕</button>
+  </div>
+  <div id="cartItems" class="flex-1 overflow-y-auto px-6 py-4"></div>
+  <div id="cartFooter" class="hidden border-t border-gray-200 px-6 py-4 bg-white">
+    <div class="flex items-baseline justify-between mb-3">
+      <span class="text-xs font-bold tracking-widest text-gray-400 uppercase">სულ</span>
+      <span id="cartTotal" class="font-display text-3xl tracking-wide">0 ₾</span>
+    </div>
+    <button onclick="openOrder()" class="w-full bg-orange hover:bg-orange-dark text-white font-semibold py-3.5 text-sm transition-colors">შეკვეთის გაფორმება →</button>
+  </div>
+</div>
+
+<!-- ══ ORDER MODAL ══ -->
+<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 flex items-center justify-center p-5 opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="modal-box bg-white w-full max-w-md border-t-4 border-orange transition-transform duration-300 translate-y-5">
+    <div id="orderFormWrap" class="p-8">
+      <h2 class="font-display text-3xl tracking-wide mb-1">შეკვეთა</h2>
+      <p class="text-sm text-gray-400 mb-5">შეავსე მონაცემები — მალე დაგიკავშირდებით</p>
+      <div id="orderSummary" class="bg-cream border border-gray-200 px-4 py-3 mb-5 text-sm"></div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">სახელი *</label>
+          <input id="fname" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange transition-colors" placeholder="გიორგი">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">გვარი *</label>
+          <input id="lname" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange transition-colors" placeholder="მაისურაძე">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">ტელეფონი *</label>
+        <input id="phone" type="tel" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange transition-colors" placeholder="5XX XXX XXX">
+      </div>
+      <div class="mb-5">
+        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">მისამართი *</label>
+        <input id="address" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange transition-colors" placeholder="ქ. თბილისი...">
+      </div>
+      <div class="flex gap-2">
+        <button id="submitBtn" onclick="submitOrder()" class="flex-1 bg-orange hover:bg-orange-dark text-white font-semibold py-3 text-sm transition-colors">გაგზავნა →</button>
+        <button onclick="closeOrder()" class="bg-cream hover:bg-gray-200 text-gray-500 font-medium px-5 py-3 text-sm border border-gray-200 transition-colors">გაუქმება</button>
+      </div>
+    </div>
+    <div id="orderSuccess" class="hidden p-8 text-center">
+      <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
+      <h3 class="font-display text-2xl tracking-wide mb-2">შეკვეთა მიღებულია!</h3>
+      <p class="text-sm text-gray-400 mb-6">მადლობა! მალე დაგიკავშირდებით <strong id="successPhone" class="text-dark"></strong> ნომერზე.</p>
+      <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors">კარგი!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROLE SWITCHER ══ -->
+<div class="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex flex-col items-end gap-2">
+  <div class="bg-dark-black border border-white/10 text-white/50 text-[10px] tracking-widest uppercase px-3 py-1 font-semibold">
+    ახლა: ვიზიტორი
+  </div>
+  <a href="admin.html" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-xs font-bold px-4 py-2.5 transition-colors shadow-lg">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2z"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+    ადმინ პანელი →
+  </a>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast" class="fixed bottom-7 left-1/2 -translate-x-1/2 translate-y-20 bg-dark text-white text-sm font-medium px-6 py-3 border-l-4 border-orange z-50 transition-transform duration-300 whitespace-nowrap pointer-events-none"></div>
+
+<script>
+function fmtPrice(price, unit) {
+  const s = parseFloat(price).toFixed(2);
+  const dot = s.indexOf('.');
+  const whole = s.slice(0, dot);
+  const dec = s.slice(dot);
+  return `<div class="flex items-baseline leading-none gap-1">
+    <div class="flex items-start">
+      <span class="font-display text-3xl tracking-wide text-dark">${whole}</span>
+      <span class="text-[10px] font-bold text-gray-500 pt-[3px]">${dec}</span>
+    </div>
+    <span class="font-display text-lg tracking-wide text-dark">₾/${unit||'ც'}</span>
+  </div>`;
+}
+
+let allProducts = [];
+let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
+let activeCategory = '';
+let activePrice = null;
+let searchQ = '';
+let filteredProducts = [];
+let currentPage = 1;
+const PAGE_SIZE = 50;
+
+const MOCK_PRODUCTS = [
+  { id: 'm1', name: 'ცემენტი M400', category: 'ცემენტი და ბეტონი', price: 18, unit: 'ტომ', description: '50კგ ტომარა, მაღალი სიმყარე, სამშენებლო ხარისხი', badge: 'ახალი', emoji: '🏗️' },
+  { id: 'm2', name: 'თეთელი აგური', category: 'აგური და ბლოკი', price: 0.45, unit: 'ც', description: 'სტანდარტული, M100, 250×120×65', badge: 'პოპულარული', emoji: '🧱' },
+  { id: 'm3', name: 'სოჭის ტყავი 50×100', category: 'ხე-ტყე', price: 12, unit: 'მ', description: '6მ სიგრძე, გამშრალი, I ხარისხი', emoji: '🪵' },
+  { id: 'm4', name: 'არმატურა D12', category: 'მეტალი', price: 8.50, unit: 'მ', description: '12მ, 11.7კგ, A400 კლასი', emoji: '⚙️' },
+  { id: 'm5', name: 'პენოფლექსი 50მმ', category: 'საიზოლაციო მასალა', price: 24, unit: 'ფლ', description: '1200×600მმ, XPS, ენერგოეფექტური', badge: 'ფასდაკლება', emoji: '🔲' },
+  { id: 'm6', name: 'კირვა გამომწვარი', category: 'ცემენტი და ბეტონი', price: 9, unit: 'ტომ', description: '25კგ, სამშენებლო ხარისხი', emoji: '⬜' },
+  { id: 'm7', name: 'პოლიეთილენის მილი D32', category: 'მილები', price: 3.20, unit: 'მ', description: 'D32, წყლისა და გათბობისთვის', emoji: '🔵' },
+  { id: 'm8', name: 'OSB ფილა 18მმ', category: 'ხე-ტყე', price: 42, unit: 'ც', description: '2500×1250მმ, სახლის მოპირკეთება', emoji: '📦' },
+  { id: 'm9', name: 'მეტალოპლასტის მილი', category: 'მილები', price: 4.80, unit: 'მ', description: 'D20, სასმელი წყლისთვის', emoji: '🔩' },
+  { id: 'm10', name: 'გიფსი ротband', category: 'ცემენტი და ბეტონი', price: 22, unit: 'ტომ', description: '30კგ, შიდა სამუშაოებისთვის', badge: 'ახალი', emoji: '🏠' },
+  { id: 'm11', name: 'I-ბალკი 100×50', category: 'მეტალი', price: 38, unit: 'მ', description: 'ნაგლინი მეტალი, S235', emoji: '⚙️' },
+  { id: 'm12', name: 'მინერალური ბამბა 100მმ', category: 'საიზოლაციო მასალა', price: 18, unit: 'მ²', description: 'ROCKWOOL, ხმაურდამცავი', emoji: '🔲' },
+];
+
+
+function buildSidebar() {
+  const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+  const counts = {};
+  allProducts.forEach(p => { counts[p.category] = (counts[p.category]||0)+1; });
+
+  // Desktop sidebar
+  const el = document.getElementById('sidebarCats');
+  const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full text-left">ყველა <span class="text-xs text-gray-400 font-normal">${allProducts.length}</span></button>`;
+  const catBtns = cats.map(c => `
+    <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full text-left transition-all">
+      ${c} <span class="text-xs text-gray-400 font-normal">${counts[c]||0}</span>
+    </button>`).join('');
+  el.innerHTML = allBtn + catBtns;
+
+  // Mobile filter cats
+  const mel = document.getElementById('mobileFilterCats');
+  if (mel) {
+    const mAllBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat text-left px-3 py-1.5 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full">ყველა (${allProducts.length})</button>`;
+    const mCatBtns = cats.map(c => `
+      <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full transition-all">
+        ${c} <span class="text-xs text-gray-400">${counts[c]||0}</span>
+      </button>`).join('');
+    mel.innerHTML = mAllBtn + mCatBtns;
+  }
+}
+
+function renderProducts(products) {
+  filteredProducts = products;
+  currentPage = 1;
+  renderPage();
+}
+
+function renderPage() {
+  const grid = document.getElementById('productsGrid');
+  const rc = document.getElementById('resultCount'); if (rc) rc.textContent = filteredProducts.length + ' პროდუქტი';
+
+  if (!filteredProducts.length) {
+    grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტი ვერ მოიძებნა</p><p class="text-sm">სცადე სხვა საძიებო სიტყვა</p></div>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = filteredProducts.slice(start, start + PAGE_SIZE);
+
+  grid.innerHTML = pageItems.map(p => `
+    <div class="card-hover bg-white border border-gray-200 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
+      <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
+      ${p.badge ? `<div class="absolute top-3 right-3 bg-orange text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide z-10">${p.badge}</div>` : ''}
+      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
+        ${p.imageUrl
+          ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
+          : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
+      </div>
+      <div class="p-4 flex flex-col flex-1">
+        <div class="text-[9px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
+        <div class="font-bold text-sm text-dark mb-1 leading-snug">${p.name}</div>
+        <div class="text-xs text-gray-400 leading-relaxed line-clamp-2 flex-1">${p.description||''}</div>
+        <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
+          <div>
+            ${p.oldPrice ? `<div class="text-xs text-gray-300 line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
+            ${fmtPrice(p.price, p.unit)}
+          </div>
+          <button onclick="event.stopPropagation();addToCart('${p.id}')"
+            class="bg-dark hover:bg-orange text-white text-xs font-bold px-4 py-2 transition-colors flex items-center gap-1.5">
+            + კალათა
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Pagination controls
+  const pg = document.getElementById('pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+
+  const btnClass = 'w-9 h-9 flex items-center justify-center text-sm font-bold border transition-colors';
+  const activeClass = 'bg-orange border-orange text-white';
+  const inactiveClass = 'bg-white border-gray-200 text-gray-500 hover:border-orange hover:text-orange';
+  const disabledClass = 'bg-cream border-gray-100 text-gray-300 cursor-not-allowed';
+
+  let html = `<button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} class="${btnClass} ${currentPage===1?disabledClass:inactiveClass}">‹</button>`;
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
+      if (i === 3 || i === totalPages - 2) html += `<span class="w-9 h-9 flex items-center justify-center text-gray-400">…</span>`;
+      continue;
+    }
+    html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+  }
+
+  html += `<button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} class="${btnClass} ${currentPage===totalPages?disabledClass:inactiveClass}">›</button>`;
+  pg.innerHTML = html;
+}
+
+window.goPage = function(page) {
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderPage();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+function applyFilters() {
+  let list = allProducts;
+  if (activeCategory) list = list.filter(p => p.category === activeCategory);
+  if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ));
+  if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
+  renderProducts(list);
+}
+
+window.setCategory = function(el, cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    t.classList.remove('border-2','border-orange','text-orange','bg-orange-light');
+    t.classList.add('border','border-gray-200','text-gray-500','bg-white');
+  });
+  el.classList.remove('border','border-gray-200','text-gray-500','bg-white');
+  el.classList.add('border-2','border-orange','text-orange','bg-orange-light');
+  applyFilters();
+};
+
+window.setSidebarCat = function(el, cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.sidebar-cat').forEach(t => {
+    t.classList.remove('text-orange','bg-orange-light','border-orange','font-bold');
+    t.classList.add('text-gray-500','bg-transparent','border-transparent');
+  });
+  el.classList.remove('text-gray-500','bg-transparent','border-transparent');
+  el.classList.add('text-orange','bg-orange-light','border-orange','font-bold');
+  applyFilters();
+};
+
+window.setPrice = function(el, min, max) {
+  activePrice = [min, max];
+  document.querySelectorAll('.price-tab').forEach(t => {
+    t.classList.remove('text-orange','bg-orange-light','border-orange');
+    t.classList.add('text-gray-500','bg-transparent','border-transparent');
+  });
+  el.classList.remove('text-gray-500','bg-transparent','border-transparent');
+  el.classList.add('text-orange','bg-orange-light','border-orange');
+  applyFilters();
+};
+
+window.filterProducts = function() {
+  searchQ = document.getElementById('searchInput').value.toLowerCase();
+  applyFilters();
+};
+
+window.filterProductsMobile = function() {
+  searchQ = document.getElementById('searchInputMobile').value.toLowerCase();
+  const desktop = document.getElementById('searchInput');
+  if (desktop) desktop.value = document.getElementById('searchInputMobile').value;
+  applyFilters();
+};
+
+window.toggleMobileFilter = function() {
+  const drawer = document.getElementById('mobileFilterDrawer');
+  const arrow = document.getElementById('filterArrow');
+  const open = !drawer.classList.contains('hidden');
+  drawer.classList.toggle('hidden');
+  arrow.style.transform = open ? '' : 'rotate(180deg)';
+};
+
+window.goProduct = function(id) {
+  window.location.href = `product.html?id=${id}`;
+};
+
+// ── Cart ──
+window.addToCart = function(id) {
+  const p = allProducts.find(p => p.id === id);
+  if (!p) return;
+  const ex = cart.find(i => i.id === id);
+  if (ex) ex.qty++;
+  else cart.push({ id, name: p.name, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit });
+  saveCart();
+  showToast('✓ ' + p.name + ' კალათაში დაემატა');
+};
+
+window.changeQty = function(id, d) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += d;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+  saveCart(); renderCart();
+};
+
+function saveCart() {
+  localStorage.setItem('uc_cart', JSON.stringify(cart));
+  document.getElementById('cartCount').textContent = cart.reduce((s,i) => s+i.qty, 0);
+}
+
+window.toggleCart = function() {
+  document.getElementById('overlay').classList.toggle('overlay-enter');
+  document.getElementById('cartDrawer').classList.toggle('drawer-enter');
+  renderCart();
+};
+
+function renderCart() {
+  const el = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+  if (!cart.length) {
+    el.innerHTML = `<div class="text-center py-16 text-gray-400"><p class="font-semibold text-dark mb-1">კალათა ცარიელია</p><p class="text-sm">დაამატე პროდუქტები</p></div>`;
+    footer.classList.add('hidden'); return;
+  }
+  footer.classList.remove('hidden');
+  el.innerHTML = cart.map(i => `
+    <div class="flex items-center gap-3 py-3 border-b border-gray-200">
+      <div class="w-14 h-14 bg-cream flex items-center justify-center flex-shrink-0 overflow-hidden">
+        ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:1.5rem">${i.emoji||'📦'}</span>`}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold truncate">${i.name}</div>
+        <div class="text-sm text-orange font-bold mt-0.5">${(i.price*i.qty).toFixed(2)} ₾</div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="changeQty('${i.id}',-1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 text-base flex items-center justify-center transition-colors">−</button>
+        <span class="text-sm font-bold w-5 text-center">${i.qty}</span>
+        <button onclick="changeQty('${i.id}',1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 text-base flex items-center justify-center transition-colors">+</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cartTotal').textContent = cart.reduce((s,i) => s+i.price*i.qty, 0).toFixed(2) + ' ₾';
+}
+
+// ── Order ──
+window.openOrder = function() {
+  const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+  document.getElementById('orderSummary').innerHTML =
+    cart.map(i => `<div class="flex justify-between py-1 text-gray-500"><span>${i.name} ×${i.qty}</span><span>${(i.price*i.qty).toFixed(2)} ₾</span></div>`).join('') +
+    `<div class="flex justify-between border-t border-gray-200 mt-2 pt-2 font-bold text-dark"><span>სულ</span><span>${total.toFixed(2)} ₾</span></div>`;
+  document.getElementById('orderModal').classList.add('modal-enter');
+};
+
+window.closeOrder = function() {
+  document.getElementById('orderModal').classList.remove('modal-enter');
+  document.getElementById('orderFormWrap').classList.remove('hidden');
+  document.getElementById('orderSuccess').classList.add('hidden');
+};
+
+window.clearCart = function() { cart = []; saveCart(); renderCart(); };
+
+window.submitOrder = async function() {
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  if (!fname||!lname||!phone||!address) { showToast('⚠ შეავსე ყველა ველი'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const { db } = await import('./firebase-config.js');
+    const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+    await addDoc(collection(db,'orders'), {
+      customer: { firstName:fname, lastName:lname, phone, address },
+      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
+      total: cart.reduce((s,i) => s+i.price*i.qty, 0),
+      status: 'new', createdAt: serverTimestamp()
+    });
+    document.getElementById('successPhone').textContent = phone;
+    document.getElementById('orderFormWrap').classList.add('hidden');
+    document.getElementById('orderSuccess').classList.remove('hidden');
+  } catch(e) {
+    // Firebase არ არის კონფიგურირებული — demo რეჟიმი
+    document.getElementById('successPhone').textContent = phone;
+    document.getElementById('orderFormWrap').classList.add('hidden');
+    document.getElementById('orderSuccess').classList.remove('hidden');
+  }
+  btn.disabled = false; btn.textContent = 'გაგზავნა →';
+};
+
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('toast-show');
+  setTimeout(() => t.classList.remove('toast-show'), 2800);
+};
+
+// ── Load products ──
+async function loadProducts() {
+  allProducts = MOCK_PRODUCTS;
+  buildSidebar();
+  renderProducts(allProducts);
+
+  // ფონში Firebase-ს ვცდი
+  try {
+    const { db } = await import('./firebase-config.js');
+    const { collection, getDocs, query, orderBy } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+    const timeout = new Promise((_, r) => setTimeout(() => r(), 5000));
+    const snap = await Promise.race([
+      getDocs(query(collection(db, 'products'), orderBy('createdAt','desc'))),
+      timeout
+    ]);
+    if (snap && snap.docs.length > 0) {
+      allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      buildSidebar();
+      renderProducts(allProducts);
+    }
+  } catch(e) {}
+}
+
+saveCart();
+loadProducts();
+</script>
+</body>
+</html>

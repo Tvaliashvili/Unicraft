@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>პროდუქტი — UniCraft</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        orange: { DEFAULT: '#E8541A', dark: '#C4400E', light: '#FDF0EB' },
+        dark:   { DEFAULT: '#1A1714', black: '#0E0C0A' },
+        cream:  { DEFAULT: '#F5F2EE', light: '#FEFCFA' },
+      },
+      fontFamily: {
+        display: ['Bebas Neue', 'sans-serif'],
+        body: ['Noto Sans Georgian', 'sans-serif'],
+      },
+    }
+  }
+}
+</script>
+<link rel="stylesheet" href="css/product.css">
+</head>
+<body class="bg-cream text-dark">
+
+<!-- HEADER -->
+<header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+      <svg width="42" height="38" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 4 L97 36 L3 36 Z" fill="#E8541A"/>
+        <rect x="5" y="35" width="90" height="54" fill="none" stroke="#E8541A" stroke-width="4"/>
+        <rect x="7" y="37" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="46" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="55" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="64" width="23" height="7" fill="#C4400E" rx="1"/>
+        <rect x="7" y="73" width="23" height="15" fill="#C4400E" rx="1"/>
+        <rect x="38" y="63" width="22" height="26" fill="#E8541A" rx="1"/>
+        <rect x="67" y="42" width="5" height="28" fill="#E8541A" rx="2"/>
+        <rect x="61" y="38" width="17" height="9" fill="#C4400E" rx="2"/>
+        <rect x="80" y="44" width="5" height="20" fill="#E8541A" rx="2"/>
+        <path d="M78 44 Q82 38 86 44" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M78 64 Q82 70 86 64" stroke="#E8541A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <rect x="90" y="40" width="4" height="26" fill="#C4400E" rx="1"/>
+        <path d="M88 40 L92 36 L96 40" fill="#C4400E"/>
+      </svg>
+      <span class="font-display text-2xl tracking-wide leading-none">
+        <span class="text-white">UNI</span><span class="text-orange">CRAFT</span>
+      </span>
+    </a>
+    <nav class="hidden md:flex items-center gap-10 mx-auto">
+      <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">მიწოდება</a>
+      <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">კონტაქტი</a>
+    </nav>
+    <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-4 py-2 transition-colors flex-shrink-0">
+      კალათა
+      <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 text-xs text-gray-400">
+    <a href="index.html" class="hover:text-orange transition-colors">მთავარი</a>
+    <span>/</span>
+    <a href="index.html" class="hover:text-orange transition-colors">კატალოგი</a>
+    <span>/</span>
+    <span id="breadcrumbName" class="text-dark font-medium"></span>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingState" class="max-w-7xl mx-auto px-6 py-24 flex items-center justify-center gap-3 text-gray-400">
+  <div class="w-5 h-5 border-2 border-gray-200 border-t-orange rounded-full animate-spin"></div>
+  იტვირთება...
+</div>
+
+<!-- PRODUCT CONTENT -->
+<div id="productContent" class="hidden max-w-7xl mx-auto px-6 py-10">
+
+  <!-- Top section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+
+    <!-- Image -->
+    <div class="bg-white border border-gray-200 relative overflow-hidden">
+      <div id="productBadge" class="hidden absolute top-0 left-0 bg-orange text-white text-[10px] font-bold px-3 py-1.5 tracking-widest uppercase z-10"></div>
+      <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
+    </div>
+
+    <!-- Info -->
+    <div class="flex flex-col">
+      <div id="productCategory" class="text-[10px] font-bold tracking-[2px] text-orange uppercase mb-2"></div>
+      <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
+      <p id="productDesc" class="text-sm text-gray-500 leading-relaxed mb-6"></p>
+
+      <!-- Price block -->
+      <div class="bg-cream border border-gray-200 p-5 mb-5">
+        <div id="productOldPrice" class="hidden text-sm text-gray-300 line-through mb-1"></div>
+        <div class="flex items-baseline gap-2">
+          <span id="productPrice" class="font-display text-5xl tracking-wide leading-none"></span>
+          <span id="productUnit" class="text-gray-400 text-sm"></span>
+        </div>
+      </div>
+
+      <!-- Qty + Add -->
+      <div class="flex items-center gap-3 mb-5">
+        <div class="flex items-center border border-gray-200 bg-white">
+          <button onclick="changeLocalQty(-1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">−</button>
+          <span id="localQty" class="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-gray-200">1</span>
+          <button onclick="changeLocalQty(1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">+</button>
+        </div>
+        <button id="addBtn" onclick="addProductToCart()" class="flex-1 bg-dark hover:bg-orange text-white font-bold py-3 text-sm transition-colors">
+          + კალათაში დამატება
+        </button>
+      </div>
+
+      <!-- Meta -->
+      <div class="border-t border-gray-200 pt-4 space-y-2" id="productMeta"></div>
+    </div>
+  </div>
+
+  <!-- Related products -->
+  <div>
+    <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-4 flex items-center gap-2">
+      <div class="w-3 h-0.5 bg-orange"></div>
+      მსგავსი პროდუქტები
+    </div>
+    <div id="relatedGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+  </div>
+
+</div>
+
+<!-- ERROR -->
+<div id="errorState" class="hidden max-w-7xl mx-auto px-6 py-24 text-center text-gray-400">
+  <p class="font-semibold text-dark text-lg mb-2">პროდუქტი ვერ მოიძებნა</p>
+  <a href="index.html" class="text-orange text-sm hover:underline">← კატალოგში დაბრუნება</a>
+</div>
+
+<!-- CART DRAWER -->
+<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light z-50 border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full">
+  <div class="bg-dark-black px-6 py-4 flex items-center justify-between">
+    <h2 class="font-display text-2xl tracking-wide text-white">კალათა</h2>
+    <button onclick="toggleCart()" class="text-white/40 hover:text-orange text-2xl leading-none transition-colors">✕</button>
+  </div>
+  <div id="cartItems" class="flex-1 overflow-y-auto px-6 py-4"></div>
+  <div id="cartFooter" class="hidden border-t border-gray-200 px-6 py-4 bg-white">
+    <div class="flex items-baseline justify-between mb-3">
+      <span class="text-xs font-bold tracking-widest text-gray-400 uppercase">სულ</span>
+      <span id="cartTotal" class="font-display text-3xl tracking-wide">0 ₾</span>
+    </div>
+    <button onclick="openOrder()" class="w-full bg-orange hover:bg-orange-dark text-white font-semibold py-3.5 text-sm transition-colors">შეკვეთის გაფორმება →</button>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 flex items-center justify-center p-5 opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="modal-box bg-white w-full max-w-md border-t-4 border-orange transition-transform duration-300 translate-y-5">
+    <div id="orderFormWrap" class="p-8">
+      <h2 class="font-display text-3xl tracking-wide mb-1">შეკვეთა</h2>
+      <p class="text-sm text-gray-400 mb-5">შეავსე მონაცემები — მალე დაგიკავშირდებით</p>
+      <div id="orderSummary" class="bg-cream border border-gray-200 px-4 py-3 mb-5 text-sm"></div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">სახელი *</label><input id="fname" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="გიორგი"></div>
+        <div><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">გვარი *</label><input id="lname" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="მაისურაძე"></div>
+      </div>
+      <div class="mb-3"><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">ტელეფონი *</label><input id="phone" type="tel" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="5XX XXX XXX"></div>
+      <div class="mb-5"><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">მისამართი *</label><input id="address" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="ქ. თბილისი..."></div>
+      <div class="flex gap-2">
+        <button id="submitBtn" onclick="submitOrder()" class="flex-1 bg-orange hover:bg-orange-dark text-white font-semibold py-3 text-sm transition-colors">გაგზავნა →</button>
+        <button onclick="closeOrder()" class="bg-cream hover:bg-gray-200 text-gray-500 font-medium px-5 py-3 text-sm border border-gray-200 transition-colors">გაუქმება</button>
+      </div>
+    </div>
+    <div id="orderSuccess" class="hidden p-8 text-center">
+      <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
+      <h3 class="font-display text-2xl tracking-wide mb-2">შეკვეთა მიღებულია!</h3>
+      <p class="text-sm text-gray-400 mb-6">მადლობა! მალე დაგიკავშირდებით <strong id="successPhone" class="text-dark"></strong> ნომერზე.</p>
+      <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors">კარგი!</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-7 left-1/2 -translate-x-1/2 translate-y-20 bg-dark text-white text-sm font-medium px-6 py-3 border-l-4 border-orange z-50 transition-transform duration-300 whitespace-nowrap pointer-events-none"></div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import {
+  doc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, orderBy, where
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+let product = null;
+let allProducts = [];
+let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
+let localQty = 1;
+
+const params = new URLSearchParams(location.search);
+const id = params.get('id');
+
+async function init() {
+  saveCart();
+  if (!id) { showError(); return; }
+  try {
+    const [pSnap, allSnap] = await Promise.all([
+      getDoc(doc(db, 'products', id)),
+      getDocs(query(collection(db, 'products'), orderBy('createdAt','desc')))
+    ]);
+    if (!pSnap.exists()) { showError(); return; }
+    product = { id: pSnap.id, ...pSnap.data() };
+    allProducts = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderProduct();
+    renderRelated();
+  } catch(e) {
+    showError();
+  }
+}
+
+function renderProduct() {
+  document.title = product.name + ' — UniCraft';
+  document.getElementById('breadcrumbName').textContent = product.name;
+  document.getElementById('productCategory').textContent = product.category || 'სხვა';
+  document.getElementById('productName').textContent = product.name;
+  document.getElementById('productDesc').textContent = product.description || '';
+  document.getElementById('productPrice').textContent = product.price;
+  document.getElementById('productUnit').textContent = '₾ / ' + (product.unit || 'ც');
+
+  if (product.oldPrice) {
+    const el = document.getElementById('productOldPrice');
+    el.classList.remove('hidden');
+    el.textContent = product.oldPrice + ' ₾';
+  }
+
+  if (product.badge) {
+    const b = document.getElementById('productBadge');
+    b.classList.remove('hidden');
+    b.textContent = product.badge;
+  }
+
+  const imgEl = document.getElementById('productImage');
+  if (product.imageUrl) {
+    imgEl.innerHTML = `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-full object-cover">`;
+  } else {
+    imgEl.innerHTML = `<span style="font-size:5rem;opacity:0.3">${product.emoji||'📦'}</span>`;
+  }
+
+  const meta = document.getElementById('productMeta');
+  const rows = [
+    ['კატეგორია', product.category],
+    ['ერთეული', product.unit],
+    product.stock ? ['მარაგი', product.stock + ' ც'] : null,
+  ].filter(Boolean);
+  meta.innerHTML = rows.map(([k,v]) => `
+    <div class="flex justify-between text-sm">
+      <span class="text-gray-400">${k}</span>
+      <span class="font-medium">${v||'—'}</span>
+    </div>`).join('');
+
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('productContent').classList.remove('hidden');
+}
+
+function renderRelated() {
+  const related = allProducts.filter(p => p.id !== id && p.category === product.category).slice(0,4);
+  const grid = document.getElementById('relatedGrid');
+  if (!related.length) { grid.parentElement.classList.add('hidden'); return; }
+  grid.innerHTML = related.map(p => `
+    <div onclick="location.href='product.html?id=${p.id}'" class="bg-white border border-gray-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all overflow-hidden">
+      <div class="h-36 bg-cream flex items-center justify-center overflow-hidden">
+        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:2.5rem;opacity:.3">${p.emoji||'📦'}</span>`}
+      </div>
+      <div class="p-3">
+        <div class="text-[9px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||''}</div>
+        <div class="font-bold text-sm mb-2 leading-snug">${p.name}</div>
+        <div class="font-display text-2xl tracking-wide">${p.price} <span class="font-sans text-xs text-gray-400 font-normal">₾/${p.unit||'ც'}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function showError() {
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('errorState').classList.remove('hidden');
+}
+
+window.changeLocalQty = function(d) {
+  localQty = Math.max(1, localQty + d);
+  document.getElementById('localQty').textContent = localQty;
+};
+
+window.addProductToCart = function() {
+  if (!product) return;
+  const ex = cart.find(i => i.id === product.id);
+  if (ex) ex.qty += localQty;
+  else cart.push({ id: product.id, name: product.name, price: product.price, qty: localQty, imageUrl: product.imageUrl, emoji: product.emoji, unit: product.unit });
+  saveCart();
+  showToast('✓ ' + product.name + ' კალათაში დაემატა');
+};
+
+window.changeQty = function(id, d) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += d;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+  saveCart(); renderCart();
+};
+
+function saveCart() {
+  localStorage.setItem('uc_cart', JSON.stringify(cart));
+  document.getElementById('cartCount').textContent = cart.reduce((s,i) => s+i.qty, 0);
+}
+
+window.toggleCart = function() {
+  document.getElementById('overlay').classList.toggle('overlay-enter');
+  document.getElementById('cartDrawer').classList.toggle('drawer-enter');
+  renderCart();
+};
+
+function renderCart() {
+  const el = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+  if (!cart.length) {
+    el.innerHTML = `<div class="text-center py-16 text-gray-400"><p class="font-semibold text-dark mb-1">კალათა ცარიელია</p></div>`;
+    footer.classList.add('hidden'); return;
+  }
+  footer.classList.remove('hidden');
+  el.innerHTML = cart.map(i => `
+    <div class="flex items-center gap-3 py-3 border-b border-gray-200">
+      <div class="w-14 h-14 bg-cream flex items-center justify-center flex-shrink-0 overflow-hidden">
+        ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:1.5rem">${i.emoji||'📦'}</span>`}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold truncate">${i.name}</div>
+        <div class="text-sm text-orange font-bold mt-0.5">${(i.price*i.qty).toFixed(2)} ₾</div>
+      </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button onclick="changeQty('${i.id}',-1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 flex items-center justify-center text-base transition-colors">−</button>
+        <span class="text-sm font-bold w-5 text-center">${i.qty}</span>
+        <button onclick="changeQty('${i.id}',1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 flex items-center justify-center text-base transition-colors">+</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('cartTotal').textContent = cart.reduce((s,i) => s+i.price*i.qty, 0).toFixed(2) + ' ₾';
+}
+
+window.openOrder = function() {
+  const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+  document.getElementById('orderSummary').innerHTML =
+    cart.map(i => `<div class="flex justify-between py-1 text-gray-500"><span>${i.name} ×${i.qty}</span><span>${(i.price*i.qty).toFixed(2)} ₾</span></div>`).join('') +
+    `<div class="flex justify-between border-t border-gray-200 mt-2 pt-2 font-bold text-dark"><span>სულ</span><span>${total.toFixed(2)} ₾</span></div>`;
+  document.getElementById('orderModal').classList.add('modal-enter');
+};
+
+window.closeOrder = function() {
+  document.getElementById('orderModal').classList.remove('modal-enter');
+  document.getElementById('orderFormWrap').classList.remove('hidden');
+  document.getElementById('orderSuccess').classList.add('hidden');
+};
+
+window.clearCart = function() { cart = []; saveCart(); renderCart(); };
+
+window.submitOrder = async function() {
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  if (!fname||!lname||!phone||!address) { showToast('⚠ შეავსე ყველა ველი'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await addDoc(collection(db,'orders'), {
+      customer: { firstName:fname, lastName:lname, phone, address },
+      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
+      total: cart.reduce((s,i) => s+i.price*i.qty, 0),
+      status: 'new', createdAt: serverTimestamp()
+    });
+    document.getElementById('successPhone').textContent = phone;
+    document.getElementById('orderFormWrap').classList.add('hidden');
+    document.getElementById('orderSuccess').classList.remove('hidden');
+  } catch(e) { showToast('❌ შეცდომა'); }
+  btn.disabled = false; btn.textContent = 'გაგზავნა →';
+};
+
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('toast-show');
+  setTimeout(() => t.classList.remove('toast-show'), 2800);
+};
+
+init();
+</script>
+</body>
+</html>
