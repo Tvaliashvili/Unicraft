@@ -758,7 +758,12 @@ window.submitOrder = async function() {
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
       status: 'pending'
     });
-  } catch(e) { /* demo mode — continue */ }
+  } catch(e) {
+    console.error('Order insert error:', e);
+    btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
+    alert('შეცდომა: ' + (e.message || JSON.stringify(e)));
+    return;
+  }
   document.getElementById('successInvNo').textContent = currentInvoiceNo;
   document.getElementById('orderFormWrap').classList.add('hidden');
   document.getElementById('orderSuccess').classList.remove('hidden');
@@ -929,4 +934,5 @@ window.sendChatMsg = async function() {
       .eq('id', chatSessionId);
   } catch(e) {
     // Demo: append locally
-    const el = document.getElementById('chatMessag
+    const el = document.getElementById('chatMessage');}
+    }
