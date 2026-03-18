@@ -81,6 +81,9 @@
         <span class="nav-icon">🧾</span> შეკვეთები
         <span id="newOrdersBadge" style="display:none;margin-left:auto;background:var(--orange);color:white;border-radius:20px;padding:1px 8px;font-size:12px"></span>
       </div>
+      <div class="nav-item" onclick="showPage('invoice-gen')">
+        <span class="nav-icon">📄</span> ინვ. გენერაცია
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px" id="adminEmail"></div>
@@ -260,15 +263,108 @@
         </div>
       </div>
       <div class="card">
-        <div class="order-row table-header" style="grid-template-columns: 140px 1fr 120px 110px 110px;">
+        <div class="order-row table-header" style="grid-template-columns: 100px 150px 1fr 130px 100px 120px;">
           <span>თარიღი</span>
-          <span>მომხმარებელი</span>
-          <span>ტელეფონი</span>
+          <span>ინვ. ნომ.</span>
+          <span>მყიდველი</span>
+          <span>საიდ. კოდი</span>
           <span>სულ</span>
           <span>სტატუსი</span>
         </div>
         <div id="ordersList">
           <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice Generation -->
+    <div class="page" id="page-invoice-gen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ინვოისის გენერაცია</div>
+          <div class="page-subtitle">შეავსე პროდუქტები და ჩამოტვირთე PDF</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:760px">
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px 16px;border-bottom:1px solid #f3f4f6">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:0.025em;line-height:1">
+              <span style="color:#141210">UNI</span><span style="color:#E8541A">CRAFT</span>
+            </div>
+            <div id="invGenDate" style="font-size:12px;color:#9ca3af;margin-top:4px"></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af">ინვოისი</div>
+            <div id="invGenNo" style="font-family:monospace;font-weight:700;font-size:18px;color:#141210;margin-top:4px"></div>
+          </div>
+        </div>
+
+        <!-- Seller & Buyer -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f3f4f6">
+          <!-- გამყიდველი -->
+          <div style="padding:14px 24px;background:#F5F2EE;border-right:1px solid #E8E2DC">
+            <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E8541A;margin-bottom:10px">გამყიდველი</div>
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:2px">დასახელება</div>
+            <div style="font-weight:600;font-size:14px;color:#141210;margin-bottom:8px">შპს უნიკრაფტი</div>
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:2px">ბანკი</div>
+            <div style="font-weight:600;font-size:14px;color:#141210;margin-bottom:8px">საქართველოს ბანკი</div>
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:2px">ა/ნ</div>
+            <div style="font-family:monospace;font-weight:700;font-size:14px;color:#141210">GE86BG0000000607455166</div>
+          </div>
+          <!-- მყიდველი -->
+          <div style="padding:14px 24px;background:#F5F2EE">
+            <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E8541A;margin-bottom:10px">მყიდველი</div>
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px">დასახელება / სახელი</div>
+            <input id="invGenBuyerName" type="text" placeholder="კომპანიის ან პირის სახელი"
+              style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;background:white;margin-bottom:8px;color:#141210">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px">პირ. ნომ. / საიდ. კოდი</div>
+            <input id="invGenBuyerId" type="text" maxlength="20" placeholder="მაგ: 01234567890"
+              style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;background:white;color:#141210">
+          </div>
+        </div>
+
+        <!-- Products table -->
+        <div style="padding:16px 24px 8px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E8541A;margin-bottom:10px">პროდუქციის ჩამონათვალი</div>
+          <div style="display:grid;grid-template-columns:1fr 70px 70px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
+            <span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
+          </div>
+          <div id="invGenRows"></div>
+          <button onclick="addInvRow()" style="margin-top:10px;background:none;border:1px dashed #e5e7eb;color:#E8541A;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500">+ სტრიქონის დამატება</button>
+        </div>
+
+        <!-- Totals -->
+        <div style="padding:8px 24px 16px;border-top:1px solid #f3f4f6;margin-top:8px">
+          <div style="display:flex;justify-content:flex-end;gap:40px;font-size:12px;color:#9ca3af;margin-bottom:6px">
+            <span>მათ შორის დღგ (18%)</span>
+            <span id="invGenVat" style="min-width:80px;text-align:right">0.00 ₾</span>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:40px;align-items:baseline;border-top:2px solid #141210;padding-top:10px">
+            <span style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af">სულ გადასახდელი</span>
+            <span id="invGenTotal" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.025em;min-width:80px;text-align:right;color:#141210">0.00 ₾</span>
+          </div>
+        </div>
+
+        <!-- Payment note -->
+        <div style="padding:10px 24px 12px;font-size:12px;color:#9ca3af;text-align:center;line-height:1.625;border-top:1px solid #f9fafb">
+          გთხოვთ თანხის გადმორიცხვისას დანიშნულებაში მიუთითოთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <strong style="color:#141210;font-weight:500">LLCunicraft@gmail.com</strong>
+        </div>
+
+        <!-- Disclaimer -->
+        <div style="margin:0 24px 16px;padding:12px 16px;background:#F5F2EE;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#6b7280;line-height:1.625">
+          <strong style="color:#4b5563">შენიშვნა:</strong> აღნიშნული ინვოისი ძალაშია მისი დაგენერირების თარიღის დღეს და შეიძლება შეიცვალოს რამდენიმე დღის შემდეგ. შპს უნიკრაფტი იტოვებს უფლებას ნებისმიერ დროს შეცვალოს ფასები ცალმხრივად და შეტყობინების გარეშე. წინამდებარე ინვოისი არ წარმოადგენს ფასის ფიქსაციის ვალდებულებას.
+        </div>
+
+        <!-- Actions -->
+        <div style="padding:12px 24px 20px;display:flex;gap:10px;border-top:1px solid var(--border)">
+          <button onclick="doAdminInvoicePDF()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ჩამოტვირთე PDF
+          </button>
+          <button onclick="resetInvGen()" class="btn btn-secondary">გასუფთავება</button>
         </div>
       </div>
     </div>
@@ -685,36 +781,64 @@ window.deleteProduct = async function(id) {
   loadProductsList();
 };
 
+// ─── Demo orders ───
+const DEMO_ORDERS = [
+  {
+    id: 'demo-1',
+    invoiceNo: 'INV-20260318-4271',
+    buyerName: 'შპს სამშენებლო ჯგუფი',
+    buyerId: '204567891',
+    items: [
+      { name: 'ცემენტი M400', qty: 50, unit: 'ტომ', price: 18 },
+      { name: 'თეთელი აგური', qty: 2000, unit: 'ც', price: 0.45 },
+      { name: 'არმატურა D12', qty: 120, unit: 'მ', price: 8.50 },
+    ],
+    total: 50*18 + 2000*0.45 + 120*8.50,
+    status: 'new',
+    createdAt: '18/03/2026'
+  }
+];
+
+function renderOrderRow(id, o, dateStr) {
+  return `<div class="order-row" style="grid-template-columns:100px 150px 1fr 130px 100px 120px">
+    <span style="font-size:12px;color:var(--gray-mid)">${dateStr}</span>
+    <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoiceNo || '–'}</span>
+    <div>
+      <div style="font-weight:600;font-size:13px">${o.buyerName || o.customer?.firstName || '–'}</div>
+      ${o.items ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${o.items.map(i=>i.name).join(', ')}</div>` : ''}
+    </div>
+    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyerId || '–'}</span>
+    <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
+    <select class="order-status status-${o.status || 'new'}"
+      onchange="updateOrderStatus('${id}', this)">
+      <option value="new" ${o.status==='new'?'selected':''}>🆕 ახალი</option>
+      <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ დადასტ.</option>
+      <option value="delivered" ${o.status==='delivered'?'selected':''}>📦 მიწოდ.</option>
+      <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ გაუქმ.</option>
+    </select>
+  </div>`;
+}
+
 // ─── Orders ───
 async function loadOrdersList() {
   const el = document.getElementById('ordersList');
   el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
-  const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')));
-  document.getElementById('orderCountLabel').textContent = snap.size + ' შეკვეთა';
-  if (!snap.size) {
-    el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთა ჯერ არ შემოსულა</p></div>';
-    return;
-  }
-  el.innerHTML = snap.docs.map(d => {
-    const o = d.data();
-    const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ka-GE') : '–';
-    return `<div class="order-row">
-      <span style="font-size:13px;color:var(--gray-mid)">${date}</span>
-      <div>
-        <div class="order-customer">${o.customer?.firstName} ${o.customer?.lastName}</div>
-        <div style="font-size:12px;color:var(--gray-mid);margin-top:2px">${o.customer?.address || ''}</div>
-      </div>
-      <span class="order-phone">${o.customer?.phone}</span>
-      <span style="font-weight:600">${o.total?.toFixed(2)} ₾</span>
-      <select class="order-status status-${o.status || 'new'}"
-        onchange="updateOrderStatus('${d.id}', this)">
-        <option value="new" ${o.status==='new'?'selected':''}>🆕 ახალი</option>
-        <option value="confirmed" ${o.status==='confirmed'?'selected':''}>✅ დადასტურებული</option>
-        <option value="delivered" ${o.status==='delivered'?'selected':''}>📦 მიწოდებული</option>
-        <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ გაუქმებული</option>
-      </select>
-    </div>`;
-  }).join('');
+  try {
+    const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')));
+    if (snap.size) {
+      document.getElementById('orderCountLabel').textContent = snap.size + ' შეკვეთა';
+      el.innerHTML = snap.docs.map(d => {
+        const o = d.data();
+        const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ka-GE') : '–';
+        return renderOrderRow(d.id, o, date);
+      }).join('');
+      return;
+    }
+  } catch(e) { /* Firebase unavailable — show demo */ }
+
+  // Demo fallback
+  document.getElementById('orderCountLabel').textContent = DEMO_ORDERS.length + ' შეკვეთა (demo)';
+  el.innerHTML = DEMO_ORDERS.map(o => renderOrderRow(o.id, o, o.createdAt)).join('');
 }
 
 window.updateOrderStatus = async function(id, sel) {
@@ -735,7 +859,104 @@ window.showToast = function(msg, type = '') {
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3000);
 };
+
+// ─── Invoice Generation ───
+let invGenRows = [];
+let invGenNo = '';
+
+function genInvNo() {
+  const d = new Date();
+  return 'INV-' + d.getFullYear()
+    + String(d.getMonth()+1).padStart(2,'0')
+    + String(d.getDate()).padStart(2,'0')
+    + '-' + Math.floor(1000 + Math.random() * 9000);
+}
+
+function initInvGen() {
+  invGenNo = genInvNo();
+  document.getElementById('invGenNo').textContent = invGenNo;
+  const d = new Date();
+  document.getElementById('invGenDate').textContent = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  const nameEl = document.getElementById('invGenBuyerName');
+  const idEl   = document.getElementById('invGenBuyerId');
+  if (nameEl) nameEl.value = '';
+  if (idEl)   idEl.value   = '';
+  invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
+  renderInvRows();
+}
+
+function renderInvRows() {
+  const el = document.getElementById('invGenRows');
+  el.innerHTML = invGenRows.map((r, i) => `
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
+      <input value="${r.name}" oninput="invRowSet(${i},'name',this.value)"
+        placeholder="პროდუქტის სახელი..."
+        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;color:var(--dark)">
+      <input type="number" value="${r.qty}" min="0.01" step="0.01" oninput="invRowSet(${i},'qty',this.value)"
+        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:center;color:var(--dark)">
+      <input value="${r.unit}" oninput="invRowSet(${i},'unit',this.value)"
+        placeholder="ც"
+        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:center;color:var(--dark)">
+      <input type="number" value="${r.price}" min="0" step="0.01" oninput="invRowSet(${i},'price',this.value)"
+        placeholder="0.00"
+        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:right;color:var(--dark)">
+      <div style="text-align:right;font-weight:600;font-size:13px;color:var(--dark)">${(parseFloat(r.qty)||0) * (parseFloat(r.price)||0) > 0 ? ((parseFloat(r.qty)||0)*(parseFloat(r.price)||0)).toFixed(2)+' ₾' : '–'}</div>
+      <button onclick="removeInvRow(${i})" style="background:none;border:none;color:var(--gray-mid);cursor:pointer;font-size:16px;padding:2px;line-height:1" title="წაშლა">✕</button>
+    </div>`).join('');
+  calcInvTotals();
+}
+
+window.invRowSet = function(i, field, val) {
+  invGenRows[i][field] = val;
+  calcInvTotals();
+  // update only the total cell for this row without full re-render (avoid losing focus)
+  const rows = document.getElementById('invGenRows').children;
+  if (rows[i]) {
+    const totalCell = rows[i].children[4];
+    const line = (parseFloat(invGenRows[i].qty)||0) * (parseFloat(invGenRows[i].price)||0);
+    totalCell.textContent = line > 0 ? line.toFixed(2) + ' ₾' : '–';
+  }
+};
+
+function calcInvTotals() {
+  const total = invGenRows.reduce((s,r) => s + (parseFloat(r.qty)||0)*(parseFloat(r.price)||0), 0);
+  const vat = total * 18 / 118;
+  document.getElementById('invGenVat').textContent = vat.toFixed(2) + ' ₾';
+  document.getElementById('invGenTotal').textContent = total.toFixed(2) + ' ₾';
+}
+
+window.addInvRow = function() {
+  invGenRows.push({ name:'', qty:1, unit:'ც', price:0 });
+  renderInvRows();
+  // focus the name input of the new row
+  const rows = document.getElementById('invGenRows').children;
+  if (rows.length) rows[rows.length-1].children[0].focus();
+};
+
+window.removeInvRow = function(i) {
+  if (invGenRows.length === 1) { invGenRows[0] = { name:'', qty:1, unit:'ც', price:0 }; }
+  else invGenRows.splice(i, 1);
+  renderInvRows();
+};
+
+window.resetInvGen = function() { initInvGen(); };
+
+window.doAdminInvoicePDF = function() {
+  const dateStr   = document.getElementById('invGenDate').textContent;
+  const buyerName = (document.getElementById('invGenBuyerName')?.value || '').trim();
+  const buyerId   = (document.getElementById('invGenBuyerId')?.value   || '').trim();
+  downloadAdminInvoicePDF(invGenRows, invGenNo, dateStr, buyerName, buyerId);
+};
+
+// init when page is shown
+const _origShowPage = window.showPage;
+window.showPage = function(name) {
+  _origShowPage(name);
+  if (name === 'invoice-gen') initInvGen();
+};
 </script>
+
+<script src="js/admin-invoice.js"></script>
 
 <!-- Role Switcher -->
 <div style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
