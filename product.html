@@ -188,10 +188,7 @@ tailwind.config = {
 <div id="toast" class="fixed bottom-7 left-1/2 -translate-x-1/2 translate-y-20 bg-dark text-white text-sm font-medium px-6 py-3 border-l-4 border-orange z-50 transition-transform duration-300 whitespace-nowrap pointer-events-none"></div>
 
 <script type="module">
-import { db } from './firebase-config.js';
-import {
-  doc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, orderBy, where
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { supabase } from './js/supabase-config.js';
 
 let product = null;
 let allProducts = [];
@@ -205,13 +202,13 @@ async function init() {
   saveCart();
   if (!id) { showError(); return; }
   try {
-    const [pSnap, allSnap] = await Promise.all([
-      getDoc(doc(db, 'products', id)),
-      getDocs(query(collection(db, 'products'), orderBy('createdAt','desc')))
+    const [{ data: product_data, error: perr }, { data: allData, error: aerr }] = await Promise.all([
+      supabase.from('products').select('*').eq('id', id).single(),
+      supabase.from('products').select('*').eq('active', true).order('created_at', { ascending: false })
     ]);
-    if (!pSnap.exists()) { showError(); return; }
-    product = { id: pSnap.id, ...pSnap.data() };
-    allProducts = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (perr || !product_data) { showError(); return; }
+    product = { ...product_data, imageUrl: product_data.image_url };
+    allProducts = (allData || []).map(p => ({ ...p, imageUrl: p.image_url }));
     renderProduct();
     renderRelated();
   } catch(e) {
@@ -369,11 +366,13 @@ window.submitOrder = async function() {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = '...';
   try {
-    await addDoc(collection(db,'orders'), {
-      customer: { firstName:fname, lastName:lname, phone, address },
+    await supabase.from('orders').insert({
+      buyer_name: fname + ' ' + lname,
+      buyer_id: phone,
       items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
-      status: 'new', createdAt: serverTimestamp()
+      status: 'pending',
+      invoice_no: 'INV-' + Date.now()
     });
     document.getElementById('successPhone').textContent = phone;
     document.getElementById('orderFormWrap').classList.add('hidden');

@@ -22,7 +22,7 @@
     <div class="login-error" id="loginError"></div>
     <div style="margin-top:16px;padding:10px;background:#f5f3f0;border-radius:8px;font-size:12px;color:#6B6560;text-align:left">
       <div style="font-weight:600;margin-bottom:4px;color:#2A2520">Demo წვდომა:</div>
-      <div>📧 admin@unicraft.ge</div>
+      <div>📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="28494c454146685d46414b5a494e5c064f4d">[email&#160;protected]</a></div>
       <div>🔑 unicraft2025</div>
     </div>
   </div>
@@ -355,7 +355,7 @@
 
         <!-- Payment note -->
         <div style="padding:10px 24px 12px;font-size:12px;color:#9ca3af;text-align:center;line-height:1.625;border-top:1px solid #f9fafb">
-          გთხოვთ თანხის გადმორიცხვისას დანიშნულებაში მიუთითოთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <strong style="color:#141210;font-weight:500">LLCunicraft@gmail.com</strong>
+          გთხოვთ თანხის გადმორიცხვისას დანიშნულებაში მიუთითოთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <strong style="color:#141210;font-weight:500"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="632f2f20160d0a001102051723040e020a0f4d000c0e">[email&#160;protected]</a></strong>
         </div>
 
         <!-- Disclaimer -->
@@ -553,16 +553,8 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { db, auth } from './firebase-config.js';
-import {
-  signInWithEmailAndPassword, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import {
-  collection, getDocs, addDoc, deleteDoc, doc,
-  serverTimestamp, query, orderBy, updateDoc, limit,
-  onSnapshot, increment, getDoc, setDoc
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+<script data-cfasync="false"></script><script type="module">
+import { supabase } from './js/supabase-config.js';
 
 // ─── Product cache for edit ───
 let productCache = {};
@@ -626,31 +618,30 @@ window.doLogin = async function() {
   errEl.textContent = '';
   if (!email || !pass) { errEl.textContent = 'შეავსე ყველა ველი'; return; }
 
-  // Demo login (Firebase-ის გარეშე)
+  // Demo login
   if (email === DEMO_EMAIL && pass === DEMO_PASS) {
     sessionStorage.setItem('uc_demo_admin', '1');
     showApp(email);
     return;
   }
 
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-  } catch (e) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (error) {
     errEl.textContent = 'არასწორი ელ. ფოსტა ან პაროლი';
   }
 };
 
 window.doLogout = async function() {
   sessionStorage.removeItem('uc_demo_admin');
-  try { await signOut(auth); } catch(e) {}
+  await supabase.auth.signOut();
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
 };
 
-// Firebase auth state
-onAuthStateChanged(auth, user => {
-  if (user) {
-    showApp(user.email);
+// Supabase auth state
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session?.user) {
+    showApp(session.user.email);
   } else if (!sessionStorage.getItem('uc_demo_admin')) {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
@@ -692,39 +683,37 @@ async function initApp() {
 
   // Stats
   try {
-    const [prodSnap, orderSnap] = await Promise.all([
-      getDocs(collection(db, 'products')),
-      getDocs(collection(db, 'orders'))
+    const [{ count: prodCount }, { count: orderCount }, { data: newOrders }] = await Promise.all([
+      supabase.from('products').select('*', { count: 'exact', head: true }),
+      supabase.from('orders').select('*', { count: 'exact', head: true }),
+      supabase.from('orders').select('id').eq('status', 'pending')
     ]);
-    document.getElementById('statProducts').textContent = prodSnap.size;
-    document.getElementById('statOrders').textContent = orderSnap.size;
-    const newOrders = orderSnap.docs.filter(d => d.data().status === 'new').length;
-    document.getElementById('statNew').textContent = newOrders;
-    if (newOrders > 0) {
+    document.getElementById('statProducts').textContent = prodCount || 0;
+    document.getElementById('statOrders').textContent = orderCount || 0;
+    const newCount = newOrders?.length || 0;
+    document.getElementById('statNew').textContent = newCount;
+    if (newCount > 0) {
       const badge = document.getElementById('newOrdersBadge');
-      badge.textContent = newOrders;
+      badge.textContent = newCount;
       badge.style.display = 'inline';
     }
     // Recent orders
-    const recent = orderSnap.docs
-      .sort((a, b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0))
-      .slice(0, 5);
-    renderRecentOrders(recent);
+    const { data: recentOrders } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
+    renderRecentOrders(recentOrders || []);
   } catch(e) { console.error(e); }
 }
 
-function renderRecentOrders(docs) {
+function renderRecentOrders(rows) {
   const el = document.getElementById('recentOrders');
-  if (!docs.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთები ჯერ არ არის</p></div>'; return; }
-  el.innerHTML = docs.map(d => {
-    const o = d.data();
-    const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ka-GE') : '–';
+  if (!rows.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთები ჯერ არ არის</p></div>'; return; }
+  el.innerHTML = rows.map(o => {
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
     return `<div class="order-row" style="grid-template-columns: 140px 1fr 120px 110px 110px;">
       <span style="font-size:13px;color:var(--gray-mid)">${date}</span>
-      <span><div class="order-customer">${o.customer?.firstName} ${o.customer?.lastName}</div></span>
-      <span class="order-phone">${o.customer?.phone}</span>
-      <span style="font-weight:600">${o.total?.toFixed(2)} ₾</span>
-      <span><span class="order-status status-${o.status || 'new'}">${statusLabel(o.status)}</span></span>
+      <span><div class="order-customer">${o.buyer_name || '–'}</div></span>
+      <span class="order-phone">${o.buyer_id || '–'}</span>
+      <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
+      <span><span class="order-status status-${o.status || 'pending'}">${statusLabel(o.status)}</span></span>
     </div>`;
   }).join('');
 }
@@ -740,17 +729,16 @@ window.addProduct = async function() {
   const btn = document.getElementById('addProductBtn');
   btn.disabled = true; btn.textContent = 'ემატება...';
   try {
-    await addDoc(collection(db, 'products'), {
+    await supabase.from('products').insert({
       name,
       category,
       price,
       unit: document.getElementById('prodUnit').value,
       description: document.getElementById('prodDesc').value.trim(),
-      imageUrl: prodFileData || '',
+      image_url: prodFileData || '',
       stock: parseInt(document.getElementById('prodStock').value) || 0,
       active: document.getElementById('prodActive').value === 'true',
       store: document.getElementById('prodStore').value.trim(),
-      createdAt: serverTimestamp()
     });
     showToast('✓ პროდუქტი დაემატა!', 'success');
     clearForm();
@@ -775,19 +763,19 @@ window.clearForm = function() {
 async function loadProductsList() {
   const el = document.getElementById('productsList');
   el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
-  const snap = await getDocs(query(collection(db, 'products'), orderBy('createdAt', 'desc')));
-  document.getElementById('productCountLabel').textContent = snap.size + ' პროდუქტი';
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+  const rows = data || [];
+  document.getElementById('productCountLabel').textContent = rows.length + ' პროდუქტი';
   productCache = {};
-  if (!snap.size) {
+  if (!rows.length) {
     el.innerHTML = '<div class="table-empty"><div class="icon">📦</div><p>პროდუქტი არ დამატებია</p></div>';
     return;
   }
-  snap.docs.forEach(d => { productCache[d.id] = d.data(); });
-  el.innerHTML = snap.docs.map(d => {
-    const p = d.data();
+  rows.forEach(p => { productCache[p.id] = p; });
+  el.innerHTML = rows.map(p => {
     return `<div class="table-row">
       <div class="prod-img-thumb">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" alt="">` : (p.emoji || '📦')}
+        ${p.image_url ? `<img src="${p.image_url}" alt="">` : (p.emoji || '📦')}
       </div>
       <div>
         <div class="prod-name">${p.name}</div>
@@ -800,8 +788,8 @@ async function loadProductsList() {
         ${p.active ? '✓ აქტიური' : '✗ დამალული'}
       </span></span>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-secondary btn-sm" onclick="editProduct('${d.id}')">✏ რედ.</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${d.id}')">🗑 წაშლა</button>
+        <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 წაშლა</button>
       </div>
     </div>`;
   }).join('');
@@ -817,13 +805,13 @@ window.editProduct = function(id) {
   document.getElementById('editPrice').value = p.price || '';
   document.getElementById('editUnit').value = p.unit || 'ც';
   document.getElementById('editDesc').value = p.description || '';
-  document.getElementById('editExistingImage').value = p.imageUrl || '';
+  document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editStock').value = p.stock || '';
   document.getElementById('editActive').value = p.active !== false ? 'true' : 'false';
   document.getElementById('editStore').value = p.store || '';
   document.getElementById('editFile').value = '';
-  if (p.imageUrl) {
-    showDropPreview('edit', p.imageUrl);
+  if (p.image_url) {
+    showDropPreview('edit', p.image_url);
   } else {
     document.getElementById('editPreview').innerHTML = DROPZONE_EMPTY;
   }
@@ -845,15 +833,15 @@ window.saveProductEdit = async function() {
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
   try {
-    await updateDoc(doc(db, 'products', id), {
+    await supabase.from('products').update({
       name, category, price,
       unit: document.getElementById('editUnit').value,
       description: document.getElementById('editDesc').value.trim(),
-      imageUrl: editFileData || document.getElementById('editExistingImage').value,
+      image_url: editFileData || document.getElementById('editExistingImage').value,
       stock: parseInt(document.getElementById('editStock').value) || 0,
       active: document.getElementById('editActive').value === 'true',
       store: document.getElementById('editStore').value.trim(),
-    });
+    }).eq('id', id);
     showToast('✓ პროდუქტი განახლდა!', 'success');
     closeEditModal();
     loadProductsList();
@@ -865,7 +853,7 @@ window.saveProductEdit = async function() {
 
 window.deleteProduct = async function(id) {
   if (!confirm('ნამდვილად წაშლა?')) return;
-  await deleteDoc(doc(db, 'products', id));
+  await supabase.from('products').delete().eq('id', id);
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
 };
@@ -948,15 +936,15 @@ const DEMO_ORDERS = [
 
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
-  const status = o.status || 'new';
+  const status = o.status || 'pending';
   return `<div class="order-row" style="grid-template-columns:100px 150px 1fr 130px 100px 120px;cursor:pointer" onclick="openOrderModal('${id}')">
     <span style="font-size:12px;color:var(--gray-mid)">${dateStr}</span>
-    <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoiceNo || '–'}</span>
+    <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoice_no || o.invoiceNo || '–'}</span>
     <div>
-      <div style="font-weight:600;font-size:13px">${o.buyerName || o.customer?.firstName || '–'}</div>
-      ${o.items ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${o.items.map(i=>i.name).join(', ')}</div>` : ''}
+      <div style="font-weight:600;font-size:13px">${o.buyer_name || o.buyerName || '–'}</div>
+      ${o.items ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${(Array.isArray(o.items) ? o.items : JSON.parse(o.items||'[]')).map(i=>i.name).join(', ')}</div>` : ''}
     </div>
-    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyerId || '–'}</span>
+    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</span>
     <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
     <div style="display:flex;align-items:center"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></div>
   </div>`;
@@ -967,18 +955,17 @@ async function loadOrdersList() {
   const el = document.getElementById('ordersList');
   el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
   try {
-    const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc')));
-    if (snap.size) {
-      document.getElementById('orderCountLabel').textContent = snap.size + ' შეკვეთა';
-      el.innerHTML = snap.docs.map(d => {
-        const o = d.data();
-        const date = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ka-GE') : '–';
-        return renderOrderRow(d.id, o, date);
+    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if (!error && data && data.length) {
+      document.getElementById('orderCountLabel').textContent = data.length + ' შეკვეთა';
+      el.innerHTML = data.map(o => {
+        const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
+        return renderOrderRow(o.id, o, date);
       }).join('');
       renderOrderStats();
       return;
     }
-  } catch(e) { /* Firebase unavailable — show demo */ }
+  } catch(e) {}
 
   // Demo fallback
   document.getElementById('orderCountLabel').textContent = DEMO_ORDERS.length + ' შეკვეთა (demo)';
@@ -1056,7 +1043,7 @@ window.setOrderStatus = async function(id, status) {
   updateModalActions(status);
   renderOrderStats();
   try {
-    await updateDoc(doc(db, 'orders', id), { status });
+    await supabase.from('orders').update({ status }).eq('id', id);
     showToast('სტატუსი განახლდა', 'success');
   } catch(e) {
     showToast('სტატუსი განახლდა (demo)', 'success');
@@ -1067,14 +1054,14 @@ window.openOrderModal = function(id) {
   window.currentOrderId = id;
   const o = ordersCache[id];
   if (!o) return;
-  document.getElementById('modalInvoiceNo').textContent = o.invoiceNo || '–';
-  document.getElementById('modalBuyerName').textContent = o.buyerName || o.customer?.firstName || '–';
-  document.getElementById('modalBuyerId').textContent = 'ს/კ: ' + (o.buyerId || '–');
+  document.getElementById('modalInvoiceNo').textContent = o.invoice_no || o.invoiceNo || '–';
+  document.getElementById('modalBuyerName').textContent = o.buyer_name || o.buyerName || '–';
+  document.getElementById('modalBuyerId').textContent = 'ს/კ: ' + (o.buyer_id || o.buyerId || '–');
   document.getElementById('modalDate').textContent = o._dateStr || '–';
-  const status = o.status || 'new';
+  const status = o.status || 'pending';
   document.getElementById('modalCurrentStatus').innerHTML = `<span class="order-status status-${status}">${statusLabel(status)}</span>`;
   updateModalActions(status);
-  const items = o.items || [];
+  const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
   let total = 0;
   document.getElementById('modalItemsBody').innerHTML = items.map(item => {
     const line = (parseFloat(item.qty)||0) * (parseFloat(item.price)||0);
@@ -1104,8 +1091,8 @@ window.closeOrderModal = function() {
 
 // ─── Chat (Admin) ───
 let currentChatSessionId = null;
-let adminMsgUnsub = null;
-let adminSessionsUnsub = null;
+let adminChatChannel = null;
+let adminSessionsChannel = null;
 
 const DEMO_CHATS = [
   {
@@ -1160,10 +1147,12 @@ function renderChatSessionsList(sessions) {
   el.innerHTML = sessions.length === 0
     ? '<div class="table-empty"><div class="icon">💬</div>შეტყობინება არ არის</div>'
     : sessions.map(s => {
-      const t = s.lastAt?.toDate ? s.lastAt.toDate().toLocaleTimeString('ka-GE', { hour:'2-digit', minute:'2-digit' }) : '';
+      const rawTime = s.updated_at || s.lastAt;
+      const t = rawTime ? new Date(rawTime).toLocaleTimeString('ka-GE', { hour:'2-digit', minute:'2-digit' }) : '';
       const active = s.id === currentChatSessionId ? 'background:var(--gray-light);' : '';
-      const displayName = s.customerName || s.id.slice(-8);
-      const displayPhone = s.customerPhone || '';
+      const displayName = s.customer_name || s.customerName || s.id.slice(-8);
+      const displayPhone = s.customer_phone || s.customerPhone || '';
+      const lastMsg = s.last_message || s.lastMessage || '...';
       return `<div onclick="openAdminChat('${s.id}')" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;${active}transition:background 0.15s" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='${s.id === currentChatSessionId ? 'var(--gray-light)' : ''}'">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
           <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
@@ -1173,26 +1162,30 @@ function renderChatSessionsList(sessions) {
           </div>
         </div>
         <div style="font-size:11px;color:#9ca3af;margin-bottom:3px">${displayPhone}</div>
-        <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.lastMessage || '...'}</div>
+        <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lastMsg}</div>
       </div>`;
     }).join('');
 }
 
 function loadChatSessions() {
-  const el = document.getElementById('chatSessionsList');
-  if (adminSessionsUnsub) adminSessionsUnsub();
-  try {
-    adminSessionsUnsub = onSnapshot(
-      query(collection(db, 'chats'), orderBy('lastAt', 'desc')),
-      snap => {
-        const sessions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (sessions.length > 0) { renderChatSessionsList(sessions); return; }
-        renderChatSessionsList(DEMO_CHATS);
-      }
-    );
-  } catch(e) {
-    renderChatSessionsList(DEMO_CHATS);
-  }
+  if (adminSessionsChannel) supabase.removeChannel(adminSessionsChannel);
+
+  // Initial load
+  supabase.from('chats').select('*').order('updated_at', { ascending: false })
+    .then(({ data }) => {
+      const sessions = data || [];
+      renderChatSessionsList(sessions.length > 0 ? sessions : DEMO_CHATS);
+    })
+    .catch(() => renderChatSessionsList(DEMO_CHATS));
+
+  // Real-time updates
+  adminSessionsChannel = supabase
+    .channel('admin-chats')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => {
+      supabase.from('chats').select('*').order('updated_at', { ascending: false })
+        .then(({ data }) => { if (data?.length) renderChatSessionsList(data); });
+    })
+    .subscribe();
 }
 
 window.openAdminChat = async function(sessionId) {
@@ -1200,6 +1193,7 @@ window.openAdminChat = async function(sessionId) {
   document.getElementById('adminChatEmpty').style.display = 'none';
   const panel = document.getElementById('adminChatPanel');
   panel.style.display = 'flex';
+
   // Check demo first
   const demoSession = DEMO_CHATS.find(c => c.id === sessionId);
   if (demoSession) {
@@ -1208,17 +1202,38 @@ window.openAdminChat = async function(sessionId) {
     document.getElementById('adminChatInput').focus();
     return;
   }
-  const sesSnap = await getDoc(doc(db, 'chats', sessionId)).catch(() => null);
-  const sesData = sesSnap?.data() || {};
-  document.getElementById('adminChatTitle').textContent = sesData.customerName ? `${sesData.customerName} · ${sesData.customerPhone || ''}` : sessionId.slice(-8);
-  try { await updateDoc(doc(db, 'chats', sessionId), { unread: 0 }); } catch(e) {}
-  if (adminMsgUnsub) adminMsgUnsub();
-  try {
-    adminMsgUnsub = onSnapshot(
-      query(collection(db, 'chats', sessionId, 'messages'), orderBy('createdAt')),
-      snap => renderAdminChatMsgs(snap.docs.map(d => ({ ...d.data() })))
-    );
-  } catch(e) {}
+
+  // Load from Supabase
+  const { data: sesData } = await supabase.from('chats').select('*').eq('id', sessionId).single().catch(() => ({ data: null }));
+  if (sesData) {
+    document.getElementById('adminChatTitle').textContent = sesData.customer_name
+      ? `${sesData.customer_name} · ${sesData.customer_phone || ''}`
+      : sessionId.slice(-8);
+    await supabase.from('chats').update({ unread: 0 }).eq('id', sessionId);
+  }
+
+  // Load messages
+  const { data: msgs } = await supabase.from('chat_messages').select('*').eq('session_id', sessionId).order('created_at');
+  renderAdminChatMsgs(msgs || []);
+
+  // Subscribe to new messages
+  if (adminChatChannel) supabase.removeChannel(adminChatChannel);
+  adminChatChannel = supabase
+    .channel('admin-msgs-' + sessionId)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'chat_messages',
+      filter: `session_id=eq.${sessionId}`
+    }, payload => {
+      const el = document.getElementById('adminChatMessages');
+      const m = payload.new;
+      const isAdmin = m.sender === 'admin';
+      el.innerHTML += `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
+        <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#141210' : 'white'};color:${isAdmin ? 'white' : 'var(--dark)'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+      </div>`;
+      el.scrollTop = el.scrollHeight;
+    })
+    .subscribe();
+
   document.getElementById('adminChatInput').focus();
 };
 
@@ -1239,14 +1254,10 @@ window.sendAdminMsg = async function() {
   if (!text || !currentChatSessionId) return;
   input.value = '';
   try {
-    await addDoc(collection(db, 'chats', currentChatSessionId, 'messages'), {
-      text, sender: 'admin', createdAt: serverTimestamp()
-    });
-    await updateDoc(doc(db, 'chats', currentChatSessionId), {
-      lastMessage: text, lastAt: serverTimestamp()
-    });
+    await supabase.from('chat_messages').insert({ session_id: currentChatSessionId, text, sender: 'admin' });
+    await supabase.from('chats').update({ last_message: text, updated_at: new Date().toISOString() }).eq('id', currentChatSessionId);
   } catch(e) {
-    showToast('Firebase საჭიროა ჩატისთვის', 'error');
+    showToast('Supabase საჭიროა ჩატისთვის', 'error');
   }
 };
 
@@ -1361,10 +1372,4 @@ window.showPage = function(name) {
   <div style="background:#141210;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;font-weight:600">
     ახლა: ადმინი
   </div>
-  <a href="index.html" style="display:flex;align-items:center;gap:8px;background:#E8541A;color:white;font-size:12px;font-weight:700;padding:10px 16px;text-decoration:none;transition:background .2s" onmouseover="this.style.background='#C4400E'" onmouseout="this.style.background='#E8541A'">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    მაღაზია →
-  </a>
-</div>
-</body>
-</html>
+  <a href="index.html" style="display:flex;align-items:center;gap:8px;background:#E8541A;color:white;font-size:12px;font-weight:700;padding:10px 16px;text-decoration:none;transition:background .2s" onmouseover="this.s

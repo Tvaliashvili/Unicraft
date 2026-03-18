@@ -208,7 +208,7 @@ tailwind.config = {
         <path d="M88 40 L92 36 L96 40" fill="#C4400E"/>
       </svg>
       <span class="font-display text-lg"><span class="text-white">UNI</span><span class="text-orange">CRAFT</span></span>
-      <span class="text-white/20 text-xs ml-3">unicraft.ge · LLCunicraft@gmail.com</span>
+      <span class="text-white/20 text-xs ml-3">unicraft.ge · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8fc3c3ccfae1e6ecfdeee9fbcfe8e2eee6e3a1ece0e2">[email&#160;protected]</a></span>
   </div>
 </footer>
 
@@ -311,7 +311,7 @@ tailwind.config = {
 
       <!-- Payment note -->
       <div class="px-7 py-3 text-xs text-gray-400 text-center leading-relaxed border-t border-gray-50 mt-2">
-        გთხოვთ თანხის გადმორიცხვისას დანიშნულებაში მიუთითოთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <span class="text-dark font-medium">LLCunicraft@gmail.com</span>
+        გთხოვთ თანხის გადმორიცხვისას დანიშნულებაში მიუთითოთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <span class="text-dark font-medium"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="eea2a2ad9b80878d9c8f889aae89838f8782c08d8183">[email&#160;protected]</a></span>
       </div>
 
       <!-- Disclaimer -->
@@ -749,15 +749,14 @@ window.submitOrder = async function() {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = 'იგზავნება...';
   try {
-    const { db } = await import('./firebase-config.js');
-    const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
-    await addDoc(collection(db,'orders'), {
-      invoiceNo: currentInvoiceNo,
-      buyerId: document.getElementById('buyerIdInput').value.trim(),
-      buyerName: document.getElementById('buyerNameInput').value.trim(),
+    const { supabase } = await import('./js/supabase-config.js');
+    await supabase.from('orders').insert({
+      invoice_no: currentInvoiceNo,
+      buyer_id: document.getElementById('buyerIdInput').value.trim(),
+      buyer_name: document.getElementById('buyerNameInput').value.trim(),
       items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
-      status: 'new', createdAt: serverTimestamp()
+      status: 'pending'
     });
   } catch(e) { /* demo mode — continue */ }
   document.getElementById('successInvNo').textContent = currentInvoiceNo;
@@ -781,17 +780,16 @@ async function loadProducts() {
   buildSidebar();
   renderProducts(allProducts);
 
-  // ფონში Firebase-ს ვცდი
+  // Load from Supabase in background
   try {
-    const { db } = await import('./firebase-config.js');
-    const { collection, getDocs, query, orderBy } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
-    const timeout = new Promise((_, r) => setTimeout(() => r(), 5000));
-    const snap = await Promise.race([
-      getDocs(query(collection(db, 'products'), orderBy('createdAt','desc'))),
-      timeout
-    ]);
-    if (snap && snap.docs.length > 0) {
-      allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const { supabase } = await import('./js/supabase-config.js');
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('active', true)
+      .order('created_at', { ascending: false });
+    if (!error && data && data.length > 0) {
+      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
       buildSidebar();
       renderProducts(allProducts);
     }
@@ -802,15 +800,16 @@ saveCart();
 loadProducts();
 </script>
 <script type="module">
-// ── Chat widget ──
+import { supabase } from './js/supabase-config.js';
+
 let chatSessionId = localStorage.getItem('uc_chat_session');
 if (!chatSessionId) {
   chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
   localStorage.setItem('uc_chat_session', chatSessionId);
 }
-let chatUnsub = null;
+let chatChannel = null;
 let chatOpen = false;
-const chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
+let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '';
 let _chatUserPhone = chatUserInfo?.phone || '';
 
@@ -821,7 +820,6 @@ window.toggleChat = function() {
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
     if (chatUserInfo) {
-      // Already registered — go straight to chat
       document.getElementById('chatIntro').style.display = 'none';
       document.getElementById('chatBody').style.display = 'flex';
       document.getElementById('chatBody').style.flexDirection = 'column';
@@ -834,23 +832,18 @@ window.toggleChat = function() {
       setTimeout(() => document.getElementById('chatNameInput').focus(), 50);
     }
   } else {
-    if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+    if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
   }
 };
 
 window.startChat = function() {
   const name = document.getElementById('chatNameInput').value.trim();
   const phone = document.getElementById('chatPhoneInput').value.trim();
-  if (!name || !phone) {
-    document.getElementById('chatIntroError').style.display = 'block';
-    return;
-  }
+  if (!name || !phone) { document.getElementById('chatIntroError').style.display = 'block'; return; }
   document.getElementById('chatIntroError').style.display = 'none';
-  localStorage.setItem('uc_chat_user', JSON.stringify({ name, phone }));
-  Object.assign(chatUserInfo || {}, { name, phone });
-  // reassign since const — use a module-level var instead
-  _chatUserName = name;
-  _chatUserPhone = phone;
+  chatUserInfo = { name, phone };
+  localStorage.setItem('uc_chat_user', JSON.stringify(chatUserInfo));
+  _chatUserName = name; _chatUserPhone = phone;
   document.getElementById('chatIntro').style.display = 'none';
   document.getElementById('chatBody').style.display = 'flex';
   document.getElementById('chatBody').style.flexDirection = 'column';
@@ -862,23 +855,53 @@ async function initChatSession(name, phone) {
   const n = name || _chatUserName;
   const p = phone || _chatUserPhone;
   try {
-    const { db } = await import('./firebase-config.js');
-    const { collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, serverTimestamp, updateDoc, increment } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
-    const sessionRef = doc(db, 'chats', chatSessionId);
-    const snap = await getDoc(sessionRef);
-    if (!snap.exists()) {
-      await setDoc(sessionRef, { createdAt: serverTimestamp(), lastMessage: '', lastAt: serverTimestamp(), unread: 0, status: 'open', customerName: n, customerPhone: p });
-      await addDoc(collection(db, 'chats', chatSessionId, 'messages'), {
+    // Upsert chat session
+    await supabase.from('chats').upsert({
+      id: chatSessionId,
+      customer_name: n,
+      customer_phone: p,
+      last_message: '',
+      unread: 0,
+      status: 'open'
+    }, { onConflict: 'id', ignoreDuplicates: true });
+
+    // Load existing messages
+    const { data: existing } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('session_id', chatSessionId)
+      .order('created_at');
+
+    if (!existing || existing.length === 0) {
+      // Insert welcome message
+      await supabase.from('chat_messages').insert({
+        session_id: chatSessionId,
         text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`,
-        sender: 'admin', createdAt: serverTimestamp()
+        sender: 'admin'
       });
-    } else if (n) {
-      await updateDoc(sessionRef, { customerName: n, customerPhone: p });
+    } else {
+      renderChatMsgs(existing);
     }
-    if (chatUnsub) chatUnsub();
-    chatUnsub = onSnapshot(query(collection(db, 'chats', chatSessionId, 'messages'), orderBy('createdAt')), s => {
-      renderChatMsgs(s.docs.map(d => ({ ...d.data() })));
-    });
+
+    // Subscribe to real-time new messages
+    if (chatChannel) supabase.removeChannel(chatChannel);
+    chatChannel = supabase
+      .channel('chat-' + chatSessionId)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `session_id=eq.${chatSessionId}`
+      }, payload => {
+        const el = document.getElementById('chatMessages');
+        const m = payload.new;
+        const isAdmin = m.sender === 'admin';
+        el.innerHTML += `<div style="display:flex;justify-content:${isAdmin ? 'flex-start' : 'flex-end'}">
+          <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? 'white' : '#E8541A'};color:${isAdmin ? '#1A1714' : 'white'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+        </div>`;
+        el.scrollTop = el.scrollHeight;
+      })
+      .subscribe();
   } catch(e) {
     renderChatMsgs([{ text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`, sender: 'admin' }]);
   }
@@ -901,18 +924,9 @@ window.sendChatMsg = async function() {
   if (!text) return;
   input.value = '';
   try {
-    const { db } = await import('./firebase-config.js');
-    const { collection, addDoc, doc, updateDoc, serverTimestamp, increment } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
-    await addDoc(collection(db, 'chats', chatSessionId, 'messages'), { text, sender: 'customer', createdAt: serverTimestamp() });
-    await updateDoc(doc(db, 'chats', chatSessionId), { lastMessage: text, lastAt: serverTimestamp(), unread: increment(1) });
+    await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
+    await supabase.from('chats').update({ last_message: text, unread: supabase.rpc('increment_unread') })
+      .eq('id', chatSessionId);
   } catch(e) {
     // Demo: append locally
-    const el = document.getElementById('chatMessages');
-    el.innerHTML += `<div style="display:flex;justify-content:flex-end"><div style="max-width:82%;padding:8px 11px;border-radius:12px 4px 12px 12px;background:#E8541A;color:white;font-size:13px;line-height:1.55">${text}</div></div>`;
-    el.scrollTop = el.scrollHeight;
-  }
-};
-</script>
-<script src="js/invoice.js"></script>
-</body>
-</html>
+    const el = document.getElementById('chatMessag
