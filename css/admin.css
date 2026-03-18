@@ -429,6 +429,7 @@ body {
   cursor: pointer;
 }
 
+.status-pending { background: #EBF3FF; color: #1855A5; }
 .status-new { background: #EBF3FF; color: #1855A5; }
 .status-confirmed { background: #DCFCE7; color: #15803d; }
 .status-in_transit { background: #DBEAFE; color: #1d4ed8; }

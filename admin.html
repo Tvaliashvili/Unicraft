@@ -669,6 +669,7 @@ window.showPage = function(name) {
   });
   if (name === 'products') loadProductsList();
   if (name === 'orders') loadOrdersList();
+  if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
   if (name === 'chat') loadChatSessions();
   // close sidebar on mobile after nav
   document.getElementById('sidebar')?.classList.remove('open');
@@ -861,6 +862,7 @@ window.deleteProduct = async function(id) {
 // ─── Orders cache & modal state ───
 let ordersCache = {};
 window.currentOrderId = null;
+let ordersChannel = null;
 
 // ─── Demo orders ───
 const DEMO_ORDERS = [
@@ -954,29 +956,42 @@ function renderOrderRow(id, o, dateStr) {
 async function loadOrdersList() {
   const el = document.getElementById('ordersList');
   el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
+
+  let hasRealData = false;
   try {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (!error && data && data.length) {
+      hasRealData = true;
       document.getElementById('orderCountLabel').textContent = data.length + ' შეკვეთა';
       el.innerHTML = data.map(o => {
         const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
         return renderOrderRow(o.id, o, date);
       }).join('');
       renderOrderStats();
-      return;
     }
   } catch(e) {}
 
-  // Demo fallback
-  document.getElementById('orderCountLabel').textContent = DEMO_ORDERS.length + ' შეკვეთა (demo)';
-  el.innerHTML = DEMO_ORDERS.map(o => renderOrderRow(o.id, o, o.createdAt)).join('');
-  renderOrderStats();
+  if (!hasRealData) {
+    // Demo fallback
+    document.getElementById('orderCountLabel').textContent = DEMO_ORDERS.length + ' შეკვეთა (demo)';
+    el.innerHTML = DEMO_ORDERS.map(o => renderOrderRow(o.id, o, o.createdAt)).join('');
+    renderOrderStats();
+  }
+
+  // Real-time subscription for new orders
+  if (ordersChannel) supabase.removeChannel(ordersChannel);
+  ordersChannel = supabase
+    .channel('orders-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+      loadOrdersList();
+    })
+    .subscribe();
 }
 
 function renderOrderStats() {
   const counts = { new:0, confirmed:0, in_transit:0, cancelled:0, completed:0 };
   Object.values(ordersCache).forEach(o => {
-    const s = o.status || 'new';
+    const s = o.status === 'pending' ? 'new' : (o.status || 'new');
     if (counts[s] !== undefined) counts[s]++;
   });
   const items = [
@@ -996,7 +1011,7 @@ function renderOrderStats() {
 }
 
 function statusLabel(s) {
-  return { new:'🆕 ახალი', confirmed:'✅ დადასტ.', in_transit:'🚚 ტრანსპ.', delivered:'📦 მიწოდ.', cancelled:'❌ გაუქმ.', completed:'✔ დასრულ.' }[s] || s;
+  return { pending:'🆕 ახალი', new:'🆕 ახალი', confirmed:'✅ დადასტ.', in_transit:'🚚 ტრანსპ.', delivered:'📦 მიწოდ.', cancelled:'❌ გაუქმ.', completed:'✔ დასრულ.' }[s] || s;
 }
 
 function updateModalActions(status) {
