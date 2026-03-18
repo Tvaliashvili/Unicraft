@@ -490,6 +490,22 @@ body {
 .page { display: none; }
 .page.active { display: block; }
 
+/* ─── Chat page full-height override ─── */
+#page-chat.active {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed;
+  left: 240px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px;
+  background: var(--bg, #f3f4f6);
+  overflow: hidden;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
 /* ─── Mobile Top Bar ─── */
 .mobile-bar {
   display: none;

@@ -84,6 +84,10 @@
       <div class="nav-item" onclick="showPage('invoice-gen')">
         <span class="nav-icon">📄</span> ინვ. გენერაცია
       </div>
+      <div class="nav-item" onclick="showPage('chat')">
+        <span class="nav-icon">💬</span> ჩატი
+        <span id="chatAdminBadge" style="display:none;margin-left:auto;background:#ef4444;color:white;border-radius:20px;padding:1px 8px;font-size:12px">0</span>
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px" id="adminEmail"></div>
@@ -417,6 +421,44 @@
   </div>
 </div>
 
+    <!-- Chat Page -->
+    <div class="page" id="page-chat">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ჩატი</div>
+          <div class="page-subtitle" id="chatSubtitle">მომხმარებელთა შეტყობინებები</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:290px 1fr;gap:16px;flex:1;min-height:0">
+        <!-- Sessions list -->
+        <div class="card" style="padding:0;overflow-y:auto;display:flex;flex-direction:column">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid)">საუბრები</div>
+          <div id="chatSessionsList" style="flex:1;overflow-y:auto">
+            <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
+          </div>
+        </div>
+        <!-- Message panel -->
+        <div class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden">
+          <div id="adminChatEmpty" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-mid);font-size:14px;flex-direction:column;gap:8px">
+            <span style="font-size:36px">💬</span>
+            <span>აირჩიეთ საუბარი სიდან</span>
+          </div>
+          <div id="adminChatPanel" style="display:none;flex-direction:column;height:100%">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <div style="width:8px;height:8px;background:#22c55e;border-radius:50%"></div>
+              <span id="adminChatTitle" style="font-weight:700;font-size:14px">მომხმარებელი</span>
+            </div>
+            <div id="adminChatMessages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f9fafb"></div>
+            <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;background:white;flex-shrink:0">
+              <input id="adminChatInput" placeholder="პასუხი..." onkeydown="if(event.key==='Enter')sendAdminMsg()"
+                style="flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none">
+              <button onclick="sendAdminMsg()" style="background:var(--dark);color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">გაგზავნა</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 <!-- Edit Product Modal -->
 <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;align-items:center;justify-content:center;padding:20px">
   <div style="background:white;border-radius:var(--radius);width:100%;max-width:660px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
@@ -518,7 +560,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 import {
   collection, getDocs, addDoc, deleteDoc, doc,
-  serverTimestamp, query, orderBy, updateDoc, limit
+  serverTimestamp, query, orderBy, updateDoc, limit,
+  onSnapshot, increment, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 // ─── Product cache for edit ───
@@ -635,6 +678,7 @@ window.showPage = function(name) {
   });
   if (name === 'products') loadProductsList();
   if (name === 'orders') loadOrdersList();
+  if (name === 'chat') loadChatSessions();
   // close sidebar on mobile after nav
   document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('show');
@@ -1056,6 +1100,154 @@ window.openOrderModal = function(id) {
 window.closeOrderModal = function() {
   document.getElementById('orderModal').style.display = 'none';
   window.currentOrderId = null;
+};
+
+// ─── Chat (Admin) ───
+let currentChatSessionId = null;
+let adminMsgUnsub = null;
+let adminSessionsUnsub = null;
+
+const DEMO_CHATS = [
+  {
+    id: 'demo-chat-1',
+    customerName: 'გიორგი მამულაშვილი',
+    customerPhone: '599 123 456',
+    lastMessage: 'გმადლობთ, ველოდები პასუხს',
+    lastAt: { toDate: () => new Date(Date.now() - 5*60000) },
+    unread: 2,
+    messages: [
+      { text: 'გამარჯობა გიორგი! 👋 რით შეგვიძლია დაგეხმაროთ?', sender: 'admin' },
+      { text: 'გამარჯობა, მაქვს კითხვა ცემენტის M400-ზე. მაქვს პროექტი და მჭირდება 50 ტომარა', sender: 'customer' },
+      { text: 'რა ვადებში გჭირდებათ მიწოდება?', sender: 'admin' },
+      { text: 'ამ კვირაში რომ მოხერხდეს კარგი იქნება', sender: 'customer' },
+      { text: 'გმადლობთ, ველოდები პასუხს', sender: 'customer' },
+    ]
+  },
+  {
+    id: 'demo-chat-2',
+    customerName: 'ნინო კვარაცხელია',
+    customerPhone: '577 987 654',
+    lastMessage: 'OSB ფილა გაქვთ მარაგში?',
+    lastAt: { toDate: () => new Date(Date.now() - 32*60000) },
+    unread: 1,
+    messages: [
+      { text: 'გამარჯობა ნინო! 👋 რით შეგვიძლია დაგეხმაროთ?', sender: 'admin' },
+      { text: 'OSB ფილა გაქვთ მარაგში?', sender: 'customer' },
+    ]
+  },
+  {
+    id: 'demo-chat-3',
+    customerName: 'შპს არქი-ბილდი',
+    customerPhone: '591 445 112',
+    lastMessage: 'კარგია, გადავიხდი გადარიცხვით',
+    lastAt: { toDate: () => new Date(Date.now() - 2*3600000) },
+    unread: 0,
+    messages: [
+      { text: 'გამარჯობა შპს არქი-ბილდი! 👋 რით შეგვიძლია დაგეხმაროთ?', sender: 'admin' },
+      { text: 'გამარჯობა, მინდა შევუკვეთო პენოფლექსი 50 ფილა', sender: 'customer' },
+      { text: 'პენოფლექსი 50მმ გვაქვს მარაგში. ფასი 24₾/ფლ. გადახდა შეიძლება გადარიცხვით ან ნაღდად.', sender: 'admin' },
+      { text: 'კარგია, გადავიხდი გადარიცხვით', sender: 'customer' },
+    ]
+  }
+];
+
+function renderChatSessionsList(sessions) {
+  const el = document.getElementById('chatSessionsList');
+  const totalUnread = sessions.reduce((s, c) => s + (c.unread || 0), 0);
+  const badge = document.getElementById('chatAdminBadge');
+  if (badge) { badge.textContent = totalUnread; badge.style.display = totalUnread > 0 ? 'inline' : 'none'; }
+  document.getElementById('chatSubtitle').textContent = sessions.length + ' საუბარი';
+  el.innerHTML = sessions.length === 0
+    ? '<div class="table-empty"><div class="icon">💬</div>შეტყობინება არ არის</div>'
+    : sessions.map(s => {
+      const t = s.lastAt?.toDate ? s.lastAt.toDate().toLocaleTimeString('ka-GE', { hour:'2-digit', minute:'2-digit' }) : '';
+      const active = s.id === currentChatSessionId ? 'background:var(--gray-light);' : '';
+      const displayName = s.customerName || s.id.slice(-8);
+      const displayPhone = s.customerPhone || '';
+      return `<div onclick="openAdminChat('${s.id}')" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;${active}transition:background 0.15s" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='${s.id === currentChatSessionId ? 'var(--gray-light)' : ''}'">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+          <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:var(--gray-mid)">${t}</span>
+            ${s.unread > 0 ? `<span style="background:#ef4444;color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${s.unread}</span>` : ''}
+          </div>
+        </div>
+        <div style="font-size:11px;color:#9ca3af;margin-bottom:3px">${displayPhone}</div>
+        <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.lastMessage || '...'}</div>
+      </div>`;
+    }).join('');
+}
+
+function loadChatSessions() {
+  const el = document.getElementById('chatSessionsList');
+  if (adminSessionsUnsub) adminSessionsUnsub();
+  try {
+    adminSessionsUnsub = onSnapshot(
+      query(collection(db, 'chats'), orderBy('lastAt', 'desc')),
+      snap => {
+        const sessions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (sessions.length > 0) { renderChatSessionsList(sessions); return; }
+        renderChatSessionsList(DEMO_CHATS);
+      }
+    );
+  } catch(e) {
+    renderChatSessionsList(DEMO_CHATS);
+  }
+}
+
+window.openAdminChat = async function(sessionId) {
+  currentChatSessionId = sessionId;
+  document.getElementById('adminChatEmpty').style.display = 'none';
+  const panel = document.getElementById('adminChatPanel');
+  panel.style.display = 'flex';
+  // Check demo first
+  const demoSession = DEMO_CHATS.find(c => c.id === sessionId);
+  if (demoSession) {
+    document.getElementById('adminChatTitle').textContent = `${demoSession.customerName} · ${demoSession.customerPhone || ''}`;
+    renderAdminChatMsgs(demoSession.messages);
+    document.getElementById('adminChatInput').focus();
+    return;
+  }
+  const sesSnap = await getDoc(doc(db, 'chats', sessionId)).catch(() => null);
+  const sesData = sesSnap?.data() || {};
+  document.getElementById('adminChatTitle').textContent = sesData.customerName ? `${sesData.customerName} · ${sesData.customerPhone || ''}` : sessionId.slice(-8);
+  try { await updateDoc(doc(db, 'chats', sessionId), { unread: 0 }); } catch(e) {}
+  if (adminMsgUnsub) adminMsgUnsub();
+  try {
+    adminMsgUnsub = onSnapshot(
+      query(collection(db, 'chats', sessionId, 'messages'), orderBy('createdAt')),
+      snap => renderAdminChatMsgs(snap.docs.map(d => ({ ...d.data() })))
+    );
+  } catch(e) {}
+  document.getElementById('adminChatInput').focus();
+};
+
+function renderAdminChatMsgs(msgs) {
+  const el = document.getElementById('adminChatMessages');
+  el.innerHTML = msgs.map(m => {
+    const isAdmin = m.sender === 'admin';
+    return `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
+      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#141210' : 'white'};color:${isAdmin ? 'white' : 'var(--dark)'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+window.sendAdminMsg = async function() {
+  const input = document.getElementById('adminChatInput');
+  const text = input.value.trim();
+  if (!text || !currentChatSessionId) return;
+  input.value = '';
+  try {
+    await addDoc(collection(db, 'chats', currentChatSessionId, 'messages'), {
+      text, sender: 'admin', createdAt: serverTimestamp()
+    });
+    await updateDoc(doc(db, 'chats', currentChatSessionId), {
+      lastMessage: text, lastAt: serverTimestamp()
+    });
+  } catch(e) {
+    showToast('Firebase საჭიროა ჩატისთვის', 'error');
+  }
 };
 
 // ─── Toast ───
