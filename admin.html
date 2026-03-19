@@ -276,6 +276,7 @@
                   <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>
                 </div>
               </div>
+              <div id="prodBgBtnWrap" style="margin-top:8px;text-align:center"></div>
             </div>
             <div class="form-group full">
               <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
@@ -657,6 +658,7 @@
               <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>
             </div>
           </div>
+          <div id="editBgBtnWrap" style="margin-top:8px;text-align:center"></div>
         </div>
         <div class="form-group full">
           <label class="form-label">მაღაზია</label>
@@ -841,11 +843,29 @@ async function _storeFile(file, prefix) {
   showDropPreview(prefix, URL.createObjectURL(file));
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
-  // Show bg remove button
-  const previewEl = document.getElementById(prefix + 'Preview');
-  previewEl.innerHTML += `<div style="text-align:center;padding:6px 0">
-    <button id="${prefix}BgBtn" onclick="triggerBgRemoval('${prefix}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:inherit">✨ ფონის მოხსნა</button>
-  </div>`;
+  // Show bg remove button OUTSIDE dropzone
+  const wrap = document.getElementById(prefix + 'BgBtnWrap');
+  if (wrap) wrap.innerHTML = `<button id="${prefix}BgBtn" onclick="triggerBgRemoval('${prefix}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:6px 18px;font-size:12px;cursor:pointer;font-family:inherit">✨ ფონის მოხსნა</button>`;
+}
+
+function _toPng(file, maxSize = 1024) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxSize || height > maxSize) {
+        if (width > height) { height = Math.round(height * maxSize / width); width = maxSize; }
+        else { width = Math.round(width * maxSize / height); height = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => resolve(new File([blob], 'image.png', { type: 'image/png' })), 'image/png');
+    };
+    img.src = url;
+  });
 }
 
 window.triggerBgRemoval = async function(prefix) {
@@ -856,12 +876,14 @@ window.triggerBgRemoval = async function(prefix) {
   try {
     const removeBg = await getRemoveBg();
     if (!removeBg) { showToast('ბიბლიოთეკა ვერ ჩაიტვირთა', 'error'); btn && (btn.disabled = false); return; }
-    const noBgBlob = await removeBg(file);
+    const pngFile = await _toPng(file, 1024);
+    const noBgBlob = await removeBg(pngFile);
     const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
     if (prefix === 'prod') prodFileData = processed;
     else editFileData = processed;
     showDropPreview(prefix, URL.createObjectURL(processed));
   } catch(e) {
+    console.error('BG removal error:', e);
     showToast('ფონის მოხსნა ვერ მოხერხდა', 'error');
     if (btn) { btn.disabled = false; btn.innerHTML = '✨ ფონის მოხსნა'; }
   }
@@ -1284,6 +1306,7 @@ window.clearForm = function() {
   document.getElementById('prodUnit').value = 'ც';
   prodFileData = null;
   document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
+  document.getElementById('prodBgBtnWrap').innerHTML = '';
   document.getElementById('prodFile').value = '';
 };
 
