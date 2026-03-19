@@ -604,6 +604,20 @@
 <div class="toast" id="toast"></div>
 
 <!-- Confirm ban IP modal -->
+<!-- Maintenance Password Modal -->
+<div id="maintPassModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:14px;padding:28px 24px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
+    <div style="font-size:28px;margin-bottom:10px">🔐</div>
+    <div id="maintPassTitle" style="font-size:15px;font-weight:700;color:#1a1714;margin-bottom:18px">პაროლის შეყვანა</div>
+    <input type="password" id="maintPassInput" placeholder="პაროლი" style="width:100%;border:1.5px solid #e0dbd5;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:8px" onkeydown="if(event.key==='Enter')confirmMaintPass()">
+    <div id="maintPassError" style="font-size:12px;color:#dc2626;min-height:18px;margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeMaintPassModal()" style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">გაუქმება</button>
+      <button onclick="confirmMaintPass()" style="flex:1;background:#1a1714;color:white;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">დადასტურება</button>
+    </div>
+  </div>
+</div>
+
 <div id="confirmBanModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
   <div style="background:white;border-radius:14px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
     <div style="font-size:32px;margin-bottom:12px">🚫</div>
@@ -961,14 +975,63 @@ function updateMaintenanceBtn(isOn) {
   }
 }
 
-window.toggleMaintenanceMode = async function() {
-  const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
-  const current = data?.value === 'true';
-  const newVal = (!current).toString();
-  const { error } = await supabase.from('settings').upsert({ key: 'maintenance_mode', value: newVal }, { onConflict: 'key' });
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  updateMaintenanceBtn(!current);
-  showToast(!current ? '🔒 საიტი გამორთულია' : '✓ საიტი ჩართულია', !current ? 'error' : 'success');
+// ─── Maintenance Password ───
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+let _maintPassCallback = null;
+
+function openMaintPassModal(title, callback) {
+  _maintPassCallback = callback;
+  document.getElementById('maintPassTitle').textContent = title;
+  document.getElementById('maintPassInput').value = '';
+  document.getElementById('maintPassError').textContent = '';
+  document.getElementById('maintPassModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('maintPassInput').focus(), 100);
+}
+
+window.closeMaintPassModal = function() {
+  document.getElementById('maintPassModal').style.display = 'none';
+  _maintPassCallback = null;
+};
+
+window.confirmMaintPass = async function() {
+  const pass = document.getElementById('maintPassInput').value;
+  if (!pass) { document.getElementById('maintPassError').textContent = 'შეიყვანე პაროლი'; return; }
+  const hash = await sha256(pass);
+  const stored = localStorage.getItem('uc_maint_pass');
+  if (!stored) {
+    // First time — set password
+    localStorage.setItem('uc_maint_pass', hash);
+    document.getElementById('maintPassModal').style.display = 'none';
+    showToast('✓ პაროლი დაყენებულია', 'success');
+    if (_maintPassCallback) _maintPassCallback();
+    _maintPassCallback = null;
+  } else if (hash === stored) {
+    document.getElementById('maintPassModal').style.display = 'none';
+    if (_maintPassCallback) _maintPassCallback();
+    _maintPassCallback = null;
+  } else {
+    document.getElementById('maintPassError').textContent = 'არასწორი პაროლი';
+    document.getElementById('maintPassInput').value = '';
+    document.getElementById('maintPassInput').focus();
+  }
+};
+
+window.toggleMaintenanceMode = function() {
+  const stored = localStorage.getItem('uc_maint_pass');
+  const title = stored ? 'პაროლის შეყვანა' : 'პაროლის დაყენება (პირველი შესვლა)';
+  openMaintPassModal(title, async () => {
+    const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
+    const current = data?.value === 'true';
+    const newVal = (!current).toString();
+    const { error } = await supabase.from('settings').upsert({ key: 'maintenance_mode', value: newVal }, { onConflict: 'key' });
+    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+    updateMaintenanceBtn(!current);
+    showToast(!current ? '🔒 საიტი გამორთულია' : '✓ საიტი ჩართულია', !current ? 'error' : 'success');
+  });
 };
 
 // ─── Categories ───
