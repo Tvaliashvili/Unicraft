@@ -233,7 +233,15 @@
           <div class="page-title">პროდუქტები</div>
           <div class="page-subtitle" id="productCountLabel"></div>
         </div>
-        <button class="btn btn-primary" onclick="showPage('add-product')">+ დამატება</button>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="position:relative">
+            <select id="storeFilterSelect" onchange="applyStoreFilter()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:160px">
+              <option value="">ყველა მაღაზია</option>
+            </select>
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--gray-mid)">▾</span>
+          </div>
+          <button class="btn btn-primary" onclick="showPage('add-product')">+ დამატება</button>
+        </div>
       </div>
       <div class="card">
         <div class="table-row table-header">
@@ -773,7 +781,31 @@ async function loadProductsList() {
 
   refreshStoreList(rows);
 
-  el.innerHTML = rows.map(p => {
+  // Populate store filter dropdown
+  const filterSel = document.getElementById('storeFilterSelect');
+  if (filterSel) {
+    const current = filterSel.value;
+    const stores = [...new Set(rows.map(p => p.store).filter(Boolean))].sort();
+    filterSel.innerHTML = `<option value="">ყველა მაღაზია</option>` +
+      stores.map(s => `<option value="${s}"${s === current ? ' selected' : ''}>${s}</option>`).join('');
+  }
+
+  renderProductRows(rows);
+}
+
+function renderProductRows(rows) {
+  const el = document.getElementById('productsList');
+  const filterVal = (document.getElementById('storeFilterSelect')?.value || '').toLowerCase();
+  const filtered = filterVal ? rows.filter(p => (p.store || '').toLowerCase() === filterVal) : rows;
+
+  document.getElementById('productCountLabel').textContent =
+    (filterVal ? filtered.length + ' / ' : '') + Object.keys(productCache).length + ' პროდუქტი';
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="table-empty"><div class="icon">📦</div><p>პროდუქტი ვერ მოიძებნა</p></div>';
+    return;
+  }
+  el.innerHTML = filtered.map(p => {
     return `<div class="table-row">
       <div class="prod-img-thumb">
         ${p.image_url ? `<img src="${p.image_url}" alt="">` : (p.emoji || '📦')}
@@ -792,6 +824,11 @@ async function loadProductsList() {
       </div>
     </div>`;
   }).join('');
+}
+
+window.applyStoreFilter = function() {
+  const rows = Object.values(productCache);
+  renderProductRows(rows);
 }
 
 window.editProduct = function(id) {
