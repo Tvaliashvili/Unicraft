@@ -187,7 +187,10 @@
               <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
             </div>
             <div class="form-group">
-              <label class="form-label">ერთეული</label>
+              <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                ერთეული
+                <span onclick="toggleUnitMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+              </label>
               <select class="form-select" id="prodUnit">
                 <option value="ც">ცალი</option>
                 <option value="კგ">კგ</option>
@@ -198,6 +201,14 @@
                 <option value="კონტ">კონტეინერი</option>
                 <option value="ტომ">ტომარა</option>
               </select>
+              <div id="unitMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                <div style="display:flex;gap:6px;margin-bottom:10px">
+                  <input class="form-input" id="newUnitValue" placeholder="მნიშვნელობა (მაგ: ლ)" style="flex:1;font-size:13px;padding:6px 10px">
+                  <input class="form-input" id="newUnitLabel" placeholder="სახელი (მაგ: ლიტრი)" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addUnit()">
+                  <button class="btn btn-primary" onclick="addUnit()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                </div>
+                <div id="unitList"></div>
+              </div>
             </div>
             <div class="form-group full">
               <label class="form-label">აღწერა</label>
@@ -820,6 +831,7 @@ async function initApp() {
     _days[d.getDay()] + ', ' + d.getDate() + ' ' + _months[d.getMonth()] + ', ' + d.getFullYear();
 
   loadCategories();
+  loadUnits();
   loadMaintenanceStatus();
 
   // Stats
@@ -864,6 +876,65 @@ function renderRecentOrders(rows) {
 window.toggleCatMgr = function() {
   const p = document.getElementById('catMgrPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
+};
+
+// ─── Units ───
+const DEFAULT_UNITS = [
+  {value:'ც',label:'ცალი'},{value:'კგ',label:'კგ'},{value:'ტ',label:'ტონა'},
+  {value:'მ²',label:'მ²'},{value:'მ³',label:'მ³'},{value:'მ',label:'მეტრი'},
+  {value:'კონტ',label:'კონტეინერი'},{value:'ტომ',label:'ტომარა'}
+];
+
+function getUnits() {
+  try { return JSON.parse(localStorage.getItem('uc_units')) || DEFAULT_UNITS; } catch(e) { return DEFAULT_UNITS; }
+}
+function saveUnits(units) { localStorage.setItem('uc_units', JSON.stringify(units)); }
+
+function loadUnits() {
+  const units = getUnits();
+  const opts = units.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
+  ['prodUnit','editUnit'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+  renderUnitList();
+}
+
+function renderUnitList() {
+  const el = document.getElementById('unitList');
+  if (!el) return;
+  const units = getUnits();
+  if (!units.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ერთეული არ არის</div>'; return; }
+  el.innerHTML = units.map((u,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px"><b>${u.value}</b> — ${u.label}</span>
+      <button onclick="deleteUnit(${i})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.toggleUnitMgr = function() {
+  const p = document.getElementById('unitMgrPanel');
+  if (p.style.display === 'none') { p.style.display = 'block'; renderUnitList(); }
+  else p.style.display = 'none';
+};
+
+window.addUnit = function() {
+  const val = document.getElementById('newUnitValue').value.trim();
+  const lbl = document.getElementById('newUnitLabel').value.trim();
+  if (!val || !lbl) { showToast('შეავსე ორივე ველი', 'error'); return; }
+  const units = getUnits();
+  if (units.find(u => u.value === val)) { showToast('ეს ერთეული უკვე არსებობს', 'error'); return; }
+  units.push({ value: val, label: lbl });
+  saveUnits(units);
+  document.getElementById('newUnitValue').value = '';
+  document.getElementById('newUnitLabel').value = '';
+  showToast('✓ ერთეული დაემატა', 'success');
+  loadUnits();
+};
+
+window.deleteUnit = function(i) {
+  const units = getUnits();
+  units.splice(i, 1);
+  saveUnits(units);
+  loadUnits();
 };
 
 // ─── Maintenance Mode ───
