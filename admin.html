@@ -234,7 +234,6 @@
           <span>კატეგორია</span>
           <span>ფასი</span>
           <span>მაღაზია</span>
-          <span>სტატუსი</span>
           <span>მოქმედება</span>
         </div>
         <div id="productsList">
@@ -765,9 +764,6 @@ async function loadProductsList() {
       <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
       <span class="price-cell">${p.price} ₾</span>
       <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
-      <span><span class="status-badge ${p.active ? 'status-active' : 'status-inactive'}">
-        ${p.active ? '✓ აქტიური' : '✗ დამალული'}
-      </span></span>
       <div style="display:flex;gap:6px">
         <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 წაშლა</button>
