@@ -24,14 +24,7 @@ tailwind.config = {
 }
 </script>
 <link rel="stylesheet" href="css/index.css">
-<style>
-.price-range{position:relative;height:22px;margin:0 8px}
-.price-range .pr-track{position:absolute;top:50%;left:0;right:0;height:4px;background:#e5e7eb;border-radius:2px;transform:translateY(-50%)}
-.price-range .pr-fill{position:absolute;height:100%;background:#E8541A;border-radius:2px}
-.price-range input[type=range]{position:absolute;width:100%;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;top:0;height:100%;padding:0;margin:0}
-.price-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#E8541A;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;pointer-events:all}
-.price-range input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#E8541A;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;pointer-events:all;border:none}
-</style>
+
 </head>
 <body class="bg-cream text-dark">
 
@@ -216,11 +209,13 @@ tailwind.config = {
   </div>
   <div>
     <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">ფასი</div>
-    <div id="mobilePriceLabel" class="text-sm text-gray-500 mt-2 mb-3">0 ₾-დან 5000 ₾-მდე</div>
-    <div class="price-range">
-      <div class="pr-track"><div id="mobilePriceFill" class="pr-fill" style="left:0;width:100%"></div></div>
-      <input type="range" id="mobilePriceMin" min="0" max="5000" value="0" step="10" oninput="updatePriceRange('mobile')">
-      <input type="range" id="mobilePriceMax" min="0" max="5000" value="5000" step="10" oninput="updatePriceRange('mobile')">
+    <div class="flex items-center gap-2 mt-1">
+      <input type="number" id="mobilePriceMin" placeholder="საწყისი" min="0" oninput="updatePriceInputs()"
+        class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+      <span class="text-gray-300 flex-shrink-0">—</span>
+      <input type="number" id="mobilePriceMax" placeholder="ბოლო" min="0" oninput="updatePriceInputs()"
+        class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+      <span class="text-gray-400 flex-shrink-0 text-sm">₾</span>
     </div>
   </div>
 </div>
@@ -240,11 +235,13 @@ tailwind.config = {
     <!-- Price -->
     <div>
       <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-2 border-b-2 border-orange inline-block">ფასი</div>
-      <div id="sidebarPriceLabel" class="text-sm text-gray-500 mt-2 mb-3">0 ₾-დან 5000 ₾-მდე</div>
-      <div class="price-range">
-        <div class="pr-track"><div id="sidebarPriceFill" class="pr-fill" style="left:0;width:100%"></div></div>
-        <input type="range" id="sidebarPriceMin" min="0" max="5000" value="0" step="10" oninput="updatePriceRange('sidebar')">
-        <input type="range" id="sidebarPriceMax" min="0" max="5000" value="5000" step="10" oninput="updatePriceRange('sidebar')">
+      <div class="flex items-center gap-2 mt-1">
+        <input type="number" id="sidebarPriceMin" placeholder="საწყისი" min="0" oninput="updatePriceInputs()"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+        <span class="text-gray-300 flex-shrink-0">—</span>
+        <input type="number" id="sidebarPriceMax" placeholder="ბოლო" min="0" oninput="updatePriceInputs()"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+        <span class="text-gray-400 flex-shrink-0 text-sm">₾</span>
       </div>
     </div>
 
@@ -656,21 +653,15 @@ window.setSidebarCat = function(el, cat) {
   applyFilters();
 };
 
-window.updatePriceRange = function(source) {
-  const prefix = source === 'mobile' ? 'mobile' : 'sidebar';
-  const minEl = document.getElementById(prefix + 'PriceMin');
-  const maxEl = document.getElementById(prefix + 'PriceMax');
-  let minV = parseInt(minEl.value);
-  let maxV = parseInt(maxEl.value);
-  if (minV > maxV) { minEl.value = maxV; minV = maxV; }
-  const pct1 = minV / 5000 * 100;
-  const pct2 = maxV / 5000 * 100;
-  const fill = document.getElementById(prefix + 'PriceFill');
-  fill.style.left = pct1 + '%';
-  fill.style.width = (pct2 - pct1) + '%';
-  const isDefault = minV === 0 && maxV === 5000;
-  document.getElementById(prefix + 'PriceLabel').textContent = minV + ' ₾-დან ' + maxV + ' ₾-მდე';
-  activePrice = isDefault ? null : [minV, maxV];
+window.updatePriceInputs = function() {
+  const sEl = document.getElementById('sidebarPriceMin');
+  const useSidebar = sEl && sEl.offsetParent !== null;
+  const prefix = useSidebar ? 'sidebar' : 'mobile';
+  const minStr = document.getElementById(prefix + 'PriceMin')?.value;
+  const maxStr = document.getElementById(prefix + 'PriceMax')?.value;
+  const minV = minStr !== '' ? parseFloat(minStr) : null;
+  const maxV = maxStr !== '' ? parseFloat(maxStr) : null;
+  activePrice = (minV !== null || maxV !== null) ? [minV ?? 0, maxV ?? Infinity] : null;
   applyFilters();
 };
 
