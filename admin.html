@@ -228,13 +228,13 @@
             </div>
             <div class="form-group full">
               <label class="form-label">ფოტო</label>
+              <input type="file" id="prodFile" accept="image/*" style="display:none" onchange="handleFile(this,'prod')">
+              <input type="file" id="prodFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'prod')">
               <div class="dropzone" id="prodDropzone"
                 onclick="openFilePickerMenu('prod')"
                 ondragover="event.preventDefault();this.classList.add('drag-over')"
                 ondragleave="this.classList.remove('drag-over')"
-                ondrop="handleDrop(event,'prod')">
-                <input type="file" id="prodFile" accept="image/*" style="display:none" onchange="handleFile(this,'prod')">
-                <input type="file" id="prodFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'prod')">
+                ondrop="handleDrop(event,'prod')">`
                 <div id="prodPreview">
                   <div class="dropzone-icon">📷</div>
                   <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
@@ -609,13 +609,13 @@
         <div class="form-group full">
           <label class="form-label">ფოტო</label>
           <input type="hidden" id="editExistingImage">
+          <input type="file" id="editFile" accept="image/*" style="display:none" onchange="handleFile(this,'edit')">
+          <input type="file" id="editFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'edit')">
           <div class="dropzone" id="editDropzone"
             onclick="openFilePickerMenu('edit')"
             ondragover="event.preventDefault();this.classList.add('drag-over')"
             ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'edit')">
-            <input type="file" id="editFile" accept="image/*" style="display:none" onchange="handleFile(this,'edit')">
-            <input type="file" id="editFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'edit')">
+            ondrop="handleDrop(event,'edit')">`
             <div id="editPreview">
               <div class="dropzone-icon">📷</div>
               <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
@@ -790,7 +790,7 @@ async function _storeFile(file, prefix) {
     }
   } catch(e) {
     document.getElementById(prefix + 'BgStatus')?.remove();
-    showToast('ფონის მოხსნა ვერ მოხერხდა', 'error');
+    // background removal failed — keep original file silently
   }
 }
 
