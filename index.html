@@ -216,7 +216,7 @@ tailwind.config = {
   </div>
   <div>
     <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">ფასი</div>
-    <div id="mobilePriceLabel" class="text-sm text-gray-500 mt-2 mb-3">0 ლარიდან 5000 ლარამდე</div>
+    <div id="mobilePriceLabel" class="text-sm text-gray-500 mt-2 mb-3">0 ₾-დან 5000 ₾-მდე</div>
     <div class="price-range">
       <div class="pr-track"><div id="mobilePriceFill" class="pr-fill" style="left:0;width:100%"></div></div>
       <input type="range" id="mobilePriceMin" min="0" max="5000" value="0" step="10" oninput="updatePriceRange('mobile')">
@@ -240,7 +240,7 @@ tailwind.config = {
     <!-- Price -->
     <div>
       <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-2 border-b-2 border-orange inline-block">ფასი</div>
-      <div id="sidebarPriceLabel" class="text-sm text-gray-500 mt-2 mb-3">0 ლარიდან 5000 ლარამდე</div>
+      <div id="sidebarPriceLabel" class="text-sm text-gray-500 mt-2 mb-3">0 ₾-დან 5000 ₾-მდე</div>
       <div class="price-range">
         <div class="pr-track"><div id="sidebarPriceFill" class="pr-fill" style="left:0;width:100%"></div></div>
         <input type="range" id="sidebarPriceMin" min="0" max="5000" value="0" step="10" oninput="updatePriceRange('sidebar')">
@@ -669,9 +669,7 @@ window.updatePriceRange = function(source) {
   fill.style.left = pct1 + '%';
   fill.style.width = (pct2 - pct1) + '%';
   const isDefault = minV === 0 && maxV === 5000;
-  document.getElementById(prefix + 'PriceLabel').textContent = isDefault
-    ? '0 ლარიდან 5000 ლარამდე'
-    : minV + ' ₾ — ' + maxV + ' ₾';
+  document.getElementById(prefix + 'PriceLabel').textContent = minV + ' ₾-დან ' + maxV + ' ₾-მდე';
   activePrice = isDefault ? null : [minV, maxV];
   applyFilters();
 };
