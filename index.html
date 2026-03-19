@@ -491,10 +491,10 @@ function fmtPrice(price, unit) {
   const dec = s.slice(dot);
   return `<div class="flex items-baseline leading-none gap-1">
     <div class="flex items-start">
-      <span class="font-display text-3xl tracking-wide text-dark">${whole}</span>
-      <span class="text-[10px] font-bold text-dark pt-[3px]">${dec}</span>
+      <span class="font-display text-4xl tracking-wide text-dark">${whole}</span>
+      <span class="text-[12px] font-bold text-dark pt-[4px]">${dec}</span>
     </div>
-    <span class="font-display text-lg tracking-wide text-dark">₾</span>
+    <span class="font-display text-xl tracking-wide text-dark">₾</span>
   </div>`;
 }
 
@@ -567,7 +567,7 @@ function renderPage() {
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
-        <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
+        <div class="text-[13px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
         <div class="font-bold text-sm text-dark mb-1 leading-snug">${p.name}</div>
         <div class="flex-1"></div>
         <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
