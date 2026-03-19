@@ -99,6 +99,10 @@
           <div class="page-title">გამარჯობა! 👋</div>
           <div class="page-subtitle" id="todayDate"></div>
         </div>
+        <button id="maintenanceToggleBtn" onclick="toggleMaintenanceMode()" style="display:flex;align-items:center;gap:8px;border:1.5px solid #e0dbd5;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;background:#f5f2ee;color:#1a1714">
+          <span id="maintenanceDot" style="width:9px;height:9px;border-radius:50%;background:#22c55e;flex-shrink:0;transition:background .2s"></span>
+          <span id="maintenanceBtnLabel">საიტი ჩართულია</span>
+        </button>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
@@ -816,6 +820,7 @@ async function initApp() {
     _days[d.getDay()] + ', ' + d.getDate() + ' ' + _months[d.getMonth()] + ', ' + d.getFullYear();
 
   loadCategories();
+  loadMaintenanceStatus();
 
   // Stats
   try {
@@ -855,6 +860,39 @@ function renderRecentOrders(rows) {
     </div>`;
   }).join('');
 }
+
+// ─── Maintenance Mode ───
+async function loadMaintenanceStatus() {
+  const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
+  updateMaintenanceBtn(data?.value === 'true');
+}
+
+function updateMaintenanceBtn(isOn) {
+  const dot = document.getElementById('maintenanceDot');
+  const label = document.getElementById('maintenanceBtnLabel');
+  const btn = document.getElementById('maintenanceToggleBtn');
+  if (!dot) return;
+  if (isOn) {
+    dot.style.background = '#ef4444';
+    label.textContent = 'საიტი გამორთულია';
+    btn.style.borderColor = '#fca5a5';
+    btn.style.background = '#fef2f2';
+  } else {
+    dot.style.background = '#22c55e';
+    label.textContent = 'საიტი ჩართულია';
+    btn.style.borderColor = '#e0dbd5';
+    btn.style.background = '#f5f2ee';
+  }
+}
+
+window.toggleMaintenanceMode = async function() {
+  const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
+  const current = data?.value === 'true';
+  const newVal = (!current).toString();
+  await supabase.from('settings').update({ value: newVal }).eq('key', 'maintenance_mode');
+  updateMaintenanceBtn(!current);
+  showToast(!current ? '🔒 საიტი გამორთულია' : '✓ საიტი ჩართულია', !current ? 'error' : 'success');
+};
 
 // ─── Categories ───
 let _categories = [];

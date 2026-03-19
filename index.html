@@ -104,13 +104,7 @@ tailwind.config = {
 </style>
 
 <script>
-(function(){
-  if (new URLSearchParams(location.search).has('preview')) {
-    document.getElementById('maintenanceScreen').style.display = 'none';
-  } else {
-    setTimeout(function(){ document.getElementById('mProgress').style.width = '68%'; }, 150);
-  }
-})();
+setTimeout(function(){ document.getElementById('mProgress').style.width = '68%'; }, 150);
 </script>
 
 <!-- ══ HEADER ══ -->
@@ -911,6 +905,22 @@ loadProducts();
 </script>
 <script type="module">
 import { supabase } from './js/supabase-config.js';
+
+// ── Maintenance mode check ──
+(async () => {
+  const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
+  if (data?.value === 'false') {
+    document.getElementById('maintenanceScreen').style.display = 'none';
+  }
+  // Subscribe to live changes
+  supabase.channel('settings-changes').on('postgres_changes',
+    { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.maintenance_mode' },
+    payload => {
+      if (payload.new.value === 'false') document.getElementById('maintenanceScreen').style.display = 'none';
+      else document.getElementById('maintenanceScreen').style.display = 'flex';
+    }
+  ).subscribe();
+})();
 
 let chatSessionId = localStorage.getItem('uc_chat_session');
 if (!chatSessionId) {
