@@ -922,6 +922,8 @@ let chatOpen = false;
 let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '';
 let _chatUserPhone = chatUserInfo?.phone || '';
+let _customerIp = null;
+fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => { _customerIp = d.ip; }).catch(() => {});
 
 window.toggleChat = function() {
   chatOpen = !chatOpen;
@@ -965,13 +967,20 @@ async function initChatSession(name, phone) {
   const n = name || _chatUserName;
   const p = phone || _chatUserPhone;
   try {
+    // Check if IP is banned
+    if (_customerIp) {
+      const { data: banCheck } = await supabase.from('banned_ips').select('ip').eq('ip', _customerIp).maybeSingle();
+      if (banCheck) { showChatBanned(); return; }
+    }
+
     await supabase.from('chats').upsert({
       id: chatSessionId, customer_name: n, customer_phone: p,
-      last_message: '', unread: 0, status: 'open'
+      last_message: '', unread: 0, status: 'open', ip: _customerIp
     }, { onConflict: 'id', ignoreDuplicates: true });
 
-    // Check if chat was closed by admin
+    // Check if chat was closed/banned by admin
     const { data: chatData } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
+    if (chatData?.status === 'banned') { showChatBanned(); return; }
     if (chatData?.status === 'closed') { showChatClosed(); return; }
 
     const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
@@ -994,7 +1003,8 @@ async function initChatSession(name, phone) {
         el.scrollTop = el.scrollHeight;
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chats', filter: `id=eq.${chatSessionId}` }, payload => {
-        if (payload.new.status === 'closed') showChatClosed();
+        if (payload.new.status === 'banned') showChatBanned();
+        else if (payload.new.status === 'closed') showChatClosed();
       })
       .subscribe();
   } catch(e) {
@@ -1005,9 +1015,26 @@ async function initChatSession(name, phone) {
 function showChatClosed() {
   document.getElementById('chatInputRow').style.display = 'none';
   const banner = document.getElementById('chatClosedBanner');
+  banner.style.background = '#fef2f2'; banner.style.borderTopColor = '#fca5a5';
+  banner.innerHTML = `<div style="font-size:12px;color:#dc2626;font-weight:700;text-align:center">🔒 საუბარი დასრულებულია</div>
+    <div style="font-size:11px;color:#6b7280;text-align:center;line-height:1.6">დამატებითი კითხვებისთვის დაუკავშირდით ადმინისტრატორს.</div>
+    <button onclick="restartChat()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;width:100%">↺ ახლიდან დაწყება</button>`;
   banner.style.display = 'flex'; banner.style.flexDirection = 'column';
   const el = document.getElementById('chatMessages');
   el.innerHTML += `<div style="text-align:center;padding:8px 0"><span style="font-size:11px;color:#9ca3af;background:#f3f4f6;padding:4px 12px;border-radius:20px">საუბარი დასრულდა</span></div>`;
+  el.scrollTop = el.scrollHeight;
+  if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
+}
+
+function showChatBanned() {
+  document.getElementById('chatInputRow').style.display = 'none';
+  const banner = document.getElementById('chatClosedBanner');
+  banner.style.background = '#f5f3ff'; banner.style.borderTopColor = '#c4b5fd';
+  banner.innerHTML = `<div style="font-size:12px;color:#7c3aed;font-weight:700;text-align:center">🚫 თქვენ დაბლოკილი ხართ</div>
+    <div style="font-size:11px;color:#6b7280;text-align:center;line-height:1.6">თქვენ დაბლოკილი ხართ არასწორი ქმედების გამო.</div>`;
+  banner.style.display = 'flex'; banner.style.flexDirection = 'column';
+  const el = document.getElementById('chatMessages');
+  el.innerHTML += `<div style="text-align:center;padding:8px 0"><span style="font-size:11px;color:#7c3aed;background:#f5f3ff;padding:4px 12px;border-radius:20px">🚫 დაბლოკილია</span></div>`;
   el.scrollTop = el.scrollHeight;
   if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
 }
@@ -1020,7 +1047,11 @@ window.copyContact = function() {
   });
 };
 
-window.restartChat = function() {
+window.restartChat = async function() {
+  if (_customerIp) {
+    const { data: banCheck } = await supabase.from('banned_ips').select('ip').eq('ip', _customerIp).maybeSingle();
+    if (banCheck) { showChatBanned(); return; }
+  }
   chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
   localStorage.setItem('uc_chat_session', chatSessionId);
   chatUserInfo = null; localStorage.removeItem('uc_chat_user');

@@ -471,7 +471,10 @@
                 <div id="adminChatStatusDot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
                 <span id="adminChatTitle" style="font-weight:700;font-size:14px">მომხმარებელი</span>
               </div>
-              <button id="closeChatBtn" onclick="closeAdminChat()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✕ საუბრის დასრულება</button>
+              <div style="display:flex;gap:6px;align-items:center">
+                <button id="banIpBtn" onclick="banChatIp()" style="display:none;background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🚫 IP ბანი</button>
+                <button id="closeChatBtn" onclick="closeAdminChat()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✕ საუბრის დასრულება</button>
+              </div>
             </div>
             <div id="adminChatMessages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f9fafb"></div>
             <div id="adminChatInputRow" style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;background:white;flex-shrink:0">
@@ -481,6 +484,18 @@
             </div>
             <div id="adminChatClosedBar" style="display:none;padding:10px 14px;border-top:1px solid var(--border);background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;text-align:center;flex-shrink:0">🔒 საუბარი დასრულებულია</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Banned IPs list -->
+      <div class="card" style="margin-top:16px;flex-shrink:0" id="bannedIpCard">
+        <div class="card-header" style="cursor:pointer;user-select:none" onclick="toggleBannedList()">
+          <span class="card-title">🚫 დაბლოკილი IP მისამართები</span>
+          <span id="bannedIpCount" style="font-size:12px;color:var(--gray-mid)"></span>
+          <span id="bannedIpChevron" style="margin-left:auto;font-size:14px;color:var(--gray-mid)">▼</span>
+        </div>
+        <div id="bannedIpListWrap" style="display:none">
+          <div id="bannedIpList" style="padding:0 16px 12px"><div style="color:var(--gray-mid);font-size:13px;padding:12px 0;text-align:center">იტვირთება...</div></div>
         </div>
       </div>
     </div>
@@ -580,6 +595,20 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Confirm ban IP modal -->
+<div id="confirmBanModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:14px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
+    <div style="font-size:32px;margin-bottom:12px">🚫</div>
+    <div style="font-size:16px;font-weight:700;color:#1a1714;margin-bottom:8px">IP მისამართის დაბლოკვა</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:8px;line-height:1.6">IP: <span id="banModalIp" style="font-family:monospace;font-weight:700;color:#7c3aed"></span></div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:24px;line-height:1.6">ეს მომხმარებელი ვეღარ შეძლებს ჩატის გამოყენებას.</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="cancelBanIp()" style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">გაუქმება</button>
+      <button onclick="confirmBanIp()" style="flex:1;background:#7c3aed;color:white;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">დაბლოკვა</button>
+    </div>
+  </div>
+</div>
 
 <!-- Confirm close chat modal -->
 <div id="confirmCloseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
@@ -722,6 +751,7 @@ window.showPage = function(name) {
   if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
   if (name === 'chat') {
     loadChatSessions();
+    loadBannedIps();
     if (isMobile()) {
       document.getElementById('chatSessionsCol').style.display = 'none';
       document.getElementById('chatMainCol').style.display = 'flex';
@@ -1225,6 +1255,7 @@ window.closeOrderModal = function() {
 
 // ─── Chat (Admin) ───
 let currentChatSessionId = null;
+let currentChatIp = null;
 let adminChatChannel = null;
 let adminSessionsChannel = null;
 
@@ -1349,10 +1380,14 @@ window.openAdminChat = async function(sessionId) {
       ? `${sesData.customer_name} · ${sesData.customer_phone || ''}`
       : sessionId.slice(-8);
     await supabase.from('chats').update({ unread: 0 }).eq('id', sessionId);
-    const isClosed = sesData.status === 'closed';
+    const isClosed = sesData.status === 'closed' || sesData.status === 'banned';
+    const isBanned = sesData.status === 'banned';
+    currentChatIp = sesData.ip || null;
     document.getElementById('closeChatBtn').style.display = isClosed ? 'none' : 'inline-flex';
+    document.getElementById('banIpBtn').style.display = (isClosed || !currentChatIp) ? 'none' : 'inline-flex';
     document.getElementById('adminChatInputRow').style.display = isClosed ? 'none' : 'flex';
     document.getElementById('adminChatClosedBar').style.display = isClosed ? 'block' : 'none';
+    document.getElementById('adminChatClosedBar').textContent = isBanned ? '🚫 მომხმარებელი დაბლოკილია' : '🔒 საუბარი დასრულებულია';
     document.getElementById('adminChatStatusDot').style.background = isClosed ? '#ef4444' : '#22c55e';
   }
 
@@ -1392,6 +1427,69 @@ function renderAdminChatMsgs(msgs) {
   }).join('');
   el.scrollTop = el.scrollHeight;
 }
+
+window.banChatIp = function() {
+  if (!currentChatSessionId || !currentChatIp) return;
+  document.getElementById('banModalIp').textContent = currentChatIp;
+  document.getElementById('confirmBanModal').style.display = 'flex';
+};
+
+window.cancelBanIp = function() {
+  document.getElementById('confirmBanModal').style.display = 'none';
+};
+
+window.confirmBanIp = async function() {
+  document.getElementById('confirmBanModal').style.display = 'none';
+  const { data: sesData } = await supabase.from('chats').select('customer_name').eq('id', currentChatSessionId).maybeSingle();
+  await supabase.from('banned_ips').upsert({ ip: currentChatIp, customer_name: sesData?.customer_name || null, chat_id: currentChatSessionId }, { onConflict: 'ip' });
+  await supabase.from('chats').update({ status: 'banned' }).eq('id', currentChatSessionId);
+  document.getElementById('banIpBtn').style.display = 'none';
+  document.getElementById('closeChatBtn').style.display = 'none';
+  document.getElementById('adminChatInputRow').style.display = 'none';
+  document.getElementById('adminChatClosedBar').style.display = 'block';
+  document.getElementById('adminChatClosedBar').textContent = '🚫 მომხმარებელი დაბლოკილია';
+  document.getElementById('adminChatStatusDot').style.background = '#ef4444';
+  showToast('IP მისამართი დაბლოკილია', 'success');
+  loadBannedIps();
+};
+
+let _bannedListOpen = false;
+window.toggleBannedList = function() {
+  _bannedListOpen = !_bannedListOpen;
+  document.getElementById('bannedIpListWrap').style.display = _bannedListOpen ? 'block' : 'none';
+  document.getElementById('bannedIpChevron').textContent = _bannedListOpen ? '▲' : '▼';
+  if (_bannedListOpen) loadBannedIps();
+};
+
+async function loadBannedIps() {
+  const { data } = await supabase.from('banned_ips').select('*').order('created_at', { ascending: false });
+  const list = data || [];
+  const countEl = document.getElementById('bannedIpCount');
+  if (countEl) countEl.textContent = list.length ? `(${list.length})` : '';
+  if (!_bannedListOpen) return;
+  const el = document.getElementById('bannedIpList');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px;padding:12px 0;text-align:center">დაბლოკილი IP არ არის</div>';
+    return;
+  }
+  el.innerHTML = list.map(b => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:monospace;font-size:13px;font-weight:700;color:#7c3aed">${b.ip}</div>
+        ${b.customer_name ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${b.customer_name}</div>` : ''}
+        <div style="font-size:10px;color:#9ca3af;margin-top:2px">${new Date(b.created_at).toLocaleDateString('ka-GE')}</div>
+      </div>
+      <button onclick="unbanIp('${b.id}','${b.ip}')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">ბანის მოხსნა</button>
+    </div>
+  `).join('');
+}
+
+window.unbanIp = async function(id, ip) {
+  await supabase.from('banned_ips').delete().eq('id', id);
+  showToast('ბანი მოხსნილია: ' + ip, 'success');
+  loadBannedIps();
+};
 
 window.closeAdminChat = function() {
   if (!currentChatSessionId) return;
