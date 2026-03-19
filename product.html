@@ -162,25 +162,39 @@ tailwind.config = {
 <div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 flex items-center justify-center p-5 opacity-0 pointer-events-none transition-opacity duration-300">
   <div class="modal-box bg-white w-full max-w-md border-t-4 border-orange transition-transform duration-300 translate-y-5">
     <div id="orderFormWrap" class="p-8">
-      <h2 class="font-display text-3xl tracking-wide mb-1">შეკვეთა</h2>
-      <p class="text-sm text-gray-400 mb-5">შეავსე მონაცემები — მალე დაგიკავშირდებით</p>
-      <div id="orderSummary" class="bg-cream border border-gray-200 px-4 py-3 mb-5 text-sm"></div>
-      <div class="grid grid-cols-2 gap-3 mb-3">
-        <div><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">სახელი *</label><input id="fname" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="გიორგი"></div>
-        <div><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">გვარი *</label><input id="lname" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="მაისურაძე"></div>
+      <h2 class="font-display text-3xl tracking-wide mb-1">ინვოისი</h2>
+      <p class="text-sm text-gray-400 mb-4">შეავსე მყიდველის მონაცემები</p>
+      <div id="orderSummary" class="bg-cream border border-gray-200 px-4 py-3 mb-4 text-sm"></div>
+      <div class="mb-3">
+        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">დასახელება / სახელი *</label>
+        <input id="buyerNameInput" type="text" placeholder="კომპანიის ან პირის სახელი" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none" style="transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
       </div>
-      <div class="mb-3"><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">ტელეფონი *</label><input id="phone" type="tel" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="5XX XXX XXX"></div>
-      <div class="mb-5"><label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">მისამართი *</label><input id="address" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-orange" placeholder="ქ. თბილისი..."></div>
+      <div class="mb-3">
+        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">პირ. ნომ. / საიდ. კოდი *</label>
+        <input id="buyerIdInput" type="text" maxlength="20" placeholder="მაგ: 01234567890" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none" style="transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+      </div>
+      <div class="mb-4">
+        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">ტელეფონი *</label>
+        <input id="buyerPhoneInput" type="tel" placeholder="მაგ: 599 123 456" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none" style="transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+      </div>
+      <div id="buyerValidationMsg" class="hidden mb-3 text-xs text-red-500 font-medium">გთხოვთ შეავსოთ ყველა საჭირო ველი</div>
       <div class="flex gap-2">
-        <button id="submitBtn" onclick="submitOrder()" class="flex-1 bg-orange hover:bg-orange-dark text-white font-semibold py-3 text-sm transition-colors">გაგზავნა →</button>
+        <button id="submitBtn" onclick="submitOrder()" class="flex-1 bg-orange hover:bg-orange-dark text-white font-semibold py-3 text-sm transition-colors">გააგზავნე მოთხოვნა →</button>
         <button onclick="closeOrder()" class="bg-cream hover:bg-gray-200 text-gray-500 font-medium px-5 py-3 text-sm border border-gray-200 transition-colors">გაუქმება</button>
       </div>
     </div>
     <div id="orderSuccess" class="hidden p-8 text-center">
       <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
-      <h3 class="font-display text-2xl tracking-wide mb-2">შეკვეთა მიღებულია!</h3>
-      <p class="text-sm text-gray-400 mb-6">მადლობა! მალე დაგიკავშირდებით <strong id="successPhone" class="text-dark"></strong> ნომერზე.</p>
-      <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors">კარგი!</button>
+      <h3 class="font-display text-2xl tracking-wide mb-2">მოთხოვნა გაიგზავნა!</h3>
+      <p class="text-sm text-gray-400 mb-2">ინვოისის ნომერი: <strong id="successInvNo" class="text-dark font-mono"></strong></p>
+      <p class="text-sm text-gray-400 mb-6">გთხოვთ განახორციელოთ გადახდა ინვოისში მითითებულ ანგარიშზე (GE86BG0000000607455166) და გამოაგზავნოთ დამადასტურებელი გადახდის ქვითარი ჩვენს ელექტრონულ მეილზე (LLCunicraft@gmail.com). მხოლოდ ამის შემდეგ დაიწყება თქვენს ინვოისზე მუშაობა.</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onclick="downloadInvoicePDF()" class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-6 py-3 text-sm transition-colors border border-gray-200">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ჩამოტვირთე ინვოისი
+        </button>
+        <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors">კარგი!</button>
+      </div>
     </div>
   </div>
 </div>
@@ -194,6 +208,13 @@ let product = null;
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
 let localQty = 1;
+let currentInvoiceNo = '';
+
+function genInvoiceNo() {
+  const d = new Date();
+  const date = d.getFullYear().toString() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  return 'INV-' + date + '-' + Math.floor(1000 + Math.random() * 9000);
+}
 
 const params = new URLSearchParams(location.search);
 const id = params.get('id');
@@ -342,7 +363,12 @@ function renderCart() {
 }
 
 window.openOrder = function() {
+  currentInvoiceNo = genInvoiceNo();
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+  document.getElementById('buyerNameInput').value = '';
+  document.getElementById('buyerIdInput').value = '';
+  document.getElementById('buyerPhoneInput').value = '';
+  document.getElementById('buyerValidationMsg').classList.add('hidden');
   document.getElementById('orderSummary').innerHTML =
     cart.map(i => `<div class="flex justify-between py-1 text-gray-500"><span>${i.name} ×${i.qty}</span><span>${(i.price*i.qty).toFixed(2)} ₾</span></div>`).join('') +
     `<div class="flex justify-between border-t border-gray-200 mt-2 pt-2 font-bold text-dark"><span>სულ</span><span>${total.toFixed(2)} ₾</span></div>`;
@@ -358,27 +384,55 @@ window.closeOrder = function() {
 window.clearCart = function() { cart = []; saveCart(); renderCart(); };
 
 window.submitOrder = async function() {
-  const fname = document.getElementById('fname').value.trim();
-  const lname = document.getElementById('lname').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const address = document.getElementById('address').value.trim();
-  if (!fname||!lname||!phone||!address) { showToast('⚠ შეავსე ყველა ველი'); return; }
+  // localStorage rate limit
+  const now = Date.now();
+  const hour = 60 * 60 * 1000;
+  const timestamps = JSON.parse(localStorage.getItem('uc_inv_ts') || '[]').filter(t => now - t < hour);
+  if (timestamps.length >= 3) { alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო'); return; }
+
+  const buyerName  = document.getElementById('buyerNameInput').value.trim();
+  const buyerId    = document.getElementById('buyerIdInput').value.trim();
+  const buyerPhone = document.getElementById('buyerPhoneInput').value.trim();
+  if (!buyerName || !buyerId || !buyerPhone) {
+    document.getElementById('buyerNameInput').style.borderColor  = buyerName  ? '' : '#ef4444';
+    document.getElementById('buyerIdInput').style.borderColor    = buyerId    ? '' : '#ef4444';
+    document.getElementById('buyerPhoneInput').style.borderColor = buyerPhone ? '' : '#ef4444';
+    document.getElementById('buyerValidationMsg').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('buyerValidationMsg').classList.add('hidden');
   const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = '...';
+  btn.disabled = true; btn.textContent = 'იგზავნება...';
   try {
-    await supabase.from('orders').insert({
-      buyer_name: fname + ' ' + lname,
-      buyer_id: phone,
-      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
+    // IP rate limit
+    let clientIp = '';
+    try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); clientIp = d.ip || ''; } catch(e) {}
+    if (clientIp) {
+      const oneHourAgo = new Date(now - hour).toISOString();
+      const { data: recent } = await supabase.from('orders').select('id').eq('client_ip', clientIp).gte('created_at', oneHourAgo);
+      if (recent && recent.length >= 3) {
+        btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
+        alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო'); return;
+      }
+    }
+    const { error: insertError } = await supabase.from('orders').insert({
+      invoice_no: currentInvoiceNo,
+      buyer_name: buyerName,
+      buyer_id: buyerId,
+      buyer_phone: buyerPhone,
+      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
       status: 'pending',
-      invoice_no: 'INV-' + Date.now()
+      client_ip: clientIp
     });
-    document.getElementById('successPhone').textContent = phone;
+    if (insertError) { btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →'; alert('შეცდომა: ' + insertError.message); return; }
+    timestamps.push(Date.now());
+    localStorage.setItem('uc_inv_ts', JSON.stringify(timestamps));
+    document.getElementById('successInvNo').textContent = currentInvoiceNo;
     document.getElementById('orderFormWrap').classList.add('hidden');
     document.getElementById('orderSuccess').classList.remove('hidden');
-  } catch(e) { showToast('❌ შეცდომა'); }
-  btn.disabled = false; btn.textContent = 'გაგზავნა →';
+  } catch(e) { alert('შეცდომა: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
 };
 
 window.showToast = function(msg) {
@@ -390,5 +444,6 @@ window.showToast = function(msg) {
 
 init();
 </script>
+<script src="js/invoice.js"></script>
 </body>
 </html>
