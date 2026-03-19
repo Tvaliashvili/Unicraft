@@ -1132,6 +1132,21 @@ window.sendChatMsg = async function() {
 </script>
 
 <script src="js/invoice.js"></script>
+<script>
+(function() {
+  var footer = document.querySelector('.bg-dark.border-t-2.border-orange');
+  var widget = document.getElementById('chatWidget');
+  if (!footer || !widget) return;
+  function updateChatPos() {
+    var footerTop = footer.getBoundingClientRect().top;
+    var viewH = window.innerHeight;
+    var overlap = viewH - footerTop;
+    widget.style.bottom = (overlap > 0 ? overlap + 16 : 24) + 'px';
+  }
+  window.addEventListener('scroll', updateChatPos, { passive: true });
+  updateChatPos();
+})();
+</script>
 </div><!-- /siteContent -->
 </body>
 </html>
