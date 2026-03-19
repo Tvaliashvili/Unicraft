@@ -274,9 +274,15 @@ tailwind.config = {
               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
               style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
           </div>
-          <div>
+          <div class="mb-2">
             <div class="text-xs text-gray-400 mb-1">პირ. ნომ. / საიდ. კოდი</div>
             <input id="buyerIdInput" type="text" maxlength="20" placeholder="მაგ: 01234567890"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
+              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+          </div>
+          <div>
+            <div class="text-xs text-gray-400 mb-1">ტელეფონი</div>
+            <input id="buyerPhoneInput" type="tel" placeholder="მაგ: 599 123 456"
               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
               style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
           </div>
@@ -352,16 +358,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ══ ROLE SWITCHER ══ -->
-<div class="fixed bottom-4 left-1/2 -translate-x-1/2 md:bottom-6 z-50 flex flex-col items-center gap-2">
-  <div class="bg-dark-black border border-white/10 text-white/50 text-[10px] tracking-widest uppercase px-3 py-1 font-semibold">
-    ახლა: ვიზიტორი
-  </div>
-  <a href="admin.html" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-xs font-bold px-4 py-2.5 transition-colors shadow-lg">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2z"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-    ადმინ პანელი →
-  </a>
-</div>
 
 <!-- ══ CHAT WIDGET ══ -->
 <div id="chatWidget" style="position:fixed;bottom:90px;right:20px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:0">
@@ -711,6 +707,7 @@ window.openOrder = function() {
 
   document.getElementById('buyerIdInput').value = '';
   document.getElementById('buyerNameInput').value = '';
+  document.getElementById('buyerPhoneInput').value = '';
   document.getElementById('invoiceNo').textContent = currentInvoiceNo;
   document.getElementById('invoiceDate').textContent = dateStr;
   const vat = total * 18 / 118;
@@ -754,6 +751,7 @@ window.submitOrder = async function() {
       invoice_no: currentInvoiceNo,
       buyer_id: document.getElementById('buyerIdInput').value.trim(),
       buyer_name: document.getElementById('buyerNameInput').value.trim(),
+      buyer_phone: document.getElementById('buyerPhoneInput').value.trim(),
       items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
       status: 'pending'
