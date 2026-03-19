@@ -392,7 +392,7 @@ function renderProduct() {
 
   const imgEl = document.getElementById('productImage');
   if (product.imageUrl) {
-    imgEl.innerHTML = `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-full object-cover">`;
+    imgEl.innerHTML = `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-full object-contain p-3" style="cursor:zoom-in" onclick="openImgZoom(this.src)">`;
   } else {
     imgEl.innerHTML = `<span style="font-size:5rem;opacity:0.3">${product.emoji||'📦'}</span>`;
   }
@@ -766,6 +766,16 @@ window.sendChatMsg = async function() {
     await supabase.from('chats').update({ last_message: text, unread: (cur?.unread||0)+1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
   } catch(e) {}
 };
+</script>
+
+<!-- Image Zoom Lightbox -->
+<div id="imgZoomOverlay" onclick="closeImgZoom()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out">
+  <img id="imgZoomSrc" src="" style="max-width:92vw;max-height:90vh;object-fit:contain;border-radius:10px;box-shadow:0 8px 60px rgba(0,0,0,0.5);pointer-events:none">
+</div>
+<script>
+function openImgZoom(src){document.getElementById('imgZoomSrc').src=src;document.getElementById('imgZoomOverlay').style.display='flex';}
+function closeImgZoom(){document.getElementById('imgZoomOverlay').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeImgZoom();});
 </script>
 </body>
 </html>
