@@ -283,8 +283,8 @@ tailwind.config = {
 
 
 <!-- ══ CART DRAWER ══ -->
-<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
-<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light z-50 border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full">
+<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:1100"></div>
+<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full" style="z-index:1100">
   <div class="bg-dark-black px-6 py-4 flex items-center justify-between">
     <h2 class="font-display text-2xl tracking-wide text-white">კალათა</h2>
     <button onclick="toggleCart()" class="text-white/40 hover:text-orange text-2xl leading-none transition-colors">✕</button>
