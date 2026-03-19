@@ -52,7 +52,7 @@ tailwind.config = {
         <span class="text-white">UNI</span><span class="text-orange">CRAFT</span>
       </span>
     </a>
-    <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-4 py-2 transition-colors flex-shrink-0">
+    <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-4 py-2 transition-colors rounded-lg flex-shrink-0">
       კალათა
       <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
     </button>
@@ -112,7 +112,7 @@ tailwind.config = {
           <span id="localQty" class="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-gray-200">1</span>
           <button onclick="changeLocalQty(1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">+</button>
         </div>
-        <button id="addBtn" onclick="addProductToCart()" class="flex-1 bg-orange hover:bg-orange-dark text-white font-bold py-3 text-sm transition-colors rounded-lg">
+        <button id="addBtn" onclick="addProductToCart()" class="flex-1 bg-dark hover:bg-orange text-white font-bold py-3 text-sm transition-colors rounded-lg">
           + კალათაში დამატება
         </button>
       </div>

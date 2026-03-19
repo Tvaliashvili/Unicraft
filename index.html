@@ -154,7 +154,7 @@ tailwind.config = {
 
       <!-- Nav + Cart -->
       <div class="flex items-center gap-3 md:gap-6 flex-shrink-0">
-        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors">
+        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
           კალათა
           <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
         </button>
@@ -576,7 +576,7 @@ function renderPage() {
             ${fmtPrice(p.price, p.unit)}
           </div>
           <button onclick="event.stopPropagation();addToCart('${p.id}')"
-            class="bg-orange hover:bg-orange-dark text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+            class="bg-dark hover:bg-orange text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
             + კალათა
           </button>
         </div>
