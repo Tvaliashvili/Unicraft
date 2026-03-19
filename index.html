@@ -992,12 +992,9 @@ async function initChatSession(name, phone) {
       .order('created_at');
 
     if (!existing || existing.length === 0) {
-      // Insert welcome message
-      await supabase.from('chat_messages').insert({
-        session_id: chatSessionId,
-        text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`,
-        sender: 'admin'
-      });
+      const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
+      await supabase.from('chat_messages').insert({ session_id: chatSessionId, text: welcomeText, sender: 'admin' });
+      await supabase.from('chats').update({ last_message: welcomeText, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
     } else {
       renderChatMsgs(existing);
     }
@@ -1044,8 +1041,8 @@ window.sendChatMsg = async function() {
   input.value = '';
   try {
     await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
-    await supabase.from('chats').update({ last_message: text, unread: supabase.rpc('increment_unread') })
-      .eq('id', chatSessionId);
+    const { data: cur } = await supabase.from('chats').select('unread').eq('id', chatSessionId).single();
+    await supabase.from('chats').update({ last_message: text, unread: (cur?.unread || 0) + 1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
   } catch(e) {}
 }
 </script>
