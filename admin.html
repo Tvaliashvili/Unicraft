@@ -244,8 +244,10 @@
           <div class="page-subtitle" id="productCountLabel"></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
+          <input id="prodCodeSearch" placeholder="🔍 კოდით ძიება..." oninput="applyProductFilters()"
+            style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);outline:none;min-width:160px">
           <div style="position:relative">
-            <select id="storeFilterSelect" onchange="applyStoreFilter()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:160px">
+            <select id="storeFilterSelect" onchange="applyProductFilters()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:160px">
               <option value="">ყველა მაღაზია</option>
             </select>
             <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--gray-mid)">▾</span>
@@ -470,7 +472,7 @@
             <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;background:white;flex-shrink:0">
               <input id="adminChatInput" placeholder="პასუხი..." onkeydown="if(event.key==='Enter')sendAdminMsg()"
                 style="flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none">
-              <button onclick="sendAdminMsg()" style="background:var(--dark);color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">გაგზავნა</button>
+              <button onclick="sendAdminMsg()" style="width:36px;height:36px;background:#E8541A;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
             </div>
           </div>
         </div>
@@ -822,10 +824,13 @@ async function loadProductsList() {
 function renderProductRows(rows) {
   const el = document.getElementById('productsList');
   const filterVal = (document.getElementById('storeFilterSelect')?.value || '').toLowerCase();
-  const filtered = filterVal ? rows.filter(p => (p.store || '').toLowerCase() === filterVal) : rows;
+  const codeSearch = (document.getElementById('prodCodeSearch')?.value || '').trim().toLowerCase();
+  let filtered = filterVal ? rows.filter(p => (p.store || '').toLowerCase() === filterVal) : rows;
+  if (codeSearch) filtered = filtered.filter(p => (p.code || '').toLowerCase().includes(codeSearch));
 
+  const total = Object.keys(productCache).length;
   document.getElementById('productCountLabel').textContent =
-    (filterVal ? filtered.length + ' / ' : '') + Object.keys(productCache).length + ' პროდუქტი';
+    (filtered.length < total ? filtered.length + ' / ' : '') + total + ' პროდუქტი';
 
   if (!filtered.length) {
     el.innerHTML = '<div class="table-empty"><div class="icon">📦</div><p>პროდუქტი ვერ მოიძებნა</p></div>';
@@ -852,7 +857,7 @@ function renderProductRows(rows) {
   }).join('');
 }
 
-window.applyStoreFilter = function() {
+window.applyProductFilters = function() {
   const rows = Object.values(productCache);
   renderProductRows(rows);
 }

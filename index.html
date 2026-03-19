@@ -153,10 +153,6 @@ tailwind.config = {
 
       <!-- Nav + Cart -->
       <div class="flex items-center gap-3 md:gap-6 flex-shrink-0">
-        <nav class="hidden md:flex items-center gap-6">
-          <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">მიწოდება</a>
-          <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">კონტაქტი</a>
-        </nav>
         <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors">
           კალათა
           <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
@@ -172,11 +168,6 @@ tailwind.config = {
       <button class="bg-orange px-4 text-white text-sm flex-shrink-0">↗</button>
     </div>
 
-    <!-- Mobile nav row -->
-    <div class="flex md:hidden items-center gap-4 pb-2 pt-1">
-      <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">მიწოდება</a>
-      <a href="#" class="text-white/50 hover:text-orange text-xs font-semibold tracking-wide transition-colors">კონტაქტი</a>
-    </div>
 
   </div>
 </header>
@@ -628,7 +619,7 @@ window.goPage = function(page) {
 function applyFilters() {
   let list = allProducts;
   if (activeCategory) list = list.filter(p => p.category === activeCategory);
-  if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ));
+  if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
   renderProducts(list);
 }
