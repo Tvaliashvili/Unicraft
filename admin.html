@@ -229,11 +229,12 @@
             <div class="form-group full">
               <label class="form-label">ფოტო</label>
               <div class="dropzone" id="prodDropzone"
-                onclick="document.getElementById('prodFile').click()"
+                onclick="openFilePickerMenu('prod')"
                 ondragover="event.preventDefault();this.classList.add('drag-over')"
                 ondragleave="this.classList.remove('drag-over')"
                 ondrop="handleDrop(event,'prod')">
                 <input type="file" id="prodFile" accept="image/*" style="display:none" onchange="handleFile(this,'prod')">
+                <input type="file" id="prodFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'prod')">
                 <div id="prodPreview">
                   <div class="dropzone-icon">📷</div>
                   <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
@@ -242,7 +243,10 @@
               </div>
             </div>
             <div class="form-group full">
-              <label class="form-label">მაღაზია</label>
+              <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                მაღაზია
+                <span onclick="toggleStoreMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+              </label>
               <div id="prodStoreCombo" style="position:relative">
                 <div style="display:flex;gap:0">
                   <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" style="border-radius:10px 0 0 10px;flex:1"
@@ -252,6 +256,14 @@
                     onmousedown="event.preventDefault();toggleStoreDropdown('prodStoreCombo')">▾</button>
                 </div>
                 <div id="prodStoreDropdown" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #e0dbd5;border-radius:10px;box-shadow:0 -4px 24px rgba(0,0,0,0.10);z-index:9999;max-height:220px;overflow-y:auto"></div>
+              </div>
+              <!-- Store manager inline -->
+              <div id="storeMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                <div style="display:flex;gap:6px;margin-bottom:10px">
+                  <input class="form-input" id="newStoreInput" placeholder="ახალი მაღაზია" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addStore()">
+                  <button class="btn btn-primary" onclick="addStore()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                </div>
+                <div id="storeList"></div>
               </div>
             </div>
           </div>
@@ -530,6 +542,32 @@
       </div>
     </div>
 
+<!-- File Picker Menu (mobile: gallery or camera) -->
+<div id="filePickerMenu" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:800;align-items:flex-end;justify-content:center" onclick="if(event.target===this)document.getElementById('filePickerMenu').style.display='none'">
+  <div style="background:white;width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:20px;display:flex;flex-direction:column;gap:10px">
+    <div style="font-size:14px;font-weight:600;color:var(--gray-dark);margin-bottom:4px;text-align:center">ფოტოს წყარო</div>
+    <button onclick="pickFromGallery()" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--bg);cursor:pointer;color:var(--gray-dark)">🖼 ალბომიდან</button>
+    <button onclick="pickFromCamera()" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--bg);cursor:pointer;color:var(--gray-dark)">📷 კამერით გადაღება</button>
+    <button onclick="document.getElementById('filePickerMenu').style.display='none'" style="width:100%;padding:12px;border:none;border-radius:12px;font-size:13px;font-family:inherit;background:var(--gray-light);cursor:pointer;color:var(--gray-mid)">გაუქმება</button>
+  </div>
+</div>
+
+<!-- Image Lightbox -->
+<div id="imgLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:700;align-items:center;justify-content:center;cursor:zoom-out" onclick="closeLightbox()">
+  <img id="imgLightboxSrc" src="" alt="" style="max-width:90vw;max-height:88vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 60px rgba(0,0,0,0.5);pointer-events:none">
+</div>
+
+<!-- Info Modal -->
+<div id="infoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:600;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeInfoModal()">
+  <div style="background:white;border-radius:var(--radius);width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+      <span class="card-title" id="infoModalName" style="font-size:15px"></span>
+      <button onclick="closeInfoModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray-mid);line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div style="padding:20px 24px;overflow-y:auto;font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--gray-dark)" id="infoModalDesc"></div>
+  </div>
+</div>
+
 <!-- Edit Product Modal -->
 <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;align-items:center;justify-content:center;padding:20px">
   <div style="background:white;border-radius:var(--radius);width:100%;max-width:660px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
@@ -579,11 +617,12 @@
           <label class="form-label">ფოტო</label>
           <input type="hidden" id="editExistingImage">
           <div class="dropzone" id="editDropzone"
-            onclick="document.getElementById('editFile').click()"
+            onclick="openFilePickerMenu('edit')"
             ondragover="event.preventDefault();this.classList.add('drag-over')"
             ondragleave="this.classList.remove('drag-over')"
             ondrop="handleDrop(event,'edit')">
             <input type="file" id="editFile" accept="image/*" style="display:none" onchange="handleFile(this,'edit')">
+            <input type="file" id="editFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'edit')">
             <div id="editPreview">
               <div class="dropzone-icon">📷</div>
               <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
@@ -673,6 +712,20 @@ async function getRemoveBg() {
 let productCache = {};
 let prodFileData = null;
 let editFileData = null;
+
+const PROD_DESC_DEFAULT = `ბრენდი / მწარმოებელი:
+
+წარმოშობის ქვეყანა:
+
+ზომა / განზომილება:
+
+წონა / მოცულობა:
+
+ძირითადი მასალა:
+
+რაოდენობა შეფუთვაში:
+
+გარანტიის ვადა:`;
 
 const DROPZONE_EMPTY = `
   <div class="dropzone-icon">📷</div>
@@ -858,6 +911,7 @@ async function initApp() {
 
   loadCategories();
   loadUnits();
+  loadStores();
   loadMaintenanceStatus();
 
   // Stats
@@ -905,20 +959,12 @@ window.toggleCatMgr = function() {
 };
 
 // ─── Units ───
-const DEFAULT_UNITS = [
-  {value:'ც',label:'ცალი'},{value:'კგ',label:'კგ'},{value:'ტ',label:'ტონა'},
-  {value:'მ²',label:'მ²'},{value:'მ³',label:'მ³'},{value:'მ',label:'მეტრი'},
-  {value:'კონტ',label:'კონტეინერი'},{value:'ტომ',label:'ტომარა'}
-];
+let _units = [];
 
-function getUnits() {
-  try { return JSON.parse(localStorage.getItem('uc_units')) || DEFAULT_UNITS; } catch(e) { return DEFAULT_UNITS; }
-}
-function saveUnits(units) { localStorage.setItem('uc_units', JSON.stringify(units)); }
-
-function loadUnits() {
-  const units = getUnits();
-  const opts = units.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
+async function loadUnits() {
+  const { data } = await supabase.from('units').select('*').order('label');
+  _units = data || [];
+  const opts = _units.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
   ['prodUnit','editUnit'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
   renderUnitList();
 }
@@ -926,12 +972,11 @@ function loadUnits() {
 function renderUnitList() {
   const el = document.getElementById('unitList');
   if (!el) return;
-  const units = getUnits();
-  if (!units.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ერთეული არ არის</div>'; return; }
-  el.innerHTML = units.map((u,i) => `
+  if (!_units.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ერთეული არ არის</div>'; return; }
+  el.innerHTML = _units.map(u => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:13px"><b>${u.value}</b> — ${u.label}</span>
-      <button onclick="deleteUnit(${i})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+      <button onclick="deleteUnit('${u.id}','${u.label.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
 }
@@ -942,25 +987,22 @@ window.toggleUnitMgr = function() {
   else p.style.display = 'none';
 };
 
-window.addUnit = function() {
+window.addUnit = async function() {
   const val = document.getElementById('newUnitValue').value.trim();
   const lbl = document.getElementById('newUnitLabel').value.trim();
   if (!val || !lbl) { showToast('შეავსე ორივე ველი', 'error'); return; }
-  const units = getUnits();
-  if (units.find(u => u.value === val)) { showToast('ეს ერთეული უკვე არსებობს', 'error'); return; }
-  units.push({ value: val, label: lbl });
-  saveUnits(units);
+  const { error } = await supabase.from('units').insert({ value: val, label: lbl });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   document.getElementById('newUnitValue').value = '';
   document.getElementById('newUnitLabel').value = '';
   showToast('✓ ერთეული დაემატა', 'success');
   loadUnits();
 };
 
-window.deleteUnit = function(i) {
-  const units = getUnits();
-  if (!confirm(`ერთეული "${units[i].label}" წაიშალოს?`)) return;
-  units.splice(i, 1);
-  saveUnits(units);
+window.deleteUnit = async function(id, label) {
+  if (!confirm(`ერთეული "${label}" წაიშალოს?`)) return;
+  await supabase.from('units').delete().eq('id', id);
+  showToast('ერთეული წაიშალა', 'error');
   loadUnits();
 };
 
@@ -1014,10 +1056,11 @@ window.confirmMaintPass = async function() {
   const pass = document.getElementById('maintPassInput').value;
   if (!pass) { document.getElementById('maintPassError').textContent = 'შეიყვანე პაროლი'; return; }
   const hash = await sha256(pass);
-  const stored = localStorage.getItem('uc_maint_pass');
+  const { data } = await supabase.from('settings').select('value').eq('key', 'maint_pass_hash').maybeSingle();
+  const stored = data?.value || null;
   if (!stored) {
     // First time — set password
-    localStorage.setItem('uc_maint_pass', hash);
+    await supabase.from('settings').upsert({ key: 'maint_pass_hash', value: hash }, { onConflict: 'key' });
     document.getElementById('maintPassModal').style.display = 'none';
     showToast('✓ პაროლი დაყენებულია', 'success');
     if (_maintPassCallback) _maintPassCallback();
@@ -1033,9 +1076,9 @@ window.confirmMaintPass = async function() {
   }
 };
 
-window.toggleMaintenanceMode = function() {
-  const stored = localStorage.getItem('uc_maint_pass');
-  const title = stored ? 'პაროლის შეყვანა' : 'პაროლის დაყენება (პირველი შესვლა)';
+window.toggleMaintenanceMode = async function() {
+  const { data } = await supabase.from('settings').select('value').eq('key', 'maint_pass_hash').maybeSingle();
+  const title = data?.value ? 'პაროლის შეყვანა' : 'პაროლის დაყენება (პირველი შესვლა)';
   openMaintPassModal(title, async () => {
     const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
     const current = data?.value === 'true';
@@ -1097,8 +1140,14 @@ async function deleteCategoryConfirmed(id, name) {
 }
 
 // ─── Products ───
-function genProductCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
+async function genProductCode() {
+  let code, exists = true;
+  while (exists) {
+    code = String(Math.floor(100000 + Math.random() * 900000));
+    const { data } = await supabase.from('products').select('id').eq('code', code).maybeSingle();
+    exists = !!data;
+  }
+  return code;
 }
 
 window.addProduct = async function() {
@@ -1125,7 +1174,7 @@ window.addProduct = async function() {
       image_url: imageUrl,
       active: true,
       store: document.getElementById('prodStore').value.trim(),
-      code: genProductCode(),
+      code: await genProductCode(),
     });
     showToast('✓ პროდუქტი დაემატა!', 'success');
     clearForm();
@@ -1137,8 +1186,9 @@ window.addProduct = async function() {
 };
 
 window.clearForm = function() {
-  ['prodName','prodDesc','prodPrice','prodStore']
+  ['prodName','prodPrice','prodStore']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('prodDesc').value = PROD_DESC_DEFAULT;
   document.getElementById('prodCategory').value = '';
   document.getElementById('prodUnit').value = 'ც';
   prodFileData = null;
@@ -1191,7 +1241,7 @@ function renderProductRows(rows) {
   el.innerHTML = filtered.map(p => {
     return `<div class="table-row">
       <div class="prod-img-thumb">
-        ${p.image_url ? `<img src="${p.image_url}" alt="">` : (p.emoji || '📦')}
+        ${p.image_url ? `<img src="${p.image_url}" alt="" style="cursor:zoom-in" onclick="openLightbox(this.src)">` : (p.emoji || '📦')}
       </div>
       <div>
         <div class="prod-name">${p.name}</div>
@@ -1201,6 +1251,7 @@ function renderProductRows(rows) {
       <span class="price-cell">${p.price} ₾${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
       <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
       <div style="display:flex;gap:6px">
+        <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')" style="background:var(--gray-light);color:var(--gray-dark);border-color:var(--gray-light)">ℹ ინფო</button>
         <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 წაშლა</button>
       </div>
@@ -1277,6 +1328,52 @@ window.deleteProduct = async function(id) {
   await supabase.from('products').delete().eq('id', id);
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
+};
+
+let _filePickerPrefix = '';
+window.openFilePickerMenu = function(prefix) {
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (!isMobile) { document.getElementById(prefix + 'File').click(); return; }
+  _filePickerPrefix = prefix;
+  document.getElementById('filePickerMenu').style.display = 'flex';
+};
+window.pickFromGallery = function() {
+  document.getElementById('filePickerMenu').style.display = 'none';
+  document.getElementById(_filePickerPrefix + 'File').click();
+};
+window.pickFromCamera = function() {
+  document.getElementById('filePickerMenu').style.display = 'none';
+  document.getElementById(_filePickerPrefix + 'FileCamera').click();
+};
+
+window.openLightbox = function(src) {
+  document.getElementById('imgLightboxSrc').src = src;
+  document.getElementById('imgLightbox').style.display = 'flex';
+};
+window.closeLightbox = function() {
+  document.getElementById('imgLightbox').style.display = 'none';
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+window.showProductInfo = function(id) {
+  const p = productCache[id];
+  if (!p) return;
+  document.getElementById('infoModalName').textContent = p.name;
+  const el = document.getElementById('infoModalDesc');
+  if (p.description) {
+    el.innerHTML = p.description.split('\n').map(line => {
+      const ci = line.indexOf(':');
+      if (ci > 0) return `<span style="font-weight:700">${line.slice(0,ci+1)}</span>${line.slice(ci+1)}`;
+      return line || '&nbsp;';
+    }).join('<br>');
+  } else {
+    el.innerHTML = '<span style="color:var(--gray-mid)">აღწერა არ არის</span>';
+  }
+  document.getElementById('infoModal').style.display = 'flex';
+};
+
+window.closeInfoModal = function() {
+  document.getElementById('infoModal').style.display = 'none';
 };
 
 // ─── Orders cache & modal state ───
@@ -1922,8 +2019,48 @@ window.doAdminInvoicePDF = function() {
 // ── Store combo helpers ──
 // ── Store combo ──
 let _storeNames = [];
+let _stores = []; // [{id, name}]
+async function loadStores() {
+  const { data } = await supabase.from('stores').select('*').order('name');
+  _stores = data || [];
+  _storeNames = [...new Set([..._stores.map(s => s.name), ..._storeNames])].sort();
+  renderStoreList();
+}
+function renderStoreList() {
+  const el = document.getElementById('storeList');
+  if (!el) return;
+  if (!_stores.length) { el.innerHTML = '<div style="font-size:12px;color:var(--gray-mid);text-align:center;padding:6px 0">მაღაზია არ არის</div>'; return; }
+  el.innerHTML = _stores.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${s.name}</span>
+      <button onclick="deleteStore('${s.id}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+window.toggleStoreMgr = function() {
+  const p = document.getElementById('storeMgrPanel');
+  if (p.style.display === 'none') { p.style.display = 'block'; renderStoreList(); }
+  else p.style.display = 'none';
+};
+window.addStore = async function() {
+  const input = document.getElementById('newStoreInput');
+  const val = input.value.trim();
+  if (!val) return;
+  const { error } = await supabase.from('stores').insert({ name: val });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ მაღაზია დაემატა', 'success');
+  loadStores();
+};
+window.deleteStore = async function(id, name) {
+  if (!confirm(`მაღაზია "${name}" წაიშალოს?`)) return;
+  await supabase.from('stores').delete().eq('id', id);
+  showToast('მაღაზია წაიშალა', 'error');
+  loadStores();
+};
 function refreshStoreList(rows) {
   _storeNames = [...new Set(rows.map(p => p.store).filter(Boolean))].sort();
+  loadStores();
 }
 function getStoreDD(comboId) {
   return document.getElementById(comboId.replace('Combo','Dropdown'));
