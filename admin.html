@@ -1186,6 +1186,7 @@ window.addProduct = async function() {
       active: true,
       store: document.getElementById('prodStore').value.trim(),
       code: await genProductCode(),
+      added_by: _me.name || _me.email,
     });
     showToast('✓ პროდუქტი დაემატა!', 'success');
     clearForm();
@@ -1245,6 +1246,7 @@ function renderProductRows(rows) {
       </div>
       <div>
         <div class="prod-name">${p.name}</div>
+        ${p.added_by ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">👤 ${p.added_by}</div>` : ''}
       </div>
       <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
       <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
