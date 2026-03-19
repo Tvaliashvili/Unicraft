@@ -633,14 +633,22 @@ body {
   #page-invoice-gen [style*="display:flex;gap:10px"] { flex-wrap: wrap; }
   #page-invoice-gen [style*="display:flex;gap:10px"] button { flex: 1; justify-content: center; }
 
-  /* Product form: unit manager inputs wrap on mobile */
-  .product-form { padding: 16px; }
+  /* Product form: fix overflow on mobile */
+  .product-form { padding: 12px; }
+  #page-add-product .card { overflow-x: hidden; }
+  #unitMgrPanel,
+  #catMgrPanel,
+  #storeMgrPanel { overflow: hidden; }
   #unitMgrPanel > div:first-child,
   #catMgrPanel > div:first-child,
   #storeMgrPanel > div:first-child { flex-wrap: wrap; }
   #unitMgrPanel > div:first-child input,
   #catMgrPanel > div:first-child input,
-  #storeMgrPanel > div:first-child input { min-width: 0; }
+  #storeMgrPanel > div:first-child input { min-width: 0; flex: 1 1 100%; }
+  #unitMgrPanel > div:first-child button,
+  #catMgrPanel > div:first-child button,
+  #storeMgrPanel > div:first-child button { width: 100%; }
+  .form-input, .form-select { max-width: 100%; }
 
   /* Products filter row: stack on mobile */
   .prod-filters { flex-direction: column; align-items: stretch; }
