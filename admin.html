@@ -6,6 +6,8 @@
 <title>ადმინ პანელი</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/admin.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('pb_XXv8v1r4bDAPMh');</script>
 </head>
 <body>
 
@@ -1699,6 +1701,10 @@ function playNotifSound() {
   } catch(e) {}
 }
 
+function sendEmailNotif(type, message) {
+  emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type, message, name: 'UniCraft', email: '' }).catch(() => {});
+}
+
 function initOrdersBadgeListener() {
   supabase.channel('global-orders-badge')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
@@ -1706,6 +1712,7 @@ function initOrdersBadgeListener() {
         updateOrderBadge((data || []).length);
       });
       playNotifSound();
+      sendEmailNotif('შეკვეთა', 'ახალი შეკვეთა შემოვიდა UniCraft-ში.');
       if (document.visibilityState !== 'visible' && Notification.permission === 'granted') {
         new Notification('🧾 UniCraft — ახალი შეკვეთა', { icon: 'favicon.ico' });
       }
@@ -1716,6 +1723,10 @@ function initOrdersBadgeListener() {
 function initChatBadgeListener() {
   if (_chatBadgeChannel) supabase.removeChannel(_chatBadgeChannel);
   _chatBadgeChannel = supabase.channel('global-chat-badge')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+      const name = payload.new?.customer_name || 'უცნობი';
+      sendEmailNotif('ჩატი', `ახალი მომხმარებელი შემოვიდა ჩატში: ${name}`);
+    })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chats' }, payload => {
       const unread = payload.new?.unread || 0;
       const prev = payload.old?.unread || 0;
