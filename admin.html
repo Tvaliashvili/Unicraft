@@ -721,14 +721,17 @@
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
 
-let _removeBg = null;
+let _removeBgFn = null;
 async function getRemoveBg() {
-  if (_removeBg) return _removeBg;
+  if (_removeBgFn) return _removeBgFn;
   try {
-    const mod = await import('https://esm.sh/@imgly/background-removal');
-    _removeBg = mod.removeBackground;
-  } catch(e) { _removeBg = null; }
-  return _removeBg;
+    const mod = await import('https://esm.sh/@imgly/background-removal@1.4.5');
+    const fn = mod.removeBackground || mod.default;
+    _removeBgFn = (file) => fn(file, {
+      publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/'
+    });
+  } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
+  return _removeBgFn;
 }
 
 // ─── Product cache for edit ───
@@ -877,7 +880,7 @@ window.triggerBgRemoval = async function(prefix) {
     const removeBg = await getRemoveBg();
     if (!removeBg) { showToast('ბიბლიოთეკა ვერ ჩაიტვირთა', 'error'); btn && (btn.disabled = false); return; }
     const pngFile = await _toPng(file, 1024);
-    const noBgBlob = await removeBg(pngFile);
+    const noBgBlob = await removeBg(pngFile); // publicPath already bound inside getRemoveBg
     const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
     if (prefix === 'prod') prodFileData = processed;
     else editFileData = processed;
