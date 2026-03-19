@@ -77,6 +77,7 @@ window.downloadInvoicePDF = function() {
     + '    <div class="party-label">მყიდველი</div>'
     + '    <div class="plabel">დასახელება / სახელი</div><div class="pval">' + (buyerName || '–') + '</div>'
     + '    <div class="plabel">პირ. ნომ. / საიდ. კოდი</div><div class="pval-mono">' + (buyerId || '–') + '</div>'
+    + '    <div class="plabel">ტელეფონი</div><div class="pval">' + (buyerPhone || '–') + '</div>'
     + '  </div>'
     + '</div>'
 
