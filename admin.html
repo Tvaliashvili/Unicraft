@@ -274,7 +274,7 @@
           <span>ინვ. ნომ.</span>
           <span>მყიდველი</span>
           <span style="text-align:center">მიბმული</span>
-          <span>საიდ. კოდი</span>
+          <span style="text-align:center">საიდ. კოდი</span>
           <span>სულ</span>
           <span style="text-align:center">სტატუსი</span>
           <span></span>
@@ -930,7 +930,7 @@ function renderOrderRow(id, o, dateStr) {
         ? `<span id="assigned-badge-${id}" style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>`
         : `<span id="assigned-badge-${id}" style="display:none;font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600"></span>`}
     </div>
-    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</span>
+    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace;text-align:center">${o.buyer_id || o.buyerId || '–'}</span>
     <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
     <div style="display:flex;align-items:center;justify-content:center"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></div>
     <div style="display:flex;align-items:center;justify-content:center">
