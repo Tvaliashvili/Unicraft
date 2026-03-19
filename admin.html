@@ -404,6 +404,7 @@
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);margin-bottom:6px">თარიღი / სტატუსი</div>
           <div id="modalDate" style="font-size:13px;color:var(--dark);margin-bottom:6px"></div>
           <div id="modalCurrentStatus"></div>
+          <div id="modalAssigned" style="margin-top:8px;font-size:12px"></div>
         </div>
       </div>
       <!-- Products table -->
@@ -609,10 +610,16 @@ function showDropPreview(prefix, src) {
 const DEMO_EMAIL = 'admin@unicraft.ge';
 const DEMO_PASS  = 'unicraft2025';
 
-function showApp(email) {
+let _me = { email: '', name: '' };
+
+async function showApp(email) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   document.getElementById('adminEmail').textContent = email;
+  _me.email = email;
+  // Try to get display name from Supabase user metadata
+  const { data: { user } } = await supabase.auth.getUser();
+  _me.name = user?.user_metadata?.full_name || user?.user_metadata?.name || email.split('@')[0];
   initApp();
 }
 
@@ -916,6 +923,7 @@ function renderOrderRow(id, o, dateStr) {
     <div>
       <div style="font-weight:600;font-size:13px">${o.buyer_name || o.buyerName || '–'}</div>
       ${o.items ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${(Array.isArray(o.items) ? o.items : JSON.parse(o.items||'[]')).map(i=>i.name).join(', ')}</div>` : ''}
+      ${o.assigned_name ? `<div style="margin-top:3px"><span id="assigned-badge-${id}" style="font-size:10px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:1px 7px;font-weight:600">${o.assigned_name}</span></div>` : `<div style="margin-top:3px"><span id="assigned-badge-${id}" style="display:none;font-size:10px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:1px 7px;font-weight:600"></span></div>`}
     </div>
     <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</span>
     <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
@@ -989,9 +997,28 @@ function statusLabel(s) {
   return { pending:'🆕 ახალი', new:'🆕 ახალი', confirmed:'✅ დადასტ.', in_transit:'🚚 ტრანსპ.', delivered:'📦 მიწოდ.', cancelled:'❌ გაუქმ.', completed:'✔ დასრულ.' }[s] || s;
 }
 
-function updateModalActions(status) {
+function updateModalActions(status, assignedTo, assignedName) {
   const el = document.getElementById('modalActions');
   if (!el) return;
+
+  const o = ordersCache[window.currentOrderId] || {};
+  const effAssignedTo  = assignedTo  !== undefined ? assignedTo  : (o.assigned_to   || null);
+  const effAssignedName= assignedName!== undefined ? assignedName: (o.assigned_name || null);
+  const isMine = effAssignedTo === _me.email;
+
+  // Update assigned label
+  const assignedEl = document.getElementById('modalAssigned');
+  if (assignedEl) {
+    if (effAssignedTo) {
+      assignedEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:3px 10px;color:#166534;font-weight:600">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ${effAssignedName}
+      </span>`;
+    } else {
+      assignedEl.innerHTML = '';
+    }
+  }
+
   if (status === 'completed' || status === 'cancelled') {
     el.innerHTML = `
       <span style="font-size:13px;color:#6b7280;font-weight:600">🔒 ეს ინვოისი ჩახურულია</span>
@@ -1005,14 +1032,43 @@ function updateModalActions(status) {
           </div>
         </div>
       </div>`;
-  } else {
+    return;
+  }
+
+  if (!effAssignedTo) {
+    // Unassigned — show "აღება" button
+    el.innerHTML = `
+      <button onclick="assignOrder()" style="background:#E8541A;color:white;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        აღება
+      </button>`;
+  } else if (isMine) {
+    // Assigned to me — show status buttons
     el.innerHTML = `
       <button onclick="setOrderStatus(window.currentOrderId,'confirmed')" style="background:#16a34a;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✓ დადასტურება</button>
       <button onclick="setOrderStatus(window.currentOrderId,'in_transit')" style="background:#2563eb;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🚚 ტრანსპორტირება</button>
-      <button onclick="setOrderStatus(window.currentOrderId,'cancelled')" style="background:#dc2626;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✕ გაუქმება</button>
-      <button onclick="setOrderStatus(window.currentOrderId,'completed')" style="background:#6b7280;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✔ დასრულება</button>`;
+      <button onclick="setOrderStatus(window.currentOrderId,'completed')" style="background:#6b7280;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✔ დასრულება</button>
+      <button onclick="setOrderStatus(window.currentOrderId,'cancelled')" style="background:none;color:#dc2626;border:1px solid #dc2626;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✕ გაუქმება</button>`;
+  } else {
+    // Assigned to someone else
+    el.innerHTML = `<span style="font-size:13px;color:#6b7280">ეს ინვოისი სხვა ადმინს აქვს მიბმული</span>`;
   }
 }
+
+window.assignOrder = async function() {
+  const id = window.currentOrderId;
+  if (!id) return;
+  const { error } = await supabase.from('orders')
+    .update({ assigned_to: _me.email, assigned_name: _me.name })
+    .eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) { ordersCache[id].assigned_to = _me.email; ordersCache[id].assigned_name = _me.name; }
+  showToast('ინვოისი მიბმულია: ' + _me.name, 'success');
+  updateModalActions(ordersCache[id]?.status || 'new', _me.email, _me.name);
+  // Update row in list
+  const badge = document.getElementById('assigned-badge-' + id);
+  if (badge) { badge.textContent = _me.name; badge.style.display = 'inline'; }
+};
 
 window.toggleReactivate = function() {
   const p = document.getElementById('reactivatePopup');
@@ -1057,7 +1113,7 @@ window.openOrderModal = function(id) {
   document.getElementById('modalDate').textContent = o._dateStr || '–';
   const status = o.status || 'pending';
   document.getElementById('modalCurrentStatus').innerHTML = `<span class="order-status status-${status}">${statusLabel(status)}</span>`;
-  updateModalActions(status);
+  updateModalActions(status, o.assigned_to || null, o.assigned_name || null);
   const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
   let total = 0;
   document.getElementById('modalItemsBody').innerHTML = items.map(item => {
