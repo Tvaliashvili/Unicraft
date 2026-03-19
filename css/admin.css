@@ -260,7 +260,7 @@ body {
 .btn-sm { padding: 6px 12px; font-size: 13px; }
 
 /* ─── Product Form ─── */
-.product-form { padding: 24px; }
+.product-form { padding: 24px; overflow-x: hidden; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
@@ -632,6 +632,15 @@ body {
   /* Invoice gen: actions */
   #page-invoice-gen [style*="display:flex;gap:10px"] { flex-wrap: wrap; }
   #page-invoice-gen [style*="display:flex;gap:10px"] button { flex: 1; justify-content: center; }
+
+  /* Product form: unit manager inputs wrap on mobile */
+  .product-form { padding: 16px; }
+  #unitMgrPanel > div:first-child,
+  #catMgrPanel > div:first-child,
+  #storeMgrPanel > div:first-child { flex-wrap: wrap; }
+  #unitMgrPanel > div:first-child input,
+  #catMgrPanel > div:first-child input,
+  #storeMgrPanel > div:first-child input { min-width: 0; }
 
   /* Products filter row: stack on mobile */
   .prod-filters { flex-direction: column; align-items: stretch; }
