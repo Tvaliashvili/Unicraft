@@ -1221,17 +1221,22 @@ function renderChatSessionsList(sessions) {
       const displayName = s.customer_name || s.customerName || s.id.slice(-8);
       const displayPhone = s.customer_phone || s.customerPhone || '';
       const lastMsg = s.last_message || s.lastMessage || '...';
+      const isClosed = s.status === 'closed';
+      const dotColor = isClosed ? '#ef4444' : '#22c55e';
       return `<div style="border-bottom:1px solid var(--border);position:relative" id="chat-row-${s.id}">
         <div onclick="openAdminChat('${s.id}')" style="padding:12px 16px;cursor:pointer;${active}transition:background 0.15s;padding-right:36px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='${s.id === currentChatSessionId ? 'var(--gray-light)' : ''}'">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
-            <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;box-shadow:0 0 0 2px white,0 0 0 3px ${dotColor}"></span>
+              <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
+            </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span style="font-size:11px;color:var(--gray-mid)">${t}</span>
               ${s.unread > 0 ? `<span style="background:#ef4444;color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${s.unread}</span>` : ''}
             </div>
           </div>
-          <div style="font-size:11px;color:#9ca3af;margin-bottom:3px">${displayPhone}</div>
-          <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lastMsg}</div>
+          <div style="font-size:11px;color:#9ca3af;margin-bottom:3px;padding-left:15px">${displayPhone}</div>
+          <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:15px">${lastMsg}</div>
         </div>
         <button onclick="deleteChat('${s.id}')" title="წაშლა" style="position:absolute;top:10px;right:8px;background:none;border:none;color:#d1d5db;font-size:14px;cursor:pointer;padding:3px;border-radius:4px;line-height:1" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#d1d5db'">✕</button>
       </div>`;
