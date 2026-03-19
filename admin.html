@@ -243,16 +243,16 @@
           <div class="page-title">პროდუქტები</div>
           <div class="page-subtitle" id="productCountLabel"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div class="prod-filters">
           <input id="prodCodeSearch" placeholder="🔍 კოდით ძიება..." oninput="applyProductFilters()"
-            style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);outline:none;min-width:160px">
-          <div style="position:relative">
-            <select id="storeFilterSelect" onchange="applyProductFilters()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:160px">
+            style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);outline:none;min-width:140px;flex:1">
+          <div style="position:relative;flex-shrink:0">
+            <select id="storeFilterSelect" onchange="applyProductFilters()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:140px">
               <option value="">ყველა მაღაზია</option>
             </select>
             <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--gray-mid)">▾</span>
           </div>
-          <button class="btn btn-primary" onclick="showPage('add-product')">+ დამატება</button>
+          <button class="btn btn-primary" onclick="showPage('add-product')" style="flex-shrink:0">+ დამატება</button>
         </div>
       </div>
       <div class="card">

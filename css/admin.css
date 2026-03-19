@@ -556,6 +556,14 @@ body {
 }
 .sidebar-overlay.show { display: block; }
 
+/* ── Products page filter row ── */
+.prod-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 768px) {
   .mobile-bar { display: flex; }
 
@@ -622,6 +630,31 @@ body {
   /* Invoice gen: actions */
   #page-invoice-gen [style*="display:flex;gap:10px"] { flex-wrap: wrap; }
   #page-invoice-gen [style*="display:flex;gap:10px"] button { flex: 1; justify-content: center; }
+
+  /* Products filter row: stack on mobile */
+  .prod-filters { flex-direction: column; align-items: stretch; }
+  .prod-filters input,
+  .prod-filters select { width: 100%; min-width: unset !important; }
+  .prod-filters > div { width: 100%; }
+  .prod-filters > div select { width: 100%; }
+
+  /* Order modal full width on mobile */
+  #orderModal { padding: 0 !important; align-items: flex-end !important; }
+  #orderModal > div { max-width: 100% !important; border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
+
+  /* Chat page: fix left position on mobile */
+  #page-chat.active { left: 0 !important; top: 54px !important; padding: 12px !important; }
+
+  /* Login card: full width with padding on small phones */
+  .login-card { padding: 28px 20px; margin: 16px; }
+
+  /* Prevent iOS auto-zoom on inputs */
+  .login-input, .form-input, .form-select, .form-textarea,
+  #adminChatInput { font-size: 16px !important; }
+
+  /* Page header: title + filters wrap */
+  .page-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .page-header > div:last-child { width: 100%; }
 
   /* Invoice gen: reduce section padding */
   #page-invoice-gen [style*="padding:16px 24px"],
