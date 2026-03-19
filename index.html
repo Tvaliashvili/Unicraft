@@ -337,7 +337,7 @@ tailwind.config = {
         <button onclick="downloadInvoicePDF()"
           class="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-5 py-2.5 text-sm transition-colors rounded-lg border border-gray-200">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          ჩამოტვირთე PDF
+          ჩამოტვირთე ინვოისი
         </button>
         <button onclick="closeOrder()"
           class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2.5 text-sm transition-colors rounded-lg whitespace-nowrap">
@@ -351,8 +351,14 @@ tailwind.config = {
       <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
       <h3 class="font-display text-2xl tracking-wide mb-2">მოთხოვნა გაიგზავნა!</h3>
       <p class="text-sm text-gray-400 mb-2">ინვოისის ნომერი: <strong id="successInvNo" class="text-dark font-mono"></strong></p>
-      <p class="text-sm text-gray-400 mb-6">გთხოვთ განახორციელოთ გადახდა მითითებულ ანგარიშზე და გამოაგზავნოთ დამადასტურებელი.</p>
-      <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors rounded-lg">კარგი!</button>
+      <p class="text-sm text-gray-400 mb-6">გთხოვთ განახორციელოთ გადახდა ინვოისში მითითებულ ანგარიშზე (GE86BG0000000607455166) და გამოაგზავნოთ დამადასტურებელი გადახდის ქვითარი ჩვენს ელექტრონულ მეილზე (LLCunicraft@gmail.com). მხოლოდ ამის შემდეგ დაიწყება თქვენს ინვოისზე მუშაობა.</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onclick="downloadInvoicePDF()" class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-6 py-3 text-sm transition-colors rounded-lg border border-gray-200">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ჩამოტვირთე ინვოისი
+        </button>
+        <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors rounded-lg">კარგი!</button>
+      </div>
     </div>
 
   </div>
