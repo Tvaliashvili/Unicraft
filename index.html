@@ -472,7 +472,9 @@ function renderPage() {
   const rc = document.getElementById('resultCount'); if (rc) rc.textContent = filteredProducts.length + ' პროდუქტი';
 
   if (!filteredProducts.length) {
-    grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტები ვერ მოიძებნა</p></div>`;
+    grid.innerHTML = window._productsLoading
+      ? `<div class="col-span-full text-center py-20 text-gray-400"><div style="font-size:2rem;margin-bottom:12px">⏳</div><p class="text-sm">პროდუქტები იტვირთება...</p></div>`
+      : `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტები ვერ მოიძებნა</p></div>`;
     document.getElementById('pagination').innerHTML = '';
     return;
   }
@@ -766,6 +768,7 @@ window.showToast = function(msg) {
 
 // ── Load products ──
 async function loadProducts() {
+  window._productsLoading = true;
   allProducts = MOCK_PRODUCTS;
   buildSidebar();
   renderProducts(allProducts);
@@ -778,12 +781,18 @@ async function loadProducts() {
       .select('*')
       .eq('active', true)
       .order('created_at', { ascending: false });
+    window._productsLoading = false;
     if (!error && data && data.length > 0) {
       allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
       buildSidebar();
       renderProducts(allProducts);
+    } else {
+      renderProducts([]);
     }
-  } catch(e) {}
+  } catch(e) {
+    window._productsLoading = false;
+    renderProducts([]);
+  }
 }
 
 saveCart();
