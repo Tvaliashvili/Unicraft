@@ -138,8 +138,8 @@ tailwind.config = {
 </div>
 
 <!-- CART DRAWER -->
-<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
-<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light z-50 border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full">
+<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:1100"></div>
+<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full" style="z-index:1100">
   <div class="bg-dark-black px-6 py-4 flex items-center justify-between">
     <h2 class="font-display text-2xl tracking-wide text-white">კალათა</h2>
     <button onclick="toggleCart()" class="text-white/40 hover:text-orange text-2xl leading-none transition-colors">✕</button>
@@ -276,6 +276,43 @@ tailwind.config = {
     </div>
 
   </div>
+</div>
+
+<!-- ══ CHAT WIDGET ══ -->
+<div id="chatWidget" style="position:fixed;bottom:24px;left:20px;z-index:999;display:flex;flex-direction:column;align-items:flex-start;gap:0;max-width:calc(100vw - 40px)">
+  <div id="chatPanel" style="display:none;width:320px;max-width:calc(100vw - 40px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;flex-direction:column;overflow:hidden;margin-bottom:10px">
+    <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
+        <span style="color:white;font-weight:700;font-size:13px;font-family:'Noto Sans Georgian',sans-serif">UniCraft · მხარდაჭერა</span>
+      </div>
+      <button onclick="toggleChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
+    </div>
+    <div id="chatIntro" style="padding:20px 18px;display:flex;flex-direction:column;gap:14px;font-family:'Noto Sans Georgian',sans-serif">
+      <p style="font-size:13px;color:#374151;line-height:1.6;margin:0">გამარჯობა! 👋 სასაუბროდ გთხოვთ შეიყვანოთ თქვენი <strong>სახელი</strong> და <strong>ტელეფონის ნომერი</strong>.</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="chatNameInput" placeholder="სახელი და გვარი" onkeydown="if(event.key==='Enter')document.getElementById('chatPhoneInput').focus()"
+          style="border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:16px;font-family:'Noto Sans Georgian',sans-serif;outline:none;color:#1A1714;width:100%;box-sizing:border-box">
+        <input id="chatPhoneInput" placeholder="ტელეფონი (მაგ: 599 123 456)" onkeydown="if(event.key==='Enter')startChat()"
+          style="border:1px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:16px;font-family:'Noto Sans Georgian',sans-serif;outline:none;color:#1A1714;width:100%;box-sizing:border-box">
+        <div id="chatIntroError" style="display:none;color:#ef4444;font-size:12px">გთხოვთ შეავსოთ ორივე ველი</div>
+      </div>
+      <button onclick="startChat()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;width:100%">ჩატის დაწყება →</button>
+    </div>
+    <div id="chatBody" style="display:none;flex-direction:column;height:380px">
+      <div id="chatMessages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f9fafb;font-family:'Noto Sans Georgian',sans-serif"></div>
+      <div style="padding:10px 12px;border-top:1px solid #e5e7eb;display:flex;gap:8px;background:white;flex-shrink:0">
+        <input id="chatInput" placeholder="შეტყობინება..." onkeydown="if(event.key==='Enter')sendChatMsg()"
+          style="flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:8px 11px;font-size:16px;font-family:'Noto Sans Georgian',sans-serif;outline:none;color:#1A1714">
+        <button onclick="sendChatMsg()" style="width:36px;height:36px;background:#E8541A;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <button onclick="toggleChat()" id="chatToggleBtn"
+    style="width:52px;height:52px;background:#E8541A;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(232,84,26,0.45);position:relative;flex-shrink:0">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
+  </button>
 </div>
 
 <div id="toast" class="fixed bottom-7 left-1/2 -translate-x-1/2 translate-y-20 bg-dark text-white text-sm font-medium px-6 py-3 border-l-4 border-orange z-50 transition-transform duration-300 whitespace-nowrap pointer-events-none"></div>
@@ -541,5 +578,85 @@ window.showToast = function(msg) {
 init();
 </script>
 <script src="js/invoice.js"></script>
+<script type="module">
+import { supabase } from './js/supabase-config.js';
+let chatSessionId = localStorage.getItem('uc_chat_session');
+if (!chatSessionId) { chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6); localStorage.setItem('uc_chat_session', chatSessionId); }
+let chatChannel = null, chatOpen = false;
+let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
+let _chatUserName = chatUserInfo?.name || '', _chatUserPhone = chatUserInfo?.phone || '';
+
+window.toggleChat = function() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chatPanel');
+  panel.style.display = chatOpen ? 'flex' : 'none';
+  if (chatOpen) {
+    document.getElementById('chatUnreadBadge').style.display = 'none';
+    if (chatUserInfo) {
+      document.getElementById('chatIntro').style.display = 'none';
+      document.getElementById('chatBody').style.display = 'flex';
+      document.getElementById('chatBody').style.flexDirection = 'column';
+      document.getElementById('chatInput').focus();
+      initChatSession();
+    } else {
+      document.getElementById('chatIntro').style.display = 'flex';
+      document.getElementById('chatIntro').style.flexDirection = 'column';
+      document.getElementById('chatBody').style.display = 'none';
+      setTimeout(() => document.getElementById('chatNameInput').focus(), 50);
+    }
+  } else { if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; } }
+};
+
+window.startChat = function() {
+  const name = document.getElementById('chatNameInput').value.trim();
+  const phone = document.getElementById('chatPhoneInput').value.trim();
+  if (!name || !phone) { document.getElementById('chatIntroError').style.display = 'block'; return; }
+  document.getElementById('chatIntroError').style.display = 'none';
+  chatUserInfo = { name, phone }; localStorage.setItem('uc_chat_user', JSON.stringify(chatUserInfo));
+  _chatUserName = name; _chatUserPhone = phone;
+  document.getElementById('chatIntro').style.display = 'none';
+  document.getElementById('chatBody').style.display = 'flex';
+  document.getElementById('chatBody').style.flexDirection = 'column';
+  document.getElementById('chatInput').focus();
+  initChatSession(name, phone);
+};
+
+async function initChatSession(name, phone) {
+  const n = name || _chatUserName, p = phone || _chatUserPhone;
+  try {
+    await supabase.from('chats').upsert({ id: chatSessionId, customer_name: n, customer_phone: p, last_message: '', unread: 0, status: 'open' }, { onConflict: 'id', ignoreDuplicates: true });
+    const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
+    if (!existing || !existing.length) {
+      const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
+      await supabase.from('chat_messages').insert({ session_id: chatSessionId, text: welcomeText, sender: 'admin' });
+      await supabase.from('chats').update({ last_message: welcomeText, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
+      renderChatMsgs([{ text: welcomeText, sender: 'admin' }]);
+    } else { renderChatMsgs(existing); }
+    if (chatChannel) supabase.removeChannel(chatChannel);
+    chatChannel = supabase.channel('chat-' + chatSessionId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${chatSessionId}` }, payload => {
+        const el = document.getElementById('chatMessages'), m = payload.new, isAdmin = m.sender === 'admin';
+        el.innerHTML += `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55">${m.text}</div></div>`;
+        el.scrollTop = el.scrollHeight;
+      }).subscribe();
+  } catch(e) { renderChatMsgs([{ text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`, sender: 'admin' }]); }
+}
+
+function renderChatMsgs(msgs) {
+  const el = document.getElementById('chatMessages');
+  el.innerHTML = msgs.map(m => { const isAdmin = m.sender==='admin'; return `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55">${m.text}</div></div>`; }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+window.sendChatMsg = async function() {
+  const input = document.getElementById('chatInput'), text = input.value.trim();
+  if (!text) return; input.value = '';
+  try {
+    await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
+    const { data: cur } = await supabase.from('chats').select('unread').eq('id', chatSessionId).single();
+    await supabase.from('chats').update({ last_message: text, unread: (cur?.unread||0)+1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
+  } catch(e) {}
+};
+</script>
 </body>
 </html>
