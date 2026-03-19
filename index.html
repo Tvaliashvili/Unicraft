@@ -560,6 +560,12 @@ tailwind.config = {
       </div>
       <button onclick="toggleChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
     </div>
+    <!-- Off-hours message -->
+    <div id="chatOffHours" style="display:none;padding:24px 18px;font-family:'Noto Sans Georgian',sans-serif;text-align:center;flex-direction:column;align-items:center;gap:14px">
+      <div style="font-size:32px">🕘</div>
+      <div style="font-size:14px;font-weight:700;color:#1A1714">ჩვენ ამჟამად ოფლაინ ვართ</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.7">თქვენ დაგვიკავშირდით არასამუშაო დროს.<br>სამუშაო საათები:<br><strong style="color:#E8541A">დილის 9:00 – საღამოს 19:00</strong></div>
+    </div>
     <!-- Intro form -->
     <div id="chatIntro" style="padding:20px 18px;display:flex;flex-direction:column;gap:14px;font-family:'Noto Sans Georgian',sans-serif">
       <p style="font-size:13px;color:#374151;line-height:1.6;margin:0">გამარჯობა! 👋 სასაუბროდ გთხოვთ შეიყვანოთ თქვენი <strong>სახელი</strong> და <strong>ტელეფონის ნომერი</strong>.</p>
@@ -1060,19 +1066,33 @@ let _chatUserPhone = chatUserInfo?.phone || '';
 let _customerIp = null;
 fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => { _customerIp = d.ip; }).catch(() => {});
 
+function isWorkingHours() {
+  const now = new Date();
+  // Tbilisi is UTC+4 (no DST)
+  const tbilisiHour = (now.getUTCHours() + 4) % 24;
+  return tbilisiHour >= 9 && tbilisiHour < 19;
+}
+
 window.toggleChat = function() {
   chatOpen = !chatOpen;
   const panel = document.getElementById('chatPanel');
   panel.style.display = chatOpen ? 'flex' : 'none';
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
-    if (chatUserInfo) {
+    if (!isWorkingHours()) {
+      document.getElementById('chatOffHours').style.display = 'flex';
+      document.getElementById('chatOffHours').style.flexDirection = 'column';
+      document.getElementById('chatIntro').style.display = 'none';
+      document.getElementById('chatBody').style.display = 'none';
+    } else if (chatUserInfo) {
+      document.getElementById('chatOffHours').style.display = 'none';
       document.getElementById('chatIntro').style.display = 'none';
       document.getElementById('chatBody').style.display = 'flex';
       document.getElementById('chatBody').style.flexDirection = 'column';
       document.getElementById('chatInput').focus();
       initChatSession();
     } else {
+      document.getElementById('chatOffHours').style.display = 'none';
       document.getElementById('chatIntro').style.display = 'flex';
       document.getElementById('chatIntro').style.flexDirection = 'column';
       document.getElementById('chatBody').style.display = 'none';
