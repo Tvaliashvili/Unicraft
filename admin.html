@@ -449,23 +449,25 @@
         </div>
         <button class="btn btn-danger btn-sm" onclick="deleteAllChats()">🗑 ყველას წაშლა</button>
       </div>
-      <div style="display:grid;grid-template-columns:290px 1fr;gap:16px;flex:1;min-height:0">
+      <div id="chatGrid" style="display:grid;grid-template-columns:290px 1fr;gap:16px;flex:1;min-height:0">
         <!-- Sessions list -->
-        <div class="card" style="padding:0;overflow-y:auto;display:flex;flex-direction:column">
+        <div id="chatSessionsCol" class="card" style="padding:0;overflow-y:auto;display:flex;flex-direction:column">
           <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid)">საუბრები</div>
           <div id="chatSessionsList" style="flex:1;overflow-y:auto">
             <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
           </div>
         </div>
         <!-- Message panel -->
-        <div class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden">
+        <div id="chatMainCol" class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden">
           <div id="adminChatEmpty" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-mid);font-size:14px;flex-direction:column;gap:8px">
+            <button id="mobileSessionsToggle" onclick="toggleChatSessions()" style="display:none;background:var(--orange);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px">☰ საუბრები</button>
             <span style="font-size:36px">💬</span>
             <span>აირჩიეთ საუბარი სიდან</span>
           </div>
           <div id="adminChatPanel" style="display:none;flex-direction:column;height:100%">
             <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
               <div style="display:flex;align-items:center;gap:10px">
+                <button id="mobileBackBtn" onclick="showChatSessionsMobile()" style="display:none;background:none;border:none;color:var(--gray-mid);font-size:20px;cursor:pointer;padding:0;margin-right:2px;line-height:1">‹</button>
                 <div id="adminChatStatusDot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
                 <span id="adminChatTitle" style="font-weight:700;font-size:14px">მომხმარებელი</span>
               </div>
@@ -718,7 +720,15 @@ window.showPage = function(name) {
   }
   if (name === 'orders') loadOrdersList();
   if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
-  if (name === 'chat') loadChatSessions();
+  if (name === 'chat') {
+    loadChatSessions();
+    if (isMobile()) {
+      document.getElementById('chatSessionsCol').style.display = 'none';
+      document.getElementById('chatMainCol').style.display = 'flex';
+      document.getElementById('mobileSessionsToggle').style.display = 'inline-block';
+      document.getElementById('mobileBackBtn').style.display = 'none';
+    }
+  }
   // close sidebar on mobile after nav
   document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('show');
@@ -1304,8 +1314,30 @@ window.deleteChat = async function(sessionId) {
   }
 };
 
+function isMobile() { return window.innerWidth <= 768; }
+
+window.toggleChatSessions = function() {
+  const col = document.getElementById('chatSessionsCol');
+  const main = document.getElementById('chatMainCol');
+  const isHidden = col.style.display === 'none' || col.style.display === '';
+  col.style.display = isHidden ? 'flex' : 'none';
+  main.style.display = isHidden ? 'none' : 'flex';
+};
+
+window.showChatSessionsMobile = function() {
+  if (!isMobile()) return;
+  document.getElementById('chatSessionsCol').style.display = 'flex';
+  document.getElementById('chatMainCol').style.display = 'none';
+};
+
 window.openAdminChat = async function(sessionId) {
   currentChatSessionId = sessionId;
+  // On mobile: hide sessions list, show main panel
+  if (isMobile()) {
+    document.getElementById('chatSessionsCol').style.display = 'none';
+    document.getElementById('chatMainCol').style.display = 'flex';
+    document.getElementById('mobileBackBtn').style.display = 'inline-block';
+  }
   document.getElementById('adminChatEmpty').style.display = 'none';
   const panel = document.getElementById('adminChatPanel');
   panel.style.display = 'flex';

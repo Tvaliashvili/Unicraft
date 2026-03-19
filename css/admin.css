@@ -643,7 +643,14 @@ body {
   #orderModal > div { max-width: 100% !important; border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
 
   /* Chat page: fix left position on mobile */
-  #page-chat.active { left: 0 !important; top: 54px !important; padding: 12px !important; }
+  #page-chat.active { left: 0 !important; top: 54px !important; padding: 8px !important; }
+
+  /* Chat grid: single column on mobile */
+  #chatGrid { display: flex !important; flex-direction: column; }
+  #chatSessionsCol { flex-direction: column; }
+  #chatMainCol { flex: 1; min-height: 0; }
+  #mobileSessionsToggle { display: inline-block !important; }
+  #mobileBackBtn { display: none; }
 
   /* Login card: full width with padding on small phones */
   .login-card { padding: 28px 20px; margin: 16px; }
