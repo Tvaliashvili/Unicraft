@@ -269,13 +269,13 @@
       </div>
       <div id="orderStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px"></div>
       <div class="card">
-        <div class="order-row table-header" style="grid-template-columns:100px 150px 1fr 130px 100px 130px 120px 40px;">
+        <div class="order-row table-header" style="grid-template-columns:100px 150px 1fr 130px 100px 100px 120px 40px;align-items:center">
           <span>თარიღი</span>
           <span>ინვ. ნომ.</span>
           <span>მყიდველი</span>
+          <span>მიბმული</span>
           <span>საიდ. კოდი</span>
           <span>სულ</span>
-          <span>მიბმული</span>
           <span>სტატუსი</span>
           <span></span>
         </div>
@@ -918,20 +918,20 @@ const DEMO_ORDERS = [];
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
   const status = o.status || 'pending';
-  return `<div class="order-row" style="grid-template-columns:100px 150px 1fr 130px 100px 130px 120px 40px;cursor:pointer" onclick="openOrderModal('${id}')">
+  return `<div class="order-row" style="grid-template-columns:100px 150px 1fr 130px 100px 100px 120px 40px;cursor:pointer;align-items:center" onclick="openOrderModal('${id}')">
     <span style="font-size:12px;color:var(--gray-mid)">${dateStr}</span>
     <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoice_no || o.invoiceNo || '–'}</span>
     <div>
       <div style="font-weight:600;font-size:13px">${o.buyer_name || o.buyerName || '–'}</div>
       ${o.items ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${(Array.isArray(o.items) ? o.items : JSON.parse(o.items||'[]')).map(i=>i.name).join(', ')}</div>` : ''}
     </div>
-    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</span>
-    <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
     <div style="display:flex;align-items:center">
       ${o.assigned_name
-        ? `<span id="assigned-badge-${id}" style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">${o.assigned_name}</span>`
+        ? `<span id="assigned-badge-${id}" style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:125px">${o.assigned_name}</span>`
         : `<span id="assigned-badge-${id}" style="display:none;font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600"></span>`}
     </div>
+    <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</span>
+    <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
     <div style="display:flex;align-items:center"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></div>
     <div style="display:flex;align-items:center;justify-content:center">
       <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:16px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">✕</button>
@@ -1048,12 +1048,13 @@ function updateModalActions(status, assignedTo, assignedName) {
         აღება
       </button>`;
   } else if (isMine) {
-    // Assigned to me — show status buttons
+    // Assigned to me — show status buttons + unassign
     el.innerHTML = `
       <button onclick="setOrderStatus(window.currentOrderId,'confirmed')" style="background:#16a34a;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✓ დადასტურება</button>
       <button onclick="setOrderStatus(window.currentOrderId,'in_transit')" style="background:#2563eb;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🚚 ტრანსპორტირება</button>
       <button onclick="setOrderStatus(window.currentOrderId,'completed')" style="background:#6b7280;color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✔ დასრულება</button>
-      <button onclick="setOrderStatus(window.currentOrderId,'cancelled')" style="background:none;color:#dc2626;border:1px solid #dc2626;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✕ გაუქმება</button>`;
+      <button onclick="setOrderStatus(window.currentOrderId,'cancelled')" style="background:none;color:#dc2626;border:1px solid #dc2626;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✕ გაუქმება</button>
+      <button onclick="unassignOrder()" style="background:none;color:#dc2626;border:1px solid #dc2626;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-left:auto">↩ ჩახსნა</button>`;
   } else {
     // Assigned to someone else
     el.innerHTML = `<span style="font-size:13px;color:#6b7280">ეს ინვოისი სხვა ადმინს აქვს მიბმული</span>`;
@@ -1073,6 +1074,20 @@ window.assignOrder = async function() {
   // Update row in list
   const badge = document.getElementById('assigned-badge-' + id);
   if (badge) { badge.textContent = _me.name; badge.style.display = 'inline'; }
+};
+
+window.unassignOrder = async function() {
+  const id = window.currentOrderId;
+  if (!id) return;
+  const { error } = await supabase.from('orders')
+    .update({ assigned_to: null, assigned_name: null })
+    .eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) { ordersCache[id].assigned_to = null; ordersCache[id].assigned_name = null; }
+  showToast('ინვოისი ჩახსნილია', 'success');
+  updateModalActions(ordersCache[id]?.status || 'new', null, null);
+  const badge = document.getElementById('assigned-badge-' + id);
+  if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
 };
 
 window.toggleReactivate = function() {
