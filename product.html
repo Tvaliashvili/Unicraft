@@ -635,7 +635,8 @@ async function initChatSession(name, phone) {
       const { data: banCheck } = await supabase.from('banned_ips').select('ip').eq('ip', _customerIp).maybeSingle();
       if (banCheck) { showChatBanned(); return; }
     }
-    await supabase.from('chats').upsert({ id: chatSessionId, customer_name: n, customer_phone: p, last_message: '', unread: 0, status: 'open', ip: _customerIp }, { onConflict: 'id', ignoreDuplicates: true });
+    await supabase.from('chats').upsert({ id: chatSessionId, customer_name: n, customer_phone: p, last_message: '', unread: 0, status: 'open' }, { onConflict: 'id', ignoreDuplicates: true });
+    if (_customerIp) supabase.from('chats').update({ ip: _customerIp }).eq('id', chatSessionId).then(() => {}).catch(() => {});
     const { data: chatData } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
     if (chatData?.status === 'banned') { showChatBanned(); return; }
     if (chatData?.status === 'closed') { showChatClosed(); return; }
@@ -657,7 +658,14 @@ async function initChatSession(name, phone) {
         if (payload.new.status === 'banned') showChatBanned();
         else if (payload.new.status === 'closed') showChatClosed();
       }).subscribe();
-  } catch(e) { renderChatMsgs([{ text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`, sender: 'admin' }]); }
+  } catch(e) {
+    try {
+      const { data: cd } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
+      if (cd?.status === 'banned') { showChatBanned(); return; }
+      if (cd?.status === 'closed') { showChatClosed(); return; }
+    } catch(e2) {}
+    renderChatMsgs([{ text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`, sender: 'admin' }]);
+  }
 }
 
 function showChatClosed() {
@@ -677,12 +685,12 @@ function showChatClosed() {
 function showChatBanned() {
   document.getElementById('chatInputRow').style.display = 'none';
   const banner = document.getElementById('chatClosedBanner');
-  banner.style.background = '#f5f3ff'; banner.style.borderTopColor = '#c4b5fd';
-  banner.innerHTML = `<div style="font-size:12px;color:#7c3aed;font-weight:700;text-align:center">🚫 თქვენ დაბლოკილი ხართ</div>
+  banner.style.background = '#fef2f2'; banner.style.borderTopColor = '#fca5a5';
+  banner.innerHTML = `<div style="font-size:12px;color:#dc2626;font-weight:700;text-align:center">🚫 თქვენ დაბლოკილი ხართ</div>
     <div style="font-size:11px;color:#6b7280;text-align:center;line-height:1.6">თქვენ დაბლოკილი ხართ არასწორი ქმედების გამო.</div>`;
   banner.style.display = 'flex'; banner.style.flexDirection = 'column';
   const el = document.getElementById('chatMessages');
-  el.innerHTML += `<div style="text-align:center;padding:8px 0"><span style="font-size:11px;color:#7c3aed;background:#f5f3ff;padding:4px 12px;border-radius:20px">🚫 დაბლოკილია</span></div>`;
+  el.innerHTML += `<div style="text-align:center;padding:8px 0"><span style="font-size:11px;color:#dc2626;background:#fef2f2;padding:4px 12px;border-radius:20px">🚫 დაბლოკილია</span></div>`;
   el.scrollTop = el.scrollHeight;
   if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
 }

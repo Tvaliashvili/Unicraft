@@ -472,7 +472,7 @@
                 <span id="adminChatTitle" style="font-weight:700;font-size:14px">მომხმარებელი</span>
               </div>
               <div style="display:flex;gap:6px;align-items:center">
-                <button id="banIpBtn" onclick="banChatIp()" style="display:none;background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🚫 IP ბანი</button>
+                <button id="banIpBtn" onclick="banChatIp()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🚫 IP ბანი</button>
                 <button id="closeChatBtn" onclick="closeAdminChat()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✕ საუბრის დასრულება</button>
               </div>
             </div>
@@ -601,11 +601,11 @@
   <div style="background:white;border-radius:14px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
     <div style="font-size:32px;margin-bottom:12px">🚫</div>
     <div style="font-size:16px;font-weight:700;color:#1a1714;margin-bottom:8px">IP მისამართის დაბლოკვა</div>
-    <div style="font-size:13px;color:#6b7280;margin-bottom:8px;line-height:1.6">IP: <span id="banModalIp" style="font-family:monospace;font-weight:700;color:#7c3aed"></span></div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:8px;line-height:1.6">IP: <span id="banModalIp" style="font-family:monospace;font-weight:700;color:#dc2626"></span></div>
     <div style="font-size:13px;color:#6b7280;margin-bottom:24px;line-height:1.6">ეს მომხმარებელი ვეღარ შეძლებს ჩატის გამოყენებას.</div>
     <div style="display:flex;gap:10px">
       <button onclick="cancelBanIp()" style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">გაუქმება</button>
-      <button onclick="confirmBanIp()" style="flex:1;background:#7c3aed;color:white;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">დაბლოკვა</button>
+      <button onclick="confirmBanIp()" style="flex:1;background:#dc2626;color:white;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">დაბლოკვა</button>
     </div>
   </div>
 </div>
@@ -1450,6 +1450,10 @@ window.confirmBanIp = async function() {
   document.getElementById('adminChatClosedBar').textContent = '🚫 მომხმარებელი დაბლოკილია';
   document.getElementById('adminChatStatusDot').style.background = '#ef4444';
   showToast('IP მისამართი დაბლოკილია', 'success');
+  // Auto-open banned list
+  _bannedListOpen = true;
+  document.getElementById('bannedIpListWrap').style.display = 'block';
+  document.getElementById('bannedIpChevron').textContent = '▲';
   loadBannedIps();
 };
 
@@ -1476,7 +1480,7 @@ async function loadBannedIps() {
   el.innerHTML = list.map(b => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-family:monospace;font-size:13px;font-weight:700;color:#7c3aed">${b.ip}</div>
+        <div style="font-family:monospace;font-size:13px;font-weight:700;color:#dc2626">${b.ip}</div>
         ${b.customer_name ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${b.customer_name}</div>` : ''}
         <div style="font-size:10px;color:#9ca3af;margin-top:2px">${new Date(b.created_at).toLocaleDateString('ka-GE')}</div>
       </div>
