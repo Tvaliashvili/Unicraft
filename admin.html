@@ -630,7 +630,7 @@ let _removeBg = null;
 async function getRemoveBg() {
   if (_removeBg) return _removeBg;
   try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/background-removal.mjs');
+    const mod = await import('https://esm.sh/@imgly/background-removal');
     _removeBg = mod.removeBackground;
   } catch(e) { _removeBg = null; }
   return _removeBg;
