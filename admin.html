@@ -840,7 +840,7 @@ window.doLogout = async function() {
 supabase.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
     showApp(session.user.email);
-  } else if (!sessionStorage.getItem('uc_demo_admin')) {
+  } else {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
   }
