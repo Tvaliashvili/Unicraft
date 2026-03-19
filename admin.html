@@ -203,10 +203,6 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">მარაგი (ცალი)</label>
-              <input class="form-input" id="prodStock" type="number" min="0" placeholder="100">
-            </div>
-            <div class="form-group">
               <label class="form-label">სტატუსი</label>
               <select class="form-select" id="prodActive">
                 <option value="true">✓ აქტიური (ჩანს კატალოგში)</option>
@@ -530,10 +526,6 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">მარაგი (ცალი)</label>
-          <input class="form-input" id="editStock" type="number" min="0" placeholder="100">
-        </div>
-        <div class="form-group">
           <label class="form-label">სტატუსი</label>
           <select class="form-select" id="editActive">
             <option value="true">✓ აქტიური</option>
@@ -739,7 +731,6 @@ window.addProduct = async function() {
       unit: document.getElementById('prodUnit').value,
       description: document.getElementById('prodDesc').value.trim(),
       image_url: prodFileData || '',
-      stock: parseInt(document.getElementById('prodStock').value) || 0,
       active: document.getElementById('prodActive').value === 'true',
       store: document.getElementById('prodStore').value.trim(),
       code: genProductCode(),
@@ -811,7 +802,6 @@ window.editProduct = function(id) {
   document.getElementById('editUnit').value = p.unit || 'ც';
   document.getElementById('editDesc').value = p.description || '';
   document.getElementById('editExistingImage').value = p.image_url || '';
-  document.getElementById('editStock').value = p.stock || '';
   document.getElementById('editActive').value = p.active !== false ? 'true' : 'false';
   document.getElementById('editStore').value = p.store || '';
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
@@ -844,7 +834,6 @@ window.saveProductEdit = async function() {
       unit: document.getElementById('editUnit').value,
       description: document.getElementById('editDesc').value.trim(),
       image_url: editFileData || document.getElementById('editExistingImage').value,
-      stock: parseInt(document.getElementById('editStock').value) || 0,
       active: document.getElementById('editActive').value === 'true',
       store: document.getElementById('editStore').value.trim(),
     }).eq('id', id);
