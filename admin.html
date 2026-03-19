@@ -951,11 +951,10 @@ function renderProductRows(rows) {
       </div>
       <div>
         <div class="prod-name">${p.name}</div>
-        <div class="prod-cat">${p.unit || ''}</div>
       </div>
       <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
       <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
-      <span class="price-cell">${p.price} ₾</span>
+      <span class="price-cell">${p.price} ₾${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
       <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
       <div style="display:flex;gap:6px">
         <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
