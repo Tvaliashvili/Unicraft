@@ -690,13 +690,13 @@ function renderPage() {
         <div class="text-[13px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
         <div class="font-bold text-sm text-dark mb-1 leading-snug">${p.name}</div>
         <div class="flex-1"></div>
-        <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
-          <div>
+        <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4 overflow-hidden">
+          <div class="min-w-0 flex-1">
             ${p.oldPrice ? `<div class="text-xs text-gray-300 line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
             ${fmtPrice(p.price, p.unit)}
           </div>
           <button onclick="event.stopPropagation();addToCart('${p.id}')"
-            class="bg-dark hover:bg-orange text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+            class="bg-dark hover:bg-orange text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 ml-2">
             + კალათა
           </button>
         </div>
