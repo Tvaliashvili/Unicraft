@@ -750,7 +750,7 @@ window.submitOrder = async function() {
   btn.disabled = true; btn.textContent = 'იგზავნება...';
   try {
     const { supabase } = await import('./js/supabase-config.js');
-    await supabase.from('orders').insert({
+    const { error: insertError } = await supabase.from('orders').insert({
       invoice_no: currentInvoiceNo,
       buyer_id: document.getElementById('buyerIdInput').value.trim(),
       buyer_name: document.getElementById('buyerNameInput').value.trim(),
@@ -758,6 +758,12 @@ window.submitOrder = async function() {
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
       status: 'pending'
     });
+    if (insertError) {
+      console.error('Order insert error:', insertError);
+      btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
+      alert('შეცდომა: ' + (insertError.message || insertError.code || JSON.stringify(insertError)));
+      return;
+    }
   } catch(e) {
     console.error('Order insert error:', e);
     btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
