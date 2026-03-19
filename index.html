@@ -1014,7 +1014,7 @@ async function initChatSession(name, phone) {
         const m = payload.new;
         const isAdmin = m.sender === 'admin';
         el.innerHTML += `<div style="display:flex;justify-content:${isAdmin ? 'flex-start' : 'flex-end'}">
-          <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? 'white' : '#E8541A'};color:${isAdmin ? '#1A1714' : 'white'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+          <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? '#141210' : '#E8541A'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
         </div>`;
         el.scrollTop = el.scrollHeight;
       })
@@ -1029,7 +1029,7 @@ function renderChatMsgs(msgs) {
   el.innerHTML = msgs.map(m => {
     const isAdmin = m.sender === 'admin';
     return `<div style="display:flex;justify-content:${isAdmin ? 'flex-start' : 'flex-end'}">
-      <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? 'white' : '#E8541A'};color:${isAdmin ? '#1A1714' : 'white'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+      <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? '#141210' : '#E8541A'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
     </div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;

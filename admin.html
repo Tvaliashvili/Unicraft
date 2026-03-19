@@ -1288,7 +1288,7 @@ window.openAdminChat = async function(sessionId) {
       const m = payload.new;
       const isAdmin = m.sender === 'admin';
       el.innerHTML += `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
-        <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#141210' : 'white'};color:${isAdmin ? 'white' : 'var(--dark)'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+        <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
       </div>`;
       el.scrollTop = el.scrollHeight;
     })
@@ -1302,7 +1302,7 @@ function renderAdminChatMsgs(msgs) {
   el.innerHTML = msgs.map(m => {
     const isAdmin = m.sender === 'admin';
     return `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
-      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#141210' : 'white'};color:${isAdmin ? 'white' : 'var(--dark)'};font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
     </div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
