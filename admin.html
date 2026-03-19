@@ -682,17 +682,13 @@ async function initApp() {
     const [{ count: prodCount }, { count: orderCount }, { data: newOrders }] = await Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }),
       supabase.from('orders').select('*', { count: 'exact', head: true }),
-      supabase.from('orders').select('id').eq('status', 'pending')
+      supabase.from('orders').select('id').in('status', ['pending', 'new'])
     ]);
     document.getElementById('statProducts').textContent = prodCount || 0;
     document.getElementById('statOrders').textContent = orderCount || 0;
     const newCount = newOrders?.length || 0;
     document.getElementById('statNew').textContent = newCount;
-    if (newCount > 0) {
-      const badge = document.getElementById('newOrdersBadge');
-      badge.textContent = newCount;
-      badge.style.display = 'inline';
-    }
+    updateOrderBadge(newCount);
     // Recent orders
     const { data: recentOrders } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
     renderRecentOrders(recentOrders || []);
@@ -859,6 +855,13 @@ let ordersCache = {};
 window.currentOrderId = null;
 let ordersChannel = null;
 
+function updateOrderBadge(count) {
+  const badge = document.getElementById('newOrdersBadge');
+  if (!badge) return;
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+}
+
 // ─── Demo orders ───
 const DEMO_ORDERS = [];
 
@@ -893,6 +896,7 @@ async function loadOrdersList() {
       hasRealData = true;
       const newCount = data.filter(o => !o.status || o.status === 'pending' || o.status === 'new').length;
       document.getElementById('orderCountLabel').textContent = newCount + ' ახალი შეკვეთა';
+      updateOrderBadge(newCount);
       el.innerHTML = data.map(o => {
         const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
         return renderOrderRow(o.id, o, date);
