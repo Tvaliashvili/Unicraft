@@ -967,6 +967,10 @@ async function initChatSession(name, phone) {
   const n = name || _chatUserName;
   const p = phone || _chatUserPhone;
   try {
+    // Ensure IP is resolved before ban check
+    if (!_customerIp) {
+      try { const r = await fetch('https://api.ipify.org?format=json'); _customerIp = (await r.json()).ip; } catch(e) {}
+    }
     // Check if IP is banned
     if (_customerIp) {
       const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();

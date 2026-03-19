@@ -631,6 +631,9 @@ window.startChat = function() {
 async function initChatSession(name, phone) {
   const n = name || _chatUserName, p = phone || _chatUserPhone;
   try {
+    if (!_customerIp) {
+      try { const r = await fetch('https://api.ipify.org?format=json'); _customerIp = (await r.json()).ip; } catch(e) {}
+    }
     if (_customerIp) {
       const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();
       if (banCheck) { showChatBanned(); return; }
