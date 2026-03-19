@@ -159,43 +159,126 @@ tailwind.config = {
 </div>
 
 <!-- ORDER MODAL -->
-<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:200">
-  <div class="modal-box bg-white w-full max-w-md border-t-4 border-orange transition-transform duration-300 translate-y-5">
-    <div id="orderFormWrap" class="p-8">
-      <h2 class="font-display text-3xl tracking-wide mb-1">ინვოისი</h2>
-      <p class="text-sm text-gray-400 mb-4">შეავსე მყიდველის მონაცემები</p>
-      <div id="orderSummary" class="bg-cream border border-gray-200 px-4 py-3 mb-4 text-sm"></div>
-      <div class="mb-3">
-        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">დასახელება / სახელი *</label>
-        <input id="buyerNameInput" type="text" placeholder="კომპანიის ან პირის სახელი" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none" style="transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:200">
+  <div class="modal-box bg-white w-full max-w-2xl border-t-4 border-orange transition-transform duration-300 translate-y-5 max-h-[92vh] overflow-y-auto">
+
+    <!-- Invoice form -->
+    <div id="orderFormWrap">
+      <!-- Header -->
+      <div class="flex items-start justify-between px-7 pt-6 pb-4 border-b border-gray-100">
+        <div>
+          <div class="font-display text-3xl tracking-wide"><span class="text-dark">UNI</span><span class="text-orange">CRAFT</span></div>
+          <div id="invoiceDate" class="text-xs text-gray-400 mt-1"></div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs font-bold tracking-[2px] text-gray-400 uppercase">ინვოისი</div>
+          <div id="invoiceNo" class="text-lg font-bold text-dark font-mono mt-1"></div>
+        </div>
       </div>
-      <div class="mb-3">
-        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">პირ. ნომ. / საიდ. კოდი *</label>
-        <input id="buyerIdInput" type="text" maxlength="20" placeholder="მაგ: 01234567890" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none" style="transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+
+      <!-- Seller & Buyer -->
+      <div class="flex border-b border-gray-100">
+        <div class="flex-1 px-7 py-4 bg-cream" style="border-right:1px solid #E8E2DC">
+          <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">გამყიდველი</div>
+          <div class="mb-2"><span class="text-gray-400 text-xs">დასახელება</span><br><span class="font-semibold text-dark text-sm">შპს უნიკრაფტი</span></div>
+          <div class="mb-2"><span class="text-gray-400 text-xs">ბანკი</span><br><span class="font-semibold text-dark text-sm">საქართველოს ბანკი</span></div>
+          <div><span class="text-gray-400 text-xs">ა/ნ</span><br><span class="font-bold text-dark font-mono tracking-wide text-sm">GE86BG0000000607455166</span></div>
+        </div>
+        <div class="flex-1 px-7 py-4 bg-cream">
+          <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">მყიდველი</div>
+          <div class="mb-2">
+            <div class="text-xs text-gray-400 mb-1">დასახელება / სახელი</div>
+            <input id="buyerNameInput" type="text" placeholder="კომპანიის ან პირის სახელი"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
+              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+          </div>
+          <div class="mb-2">
+            <div class="text-xs text-gray-400 mb-1">პირ. ნომ. / საიდ. კოდი</div>
+            <input id="buyerIdInput" type="text" maxlength="20" placeholder="მაგ: 01234567890"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
+              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+          </div>
+          <div>
+            <div class="text-xs text-gray-400 mb-1">ტელეფონი</div>
+            <input id="buyerPhoneInput" type="tel" placeholder="მაგ: 599 123 456"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
+              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+          </div>
+        </div>
       </div>
-      <div class="mb-4">
-        <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">ტელეფონი *</label>
-        <input id="buyerPhoneInput" type="tel" placeholder="მაგ: 599 123 456" class="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none" style="transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
+
+      <!-- Products table -->
+      <div class="px-7 pt-5 pb-2">
+        <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">პროდუქციის ჩამონათვალი</div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs font-semibold tracking-widest text-gray-400 uppercase border-b-2 border-gray-100">
+              <th class="text-left pb-2">დასახელება</th>
+              <th class="text-center pb-2 w-16">რ-ბა</th>
+              <th class="text-right pb-2 w-24">ერთ. ფასი</th>
+              <th class="text-right pb-2 w-24">სულ</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceItems"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="pt-3 pb-1 text-right text-xs text-gray-400 pr-4">მათ შორის დღგ (18%)</td>
+              <td class="pt-3 pb-1 text-right text-xs text-gray-400" id="invoiceVat"></td>
+            </tr>
+            <tr class="border-t-2 border-dark">
+              <td colspan="3" class="pt-3 text-right text-xs font-bold tracking-widest text-gray-400 uppercase pr-4">სულ გადასახდელი</td>
+              <td class="pt-3 text-right" id="invoiceTotal"></td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
-      <div id="buyerValidationMsg" class="hidden mb-3 text-xs text-red-500 font-medium">გთხოვთ შეავსოთ ყველა საჭირო ველი</div>
-      <div class="flex gap-2">
-        <button id="submitBtn" onclick="submitOrder()" class="flex-1 bg-orange hover:bg-orange-dark text-white font-semibold py-3 text-sm transition-colors">გააგზავნე მოთხოვნა →</button>
-        <button onclick="closeOrder()" class="bg-cream hover:bg-gray-200 text-gray-500 font-medium px-5 py-3 text-sm border border-gray-200 transition-colors">გაუქმება</button>
+
+      <!-- Payment note -->
+      <div class="px-7 py-3 text-xs text-gray-400 text-center leading-relaxed border-t border-gray-50 mt-2">
+        გთხოვთ თანხის გადმორიცხვისას დანიშნულებაში მიუთითოთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <span class="text-dark font-medium">LLCunicraft@gmail.com</span>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="mx-7 mb-4 bg-cream border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-500 leading-relaxed">
+        <span class="font-bold text-gray-600">შენიშვნა:</span> აღნიშნული ინვოისი ძალაშია მისი დაგენერირების თარიღის დღეს და შეიძლება შეიცვალოს რამდენიმე დღის შემდეგ. შპს უნიკრაფტი იტოვებს უფლებას ნებისმიერ დროს შეცვალოს ფასები ცალმხრივად და შეტყობინების გარეშე. წინამდებარე ინვოისი არ წარმოადგენს ფასის ფიქსაციის ვალდებულებას.
+      </div>
+
+      <!-- Validation error -->
+      <div id="buyerValidationMsg" class="hidden px-7 pb-2 text-xs text-red-500 font-medium">გთხოვთ შეავსოთ ყველა საჭირო ველი</div>
+
+      <!-- Actions -->
+      <div class="px-7 pb-6 flex items-center gap-3">
+        <button id="submitBtn" onclick="submitOrder()"
+          class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 text-xs transition-colors rounded-lg whitespace-nowrap">
+          გაგზავნე მოთხოვნა →
+        </button>
+        <button onclick="downloadInvoicePDF()"
+          class="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-5 py-2.5 text-sm transition-colors rounded-lg border border-gray-200">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ჩამოტვირთე ინვოისი
+        </button>
+        <button onclick="closeOrder()"
+          class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2.5 text-sm transition-colors rounded-lg whitespace-nowrap">
+          გაუქმება
+        </button>
       </div>
     </div>
+
+    <!-- Success -->
     <div id="orderSuccess" class="hidden p-8 text-center">
       <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
       <h3 class="font-display text-2xl tracking-wide mb-2">მოთხოვნა გაიგზავნა!</h3>
       <p class="text-sm text-gray-400 mb-2">ინვოისის ნომერი: <strong id="successInvNo" class="text-dark font-mono"></strong></p>
       <p class="text-sm text-gray-400 mb-6">გთხოვთ განახორციელოთ გადახდა ინვოისში მითითებულ ანგარიშზე (GE86BG0000000607455166) და გამოაგზავნოთ დამადასტურებელი გადახდის ქვითარი ჩვენს ელექტრონულ მეილზე (LLCunicraft@gmail.com). მხოლოდ ამის შემდეგ დაიწყება თქვენს ინვოისზე მუშაობა.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <button onclick="downloadInvoicePDF()" class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-6 py-3 text-sm transition-colors border border-gray-200">
+        <button onclick="downloadInvoicePDF()" class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-6 py-3 text-sm transition-colors rounded-lg border border-gray-200">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           ჩამოტვირთე ინვოისი
         </button>
-        <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors">კარგი!</button>
+        <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors rounded-lg">კარგი!</button>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -365,13 +448,25 @@ function renderCart() {
 window.openOrder = function() {
   currentInvoiceNo = genInvoiceNo();
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+  const vat = total * 18 / 118;
+  const d = new Date();
+  document.getElementById('invoiceDate').textContent = d.toLocaleDateString('ka-GE', {year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('invoiceNo').textContent = currentInvoiceNo;
+  document.getElementById('invoiceItems').innerHTML = cart.map(i => `
+    <tr class="border-b border-gray-50">
+      <td class="py-2 pr-2">${i.name}</td>
+      <td class="py-2 text-center">${i.qty} ${i.unit||'ც'}</td>
+      <td class="py-2 text-right">${parseFloat(i.price).toFixed(2)} ₾</td>
+      <td class="py-2 text-right font-semibold">${(i.price*i.qty).toFixed(2)} ₾</td>
+    </tr>`).join('');
+  document.getElementById('invoiceVat').textContent = vat.toFixed(2) + ' ₾';
+  document.getElementById('invoiceTotal').innerHTML = `<span class="font-display text-2xl tracking-wide">${total.toFixed(2)} ₾</span>`;
   document.getElementById('buyerNameInput').value = '';
   document.getElementById('buyerIdInput').value = '';
   document.getElementById('buyerPhoneInput').value = '';
   document.getElementById('buyerValidationMsg').classList.add('hidden');
-  document.getElementById('orderSummary').innerHTML =
-    cart.map(i => `<div class="flex justify-between py-1 text-gray-500"><span>${i.name} ×${i.qty}</span><span>${(i.price*i.qty).toFixed(2)} ₾</span></div>`).join('') +
-    `<div class="flex justify-between border-t border-gray-200 mt-2 pt-2 font-bold text-dark"><span>სულ</span><span>${total.toFixed(2)} ₾</span></div>`;
+  document.getElementById('orderFormWrap').classList.remove('hidden');
+  document.getElementById('orderSuccess').classList.add('hidden');
   document.getElementById('orderModal').classList.add('modal-enter');
 };
 
