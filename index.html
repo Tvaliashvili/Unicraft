@@ -209,13 +209,19 @@ tailwind.config = {
   </div>
   <div>
     <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">ფასი</div>
-    <div class="flex items-center gap-2 mt-1">
-      <input type="number" id="mobilePriceMin" placeholder="საწყისი" min="0" oninput="updatePriceInputs()"
-        class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-      <span class="text-gray-300 flex-shrink-0">—</span>
-      <input type="number" id="mobilePriceMax" placeholder="ბოლო" min="0" oninput="updatePriceInputs()"
-        class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-      <span class="text-gray-400 flex-shrink-0 text-sm">₾</span>
+    <div class="flex items-end gap-2 mt-1">
+      <div class="flex-1">
+        <div class="text-[10px] text-gray-400 mb-1">საწყისი</div>
+        <input type="number" id="mobilePriceMin" min="0" oninput="updatePriceInputs()"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+      </div>
+      <span class="text-gray-300 flex-shrink-0 pb-2">—</span>
+      <div class="flex-1">
+        <div class="text-[10px] text-gray-400 mb-1">ბოლო</div>
+        <input type="number" id="mobilePriceMax" min="0" oninput="updatePriceInputs()"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+      </div>
+      <span class="text-gray-400 flex-shrink-0 text-sm pb-2">₾</span>
     </div>
   </div>
 </div>
@@ -235,13 +241,19 @@ tailwind.config = {
     <!-- Price -->
     <div>
       <div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-2 pb-2 border-b-2 border-orange inline-block">ფასი</div>
-      <div class="flex items-center gap-2 mt-1">
-        <input type="number" id="sidebarPriceMin" placeholder="საწყისი" min="0" oninput="updatePriceInputs()"
-          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-        <span class="text-gray-300 flex-shrink-0">—</span>
-        <input type="number" id="sidebarPriceMax" placeholder="ბოლო" min="0" oninput="updatePriceInputs()"
-          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-        <span class="text-gray-400 flex-shrink-0 text-sm">₾</span>
+      <div class="flex items-end gap-2 mt-1">
+        <div class="flex-1">
+          <div class="text-[10px] text-gray-400 mb-1">საწყისი</div>
+          <input type="number" id="sidebarPriceMin" min="0" oninput="updatePriceInputs()"
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+        </div>
+        <span class="text-gray-300 flex-shrink-0 pb-2">—</span>
+        <div class="flex-1">
+          <div class="text-[10px] text-gray-400 mb-1">ბოლო</div>
+          <input type="number" id="sidebarPriceMax" min="0" oninput="updatePriceInputs()"
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+        </div>
+        <span class="text-gray-400 flex-shrink-0 text-sm pb-2">₾</span>
       </div>
     </div>
 
