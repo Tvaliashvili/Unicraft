@@ -636,17 +636,45 @@ const DROPZONE_EMPTY = `
   <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
   <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>`;
 
+// Convert image File → WebP Blob via Canvas
+function convertToWebP(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('WebP conversion failed')), 'image/webp', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+    img.src = url;
+  });
+}
+
+// Upload File to Supabase Storage, return public URL
+async function uploadProductImage(file) {
+  const webpBlob = await convertToWebP(file);
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+  const { error } = await supabase.storage.from('product-images').upload(fileName, webpBlob, { contentType: 'image/webp' });
+  if (error) throw error;
+  const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+  return data.publicUrl;
+}
+
+function _storeFile(file, prefix) {
+  if (prefix === 'prod') prodFileData = file;
+  else editFileData = file;
+  showDropPreview(prefix, URL.createObjectURL(file));
+}
+
 window.handleFile = function(input, prefix) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) { showToast('ფაილი ძალიან დიდია (მაქს 5MB)', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    if (prefix === 'prod') prodFileData = e.target.result;
-    else editFileData = e.target.result;
-    showDropPreview(prefix, e.target.result);
-  };
-  reader.readAsDataURL(file);
+  _storeFile(file, prefix);
 };
 
 window.handleDrop = function(e, prefix) {
@@ -655,13 +683,7 @@ window.handleDrop = function(e, prefix) {
   const file = e.dataTransfer.files[0];
   if (!file || !file.type.startsWith('image/')) return;
   if (file.size > 5 * 1024 * 1024) { showToast('ფაილი ძალიან დიდია (მაქს 5MB)', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = ev => {
-    if (prefix === 'prod') prodFileData = ev.target.result;
-    else editFileData = ev.target.result;
-    showDropPreview(prefix, ev.target.result);
-  };
-  reader.readAsDataURL(file);
+  _storeFile(file, prefix);
 };
 
 function showDropPreview(prefix, src) {
@@ -826,13 +848,18 @@ window.addProduct = async function() {
   const btn = document.getElementById('addProductBtn');
   btn.disabled = true; btn.textContent = 'ემატება...';
   try {
+    let imageUrl = '';
+    if (prodFileData) {
+      btn.textContent = 'ფოტო იტვირთება...';
+      imageUrl = await uploadProductImage(prodFileData);
+    }
     await supabase.from('products').insert({
       name,
       category,
       price,
       unit: document.getElementById('prodUnit').value,
       description: document.getElementById('prodDesc').value.trim(),
-      image_url: prodFileData || '',
+      image_url: imageUrl,
       active: true,
       store: document.getElementById('prodStore').value.trim(),
       code: genProductCode(),
@@ -961,11 +988,16 @@ window.saveProductEdit = async function() {
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
   try {
+    let imageUrl = document.getElementById('editExistingImage').value;
+    if (editFileData) {
+      btn.textContent = 'ფოტო იტვირთება...';
+      imageUrl = await uploadProductImage(editFileData);
+    }
     await supabase.from('products').update({
       name, category, price,
       unit: document.getElementById('editUnit').value,
       description: document.getElementById('editDesc').value.trim(),
-      image_url: editFileData || document.getElementById('editExistingImage').value,
+      image_url: imageUrl,
       active: true,
       store: document.getElementById('editStore').value.trim(),
     }).eq('id', id);
