@@ -567,7 +567,7 @@ function renderPage() {
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
-        <div class="text-[9px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
+        <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
         <div class="font-bold text-sm text-dark mb-1 leading-snug">${p.name}</div>
         <div class="text-xs text-gray-400 leading-relaxed line-clamp-2 flex-1">${p.description||''}</div>
         <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
@@ -969,7 +969,7 @@ async function initChatSession(name, phone) {
   try {
     // Check if IP is banned
     if (_customerIp) {
-      const { data: banCheck } = await supabase.from('banned_ips').select('ip').eq('ip', _customerIp).maybeSingle();
+      const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();
       if (banCheck) { showChatBanned(); return; }
     }
 
@@ -1055,7 +1055,7 @@ window.copyContact = function() {
 
 window.restartChat = async function() {
   if (_customerIp) {
-    const { data: banCheck } = await supabase.from('banned_ips').select('ip').eq('ip', _customerIp).maybeSingle();
+    const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();
     if (banCheck) { showChatBanned(); return; }
   }
   chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);

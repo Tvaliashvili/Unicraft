@@ -632,7 +632,7 @@ async function initChatSession(name, phone) {
   const n = name || _chatUserName, p = phone || _chatUserPhone;
   try {
     if (_customerIp) {
-      const { data: banCheck } = await supabase.from('banned_ips').select('ip').eq('ip', _customerIp).maybeSingle();
+      const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();
       if (banCheck) { showChatBanned(); return; }
     }
     await supabase.from('chats').upsert({ id: chatSessionId, customer_name: n, customer_phone: p, last_message: '', unread: 0, status: 'open' }, { onConflict: 'id', ignoreDuplicates: true });

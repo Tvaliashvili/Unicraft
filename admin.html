@@ -473,7 +473,7 @@
               </div>
               <div style="display:flex;gap:6px;align-items:center">
                 <button id="banIpBtn" onclick="banChatIp()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🚫 IP ბანი</button>
-                <button id="closeChatBtn" onclick="closeAdminChat()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✕ საუბრის დასრულება</button>
+                <button id="closeChatBtn" onclick="closeAdminChat()" style="display:none;background:#dcfce7;color:#16a34a;border:1px solid #86efac;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✓ საუბრის დასრულება</button>
               </div>
             </div>
             <div id="adminChatMessages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f9fafb"></div>
@@ -1275,13 +1275,16 @@ function renderChatSessionsList(sessions) {
       const displayName = s.customer_name || s.customerName || s.id.slice(-8);
       const displayPhone = s.customer_phone || s.customerPhone || '';
       const lastMsg = s.last_message || s.lastMessage || '...';
+      const isBanned = s.status === 'banned';
       const isClosed = s.status === 'closed';
-      const dotColor = isClosed ? '#ef4444' : '#22c55e';
+      const statusIcon = isBanned
+        ? `<span style="font-size:11px;color:#dc2626;font-weight:700;flex-shrink:0">✕</span>`
+        : `<span style="width:8px;height:8px;border-radius:50%;background:${isClosed ? '#ef4444' : '#22c55e'};flex-shrink:0;box-shadow:0 0 0 2px white,0 0 0 3px ${isClosed ? '#ef4444' : '#22c55e'}"></span>`;
       return `<div style="border-bottom:1px solid var(--border);position:relative" id="chat-row-${s.id}">
         <div onclick="openAdminChat('${s.id}')" style="padding:12px 16px;cursor:pointer;${active}transition:background 0.15s;padding-right:36px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='${s.id === currentChatSessionId ? 'var(--gray-light)' : ''}'">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
             <div style="display:flex;align-items:center;gap:7px">
-              <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;box-shadow:0 0 0 2px white,0 0 0 3px ${dotColor}"></span>
+              ${statusIcon}
               <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px">
@@ -1440,8 +1443,6 @@ window.cancelBanIp = function() {
 
 window.confirmBanIp = async function() {
   document.getElementById('confirmBanModal').style.display = 'none';
-  const { data: sesData } = await supabase.from('chats').select('customer_name').eq('id', currentChatSessionId).maybeSingle();
-  await supabase.from('banned_ips').upsert({ ip: currentChatIp, customer_name: sesData?.customer_name || null, chat_id: currentChatSessionId }, { onConflict: 'ip' });
   await supabase.from('chats').update({ status: 'banned' }).eq('id', currentChatSessionId);
   document.getElementById('banIpBtn').style.display = 'none';
   document.getElementById('closeChatBtn').style.display = 'none';
@@ -1466,7 +1467,7 @@ window.toggleBannedList = function() {
 };
 
 async function loadBannedIps() {
-  const { data } = await supabase.from('banned_ips').select('*').order('created_at', { ascending: false });
+  const { data } = await supabase.from('chats').select('id,ip,customer_name,updated_at').eq('status', 'banned').not('ip', 'is', null).order('updated_at', { ascending: false });
   const list = data || [];
   const countEl = document.getElementById('bannedIpCount');
   if (countEl) countEl.textContent = list.length ? `(${list.length})` : '';
@@ -1482,7 +1483,7 @@ async function loadBannedIps() {
       <div>
         <div style="font-family:monospace;font-size:13px;font-weight:700;color:#dc2626">${b.ip}</div>
         ${b.customer_name ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${b.customer_name}</div>` : ''}
-        <div style="font-size:10px;color:#9ca3af;margin-top:2px">${new Date(b.created_at).toLocaleDateString('ka-GE')}</div>
+        <div style="font-size:10px;color:#9ca3af;margin-top:2px">${new Date(b.updated_at).toLocaleDateString('ka-GE')}</div>
       </div>
       <button onclick="unbanIp('${b.id}','${b.ip}')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">ბანის მოხსნა</button>
     </div>
@@ -1490,7 +1491,7 @@ async function loadBannedIps() {
 }
 
 window.unbanIp = async function(id, ip) {
-  await supabase.from('banned_ips').delete().eq('id', id);
+  await supabase.from('chats').update({ status: 'closed' }).eq('id', id);
   showToast('ბანი მოხსნილია: ' + ip, 'success');
   loadBannedIps();
 };
