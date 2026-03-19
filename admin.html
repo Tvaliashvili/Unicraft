@@ -625,7 +625,16 @@
 
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
-import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/background-removal.mjs';
+
+let _removeBg = null;
+async function getRemoveBg() {
+  if (_removeBg) return _removeBg;
+  try {
+    const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/background-removal.mjs');
+    _removeBg = mod.removeBackground;
+  } catch(e) { _removeBg = null; }
+  return _removeBg;
+}
 
 // ─── Product cache for edit ───
 let productCache = {};
@@ -671,12 +680,22 @@ async function _storeFile(file, prefix) {
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
   try {
-    const noBgBlob = await removeBackground(file);
-    const previewUrl = URL.createObjectURL(noBgBlob);
-    if (prefix === 'prod') prodFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
-    else editFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
-    showDropPreview(prefix, previewUrl);
+    const removeBg = await getRemoveBg();
+    if (removeBg) {
+      const noBgBlob = await removeBg(file);
+      const previewUrl = URL.createObjectURL(noBgBlob);
+      if (prefix === 'prod') prodFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
+      else editFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
+      showDropPreview(prefix, previewUrl);
+    } else {
+      if (prefix === 'prod') prodFileData = file;
+      else editFileData = file;
+      showDropPreview(prefix, URL.createObjectURL(file));
+      showToast('ფონის მოხსნა მიუწვდომელია', 'error');
+    }
   } catch(e) {
+    if (prefix === 'prod') prodFileData = file;
+    else editFileData = file;
     showDropPreview(prefix, URL.createObjectURL(file));
     showToast('ფონის მოხსნა ვერ მოხერხდა, ორიგინალი შეინახება', 'error');
   }
