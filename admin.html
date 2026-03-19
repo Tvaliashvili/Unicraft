@@ -204,8 +204,10 @@
             </div>
             <div class="form-group full">
               <label class="form-label">მაღაზია</label>
-              <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" list="storeList" autocomplete="off">
-              <datalist id="storeList"></datalist>
+              <div class="store-combo" id="prodStoreCombo">
+                <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" oninput="filterStoreDropdown('prodStoreCombo',this.value)" onfocus="openStoreDropdown('prodStoreCombo')" onblur="closeStoreDropdown('prodStoreCombo',300)">
+                <div class="store-dropdown" id="prodStoreDropdown"></div>
+              </div>
             </div>
           </div>
           <div class="form-actions">
@@ -520,7 +522,10 @@
         </div>
         <div class="form-group full">
           <label class="form-label">მაღაზია</label>
-          <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" list="storeList" autocomplete="off">
+          <div class="store-combo" id="editStoreCombo">
+            <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" oninput="filterStoreDropdown('editStoreCombo',this.value)" onfocus="openStoreDropdown('editStoreCombo')" onblur="closeStoreDropdown('editStoreCombo',300)">
+            <div class="store-dropdown" id="editStoreDropdown"></div>
+          </div>
         </div>
       </div>
       <div class="form-actions">
@@ -753,12 +758,7 @@ async function loadProductsList() {
   }
   rows.forEach(p => { productCache[p.id] = p; });
 
-  // Populate store autocomplete datalist with unique store names
-  const storeList = document.getElementById('storeList');
-  if (storeList) {
-    const stores = [...new Set(rows.map(p => p.store).filter(Boolean))];
-    storeList.innerHTML = stores.map(s => `<option value="${s}">`).join('');
-  }
+  refreshStoreList(rows);
 
   el.innerHTML = rows.map(p => {
     return `<div class="table-row">
@@ -1307,6 +1307,43 @@ window.doAdminInvoicePDF = function() {
 };
 
 // init when page is shown
+// ── Store combo helpers ──
+let _storeNames = [];
+function refreshStoreList(rows) {
+  _storeNames = [...new Set(rows.map(p => p.store).filter(Boolean))].sort();
+}
+function buildDropdownHTML(list) {
+  if (!list.length) return `<div class="store-dropdown-empty">შენახული მაღაზია არ არის</div>`;
+  return list.map(s => `<div class="store-dropdown-item" onmousedown="pickStore(event,'${s.replace(/'/g,"\\'")}',this)">${s}</div>`).join('');
+}
+window.openStoreDropdown = function(comboId) {
+  const dd = document.getElementById(comboId.replace('Combo','Dropdown'));
+  if (!dd) return;
+  dd.innerHTML = buildDropdownHTML(_storeNames);
+  dd.classList.add('open');
+};
+window.closeStoreDropdown = function(comboId, delay) {
+  setTimeout(() => {
+    const dd = document.getElementById(comboId.replace('Combo','Dropdown'));
+    if (dd) dd.classList.remove('open');
+  }, delay || 0);
+};
+window.filterStoreDropdown = function(comboId, val) {
+  const dd = document.getElementById(comboId.replace('Combo','Dropdown'));
+  if (!dd) return;
+  const filtered = val ? _storeNames.filter(s => s.toLowerCase().includes(val.toLowerCase())) : _storeNames;
+  dd.innerHTML = buildDropdownHTML(filtered);
+  dd.classList.add('open');
+};
+window.pickStore = function(e, val, el) {
+  e.preventDefault();
+  const combo = el.closest('.store-combo');
+  const input = combo ? combo.querySelector('input') : null;
+  if (input) input.value = val;
+  const dd = combo ? combo.querySelector('.store-dropdown') : null;
+  if (dd) dd.classList.remove('open');
+};
+
 const _origShowPage = window.showPage;
 window.showPage = function(name) {
   _origShowPage(name);
