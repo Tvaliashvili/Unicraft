@@ -1138,13 +1138,12 @@ window.sendChatMsg = async function() {
   var widget = document.getElementById('chatWidget');
   if (!footer || !widget) return;
   function updateChatPos() {
-    var footerTop = footer.getBoundingClientRect().top;
-    var viewH = window.innerHeight;
-    var overlap = viewH - footerTop;
+    var rect = footer.getBoundingClientRect();
+    if (rect.height === 0) return;
+    var overlap = window.innerHeight - rect.top;
     widget.style.bottom = (overlap > 0 ? overlap + 16 : 24) + 'px';
   }
   window.addEventListener('scroll', updateChatPos, { passive: true });
-  updateChatPos();
 })();
 </script>
 </div><!-- /siteContent -->
