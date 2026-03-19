@@ -290,8 +290,10 @@ import { supabase } from './js/supabase-config.js';
 let product = null;
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
+window.cart = cart;
 let localQty = 1;
 let currentInvoiceNo = '';
+window.currentInvoiceNo = '';
 
 function genInvoiceNo() {
   const d = new Date();
@@ -410,6 +412,7 @@ window.changeQty = function(id, d) {
 
 function saveCart() {
   localStorage.setItem('uc_cart', JSON.stringify(cart));
+  window.cart = cart;
   document.getElementById('cartCount').textContent = cart.reduce((s,i) => s+i.qty, 0);
 }
 
@@ -447,6 +450,7 @@ function renderCart() {
 
 window.openOrder = function() {
   currentInvoiceNo = genInvoiceNo();
+  window.currentInvoiceNo = currentInvoiceNo;
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
   const vat = total * 18 / 118;
   const d = new Date();
