@@ -917,7 +917,10 @@ window.sendChatMsg = async function() {
     await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
     await supabase.from('chats').update({ last_message: text, unread: supabase.rpc('increment_unread') })
       .eq('id', chatSessionId);
-  } catch(e) {
-    // Demo: append locally
-    const el = document.getElementById('chatMessage');}
-    }
+  } catch(e) {}
+}
+</script>
+
+<script src="js/invoice.js"></script>
+</body>
+</html>
