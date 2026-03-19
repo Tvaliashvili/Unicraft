@@ -946,6 +946,7 @@ window.addUnit = function() {
 
 window.deleteUnit = function(i) {
   const units = getUnits();
+  if (!confirm(`ერთეული "${units[i].label}" წაიშალოს?`)) return;
   units.splice(i, 1);
   saveUnits(units);
   loadUnits();
