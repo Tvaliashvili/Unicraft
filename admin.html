@@ -922,10 +922,7 @@ function renderOrderRow(id, o, dateStr) {
   return `<div class="order-row" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px 40px;cursor:pointer;align-items:center" onclick="openOrderModal('${id}')">
     <span style="font-size:12px;color:var(--gray-mid)">${dateStr}</span>
     <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoice_no || o.invoiceNo || '–'}</span>
-    <div>
-      <div style="font-weight:600;font-size:13px">${o.buyer_name || o.buyerName || '–'}</div>
-      ${o.items ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">${(Array.isArray(o.items) ? o.items : JSON.parse(o.items||'[]')).map(i=>i.name).join(', ')}</div>` : ''}
-    </div>
+    <span style="font-weight:600;font-size:13px">${o.buyer_name || o.buyerName || '–'}</span>
     <span style="font-size:12px;color:var(--gray-mid);font-family:monospace;text-align:center">${o.buyer_id || o.buyerId || '–'}</span>
     <span style="font-size:12px;color:var(--gray-mid);text-align:center;font-family:monospace">${o.buyer_phone || '–'}</span>
     <div style="display:flex;align-items:center;justify-content:center">
