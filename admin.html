@@ -204,9 +204,15 @@
             </div>
             <div class="form-group full">
               <label class="form-label">მაღაზია</label>
-              <div class="store-combo" id="prodStoreCombo">
-                <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" oninput="filterStoreDropdown('prodStoreCombo',this.value)" onfocus="openStoreDropdown('prodStoreCombo')" onblur="closeStoreDropdown('prodStoreCombo',300)">
-                <div class="store-dropdown" id="prodStoreDropdown"></div>
+              <div id="prodStoreCombo" style="position:relative">
+                <div style="display:flex;gap:0">
+                  <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" style="border-radius:10px 0 0 10px;flex:1"
+                    oninput="filterStoreDropdown('prodStoreCombo',this.value)"
+                    onblur="closeStoreDropdown('prodStoreCombo',200)">
+                  <button type="button" style="border:1px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:0 12px;background:var(--bg);cursor:pointer;color:var(--gray-mid);font-size:11px"
+                    onmousedown="event.preventDefault();toggleStoreDropdown('prodStoreCombo')">▾</button>
+                </div>
+                <div id="prodStoreDropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #e0dbd5;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.10);z-index:9999;max-height:220px;overflow-y:auto"></div>
               </div>
             </div>
           </div>
@@ -522,9 +528,15 @@
         </div>
         <div class="form-group full">
           <label class="form-label">მაღაზია</label>
-          <div class="store-combo" id="editStoreCombo">
-            <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" oninput="filterStoreDropdown('editStoreCombo',this.value)" onfocus="openStoreDropdown('editStoreCombo')" onblur="closeStoreDropdown('editStoreCombo',300)">
-            <div class="store-dropdown" id="editStoreDropdown"></div>
+          <div id="editStoreCombo" style="position:relative">
+            <div style="display:flex;gap:0">
+              <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" style="border-radius:10px 0 0 10px;flex:1"
+                oninput="filterStoreDropdown('editStoreCombo',this.value)"
+                onblur="closeStoreDropdown('editStoreCombo',200)">
+              <button type="button" style="border:1px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:0 12px;background:var(--bg);cursor:pointer;color:var(--gray-mid);font-size:11px"
+                onmousedown="event.preventDefault();toggleStoreDropdown('editStoreCombo')">▾</button>
+            </div>
+            <div id="editStoreDropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #e0dbd5;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.10);z-index:9999;max-height:220px;overflow-y:auto"></div>
           </div>
         </div>
       </div>
@@ -1308,40 +1320,54 @@ window.doAdminInvoicePDF = function() {
 
 // init when page is shown
 // ── Store combo helpers ──
+// ── Store combo ──
 let _storeNames = [];
 function refreshStoreList(rows) {
   _storeNames = [...new Set(rows.map(p => p.store).filter(Boolean))].sort();
 }
-function buildDropdownHTML(list) {
-  if (!list.length) return `<div class="store-dropdown-empty">შენახული მაღაზია არ არის</div>`;
-  return list.map(s => `<div class="store-dropdown-item" onmousedown="pickStore(event,'${s.replace(/'/g,"\\'")}',this)">${s}</div>`).join('');
+function getStoreDD(comboId) {
+  return document.getElementById(comboId.replace('Combo','Dropdown'));
 }
-window.openStoreDropdown = function(comboId) {
-  const dd = document.getElementById(comboId.replace('Combo','Dropdown'));
+function getStoreInput(comboId) {
+  return document.getElementById(comboId.replace('Combo',''));
+}
+function renderStoreDD(comboId, list) {
+  const dd = getStoreDD(comboId);
   if (!dd) return;
-  dd.innerHTML = buildDropdownHTML(_storeNames);
-  dd.classList.add('open');
+  if (!list.length) {
+    dd.innerHTML = `<div style="padding:12px 14px;font-size:12px;color:#aaa;text-align:center">შენახული მაღაზია არ არის</div>`;
+  } else {
+    dd.innerHTML = list.map(s =>
+      `<div style="padding:10px 14px;font-size:13px;color:#333;cursor:pointer;border-radius:8px;margin:3px;transition:background .15s"
+        onmouseover="this.style.background='#f5f2ee'" onmouseout="this.style.background=''"
+        onmousedown="pickStore(event,'${s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${comboId}')">${s}</div>`
+    ).join('');
+  }
+  dd.style.display = 'block';
+}
+window.toggleStoreDropdown = function(comboId) {
+  const dd = getStoreDD(comboId);
+  if (!dd) return;
+  if (dd.style.display === 'block') { dd.style.display = 'none'; return; }
+  const input = getStoreInput(comboId);
+  const val = input ? input.value : '';
+  const filtered = val ? _storeNames.filter(s => s.toLowerCase().includes(val.toLowerCase())) : _storeNames;
+  renderStoreDD(comboId, filtered);
+  input && input.focus();
 };
 window.closeStoreDropdown = function(comboId, delay) {
-  setTimeout(() => {
-    const dd = document.getElementById(comboId.replace('Combo','Dropdown'));
-    if (dd) dd.classList.remove('open');
-  }, delay || 0);
+  setTimeout(() => { const dd = getStoreDD(comboId); if (dd) dd.style.display = 'none'; }, delay || 0);
 };
 window.filterStoreDropdown = function(comboId, val) {
-  const dd = document.getElementById(comboId.replace('Combo','Dropdown'));
-  if (!dd) return;
   const filtered = val ? _storeNames.filter(s => s.toLowerCase().includes(val.toLowerCase())) : _storeNames;
-  dd.innerHTML = buildDropdownHTML(filtered);
-  dd.classList.add('open');
+  renderStoreDD(comboId, filtered);
 };
-window.pickStore = function(e, val, el) {
+window.pickStore = function(e, val, comboId) {
   e.preventDefault();
-  const combo = el.closest('.store-combo');
-  const input = combo ? combo.querySelector('input') : null;
+  const input = getStoreInput(comboId);
   if (input) input.value = val;
-  const dd = combo ? combo.querySelector('.store-dropdown') : null;
-  if (dd) dd.classList.remove('open');
+  const dd = getStoreDD(comboId);
+  if (dd) dd.style.display = 'none';
 };
 
 const _origShowPage = window.showPage;
