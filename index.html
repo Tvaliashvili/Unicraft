@@ -29,7 +29,7 @@ tailwind.config = {
 <body class="bg-cream text-dark">
 
 <!-- ══ MAINTENANCE SCREEN ══ -->
-<div id="maintenanceScreen" style="position:fixed;inset:0;background:#0E0C0A;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;font-family:'Noto Sans Georgian',sans-serif">
+<div id="maintenanceScreen" style="position:fixed;inset:0;background:#0E0C0A;z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;font-family:'Noto Sans Georgian',sans-serif">
 
   <!-- Top accent line -->
   <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#C4400E,#E8541A,#ff6a2f,#E8541A,#C4400E);background-size:200% 100%;animation:mShift 3s linear infinite"></div>
@@ -909,15 +909,13 @@ import { supabase } from './js/supabase-config.js';
 // ── Maintenance mode check ──
 (async () => {
   const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
-  if (data?.value === 'false') {
-    document.getElementById('maintenanceScreen').style.display = 'none';
-  }
+  const ms = document.getElementById('maintenanceScreen');
+  ms.style.display = data?.value === 'true' ? 'flex' : 'none';
   // Subscribe to live changes
   supabase.channel('settings-changes').on('postgres_changes',
     { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.maintenance_mode' },
     payload => {
-      if (payload.new.value === 'false') document.getElementById('maintenanceScreen').style.display = 'none';
-      else document.getElementById('maintenanceScreen').style.display = 'flex';
+      ms.style.display = payload.new.value === 'true' ? 'flex' : 'none';
     }
   ).subscribe();
 })();
