@@ -104,6 +104,7 @@ tailwind.config = {
 </style>
 
 
+<div id="siteContent" style="display:none">
 <!-- ══ HEADER ══ -->
 <header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 md:px-6">
@@ -910,6 +911,7 @@ import { supabase } from './js/supabase-config.js';
   const isPreview = new URLSearchParams(location.search).has('preview');
   const showMaintenance = data?.value === 'true' && !isPreview;
   ms.style.display = showMaintenance ? 'flex' : 'none';
+  document.getElementById('siteContent').style.display = showMaintenance ? 'none' : 'block';
   if (showMaintenance) setTimeout(() => { document.getElementById('mProgress').style.width = '68%'; }, 150);
   // Subscribe to live changes
   supabase.channel('settings-changes').on('postgres_changes',
@@ -917,6 +919,7 @@ import { supabase } from './js/supabase-config.js';
     payload => {
       const on = payload.new.value === 'true';
       ms.style.display = on ? 'flex' : 'none';
+      document.getElementById('siteContent').style.display = on ? 'none' : 'block';
       if (on) { document.getElementById('mProgress').style.width = '0'; setTimeout(() => { document.getElementById('mProgress').style.width = '68%'; }, 150); }
     }
   ).subscribe();
@@ -1129,5 +1132,6 @@ window.sendChatMsg = async function() {
 </script>
 
 <script src="js/invoice.js"></script>
+</div><!-- /siteContent -->
 </body>
 </html>
