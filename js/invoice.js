@@ -115,16 +115,11 @@ window.downloadInvoicePDF = function() {
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const win = window.open(url, '_blank', 'width=820,height=950');
-  if (win) {
-    setTimeout(function() { win.focus(); win.print(); URL.revokeObjectURL(url); }, 900);
-  } else {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'invoice-' + currentInvoiceNo + '.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (currentInvoiceNo || 'invoice') + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
