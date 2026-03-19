@@ -405,6 +405,8 @@
         <thead>
           <tr style="border-bottom:2px solid var(--dark)">
             <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);font-weight:600">დასახელება</th>
+            <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);font-weight:600">კოდი</th>
+            <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);font-weight:600">მაღ.</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);font-weight:600">რ-ბა</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);font-weight:600">ერთ. ფასი</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-mid);font-weight:600">სულ</th>
@@ -1035,6 +1037,8 @@ window.openOrderModal = function(id) {
     total += line;
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:8px 4px">${item.name}</td>
+      <td style="padding:8px 4px;font-family:monospace;font-size:12px;color:var(--gray-mid)">${item.code||'–'}</td>
+      <td style="padding:8px 4px;font-size:12px;color:var(--gray-mid)">${item.store||'–'}</td>
       <td style="padding:8px 4px;text-align:right">${item.qty} ${item.unit||'ც'}</td>
       <td style="padding:8px 4px;text-align:right">${parseFloat(item.price||0).toFixed(2)} ₾</td>
       <td style="padding:8px 4px;text-align:right;font-weight:600">${line.toFixed(2)} ₾</td>
@@ -1043,10 +1047,10 @@ window.openOrderModal = function(id) {
   const vat = total * 18 / 118;
   const grandTotal = parseFloat(o.total||0) || total;
   document.getElementById('modalItemsFoot').innerHTML = `
-    <tr><td colspan="3" style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">მ.შ. დღგ 18%</td>
+    <tr><td colspan="5" style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">მ.შ. დღგ 18%</td>
       <td style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">${vat.toFixed(2)} ₾</td></tr>
     <tr style="border-top:2px solid var(--dark)">
-      <td colspan="3" style="padding:10px 4px;text-align:right;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px">სულ გადასახდელი</td>
+      <td colspan="5" style="padding:10px 4px;text-align:right;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px">სულ გადასახდელი</td>
       <td style="padding:10px 4px;text-align:right;font-weight:700;font-size:20px;font-family:'Bebas Neue',sans-serif">${grandTotal.toFixed(2)} ₾</td></tr>`;
   document.getElementById('orderModal').style.display = 'flex';
 };

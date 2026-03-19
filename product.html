@@ -398,7 +398,7 @@ window.addProductToCart = function() {
   if (!product) return;
   const ex = cart.find(i => i.id === product.id);
   if (ex) ex.qty += localQty;
-  else cart.push({ id: product.id, name: product.name, price: product.price, qty: localQty, imageUrl: product.imageUrl, emoji: product.emoji, unit: product.unit });
+  else cart.push({ id: product.id, name: product.name, price: product.price, qty: localQty, imageUrl: product.imageUrl, emoji: product.emoji, unit: product.unit, code: product.code || '', store: product.store || '' });
   saveCart();
   showToast('✓ ' + product.name + ' კალათაში დაემატა');
 };
@@ -520,7 +520,7 @@ window.submitOrder = async function() {
       buyer_name: buyerName,
       buyer_id: buyerId,
       buyer_phone: buyerPhone,
-      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit })),
+      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit, code:i.code||'', store:i.store||'' })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
       status: 'pending',
       client_ip: clientIp
