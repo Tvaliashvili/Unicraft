@@ -779,8 +779,7 @@ async function _storeFile(file, prefix) {
   try {
     const removeBg = await getRemoveBg();
     if (removeBg) {
-      const resized = await resizeImage(file, 1024);
-      const noBgBlob = await removeBg(resized);
+      const noBgBlob = await removeBg(file);
       const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
       if (prefix === 'prod') prodFileData = processed;
       else editFileData = processed;
