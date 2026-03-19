@@ -741,6 +741,27 @@ window.submitOrder = async function() {
   btn.disabled = true; btn.textContent = 'იგზავნება...';
   try {
     const { supabase } = await import('./js/supabase-config.js');
+
+    // Get client IP
+    let clientIp = '';
+    try {
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipRes.json();
+      clientIp = ipData.ip || '';
+    } catch(e) {}
+
+    // IP-based rate limit check
+    if (clientIp) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data: recentOrders } = await supabase.from('orders')
+        .select('id').eq('client_ip', clientIp).gte('created_at', oneHourAgo);
+      if (recentOrders && recentOrders.length >= 3) {
+        btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
+        alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო');
+        return;
+      }
+    }
+
     const { error: insertError } = await supabase.from('orders').insert({
       invoice_no: currentInvoiceNo,
       buyer_id: document.getElementById('buyerIdInput').value.trim(),
@@ -748,7 +769,8 @@ window.submitOrder = async function() {
       buyer_phone: document.getElementById('buyerPhoneInput').value.trim(),
       items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
-      status: 'pending'
+      status: 'pending',
+      client_ip: clientIp
     });
     if (insertError) {
       console.error('Order insert error:', insertError);
