@@ -995,6 +995,7 @@ async function initChatSession(name, phone) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
       await supabase.from('chat_messages').insert({ session_id: chatSessionId, text: welcomeText, sender: 'admin' });
       await supabase.from('chats').update({ last_message: welcomeText, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
+      renderChatMsgs([{ text: welcomeText, sender: 'admin' }]);
     } else {
       renderChatMsgs(existing);
     }
