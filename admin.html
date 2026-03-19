@@ -204,7 +204,8 @@
             </div>
             <div class="form-group full">
               <label class="form-label">მაღაზია</label>
-              <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456">
+              <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" list="storeList" autocomplete="off">
+              <datalist id="storeList"></datalist>
             </div>
           </div>
           <div class="form-actions">
@@ -519,7 +520,7 @@
         </div>
         <div class="form-group full">
           <label class="form-label">მაღაზია</label>
-          <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456">
+          <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" list="storeList" autocomplete="off">
         </div>
       </div>
       <div class="form-actions">
@@ -751,6 +752,14 @@ async function loadProductsList() {
     return;
   }
   rows.forEach(p => { productCache[p.id] = p; });
+
+  // Populate store autocomplete datalist with unique store names
+  const storeList = document.getElementById('storeList');
+  if (storeList) {
+    const stores = [...new Set(rows.map(p => p.store).filter(Boolean))];
+    storeList.innerHTML = stores.map(s => `<option value="${s}">`).join('');
+  }
+
   el.innerHTML = rows.map(p => {
     return `<div class="table-row">
       <div class="prod-img-thumb">
