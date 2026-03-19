@@ -1232,16 +1232,19 @@ function renderChatSessionsList(sessions) {
       const displayName = s.customer_name || s.customerName || s.id.slice(-8);
       const displayPhone = s.customer_phone || s.customerPhone || '';
       const lastMsg = s.last_message || s.lastMessage || '...';
-      return `<div onclick="openAdminChat('${s.id}')" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;${active}transition:background 0.15s" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='${s.id === currentChatSessionId ? 'var(--gray-light)' : ''}'">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
-          <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;color:var(--gray-mid)">${t}</span>
-            ${s.unread > 0 ? `<span style="background:#ef4444;color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${s.unread}</span>` : ''}
+      return `<div style="border-bottom:1px solid var(--border);position:relative" id="chat-row-${s.id}">
+        <div onclick="openAdminChat('${s.id}')" style="padding:12px 16px;cursor:pointer;${active}transition:background 0.15s;padding-right:36px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='${s.id === currentChatSessionId ? 'var(--gray-light)' : ''}'">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:700;color:var(--dark)">${displayName}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--gray-mid)">${t}</span>
+              ${s.unread > 0 ? `<span style="background:#ef4444;color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${s.unread}</span>` : ''}
+            </div>
           </div>
+          <div style="font-size:11px;color:#9ca3af;margin-bottom:3px">${displayPhone}</div>
+          <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lastMsg}</div>
         </div>
-        <div style="font-size:11px;color:#9ca3af;margin-bottom:3px">${displayPhone}</div>
-        <div style="font-size:12px;color:var(--gray-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lastMsg}</div>
+        <button onclick="deleteChat('${s.id}')" title="წაშლა" style="position:absolute;top:10px;right:8px;background:none;border:none;color:#d1d5db;font-size:14px;cursor:pointer;padding:3px;border-radius:4px;line-height:1" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#d1d5db'">✕</button>
       </div>`;
     }).join('');
 }
@@ -1267,23 +1270,27 @@ function loadChatSessions() {
     .subscribe();
 }
 
+window.deleteChat = async function(sessionId) {
+  if (!confirm('ნამდვილად გსურთ ამ საუბრის წაშლა?')) return;
+  await supabase.from('chat_messages').delete().eq('session_id', sessionId);
+  await supabase.from('chats').delete().eq('id', sessionId);
+  const row = document.getElementById('chat-row-' + sessionId);
+  if (row) row.remove();
+  if (currentChatSessionId === sessionId) {
+    document.getElementById('adminChatPanel').style.display = 'none';
+    document.getElementById('adminChatEmpty').style.display = 'flex';
+    currentChatSessionId = null;
+  }
+};
+
 window.openAdminChat = async function(sessionId) {
   currentChatSessionId = sessionId;
   document.getElementById('adminChatEmpty').style.display = 'none';
   const panel = document.getElementById('adminChatPanel');
   panel.style.display = 'flex';
 
-  // Check demo first
-  const demoSession = DEMO_CHATS.find(c => c.id === sessionId);
-  if (demoSession) {
-    document.getElementById('adminChatTitle').textContent = `${demoSession.customerName} · ${demoSession.customerPhone || ''}`;
-    renderAdminChatMsgs(demoSession.messages);
-    document.getElementById('adminChatInput').focus();
-    return;
-  }
-
-  // Load from Supabase
-  const { data: sesData } = await supabase.from('chats').select('*').eq('id', sessionId).single().catch(() => ({ data: null }));
+  // Load session metadata
+  const { data: sesData } = await supabase.from('chats').select('*').eq('id', sessionId).maybeSingle();
   if (sesData) {
     document.getElementById('adminChatTitle').textContent = sesData.customer_name
       ? `${sesData.customer_name} · ${sesData.customer_phone || ''}`
@@ -1292,7 +1299,8 @@ window.openAdminChat = async function(sessionId) {
   }
 
   // Load messages
-  const { data: msgs } = await supabase.from('chat_messages').select('*').eq('session_id', sessionId).order('created_at');
+  const { data: msgs, error: msgsErr } = await supabase
+    .from('chat_messages').select('*').eq('session_id', sessionId).order('created_at');
   renderAdminChatMsgs(msgs || []);
 
   // Subscribe to new messages
