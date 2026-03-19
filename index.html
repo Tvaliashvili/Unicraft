@@ -555,7 +555,7 @@ tailwind.config = {
     <!-- Header -->
     <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
+        <div id="chatStatusDot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
         <span style="color:white;font-weight:700;font-size:13px;font-family:'Noto Sans Georgian',sans-serif">UniCraft · მხარდაჭერა</span>
       </div>
       <button onclick="toggleChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
@@ -1079,6 +1079,7 @@ window.toggleChat = function() {
   panel.style.display = chatOpen ? 'flex' : 'none';
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
+    document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
     if (!isWorkingHours()) {
       document.getElementById('chatOffHours').style.display = 'flex';
       document.getElementById('chatOffHours').style.flexDirection = 'column';
