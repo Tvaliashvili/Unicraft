@@ -860,76 +860,7 @@ window.currentOrderId = null;
 let ordersChannel = null;
 
 // ─── Demo orders ───
-const DEMO_ORDERS = [
-  {
-    id: 'demo-1',
-    invoiceNo: 'INV-20260318-4271',
-    buyerName: 'შპს სამშენებლო ჯგუფი',
-    buyerId: '204567891',
-    items: [
-      { name: 'ცემენტი M400', qty: 50, unit: 'ტომ', price: 18 },
-      { name: 'თეთელი აგური', qty: 2000, unit: 'ც', price: 0.45 },
-      { name: 'არმატურა D12', qty: 120, unit: 'მ', price: 8.50 },
-    ],
-    total: 50*18 + 2000*0.45 + 120*8.50,
-    status: 'new',
-    createdAt: '18/03/2026'
-  },
-  {
-    id: 'demo-2',
-    invoiceNo: 'INV-20260317-1842',
-    buyerName: 'გიორგი მამულაშვილი',
-    buyerId: '01023456789',
-    items: [
-      { name: 'ქვიშა მდინარის', qty: 5, unit: 'მ³', price: 45 },
-      { name: 'ხრეში 5-20', qty: 3, unit: 'მ³', price: 52 },
-    ],
-    total: 5*45 + 3*52,
-    status: 'new',
-    createdAt: '17/03/2026'
-  },
-  {
-    id: 'demo-3',
-    invoiceNo: 'INV-20260316-7753',
-    buyerName: 'შპს არქი-ბილდი',
-    buyerId: '405123987',
-    items: [
-      { name: 'პენოპოლისტიროლი 100მმ', qty: 80, unit: 'ც', price: 12.50 },
-      { name: 'საკრავი ბადე', qty: 200, unit: 'მ²', price: 1.80 },
-      { name: 'შტუკატურის თაბაშირი', qty: 30, unit: 'ტომ', price: 9 },
-    ],
-    total: 80*12.50 + 200*1.80 + 30*9,
-    status: 'new',
-    createdAt: '16/03/2026'
-  },
-  {
-    id: 'demo-4',
-    invoiceNo: 'INV-20260315-3391',
-    buyerName: 'ნინო კვარაცხელია',
-    buyerId: '59812340011',
-    items: [
-      { name: 'კერამიკული ფილა 60×60', qty: 120, unit: 'ც', price: 6.20 },
-      { name: 'ფილის წებო', qty: 10, unit: 'ტომ', price: 14 },
-    ],
-    total: 120*6.20 + 10*14,
-    status: 'new',
-    createdAt: '15/03/2026'
-  },
-  {
-    id: 'demo-5',
-    invoiceNo: 'INV-20260314-9902',
-    buyerName: 'შპს სტრუქტ პლუსი',
-    buyerId: '202987654',
-    items: [
-      { name: 'მეტალოპროფილი C100', qty: 60, unit: 'მ', price: 7.80 },
-      { name: 'თვითმჭრელი ჭანჭიკი', qty: 500, unit: 'ც', price: 0.12 },
-      { name: 'მინერალური ბამბა 50მმ', qty: 40, unit: 'ც', price: 11 },
-    ],
-    total: 60*7.80 + 500*0.12 + 40*11,
-    status: 'new',
-    createdAt: '14/03/2026'
-  }
-];
+const DEMO_ORDERS = [];
 
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
@@ -967,9 +898,8 @@ async function loadOrdersList() {
   } catch(e) {}
 
   if (!hasRealData) {
-    // Demo fallback
-    document.getElementById('orderCountLabel').textContent = DEMO_ORDERS.length + ' შეკვეთა (demo)';
-    el.innerHTML = DEMO_ORDERS.map(o => renderOrderRow(o.id, o, o.createdAt)).join('');
+    document.getElementById('orderCountLabel').textContent = '0 შეკვეთა';
+    el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთები ჯერ არ არის</p></div>';
     renderOrderStats();
   }
 

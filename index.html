@@ -432,32 +432,7 @@ let filteredProducts = [];
 let currentPage = 1;
 const PAGE_SIZE = 50;
 
-const MOCK_PRODUCTS = [
-  { id: 'm1', name: 'ცემენტი M400', category: 'ცემენტი და ბეტონი', price: 18, unit: 'ტომ', description: '50კგ ტომარა, მაღალი სიმყარე, სამშენებლო ხარისხი', badge: 'ახალი', emoji: '🏗️',
-    imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm2', name: 'თეთელი აგური', category: 'აგური და ბლოკი', price: 0.45, unit: 'ც', description: 'სტანდარტული, M100, 250×120×65', badge: 'პოპულარული', emoji: '🧱',
-    imageUrl: 'https://images.unsplash.com/photo-1596483893042-38d32e38b0d0?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm3', name: 'სოჭის ტყავი 50×100', category: 'ხე-ტყე', price: 12, unit: 'მ', description: '6მ სიგრძე, გამშრალი, I ხარისხი', emoji: '🪵',
-    imageUrl: 'https://images.unsplash.com/photo-1542621334-a254cf47733d?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm4', name: 'არმატურა D12', category: 'მეტალი', price: 8.50, unit: 'მ', description: '12მ, 11.7კგ, A400 კლასი', emoji: '⚙️',
-    imageUrl: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm5', name: 'პენოფლექსი 50მმ', category: 'საიზოლაციო მასალა', price: 24, unit: 'ფლ', description: '1200×600მმ, XPS, ენერგოეფექტური', badge: 'ფასდაკლება', emoji: '🔲',
-    imageUrl: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm6', name: 'კირვა გამომწვარი', category: 'ცემენტი და ბეტონი', price: 9, unit: 'ტომ', description: '25კგ, სამშენებლო ხარისხი', emoji: '⬜',
-    imageUrl: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777540?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm7', name: 'პოლიეთილენის მილი D32', category: 'მილები', price: 3.20, unit: 'მ', description: 'D32, წყლისა და გათბობისთვის', emoji: '🔵',
-    imageUrl: 'https://images.unsplash.com/photo-1504469374408-2be94c5a1bda?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm8', name: 'OSB ფილა 18მმ', category: 'ხე-ტყე', price: 42, unit: 'ც', description: '2500×1250მმ, სახლის მოპირკეთება', emoji: '📦',
-    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm9', name: 'მეტალოპლასტის მილი', category: 'მილები', price: 4.80, unit: 'მ', description: 'D20, სასმელი წყლისთვის', emoji: '🔩',
-    imageUrl: 'https://images.unsplash.com/photo-1581093196277-9e136cfdb7a8?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm10', name: 'გიფსი ротband', category: 'ცემენტი და ბეტონი', price: 22, unit: 'ტომ', description: '30კგ, შიდა სამუშაოებისთვის', badge: 'ახალი', emoji: '🏠',
-    imageUrl: 'https://images.unsplash.com/photo-1590599145008-e4ec48675a96?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm11', name: 'I-ბალკი 100×50', category: 'მეტალი', price: 38, unit: 'მ', description: 'ნაგლინი მეტალი, S235', emoji: '⚙️',
-    imageUrl: 'https://images.unsplash.com/photo-1518281420975-50db6e5d0a97?auto=format&fit=crop&w=600&q=80' },
-  { id: 'm12', name: 'მინერალური ბამბა 100მმ', category: 'საიზოლაციო მასალა', price: 18, unit: 'მ²', description: 'ROCKWOOL, ხმაურდამცავი', emoji: '🔲',
-    imageUrl: 'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=600&q=80' },
-];
+const MOCK_PRODUCTS = [];
 
 
 function buildSidebar() {
@@ -497,7 +472,7 @@ function renderPage() {
   const rc = document.getElementById('resultCount'); if (rc) rc.textContent = filteredProducts.length + ' პროდუქტი';
 
   if (!filteredProducts.length) {
-    grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტი ვერ მოიძებნა</p><p class="text-sm">სცადე სხვა საძიებო სიტყვა</p></div>`;
+    grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტები ვერ მოიძებნა</p></div>`;
     document.getElementById('pagination').innerHTML = '';
     return;
   }
