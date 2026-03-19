@@ -1050,7 +1050,7 @@ function updateModalActions(status, assignedTo, assignedName) {
     // Assigned to me — show status buttons + unassign (no "დადასტურება" — auto-confirmed on assign)
     el.style.justifyContent = 'space-between';
     el.innerHTML = `
-      <button onclick="setOrderStatus(window.currentOrderId,'in_transit')" style="flex:1;background:#2563eb;color:white;border:none;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🚚 ტრანსპორტირება</button>
+      <button onclick="setOrderStatus(window.currentOrderId,'in_transit')" style="flex:1;background:#2563eb;color:white;border:none;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🚚 ტრანსპორტირება</button>
       <button onclick="setOrderStatus(window.currentOrderId,'completed')" style="flex:1;background:#6b7280;color:white;border:none;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✔ დასრულება</button>
       <button onclick="setOrderStatus(window.currentOrderId,'cancelled')" style="flex:1;background:none;color:#dc2626;border:1px solid #dc2626;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✕ გაუქმება</button>
       <button onclick="unassignOrder()" style="flex:1;background:none;color:#dc2626;border:1px solid #dc2626;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">↩ ჩახსნა</button>`;
