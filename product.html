@@ -83,16 +83,18 @@ tailwind.config = {
   <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
 
     <!-- Image -->
-    <div class="bg-white border border-gray-200 relative overflow-hidden">
-      <div id="productBadge" class="hidden absolute top-0 left-0 bg-orange text-white text-[10px] font-bold px-3 py-1.5 tracking-widest uppercase z-10"></div>
-      <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
+    <div class="flex flex-col gap-4">
+      <div class="bg-white border border-gray-200 relative overflow-hidden">
+        <div id="productBadge" class="hidden absolute top-0 left-0 bg-orange text-white text-[10px] font-bold px-3 py-1.5 tracking-widest uppercase z-10"></div>
+        <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
+      </div>
+      <p id="productDesc" class="text-sm text-gray-500 leading-relaxed"></p>
     </div>
 
     <!-- Info -->
     <div class="flex flex-col">
       <div id="productCategory" class="text-[10px] font-bold tracking-[2px] text-orange uppercase mb-2"></div>
       <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
-      <p id="productDesc" class="text-sm text-gray-500 leading-relaxed mb-6"></p>
 
       <!-- Price block -->
       <div class="bg-cream border border-gray-200 p-5 mb-5">
