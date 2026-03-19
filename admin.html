@@ -241,6 +241,7 @@
         <div class="table-row table-header">
           <span>ფოტო</span>
           <span>პროდუქტი</span>
+          <span>კოდი</span>
           <span>კატეგორია</span>
           <span>ფასი</span>
           <span>მაღაზია</span>
@@ -463,6 +464,10 @@
     </div>
     <div class="product-form">
       <input type="hidden" id="editProdId">
+      <div style="padding:10px 20px 0;display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--gray-mid)">პროდუქტის კოდი:</span>
+        <span id="editCodeDisplay" style="font-family:monospace;font-size:14px;font-weight:700;color:var(--gray-dark);background:var(--gray-light);padding:2px 10px;border-radius:6px;letter-spacing:1px"></span>
+      </div>
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
@@ -711,6 +716,10 @@ function renderRecentOrders(rows) {
 }
 
 // ─── Products ───
+function genProductCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
 window.addProduct = async function() {
   const name = document.getElementById('prodName').value.trim();
   const category = document.getElementById('prodCategory').value;
@@ -731,6 +740,7 @@ window.addProduct = async function() {
       stock: parseInt(document.getElementById('prodStock').value) || 0,
       active: document.getElementById('prodActive').value === 'true',
       store: document.getElementById('prodStore').value.trim(),
+      code: genProductCode(),
     });
     showToast('✓ პროდუქტი დაემატა!', 'success');
     clearForm();
@@ -773,6 +783,7 @@ async function loadProductsList() {
         <div class="prod-name">${p.name}</div>
         <div class="prod-cat">${p.unit || ''}</div>
       </div>
+      <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
       <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
       <span class="price-cell">${p.price} ₾</span>
       <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
@@ -801,6 +812,7 @@ window.editProduct = function(id) {
   document.getElementById('editStock').value = p.stock || '';
   document.getElementById('editActive').value = p.active !== false ? 'true' : 'false';
   document.getElementById('editStore').value = p.store || '';
+  document.getElementById('editCodeDisplay').textContent = p.code || '—';
   document.getElementById('editFile').value = '';
   if (p.image_url) {
     showDropPreview('edit', p.image_url);

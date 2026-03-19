@@ -352,6 +352,7 @@ function renderProduct() {
 
   const meta = document.getElementById('productMeta');
   const rows = [
+    product.code ? ['კოდი', product.code] : null,
     ['კატეგორია', product.category],
     ['ერთეული', product.unit],
     product.stock ? ['მარაგი', product.stock + ' ც'] : null,
@@ -359,7 +360,7 @@ function renderProduct() {
   meta.innerHTML = rows.map(([k,v]) => `
     <div class="flex justify-between text-sm">
       <span class="text-gray-400">${k}</span>
-      <span class="font-medium">${v||'—'}</span>
+      <span class="${k==='კოდი' ? 'font-bold font-mono tracking-widest text-dark' : 'font-medium'}">${v||'—'}</span>
     </div>`).join('');
 
   document.getElementById('loadingState').classList.add('hidden');
