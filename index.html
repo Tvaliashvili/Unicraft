@@ -717,6 +717,15 @@ window.closeOrder = function() {
 window.clearCart = function() { cart = []; saveCart(); renderCart(); };
 
 window.submitOrder = async function() {
+  // Rate limit: max 3 invoices per hour
+  const now = Date.now();
+  const hour = 60 * 60 * 1000;
+  const timestamps = JSON.parse(localStorage.getItem('uc_inv_ts') || '[]').filter(t => now - t < hour);
+  if (timestamps.length >= 3) {
+    alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო');
+    return;
+  }
+
   const buyerName  = document.getElementById('buyerNameInput').value.trim();
   const buyerId    = document.getElementById('buyerIdInput').value.trim();
   const buyerPhone = document.getElementById('buyerPhoneInput').value.trim();
@@ -753,6 +762,8 @@ window.submitOrder = async function() {
     alert('შეცდომა: ' + (e.message || JSON.stringify(e)));
     return;
   }
+  timestamps.push(Date.now());
+  localStorage.setItem('uc_inv_ts', JSON.stringify(timestamps));
   document.getElementById('successInvNo').textContent = currentInvoiceNo;
   document.getElementById('orderFormWrap').classList.add('hidden');
   document.getElementById('orderSuccess').classList.remove('hidden');
