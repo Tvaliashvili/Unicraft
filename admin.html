@@ -130,6 +130,16 @@
           <span class="card-title">ბოლო შეკვეთები</span>
           <button class="btn btn-secondary btn-sm" onclick="showPage('orders')">ყველა →</button>
         </div>
+        <div class="order-row table-header" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px;align-items:center">
+          <span>თარიღი</span>
+          <span>ინვ. ნომ.</span>
+          <span>მყიდველი</span>
+          <span style="text-align:center">საიდ. კოდი</span>
+          <span style="text-align:center">ტელეფონი</span>
+          <span style="text-align:center">მიბმული</span>
+          <span>სულ</span>
+          <span style="text-align:center">სტატუსი</span>
+        </div>
         <div id="recentOrders"><div class="table-loading"><div class="spinner"></div> იტვირთება...</div></div>
       </div>
     </div>
@@ -720,12 +730,18 @@ function renderRecentOrders(rows) {
   if (!rows.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🧾</div><p>შეკვეთები ჯერ არ არის</p></div>'; return; }
   el.innerHTML = rows.map(o => {
     const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
-    return `<div class="order-row" style="grid-template-columns: 140px 1fr 120px 110px 110px;">
-      <span style="font-size:13px;color:var(--gray-mid)">${date}</span>
-      <span><div class="order-customer">${o.buyer_name || '–'}</div></span>
-      <span class="order-phone">${o.buyer_id || '–'}</span>
+    const status = o.status || 'pending';
+    return `<div class="order-row" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px;align-items:center;cursor:pointer" onclick="showPage('orders')">
+      <span style="font-size:12px;color:var(--gray-mid)">${date}</span>
+      <span style="font-family:monospace;font-size:12px;font-weight:600">${o.invoice_no || '–'}</span>
+      <span style="font-weight:600;font-size:13px">${o.buyer_name || '–'}</span>
+      <span style="font-size:12px;color:var(--gray-mid);text-align:center;font-family:monospace">${o.buyer_id || '–'}</span>
+      <span style="font-size:12px;color:var(--gray-mid);text-align:center;font-family:monospace">${o.buyer_phone || '–'}</span>
+      <div style="display:flex;justify-content:center">
+        ${o.assigned_name ? `<span style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>` : '<span style="color:var(--gray-mid);font-size:12px">–</span>'}
+      </div>
       <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
-      <span><span class="order-status status-${o.status || 'pending'}">${statusLabel(o.status)}</span></span>
+      <div style="display:flex;justify-content:center"><span class="order-status status-${status}">${statusLabel(status)}</span></div>
     </div>`;
   }).join('');
 }
