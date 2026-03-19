@@ -579,6 +579,19 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Confirm close chat modal -->
+<div id="confirmCloseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:14px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
+    <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:16px;font-weight:700;color:#1a1714;margin-bottom:8px">საუბრის დასრულება</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:24px;line-height:1.6">ნამდვილად გსურს ამ საუბრის დასრულება? მომხმარებელს ეცნობება რომ ჩატი დაიხურა.</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="cancelCloseChat()" style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">გაუქმება</button>
+      <button onclick="confirmCloseChat()" style="flex:1;background:#dc2626;color:white;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">დასრულება</button>
+    </div>
+  </div>
+</div>
+
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
 
@@ -1348,14 +1361,23 @@ function renderAdminChatMsgs(msgs) {
   el.scrollTop = el.scrollHeight;
 }
 
-window.closeAdminChat = async function() {
+window.closeAdminChat = function() {
   if (!currentChatSessionId) return;
+  document.getElementById('confirmCloseModal').style.display = 'flex';
+};
+
+window.confirmCloseChat = async function() {
+  document.getElementById('confirmCloseModal').style.display = 'none';
   await supabase.from('chats').update({ status: 'closed' }).eq('id', currentChatSessionId);
   document.getElementById('closeChatBtn').style.display = 'none';
   document.getElementById('adminChatInputRow').style.display = 'none';
   document.getElementById('adminChatClosedBar').style.display = 'block';
   document.getElementById('adminChatStatusDot').style.background = '#ef4444';
   showToast('საუბარი დასრულდა');
+};
+
+window.cancelCloseChat = function() {
+  document.getElementById('confirmCloseModal').style.display = 'none';
 };
 
 window.sendAdminMsg = async function() {
