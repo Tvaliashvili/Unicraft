@@ -625,6 +625,7 @@
 
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
+import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/background-removal.mjs';
 
 // ─── Product cache for edit ───
 let productCache = {};
@@ -636,8 +637,8 @@ const DROPZONE_EMPTY = `
   <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
   <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>`;
 
-// Convert image File → WebP Blob via Canvas
-function convertToWebP(file) {
+// Convert File/Blob → WebP Blob via Canvas
+function toWebP(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -647,16 +648,16 @@ function convertToWebP(file) {
       canvas.height = img.naturalHeight;
       canvas.getContext('2d').drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
-      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('WebP conversion failed')), 'image/webp', 0.85);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('WebP failed')), 'image/webp', 0.85);
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Load failed')); };
     img.src = url;
   });
 }
 
 // Upload File to Supabase Storage, return public URL
 async function uploadProductImage(file) {
-  const webpBlob = await convertToWebP(file);
+  const webpBlob = await toWebP(file);
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
   const { error } = await supabase.storage.from('product-images').upload(fileName, webpBlob, { contentType: 'image/webp' });
   if (error) throw error;
@@ -664,10 +665,21 @@ async function uploadProductImage(file) {
   return data.publicUrl;
 }
 
-function _storeFile(file, prefix) {
+async function _storeFile(file, prefix) {
+  const previewEl = document.getElementById(prefix + 'Preview');
+  previewEl.innerHTML = `<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px"><div class="spinner" style="margin:0 auto 8px"></div>ფონი იხსნება...</div>`;
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
-  showDropPreview(prefix, URL.createObjectURL(file));
+  try {
+    const noBgBlob = await removeBackground(file);
+    const previewUrl = URL.createObjectURL(noBgBlob);
+    if (prefix === 'prod') prodFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
+    else editFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
+    showDropPreview(prefix, previewUrl);
+  } catch(e) {
+    showDropPreview(prefix, URL.createObjectURL(file));
+    showToast('ფონის მოხსნა ვერ მოხერხდა, ორიგინალი შეინახება', 'error');
+  }
 }
 
 window.handleFile = function(input, prefix) {
@@ -685,6 +697,7 @@ window.handleDrop = function(e, prefix) {
   if (file.size > 5 * 1024 * 1024) { showToast('ფაილი ძალიან დიდია (მაქს 5MB)', 'error'); return; }
   _storeFile(file, prefix);
 };
+
 
 function showDropPreview(prefix, src) {
   document.getElementById(prefix + 'Preview').innerHTML =
