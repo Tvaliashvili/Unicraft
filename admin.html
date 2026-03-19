@@ -892,7 +892,8 @@ window.toggleMaintenanceMode = async function() {
   const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
   const current = data?.value === 'true';
   const newVal = (!current).toString();
-  await supabase.from('settings').update({ value: newVal }).eq('key', 'maintenance_mode');
+  const { error } = await supabase.from('settings').upsert({ key: 'maintenance_mode', value: newVal }, { onConflict: 'key' });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   updateMaintenanceBtn(!current);
   showToast(!current ? '🔒 საიტი გამორთულია' : '✓ საიტი ჩართულია', !current ? 'error' : 'success');
 };
