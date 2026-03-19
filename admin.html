@@ -1173,49 +1173,6 @@ let currentChatSessionId = null;
 let adminChatChannel = null;
 let adminSessionsChannel = null;
 
-const DEMO_CHATS = [
-  {
-    id: 'demo-chat-1',
-    customerName: 'გიორგი მამულაშვილი',
-    customerPhone: '599 123 456',
-    lastMessage: 'გმადლობთ, ველოდები პასუხს',
-    lastAt: { toDate: () => new Date(Date.now() - 5*60000) },
-    unread: 2,
-    messages: [
-      { text: 'გამარჯობა გიორგი! 👋 რით შეგვიძლია დაგეხმაროთ?', sender: 'admin' },
-      { text: 'გამარჯობა, მაქვს კითხვა ცემენტის M400-ზე. მაქვს პროექტი და მჭირდება 50 ტომარა', sender: 'customer' },
-      { text: 'რა ვადებში გჭირდებათ მიწოდება?', sender: 'admin' },
-      { text: 'ამ კვირაში რომ მოხერხდეს კარგი იქნება', sender: 'customer' },
-      { text: 'გმადლობთ, ველოდები პასუხს', sender: 'customer' },
-    ]
-  },
-  {
-    id: 'demo-chat-2',
-    customerName: 'ნინო კვარაცხელია',
-    customerPhone: '577 987 654',
-    lastMessage: 'OSB ფილა გაქვთ მარაგში?',
-    lastAt: { toDate: () => new Date(Date.now() - 32*60000) },
-    unread: 1,
-    messages: [
-      { text: 'გამარჯობა ნინო! 👋 რით შეგვიძლია დაგეხმაროთ?', sender: 'admin' },
-      { text: 'OSB ფილა გაქვთ მარაგში?', sender: 'customer' },
-    ]
-  },
-  {
-    id: 'demo-chat-3',
-    customerName: 'შპს არქი-ბილდი',
-    customerPhone: '591 445 112',
-    lastMessage: 'კარგია, გადავიხდი გადარიცხვით',
-    lastAt: { toDate: () => new Date(Date.now() - 2*3600000) },
-    unread: 0,
-    messages: [
-      { text: 'გამარჯობა შპს არქი-ბილდი! 👋 რით შეგვიძლია დაგეხმაროთ?', sender: 'admin' },
-      { text: 'გამარჯობა, მინდა შევუკვეთო პენოფლექსი 50 ფილა', sender: 'customer' },
-      { text: 'პენოფლექსი 50მმ გვაქვს მარაგში. ფასი 24₾/ფლ. გადახდა შეიძლება გადარიცხვით ან ნაღდად.', sender: 'admin' },
-      { text: 'კარგია, გადავიხდი გადარიცხვით', sender: 'customer' },
-    ]
-  }
-];
 
 function renderChatSessionsList(sessions) {
   const el = document.getElementById('chatSessionsList');
@@ -1256,9 +1213,9 @@ function loadChatSessions() {
   supabase.from('chats').select('*').order('updated_at', { ascending: false })
     .then(({ data }) => {
       const sessions = data || [];
-      renderChatSessionsList(sessions.length > 0 ? sessions : DEMO_CHATS);
+      renderChatSessionsList(sessions);
     })
-    .catch(() => renderChatSessionsList(DEMO_CHATS));
+    .catch(() => renderChatSessionsList([]));
 
   // Real-time updates
   adminSessionsChannel = supabase
