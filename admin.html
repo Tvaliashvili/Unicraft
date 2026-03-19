@@ -202,13 +202,6 @@
                 </div>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">სტატუსი</label>
-              <select class="form-select" id="prodActive">
-                <option value="true">✓ აქტიური (ჩანს კატალოგში)</option>
-                <option value="false">✗ დამალული</option>
-              </select>
-            </div>
             <div class="form-group full">
               <label class="form-label">მაღაზია</label>
               <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456">
@@ -525,13 +518,6 @@
             </div>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">სტატუსი</label>
-          <select class="form-select" id="editActive">
-            <option value="true">✓ აქტიური</option>
-            <option value="false">✗ დამალული</option>
-          </select>
-        </div>
         <div class="form-group full">
           <label class="form-label">მაღაზია</label>
           <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456">
@@ -731,7 +717,7 @@ window.addProduct = async function() {
       unit: document.getElementById('prodUnit').value,
       description: document.getElementById('prodDesc').value.trim(),
       image_url: prodFileData || '',
-      active: document.getElementById('prodActive').value === 'true',
+      active: true,
       store: document.getElementById('prodStore').value.trim(),
       code: genProductCode(),
     });
@@ -749,7 +735,6 @@ window.clearForm = function() {
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('prodCategory').value = '';
   document.getElementById('prodUnit').value = 'ც';
-  document.getElementById('prodActive').value = 'true';
   prodFileData = null;
   document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
   document.getElementById('prodFile').value = '';
@@ -802,7 +787,6 @@ window.editProduct = function(id) {
   document.getElementById('editUnit').value = p.unit || 'ც';
   document.getElementById('editDesc').value = p.description || '';
   document.getElementById('editExistingImage').value = p.image_url || '';
-  document.getElementById('editActive').value = p.active !== false ? 'true' : 'false';
   document.getElementById('editStore').value = p.store || '';
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
   document.getElementById('editFile').value = '';
@@ -834,7 +818,7 @@ window.saveProductEdit = async function() {
       unit: document.getElementById('editUnit').value,
       description: document.getElementById('editDesc').value.trim(),
       image_url: editFileData || document.getElementById('editExistingImage').value,
-      active: document.getElementById('editActive').value === 'true',
+      active: true,
       store: document.getElementById('editStore').value.trim(),
     }).eq('id', id);
     showToast('✓ პროდუქტი განახლდა!', 'success');
