@@ -597,7 +597,10 @@ tailwind.config = {
   </div>
   <button onclick="toggleChat()" id="chatToggleBtn"
     style="width:52px;height:52px;background:#E8541A;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="chatIconWrap" style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center">
+      <svg id="chatIconChat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="position:absolute;transition:transform 0.3s ease,opacity 0.3s ease;transform:scale(1) rotate(0deg);opacity:1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <svg id="chatIconX" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="position:absolute;transition:transform 0.3s ease,opacity 0.3s ease;transform:scale(0) rotate(-90deg);opacity:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </span>
     <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
   </button>
 </div>
@@ -1079,6 +1082,15 @@ window.toggleChat = function() {
   chatOpen = !chatOpen;
   const panel = document.getElementById('chatPanel');
   panel.style.display = chatOpen ? 'flex' : 'none';
+  const iconChat = document.getElementById('chatIconChat');
+  const iconX = document.getElementById('chatIconX');
+  if (chatOpen) {
+    iconChat.style.transform = 'scale(0) rotate(90deg)'; iconChat.style.opacity = '0';
+    iconX.style.transform = 'scale(1) rotate(0deg)'; iconX.style.opacity = '1';
+  } else {
+    iconChat.style.transform = 'scale(1) rotate(0deg)'; iconChat.style.opacity = '1';
+    iconX.style.transform = 'scale(0) rotate(-90deg)'; iconX.style.opacity = '0';
+  }
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
     document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
