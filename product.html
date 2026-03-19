@@ -420,7 +420,7 @@ function renderRelated() {
   grid.innerHTML = related.map(p => `
     <div onclick="location.href='product.html?id=${p.id}'" class="bg-white border border-gray-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all overflow-hidden">
       <div class="h-36 bg-cream flex items-center justify-center overflow-hidden">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:2.5rem;opacity:.3">${p.emoji||'📦'}</span>`}
+        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-contain p-2">` : `<span style="font-size:2.5rem;opacity:.3">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-3">
         <div class="text-[9px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||''}</div>
