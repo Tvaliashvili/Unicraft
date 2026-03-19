@@ -707,8 +707,10 @@ window.showPage = function(name) {
 // ─── Init ───
 async function initApp() {
   const d = new Date();
+  const _days = ['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
+  const _months = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
   document.getElementById('todayDate').textContent =
-    d.toLocaleDateString('ka-GE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    _days[d.getDay()] + ', ' + d.getDate() + ' ' + _months[d.getMonth()] + ', ' + d.getFullYear();
 
   // Stats
   try {
