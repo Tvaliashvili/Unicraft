@@ -15,11 +15,16 @@
     <div class="login-logo">🏗️</div>
     <h1>ადმინ პანელი</h1>
     <p>შედი შენი ანგარიშით</p>
-    <input class="login-input" type="email" id="loginEmail" placeholder="ელ. ფოსტა" autocomplete="email">
+    <input class="login-input" type="email" id="loginEmail" placeholder="ელ. ფოსტა" autocomplete="email" value="admin@unicraft.ge">
     <input class="login-input" type="password" id="loginPass" placeholder="პაროლი" autocomplete="current-password"
-      onkeydown="if(event.key==='Enter') doLogin()">
+      onkeydown="if(event.key==='Enter') doLogin()" value="unicraft2025">
     <button class="login-btn" onclick="doLogin()">შესვლა</button>
     <div class="login-error" id="loginError"></div>
+    <div style="margin-top:16px;padding:10px;background:#f5f3f0;border-radius:8px;font-size:12px;color:#6B6560;text-align:left">
+      <div style="font-weight:600;margin-bottom:4px;color:#2A2520">Demo წვდომა:</div>
+      <div>📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="28494c454146685d46414b5a494e5c064f4d">[email&#160;protected]</a></div>
+      <div>🔑 unicraft2025</div>
+    </div>
   </div>
 </div>
 
@@ -594,6 +599,10 @@ function showDropPreview(prefix, src) {
     `<img src="${src}" class="dropzone-img-preview"><div class="dropzone-change-hint">სხვა ფოტოს ასარჩევად კვლავ დააჭირე</div>`;
 }
 
+// ─── Demo credentials (Firebase-ის გარეშე) ───
+const DEMO_EMAIL = 'admin@unicraft.ge';
+const DEMO_PASS  = 'unicraft2025';
+
 function showApp(email) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
@@ -609,6 +618,13 @@ window.doLogin = async function() {
   errEl.textContent = '';
   if (!email || !pass) { errEl.textContent = 'შეავსე ყველა ველი'; return; }
 
+  // Demo login
+  if (email === DEMO_EMAIL && pass === DEMO_PASS) {
+    sessionStorage.setItem('uc_demo_admin', '1');
+    showApp(email);
+    return;
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
   if (error) {
     errEl.textContent = 'არასწორი ელ. ფოსტა ან პაროლი';
@@ -616,6 +632,7 @@ window.doLogin = async function() {
 };
 
 window.doLogout = async function() {
+  sessionStorage.removeItem('uc_demo_admin');
   await supabase.auth.signOut();
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
@@ -625,11 +642,16 @@ window.doLogout = async function() {
 supabase.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
     showApp(session.user.email);
-  } else {
+  } else if (!sessionStorage.getItem('uc_demo_admin')) {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
   }
 });
+
+// Demo session restore
+if (sessionStorage.getItem('uc_demo_admin')) {
+  showApp(DEMO_EMAIL);
+}
 
 // ─── Mobile sidebar toggle ───
 window.toggleSidebar = function() {
@@ -1365,4 +1387,10 @@ window.showPage = function(name) {
   <div style="background:#141210;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;font-weight:600">
     ახლა: ადმინი
   </div>
-  <a href="index.html" style="display:flex;align-items:center;gap:8px;background:#E8541A;color:white;font-size:12px;font-weight:700;padding:10px 16px;text-decoration:none;transition:background .2s" onmouseover="this.s
+  <a href="index.html" style="display:flex;align-items:center;gap:8px;background:#E8541A;color:white;font-size:12px;font-weight:700;padding:10px 16px;text-decoration:none;">
+    საიტი →
+  </a>
+</div>
+
+</body>
+</html>
