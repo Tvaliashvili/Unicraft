@@ -1711,6 +1711,14 @@ function initOrdersBadgeListener() {
       supabase.from('orders').select('id').in('status', ['pending', 'new']).then(({ data }) => {
         updateOrderBadge((data || []).length);
       });
+      // Reload orders list if on orders page
+      if (document.getElementById('page-orders')?.classList.contains('active')) {
+        loadOrdersList();
+      }
+      // Always reload dashboard recent orders
+      supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
+        if (data) renderRecentOrders(data);
+      });
       playNotifSound();
       sendEmailNotif('შეკვეთა', 'ახალი შეკვეთა შემოვიდა UniCraft-ში.');
       if (document.visibilityState !== 'visible' && Notification.permission === 'granted') {
