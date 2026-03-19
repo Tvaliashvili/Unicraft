@@ -131,6 +131,8 @@ tailwind.config = {
 <style>
 @keyframes mPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 @keyframes mShift { 0%{background-position:0 0} 100%{background-position:200% 0} }
+@keyframes chatGlow { 0%,100%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0.5)} 50%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 10px rgba(232,84,26,0)} }
+#chatToggleBtn { animation: chatGlow 2s ease-in-out infinite; }
 </style>
 
 
@@ -594,7 +596,7 @@ tailwind.config = {
     </div>
   </div>
   <button onclick="toggleChat()" id="chatToggleBtn"
-    style="width:52px;height:52px;background:#E8541A;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(232,84,26,0.45);position:relative;flex-shrink:0">
+    style="width:52px;height:52px;background:#E8541A;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
   </button>
