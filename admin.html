@@ -731,8 +731,8 @@ window.addProduct = async function() {
 };
 
 window.clearForm = function() {
-  ['prodName','prodDesc','prodStock','prodPrice','prodStore']
-    .forEach(id => document.getElementById(id).value = '');
+  ['prodName','prodDesc','prodPrice','prodStore']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('prodCategory').value = '';
   document.getElementById('prodUnit').value = 'ც';
   prodFileData = null;
