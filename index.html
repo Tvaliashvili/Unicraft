@@ -559,7 +559,7 @@ function renderPage() {
   const pageItems = filteredProducts.slice(start, start + PAGE_SIZE);
 
   grid.innerHTML = pageItems.map(p => `
-    <div class="card-hover bg-white border border-gray-900 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
+    <div class="card-hover bg-white border border-gray-300 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
       <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
         ${p.imageUrl
