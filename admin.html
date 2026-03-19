@@ -163,17 +163,6 @@
               <label class="form-label">კატეგორია <span class="required">*</span></label>
               <select class="form-select" id="prodCategory">
                 <option value="">კატეგორია...</option>
-                <option>ცემენტი და ბეტონი</option>
-                <option>აგური და ბლოკი</option>
-                <option>კარამზიტი</option>
-                <option>ხე-ტყე</option>
-                <option>მეტალი</option>
-                <option>საიზოლაციო მასალა</option>
-                <option>სადახურე მასალა</option>
-                <option>მილები</option>
-                <option>ელ. მასალა</option>
-                <option>ინსტრუმენტი</option>
-                <option>სხვა</option>
               </select>
             </div>
             <div class="form-group">
@@ -232,6 +221,20 @@
             </button>
             <button class="btn btn-secondary" onclick="clearForm()">გასუფთავება</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Category Management -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <span class="card-title">კატეგორიების მართვა</span>
+        </div>
+        <div style="padding:16px">
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <input class="form-input" id="newCatInput" placeholder="ახალი კატეგორიის სახელი" style="flex:1" onkeydown="if(event.key==='Enter')addCategory()">
+            <button class="btn btn-primary" onclick="addCategory()">+ დამატება</button>
+          </div>
+          <div id="categoryList"></div>
         </div>
       </div>
     </div>
@@ -522,17 +525,6 @@
           <label class="form-label">კატეგორია <span class="required">*</span></label>
           <select class="form-select" id="editCategory">
             <option value="">კატეგორია...</option>
-            <option>ცემენტი და ბეტონი</option>
-            <option>აგური და ბლოკი</option>
-            <option>კარამზიტი</option>
-            <option>ხე-ტყე</option>
-            <option>მეტალი</option>
-            <option>საიზოლაციო მასალა</option>
-            <option>სადახურე მასალა</option>
-            <option>მილები</option>
-            <option>ელ. მასალა</option>
-            <option>ინსტრუმენტი</option>
-            <option>სხვა</option>
           </select>
         </div>
         <div class="form-group">
@@ -794,8 +786,9 @@ window.showPage = function(name) {
     if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
   });
   if (name === 'products') loadProductsList();
-  if (name === 'add-product' && !_storeNames.length) {
-    supabase.from('products').select('store').then(({ data }) => { if (data) refreshStoreList(data); });
+  if (name === 'add-product') {
+    loadCategories();
+    if (!_storeNames.length) supabase.from('products').select('store').then(({ data }) => { if (data) refreshStoreList(data); });
   }
   if (name === 'orders') loadOrdersList();
   if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
@@ -821,6 +814,8 @@ async function initApp() {
   const _months = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
   document.getElementById('todayDate').textContent =
     _days[d.getDay()] + ', ' + d.getDate() + ' ' + _months[d.getMonth()] + ', ' + d.getFullYear();
+
+  loadCategories();
 
   // Stats
   try {
@@ -859,6 +854,55 @@ function renderRecentOrders(rows) {
       <div style="display:flex;justify-content:center"><span class="order-status status-${status}">${statusLabel(status)}</span></div>
     </div>`;
   }).join('');
+}
+
+// ─── Categories ───
+let _categories = [];
+
+async function loadCategories() {
+  const { data } = await supabase.from('categories').select('*').order('name');
+  _categories = data || [];
+  const opts = '<option value="">კატეგორია...</option>' + _categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  document.getElementById('prodCategory').innerHTML = opts;
+  document.getElementById('editCategory').innerHTML = opts;
+  renderCategoryList();
+}
+
+function renderCategoryList() {
+  const el = document.getElementById('categoryList');
+  if (!el) return;
+  if (!_categories.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">კატეგორია არ არის</div>'; return; }
+  el.innerHTML = _categories.map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${c.name}</span>
+      <button onclick="confirmDeleteCategory('${c.id}','${c.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.addCategory = async function() {
+  const input = document.getElementById('newCatInput');
+  const name = input.value.trim();
+  if (!name) return;
+  if (_categories.find(c => c.name === name)) { showToast('ეს კატეგორია უკვე არსებობს', 'error'); return; }
+  const { error } = await supabase.from('categories').insert({ name });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ კატეგორია დაემატა', 'success');
+  loadCategories();
+};
+
+window.confirmDeleteCategory = function(id, name) {
+  if (!confirm(`კატეგორია "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ კატეგორიაში ასევე წაიშლება!`)) return;
+  deleteCategoryConfirmed(id, name);
+};
+
+async function deleteCategoryConfirmed(id, name) {
+  await supabase.from('products').delete().eq('category', name);
+  await supabase.from('categories').delete().eq('id', id);
+  showToast('კატეგორია წაიშალა', 'error');
+  loadCategories();
+  loadProductsList();
 }
 
 // ─── Products ───
