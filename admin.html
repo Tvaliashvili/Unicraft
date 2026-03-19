@@ -805,7 +805,7 @@ function renderRecentOrders(rows) {
       <div style="display:flex;justify-content:center">
         ${o.assigned_name ? `<span style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>` : '<span style="color:var(--gray-mid);font-size:12px">–</span>'}
       </div>
-      <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
+      <span style="font-weight:600;font-size:13px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</span>
       <div style="display:flex;justify-content:center"><span class="order-status status-${status}">${statusLabel(status)}</span></div>
     </div>`;
   }).join('');
