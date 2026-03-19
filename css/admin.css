@@ -647,8 +647,8 @@ body {
 
   /* Chat grid: single column on mobile */
   #chatGrid { display: flex !important; flex-direction: column; }
-  #chatSessionsCol { flex-direction: column; }
-  #chatMainCol { flex: 1; min-height: 0; }
+  #chatSessionsCol { flex-direction: column; width: 100%; }
+  #chatMainCol { flex: 1; min-height: 0; width: 100%; }
   #mobileSessionsToggle { display: inline-block !important; }
   #mobileBackBtn { display: none; }
 
