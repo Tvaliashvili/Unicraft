@@ -445,6 +445,7 @@
           <div class="page-title">ჩატი</div>
           <div class="page-subtitle" id="chatSubtitle">მომხმარებელთა შეტყობინებები</div>
         </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteAllChats()">🗑 ყველას წაშლა</button>
       </div>
       <div style="display:grid;grid-template-columns:290px 1fr;gap:16px;flex:1;min-height:0">
         <!-- Sessions list -->
@@ -1242,6 +1243,20 @@ function loadChatSessions() {
     })
     .subscribe();
 }
+
+window.deleteAllChats = async function() {
+  if (!confirm('ნამდვილად გსურთ ყველა საუბრის წაშლა? ეს მოქმედება შეუქცევადია.')) return;
+  await supabase.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  await supabase.from('chats').delete().neq('id', '');
+  document.getElementById('chatSessionsList').innerHTML = '<div class="table-empty"><div class="icon">💬</div>შეტყობინება არ არის</div>';
+  document.getElementById('adminChatPanel').style.display = 'none';
+  document.getElementById('adminChatEmpty').style.display = 'flex';
+  document.getElementById('chatSubtitle').textContent = '0 საუბარი';
+  currentChatSessionId = null;
+  const badge = document.getElementById('chatAdminBadge');
+  if (badge) badge.style.display = 'none';
+  showToast('ყველა საუბარი წაიშალა', 'success');
+};
 
 window.deleteChat = async function(sessionId) {
   if (!confirm('ნამდვილად გსურთ ამ საუბრის წაშლა?')) return;
