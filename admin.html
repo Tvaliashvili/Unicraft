@@ -247,16 +247,9 @@
                 მაღაზია
                 <span onclick="toggleStoreMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
               </label>
-              <div id="prodStoreCombo" style="position:relative">
-                <div style="display:flex;gap:0">
-                  <input class="form-input" id="prodStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" style="border-radius:10px 0 0 10px;flex:1"
-                    oninput="filterStoreDropdown('prodStoreCombo',this.value)"
-                    onblur="closeStoreDropdown('prodStoreCombo',200)">
-                  <button type="button" style="border:1px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:0 12px;background:var(--bg);cursor:pointer;color:var(--gray-mid);font-size:11px"
-                    onmousedown="event.preventDefault();toggleStoreDropdown('prodStoreCombo')">▾</button>
-                </div>
-                <div id="prodStoreDropdown" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #e0dbd5;border-radius:10px;box-shadow:0 -4px 24px rgba(0,0,0,0.10);z-index:9999;max-height:220px;overflow-y:auto"></div>
-              </div>
+              <select class="form-select" id="prodStore">
+                <option value="">მაღაზია...</option>
+              </select>
               <!-- Store manager inline -->
               <div id="storeMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
                 <div style="display:flex;gap:6px;margin-bottom:10px">
@@ -632,16 +625,9 @@
         </div>
         <div class="form-group full">
           <label class="form-label">მაღაზია</label>
-          <div id="editStoreCombo" style="position:relative">
-            <div style="display:flex;gap:0">
-              <input class="form-input" id="editStore" placeholder="მაგ: ელიავა, პავილიონი 14-B · 599 123 456" autocomplete="off" style="border-radius:10px 0 0 10px;flex:1"
-                oninput="filterStoreDropdown('editStoreCombo',this.value)"
-                onblur="closeStoreDropdown('editStoreCombo',200)">
-              <button type="button" style="border:1px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:0 12px;background:var(--bg);cursor:pointer;color:var(--gray-mid);font-size:11px"
-                onmousedown="event.preventDefault();toggleStoreDropdown('editStoreCombo')">▾</button>
-            </div>
-            <div id="editStoreDropdown" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #e0dbd5;border-radius:10px;box-shadow:0 -4px 24px rgba(0,0,0,0.10);z-index:9999;max-height:220px;overflow-y:auto"></div>
-          </div>
+          <select class="form-select" id="editStore">
+            <option value="">მაღაზია...</option>
+          </select>
         </div>
       </div>
       <div class="form-actions">
@@ -882,7 +868,7 @@ window.showPage = function(name) {
   if (name === 'products') loadProductsList();
   if (name === 'add-product') {
     loadCategories();
-    if (!_storeNames.length) supabase.from('products').select('store').then(({ data }) => { if (data) refreshStoreList(data); });
+    loadStores();
   }
   if (name === 'orders') loadOrdersList();
   if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
@@ -1208,17 +1194,6 @@ async function loadProductsList() {
     return;
   }
   rows.forEach(p => { productCache[p.id] = p; });
-
-  refreshStoreList(rows);
-
-  // Populate store filter dropdown
-  const filterSel = document.getElementById('storeFilterSelect');
-  if (filterSel) {
-    const current = filterSel.value;
-    const stores = [...new Set(rows.map(p => p.store).filter(Boolean))].sort();
-    filterSel.innerHTML = `<option value="">ყველა მაღაზია</option>` +
-      stores.map(s => `<option value="${s}"${s === current ? ' selected' : ''}>${s}</option>`).join('');
-  }
 
   renderProductRows(rows);
 }
@@ -2017,14 +1992,20 @@ window.doAdminInvoicePDF = function() {
 
 // init when page is shown
 // ── Store combo helpers ──
-// ── Store combo ──
-let _storeNames = [];
-let _stores = []; // [{id, name}]
+// ── Stores ──
+let _stores = [];
 async function loadStores() {
   const { data } = await supabase.from('stores').select('*').order('name');
   _stores = data || [];
-  _storeNames = [...new Set([..._stores.map(s => s.name), ..._storeNames])].sort();
+  const opts = '<option value="">მაღაზია...</option>' + _stores.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  ['prodStore','editStore'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
   renderStoreList();
+  // update filter dropdown
+  const filterSel = document.getElementById('storeFilterSelect');
+  if (filterSel) {
+    const current = filterSel.value;
+    filterSel.innerHTML = '<option value="">ყველა მაღაზია</option>' + _stores.map(s => `<option value="${s.name}"${s.name === current ? ' selected' : ''}>${s.name}</option>`).join('');
+  }
 }
 function renderStoreList() {
   const el = document.getElementById('storeList');
@@ -2058,54 +2039,7 @@ window.deleteStore = async function(id, name) {
   showToast('მაღაზია წაიშალა', 'error');
   loadStores();
 };
-function refreshStoreList(rows) {
-  _storeNames = [...new Set(rows.map(p => p.store).filter(Boolean))].sort();
-  loadStores();
-}
-function getStoreDD(comboId) {
-  return document.getElementById(comboId.replace('Combo','Dropdown'));
-}
-function getStoreInput(comboId) {
-  return document.getElementById(comboId.replace('Combo',''));
-}
-function renderStoreDD(comboId, list) {
-  const dd = getStoreDD(comboId);
-  if (!dd) return;
-  if (!list.length) {
-    dd.innerHTML = `<div style="padding:12px 14px;font-size:12px;color:#aaa;text-align:center">შენახული მაღაზია არ არის</div>`;
-  } else {
-    dd.innerHTML = list.map(s =>
-      `<div style="padding:10px 14px;font-size:13px;color:#333;cursor:pointer;border-radius:8px;margin:3px;transition:background .15s"
-        onmouseover="this.style.background='#f5f2ee'" onmouseout="this.style.background=''"
-        onmousedown="pickStore(event,'${s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${comboId}')">${s}</div>`
-    ).join('');
-  }
-  dd.style.display = 'block';
-}
-window.toggleStoreDropdown = function(comboId) {
-  const dd = getStoreDD(comboId);
-  if (!dd) return;
-  if (dd.style.display === 'block') { dd.style.display = 'none'; return; }
-  const input = getStoreInput(comboId);
-  const val = input ? input.value : '';
-  const filtered = val ? _storeNames.filter(s => s.toLowerCase().includes(val.toLowerCase())) : _storeNames;
-  renderStoreDD(comboId, filtered);
-  input && input.focus();
-};
-window.closeStoreDropdown = function(comboId, delay) {
-  setTimeout(() => { const dd = getStoreDD(comboId); if (dd) dd.style.display = 'none'; }, delay || 0);
-};
-window.filterStoreDropdown = function(comboId, val) {
-  const filtered = val ? _storeNames.filter(s => s.toLowerCase().includes(val.toLowerCase())) : _storeNames;
-  renderStoreDD(comboId, filtered);
-};
-window.pickStore = function(e, val, comboId) {
-  e.preventDefault();
-  const input = getStoreInput(comboId);
-  if (input) input.value = val;
-  const dd = getStoreDD(comboId);
-  if (dd) dd.style.display = 'none';
-};
+function refreshStoreList() { loadStores(); }
 
 const _origShowPage = window.showPage;
 window.showPage = function(name) {
