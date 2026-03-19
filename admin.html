@@ -865,7 +865,7 @@ const DEMO_ORDERS = [];
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
   const status = o.status || 'pending';
-  return `<div class="order-row" style="grid-template-columns:100px 150px 1fr 130px 100px 120px;cursor:pointer" onclick="openOrderModal('${id}')">
+  return `<div class="order-row" style="grid-template-columns:100px 150px 1fr 130px 100px 120px 40px;cursor:pointer" onclick="openOrderModal('${id}')">
     <span style="font-size:12px;color:var(--gray-mid)">${dateStr}</span>
     <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoice_no || o.invoiceNo || '–'}</span>
     <div>
@@ -875,6 +875,9 @@ function renderOrderRow(id, o, dateStr) {
     <span style="font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</span>
     <span style="font-weight:600">${parseFloat(o.total||0).toFixed(2)} ₾</span>
     <div style="display:flex;align-items:center"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></div>
+    <div style="display:flex;align-items:center;justify-content:center">
+      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:16px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">✕</button>
+    </div>
   </div>`;
 }
 
@@ -888,7 +891,8 @@ async function loadOrdersList() {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (!error && data && data.length) {
       hasRealData = true;
-      document.getElementById('orderCountLabel').textContent = data.length + ' შეკვეთა';
+      const newCount = data.filter(o => !o.status || o.status === 'pending' || o.status === 'new').length;
+      document.getElementById('orderCountLabel').textContent = newCount + ' ახალი შეკვეთა';
       el.innerHTML = data.map(o => {
         const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
         return renderOrderRow(o.id, o, date);
@@ -971,6 +975,13 @@ window.toggleReactivate = function() {
 
 window.reactivateOrder = function() {
   setOrderStatus(window.currentOrderId, 'new');
+};
+
+window.deleteOrder = async function(id) {
+  if (!confirm('ნამდვილად გსურთ ამ შეკვეთის წაშლა?')) return;
+  await supabase.from('orders').delete().eq('id', id);
+  delete ordersCache[id];
+  loadOrdersList();
 };
 
 window.setOrderStatus = async function(id, status) {
