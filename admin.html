@@ -664,9 +664,17 @@ function toWebP(file) {
   });
 }
 
-// Upload File to Supabase Storage, return public URL
+// Upload File to Supabase Storage (removes bg + converts to WebP), return public URL
 async function uploadProductImage(file) {
-  const webpBlob = await toWebP(file);
+  let processedFile = file;
+  const removeBg = await getRemoveBg();
+  if (removeBg) {
+    try {
+      const noBgBlob = await removeBg(file);
+      processedFile = new File([noBgBlob], 'image.png', { type: 'image/png' });
+    } catch(e) {}
+  }
+  const webpBlob = await toWebP(processedFile);
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
   const { error } = await supabase.storage.from('product-images').upload(fileName, webpBlob, { contentType: 'image/webp' });
   if (error) throw error;
@@ -674,31 +682,10 @@ async function uploadProductImage(file) {
   return data.publicUrl;
 }
 
-async function _storeFile(file, prefix) {
-  const previewEl = document.getElementById(prefix + 'Preview');
-  previewEl.innerHTML = `<div style="padding:24px;text-align:center;color:#6b7280;font-size:13px"><div class="spinner" style="margin:0 auto 8px"></div>ფონი იხსნება...</div>`;
+function _storeFile(file, prefix) {
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
-  try {
-    const removeBg = await getRemoveBg();
-    if (removeBg) {
-      const noBgBlob = await removeBg(file);
-      const previewUrl = URL.createObjectURL(noBgBlob);
-      if (prefix === 'prod') prodFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
-      else editFileData = new File([noBgBlob], 'image.png', { type: 'image/png' });
-      showDropPreview(prefix, previewUrl);
-    } else {
-      if (prefix === 'prod') prodFileData = file;
-      else editFileData = file;
-      showDropPreview(prefix, URL.createObjectURL(file));
-      showToast('ფონის მოხსნა მიუწვდომელია', 'error');
-    }
-  } catch(e) {
-    if (prefix === 'prod') prodFileData = file;
-    else editFileData = file;
-    showDropPreview(prefix, URL.createObjectURL(file));
-    showToast('ფონის მოხსნა ვერ მოხერხდა, ორიგინალი შეინახება', 'error');
-  }
+  showDropPreview(prefix, URL.createObjectURL(file));
 }
 
 window.handleFile = function(input, prefix) {
