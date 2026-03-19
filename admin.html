@@ -704,17 +704,12 @@ function renderDescRows(containerId, values = {}) {
   if (!el) return;
   el.innerHTML = DESC_FIELDS.map((label, i) => `
     <div class="desc-field-row" id="${containerId}_row_${i}" style="display:flex;align-items:center;border-bottom:1px solid var(--border)">
-      <button onclick="hideDescRow('${containerId}',${i})" title="წაშლა" style="flex-shrink:0;width:32px;height:36px;background:none;border:none;border-right:1px solid var(--border);cursor:pointer;color:#dc2626;font-size:18px;line-height:1">−</button>
-      <span style="flex-shrink:0;font-size:12px;font-weight:600;color:var(--gray-mid);padding:0 8px;min-width:160px">${label}:</span>
+      <span style="flex-shrink:0;font-size:12px;font-weight:600;color:var(--gray-mid);padding:0 10px;min-width:170px;border-right:1px solid var(--border)">${label}:</span>
       <input style="flex:1;border:none;outline:none;font-size:13px;font-family:inherit;padding:8px 10px;background:transparent;color:var(--gray-dark)" placeholder="—" value="${(values[label]||'').replace(/"/g,'&quot;')}">
     </div>
   `).join('');
 }
 
-window.hideDescRow = function(containerId, i) {
-  const row = document.getElementById(containerId + '_row_' + i);
-  if (row) row.style.display = 'none';
-};
 
 function getDescValue(containerId) {
   return DESC_FIELDS.map((label, i) => {
