@@ -95,7 +95,7 @@ tailwind.config = {
   </div>
 
   <!-- Bottom label -->
-  <div style="position:absolute;bottom:24px;color:rgba(255,255,255,0.12);font-size:11px;letter-spacing:1px">© 2025 შპს უნიკრაფტი</div>
+  <div style="position:absolute;bottom:24px;color:white;font-size:11px;letter-spacing:1px">© 2025 შპს უნიკრაფტი</div>
 </div>
 
 <style>
@@ -103,9 +103,6 @@ tailwind.config = {
 @keyframes mShift { 0%{background-position:0 0} 100%{background-position:200% 0} }
 </style>
 
-<script>
-setTimeout(function(){ document.getElementById('mProgress').style.width = '68%'; }, 150);
-</script>
 
 <!-- ══ HEADER ══ -->
 <header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
@@ -911,12 +908,16 @@ import { supabase } from './js/supabase-config.js';
   const { data } = await supabase.from('settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
   const ms = document.getElementById('maintenanceScreen');
   const isPreview = new URLSearchParams(location.search).has('preview');
-  ms.style.display = (data?.value === 'true' && !isPreview) ? 'flex' : 'none';
+  const showMaintenance = data?.value === 'true' && !isPreview;
+  ms.style.display = showMaintenance ? 'flex' : 'none';
+  if (showMaintenance) setTimeout(() => { document.getElementById('mProgress').style.width = '68%'; }, 150);
   // Subscribe to live changes
   supabase.channel('settings-changes').on('postgres_changes',
     { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.maintenance_mode' },
     payload => {
-      ms.style.display = payload.new.value === 'true' ? 'flex' : 'none';
+      const on = payload.new.value === 'true';
+      ms.style.display = on ? 'flex' : 'none';
+      if (on) { document.getElementById('mProgress').style.width = '0'; setTimeout(() => { document.getElementById('mProgress').style.width = '68%'; }, 150); }
     }
   ).subscribe();
 })();
