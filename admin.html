@@ -212,19 +212,8 @@
             </div>
             <div class="form-group full">
               <label class="form-label">აღწერა</label>
-              <textarea class="form-textarea" id="prodDesc" style="min-height:180px">ბრენდი / მწარმოებელი:
-
-წარმოშობის ქვეყანა:
-
-ზომა / განზომილება:
-
-წონა / მოცულობა:
-
-ძირითადი მასალა:
-
-რაოდენობა შეფუთვაში:
-
-გარანტიის ვადა: </textarea>
+              <div id="prodDescRows" style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+              </div>
             </div>
             <div class="form-group full">
               <label class="form-label">ფოტო</label>
@@ -604,7 +593,7 @@
         </div>
         <div class="form-group full">
           <label class="form-label">აღწერა</label>
-          <textarea class="form-textarea" id="editDesc" placeholder="პროდუქტის დეტალური აღწერა..."></textarea>
+          <div id="editDescRows" style="border:1px solid var(--border);border-radius:10px;overflow:hidden"></div>
         </div>
         <div class="form-group full">
           <label class="form-label">ფოტო</label>
@@ -699,19 +688,56 @@ let productCache = {};
 let prodFileData = null;
 let editFileData = null;
 
-const PROD_DESC_DEFAULT = `ბრენდი / მწარმოებელი:
+const DESC_FIELDS = [
+  'ბრენდი / მწარმოებელი',
+  'წარმოშობის ქვეყანა',
+  'ზომა / განზომილება',
+  'წონა / მოცულობა',
+  'ძირითადი მასალა',
+  'რაოდენობა შეფუთვაში',
+  'გარანტიის ვადა',
+  'სხვა ინფორმაცია',
+];
 
-წარმოშობის ქვეყანა:
+function renderDescRows(containerId, values = {}) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = DESC_FIELDS.map((label, i) => `
+    <div class="desc-field-row" id="${containerId}_row_${i}" style="display:flex;align-items:center;border-bottom:1px solid var(--border)">
+      <button onclick="hideDescRow('${containerId}',${i})" title="წაშლა" style="flex-shrink:0;width:32px;height:36px;background:none;border:none;border-right:1px solid var(--border);cursor:pointer;color:#dc2626;font-size:18px;line-height:1">−</button>
+      <span style="flex-shrink:0;font-size:12px;font-weight:600;color:var(--gray-mid);padding:0 8px;min-width:160px">${label}:</span>
+      <input style="flex:1;border:none;outline:none;font-size:13px;font-family:inherit;padding:8px 10px;background:transparent;color:var(--gray-dark)" placeholder="—" value="${(values[label]||'').replace(/"/g,'&quot;')}">
+    </div>
+  `).join('');
+}
 
-ზომა / განზომილება:
+window.hideDescRow = function(containerId, i) {
+  const row = document.getElementById(containerId + '_row_' + i);
+  if (row) row.style.display = 'none';
+};
 
-წონა / მოცულობა:
+function getDescValue(containerId) {
+  return DESC_FIELDS.map((label, i) => {
+    const row = document.getElementById(containerId + '_row_' + i);
+    if (!row || row.style.display === 'none') return null;
+    const val = row.querySelector('input').value.trim();
+    return val ? `${label}: ${val}` : null;
+  }).filter(Boolean).join('\n');
+}
 
-ძირითადი მასალა:
-
-რაოდენობა შეფუთვაში:
-
-გარანტიის ვადა:`;
+function parseDescValue(text) {
+  const map = {};
+  if (!text) return map;
+  text.split('\n').forEach(line => {
+    const ci = line.indexOf(':');
+    if (ci > 0) {
+      const label = line.slice(0, ci).trim();
+      const val = line.slice(ci + 1).trim();
+      map[label] = val;
+    }
+  });
+  return map;
+}
 
 const DROPZONE_EMPTY = `
   <div class="dropzone-icon">📷</div>
@@ -772,26 +798,33 @@ async function resizeImage(file, maxSize = 1024) {
 
 async function _storeFile(file, prefix) {
   showDropPreview(prefix, URL.createObjectURL(file));
-  const previewEl = document.getElementById(prefix + 'Preview');
-  previewEl.innerHTML += `<div id="${prefix}BgStatus" style="text-align:center;padding:6px 0;font-size:12px;color:#6b7280"><div class="spinner" style="display:inline-block;margin-right:6px;width:12px;height:12px;border-width:2px"></div>ფონი იხსნება...</div>`;
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
+  // Show bg remove button
+  const previewEl = document.getElementById(prefix + 'Preview');
+  previewEl.innerHTML += `<div style="text-align:center;padding:6px 0">
+    <button id="${prefix}BgBtn" onclick="triggerBgRemoval('${prefix}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:inherit">✨ ფონის მოხსნა</button>
+  </div>`;
+}
+
+window.triggerBgRemoval = async function(prefix) {
+  const btn = document.getElementById(prefix + 'BgBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner" style="display:inline-block;width:12px;height:12px;border-width:2px;margin-right:6px"></div>იხსნება...'; }
+  const file = prefix === 'prod' ? prodFileData : editFileData;
+  if (!file) return;
   try {
     const removeBg = await getRemoveBg();
-    if (removeBg) {
-      const noBgBlob = await removeBg(file);
-      const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
-      if (prefix === 'prod') prodFileData = processed;
-      else editFileData = processed;
-      showDropPreview(prefix, URL.createObjectURL(processed));
-    } else {
-      document.getElementById(prefix + 'BgStatus')?.remove();
-    }
+    if (!removeBg) { showToast('ბიბლიოთეკა ვერ ჩაიტვირთა', 'error'); btn && (btn.disabled = false); return; }
+    const noBgBlob = await removeBg(file);
+    const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
+    if (prefix === 'prod') prodFileData = processed;
+    else editFileData = processed;
+    showDropPreview(prefix, URL.createObjectURL(processed));
   } catch(e) {
-    document.getElementById(prefix + 'BgStatus')?.remove();
-    // background removal failed — keep original file silently
+    showToast('ფონის მოხსნა ვერ მოხერხდა', 'error');
+    if (btn) { btn.disabled = false; btn.innerHTML = '✨ ფონის მოხსნა'; }
   }
-}
+};
 
 window.handleFile = function(input, prefix) {
   const file = input.files[0];
@@ -923,6 +956,7 @@ async function initApp() {
   loadUnits();
   loadStores();
   loadMaintenanceStatus();
+  renderDescRows('prodDescRows');
 
   // Stats
   try {
@@ -1180,7 +1214,7 @@ window.addProduct = async function() {
       category,
       price,
       unit: document.getElementById('prodUnit').value,
-      description: document.getElementById('prodDesc').value.trim(),
+      description: getDescValue('prodDescRows'),
       image_url: imageUrl,
       active: true,
       store: document.getElementById('prodStore').value.trim(),
@@ -1199,7 +1233,7 @@ window.addProduct = async function() {
 window.clearForm = function() {
   ['prodName','prodPrice','prodStore']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  document.getElementById('prodDesc').value = PROD_DESC_DEFAULT;
+  renderDescRows('prodDescRows');
   document.getElementById('prodCategory').value = '';
   document.getElementById('prodUnit').value = 'ც';
   prodFileData = null;
@@ -1274,7 +1308,7 @@ window.editProduct = function(id) {
   document.getElementById('editCategory').value = p.category || '';
   document.getElementById('editPrice').value = p.price || '';
   document.getElementById('editUnit').value = p.unit || 'ც';
-  document.getElementById('editDesc').value = p.description || '';
+  renderDescRows('editDescRows', parseDescValue(p.description || ''));
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editStore').value = p.store || '';
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
@@ -1310,7 +1344,7 @@ window.saveProductEdit = async function() {
     await supabase.from('products').update({
       name, category, price,
       unit: document.getElementById('editUnit').value,
-      description: document.getElementById('editDesc').value.trim(),
+      description: getDescValue('editDescRows'),
       image_url: imageUrl,
       active: true,
       store: document.getElementById('editStore').value.trim(),
