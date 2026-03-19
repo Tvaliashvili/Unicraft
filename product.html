@@ -299,6 +299,11 @@ tailwind.config = {
       </div>
       <button onclick="startChat()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;width:100%">ჩატის დაწყება →</button>
     </div>
+    <div id="chatClosed" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px 20px;text-align:center;font-family:'Noto Sans Georgian',sans-serif;height:260px">
+      <div style="font-size:36px">🔒</div>
+      <p style="font-size:13px;color:#374151;line-height:1.7;margin:0">ჩატი დახურულია.<br>ადმინისტრატორმა საუბარი დაასრულა.</p>
+      <button onclick="restartChat()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif">↺ ახლიდან დაწყება</button>
+    </div>
     <div id="chatBody" style="display:none;flex-direction:column;height:380px">
       <div id="chatMessages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f9fafb;font-family:'Noto Sans Georgian',sans-serif"></div>
       <div style="padding:10px 12px;border-top:1px solid #e5e7eb;display:flex;gap:8px;background:white;flex-shrink:0">
@@ -625,6 +630,8 @@ async function initChatSession(name, phone) {
   const n = name || _chatUserName, p = phone || _chatUserPhone;
   try {
     await supabase.from('chats').upsert({ id: chatSessionId, customer_name: n, customer_phone: p, last_message: '', unread: 0, status: 'open' }, { onConflict: 'id', ignoreDuplicates: true });
+    const { data: chatData } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
+    if (chatData?.status === 'closed') { showChatClosed(); return; }
     const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
     if (!existing || !existing.length) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
@@ -638,9 +645,33 @@ async function initChatSession(name, phone) {
         const el = document.getElementById('chatMessages'), m = payload.new, isAdmin = m.sender === 'admin';
         el.innerHTML += `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55">${m.text}</div></div>`;
         el.scrollTop = el.scrollHeight;
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chats', filter: `id=eq.${chatSessionId}` }, payload => {
+        if (payload.new.status === 'closed') showChatClosed();
       }).subscribe();
   } catch(e) { renderChatMsgs([{ text: `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`, sender: 'admin' }]); }
 }
+
+function showChatClosed() {
+  document.getElementById('chatBody').style.display = 'none';
+  const el = document.getElementById('chatClosed');
+  el.style.display = 'flex'; el.style.flexDirection = 'column';
+  if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
+}
+
+window.restartChat = function() {
+  chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+  localStorage.setItem('uc_chat_session', chatSessionId);
+  chatUserInfo = null; localStorage.removeItem('uc_chat_user');
+  _chatUserName = ''; _chatUserPhone = '';
+  document.getElementById('chatClosed').style.display = 'none';
+  document.getElementById('chatBody').style.display = 'none';
+  document.getElementById('chatIntro').style.display = 'flex';
+  document.getElementById('chatIntro').style.flexDirection = 'column';
+  document.getElementById('chatNameInput').value = '';
+  document.getElementById('chatPhoneInput').value = '';
+  setTimeout(() => document.getElementById('chatNameInput').focus(), 50);
+};
 
 function renderChatMsgs(msgs) {
   const el = document.getElementById('chatMessages');
