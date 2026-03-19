@@ -18,7 +18,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: clamp(14px, 1.5625vw, 32px); }
+html { font-size: clamp(16px, 1.25vw, 28px); }
 
 body {
   font-family: 'Noto Sans Georgian', sans-serif;
