@@ -838,6 +838,7 @@ async function _storeFile(file, prefix) {
   showDropPreview(prefix, URL.createObjectURL(file));
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
+}
 
 window.handleFile = function(input, prefix) {
   const file = input.files[0];
