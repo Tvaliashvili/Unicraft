@@ -725,12 +725,11 @@ let _removeBgFn = null;
 async function getRemoveBg() {
   if (_removeBgFn) return _removeBgFn;
   try {
-    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-    const mod = await import('https://esm.sh/@imgly/background-removal');
+    const mod = await import('https://esm.sh/@imgly/background-removal@1.7.0');
     const fn = mod.removeBackground || mod.default;
-    _removeBgFn = isMobile
-      ? (file) => fn(file, { publicPath: 'https://cdn.img.ly/packages/imgly/background-removal-js/latest/dist/browser/' })
-      : fn;
+    _removeBgFn = (file) => fn(file, {
+      publicPath: 'https://unpkg.com/@imgly/background-removal@1.7.0/dist/'
+    });
   } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
   return _removeBgFn;
 }
