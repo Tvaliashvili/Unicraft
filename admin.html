@@ -726,11 +726,7 @@ async function getRemoveBg() {
   if (_removeBgFn) return _removeBgFn;
   try {
     const mod = await import('https://esm.sh/@imgly/background-removal');
-    const fn = mod.removeBackground || mod.default;
-    _removeBgFn = (file) => fn(file, {
-      publicPath: 'https://unpkg.com/@imgly/background-removal/dist/',
-      model: 'medium'
-    });
+    _removeBgFn = mod.removeBackground || mod.default;
   } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
   return _removeBgFn;
 }
