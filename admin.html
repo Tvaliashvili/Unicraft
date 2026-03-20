@@ -721,22 +721,13 @@
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
 
-const REMOVE_BG_URL = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/remove-bg';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo';
-const _isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
 let _removeBgFn = null;
 async function getRemoveBg() {
   if (_removeBgFn) return _removeBgFn;
-  if (!_isMobile) {
-    try {
-      const mod = await import('https://esm.sh/@imgly/background-removal@1.7.0');
-      const fn = mod.removeBackground || mod.default;
-      _removeBgFn = (file) => fn(file, {
-        publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/'
-      });
-    } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
-  }
+  try {
+    const mod = await import('https://esm.sh/@imgly/background-removal');
+    _removeBgFn = mod.removeBackground || mod.default;
+  } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
   return _removeBgFn;
 }
 
@@ -868,21 +859,11 @@ window.triggerBgRemoval = async function(prefix) {
   const file = prefix === 'prod' ? prodFileData : editFileData;
   if (!file) return;
   try {
-    let processed;
-    const pngFile = await _toPng(file, 1024);
-    if (_isMobile) {
-      const fd = new FormData();
-      fd.append('file', pngFile);
-      const res = await fetch(REMOVE_BG_URL, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }, body: fd });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Error'); }
-      const blob = await res.blob();
-      processed = new File([blob], 'image.png', { type: 'image/png' });
-    } else {
-      const removeBg = await getRemoveBg();
-      if (!removeBg) { if (btn) { btn.disabled = false; btn.style.cssText = 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:8px;padding:6px 18px;font-size:12px;cursor:pointer;font-family:inherit'; btn.innerHTML = '✨ ფონის მოხსნა'; } return; }
-      const noBgBlob = await removeBg(pngFile);
-      processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
-    }
+    const removeBg = await getRemoveBg();
+    if (!removeBg) { if (btn) { btn.disabled = false; btn.style.cssText = 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:8px;padding:6px 18px;font-size:12px;cursor:pointer;font-family:inherit'; btn.innerHTML = '✨ ფონის მოხსნა'; } return; }
+    const resized = await resizeImage(file, 1024);
+    const noBgBlob = await removeBg(resized);
+    const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
     if (prefix === 'prod') prodFileData = processed;
     else editFileData = processed;
     showDropPreview(prefix, URL.createObjectURL(processed));
