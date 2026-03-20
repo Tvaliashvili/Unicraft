@@ -1339,7 +1339,7 @@ function renderProductRows(rows) {
         <div onclick="toggleSection('${id}')" style="flex:1;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
           <span>${title} <span style="font-weight:400">(${count})</span></span>
           <div style="display:flex;align-items:center;gap:8px">
-            <button id="${id}-bulk-btn" onclick="event.stopPropagation();${bulkAction}" style="display:none;${bulkStyle};border-radius:8px;padding:0 10px;height:26px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity 0.15s">${bulkLabel}</button>
+            <button id="${id}-bulk-btn" onclick="event.stopPropagation();${bulkAction}" style="display:none;${bulkStyle};border-radius:8px;padding:0 10px;height:26px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity 0.15s;align-items:center">${bulkLabel}</button>
             <span id="${id}-chevron" style="font-size:14px;transition:transform 0.2s">${defaultOpen ? '▲' : '▼'}</span>
           </div>
         </div>
