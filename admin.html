@@ -811,7 +811,7 @@ async function uploadProductImage(file) {
     body: formData
   });
   const data = await res.json();
-  if (!data.url) throw new Error(data.error || 'Upload failed');
+  if (!data.url) throw new Error('Drive upload error: ' + (data.error || JSON.stringify(data)));
   return data.url;
 }
 
