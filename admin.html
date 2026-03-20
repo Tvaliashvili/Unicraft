@@ -1305,6 +1305,7 @@ function renderProductRows(rows) {
       <span class="price-cell">${p.price} ₾${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
       <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
       <div style="display:flex;gap:6px">
+        ${p.image_url ? `<button class="btn btn-sm" id="bgr-${p.id}" onclick="removeBgForProduct('${p.id}')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">BGR</button>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
         <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 წაშლა</button>
@@ -1393,6 +1394,47 @@ window.deleteProduct = async function(id) {
   }
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
+};
+
+let _removeBgFn = null;
+async function getRemoveBg() {
+  if (_removeBgFn) return _removeBgFn;
+  try {
+    const mod = await import('https://esm.sh/@imgly/background-removal');
+    _removeBgFn = mod.removeBackground || mod.default;
+  } catch(e) { _removeBgFn = null; }
+  return _removeBgFn;
+}
+
+window.removeBgForProduct = async function(id) {
+  const btn = document.getElementById('bgr-' + id);
+  if (btn) { btn.disabled = true; btn.textContent = '...'; btn.style.background = '#fff7ed'; btn.style.color = '#c2410c'; btn.style.borderColor = '#fed7aa'; }
+  try {
+    const { data: p } = await supabase.from('products').select('image_url').eq('id', id).single();
+    if (!p?.image_url) throw new Error('სურათი არ მოიძებნა');
+    const imgRes = await fetch(p.image_url);
+    const imgBlob = await imgRes.blob();
+    const imgFile = new File([imgBlob], 'image.jpg', { type: imgBlob.type });
+    const removeBg = await getRemoveBg();
+    if (!removeBg) throw new Error('library ვერ ჩაიტვირთა');
+    const resized = await resizeImage(imgFile, 1024);
+    const noBgBlob = await removeBg(resized);
+    const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
+    const newUrl = await uploadProductImage(processed);
+    const oldMatch = p.image_url.match(/\/d\/([^/?]+)/) || p.image_url.match(/[?&]id=([^&]+)/);
+    await supabase.from('products').update({ image_url: newUrl }).eq('id', id);
+    if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+      body: JSON.stringify({ fileId: oldMatch[1] })
+    }).catch(() => {});
+    showToast('✓ ფონი მოხსნილია!', 'success');
+    loadProductsList();
+  } catch(e) {
+    console.error(e);
+    showToast('შეცდომა: ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'BGR'; btn.style.background = '#eff6ff'; btn.style.color = '#1d4ed8'; btn.style.borderColor = '#bfdbfe'; }
+  }
 };
 
 let _filePickerPrefix = '';
