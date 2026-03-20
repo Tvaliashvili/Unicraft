@@ -8,7 +8,7 @@ const REFRESH_TOKEN = Deno.env.get("GDRIVE_REFRESH_TOKEN")!;
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, DELETE, OPTIONS",
 };
 
 async function getAccessToken(): Promise<string> {
