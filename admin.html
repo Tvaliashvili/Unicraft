@@ -813,14 +813,19 @@ function toWebP(file, maxSize = 1200) {
   });
 }
 
-// Upload File to Supabase Storage (converts to WebP), return public URL
+// Upload File to Google Drive via Edge Function, return public URL
 async function uploadProductImage(file) {
   const webpBlob = await toWebP(file);
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
-  const { error } = await supabase.storage.from('product-images').upload(fileName, webpBlob, { contentType: 'image/webp' });
-  if (error) throw error;
-  const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
-  return data.publicUrl;
+  const formData = new FormData();
+  formData.append('file', new File([webpBlob], fileName, { type: 'image/webp' }));
+  const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  if (!data.url) throw new Error(data.error || 'Upload failed');
+  return data.url;
 }
 
 async function resizeImage(file, maxSize = 1024) {
