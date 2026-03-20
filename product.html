@@ -24,6 +24,10 @@ tailwind.config = {
 }
 </script>
 <link rel="stylesheet" href="css/product.css">
+<style>
+@keyframes chatGlow { 0%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0.6)} 70%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 14px rgba(232,84,26,0)} 100%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0)} }
+#chatToggleBtn { animation: chatGlow 2s ease-out infinite; }
+</style>
 </head>
 <body class="bg-cream text-dark">
 
@@ -83,10 +87,14 @@ tailwind.config = {
 </g>
         </svg>
       </a>
-      <div class="flex items-center gap-3 flex-shrink-0">
+      <div class="flex items-center gap-2 flex-shrink-0">
         <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
           კალათა
           <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
+        </button>
+        <button onclick="toggleChat()" id="chatToggleBtn" class="relative flex items-center justify-center w-10 h-10 rounded-full" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
         </button>
       </div>
     </div>
@@ -315,8 +323,8 @@ tailwind.config = {
 </div>
 
 <!-- ══ CHAT WIDGET ══ -->
-<div id="chatWidget" style="position:fixed;bottom:24px;left:20px;z-index:999;display:flex;flex-direction:column;align-items:flex-start;gap:0;max-width:calc(100vw - 40px)">
-  <div id="chatPanel" style="display:none;width:320px;max-width:calc(100vw - 40px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;flex-direction:column;overflow:hidden;margin-bottom:10px">
+<div id="chatWidget" style="position:fixed;top:62px;right:16px;z-index:999;max-width:calc(100vw - 32px)">
+  <div id="chatPanel" style="display:none;width:320px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;flex-direction:column;overflow:hidden">
     <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
@@ -349,11 +357,6 @@ tailwind.config = {
       </div>
     </div>
   </div>
-  <button onclick="toggleChat()" id="chatToggleBtn"
-    style="width:52px;height:52px;background:#E8541A;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(232,84,26,0.45);position:relative;flex-shrink:0">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
-  </button>
 </div>
 
 <div id="toast" class="fixed bottom-7 left-1/2 -translate-x-1/2 translate-y-20 bg-dark text-white text-sm font-medium px-6 py-3 border-l-4 border-orange z-50 transition-transform duration-300 whitespace-nowrap pointer-events-none"></div>
