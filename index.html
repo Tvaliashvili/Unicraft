@@ -684,9 +684,9 @@ function renderPage() {
   grid.innerHTML = pageItems.map(p => `
     <div class="card-hover bg-white border border-gray-300 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
-      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0 p-3">
+      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
         ${p.imageUrl
-          ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
+          ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
