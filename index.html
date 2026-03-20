@@ -623,6 +623,7 @@ function fmtPrice(price, unit) {
 
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
+document.getElementById('cartCount').textContent = cart.length;
 let activeCategory = '';
 let activePrice = null;
 let searchQ = '';
@@ -825,7 +826,7 @@ window.changeQty = function(id, d) {
 
 function saveCart() {
   localStorage.setItem('uc_cart', JSON.stringify(cart));
-  document.getElementById('cartCount').textContent = cart.reduce((s,i) => s+i.qty, 0);
+  document.getElementById('cartCount').textContent = cart.length;
 }
 
 window.toggleCart = function() {

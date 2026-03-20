@@ -365,6 +365,7 @@ let product = null;
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
 window.cart = cart;
+document.getElementById('cartCount').textContent = cart.length;
 let localQty = 1;
 let currentInvoiceNo = '';
 window.currentInvoiceNo = '';
@@ -524,7 +525,7 @@ window.changeQty = function(id, d) {
 function saveCart() {
   localStorage.setItem('uc_cart', JSON.stringify(cart));
   window.cart = cart;
-  document.getElementById('cartCount').textContent = cart.reduce((s,i) => s+i.qty, 0);
+  document.getElementById('cartCount').textContent = cart.length;
 }
 
 window.toggleCart = function() {
