@@ -867,6 +867,7 @@ window.triggerBgRemoval = async function(prefix) {
     if (prefix === 'prod') prodFileData = processed;
     else editFileData = processed;
     showDropPreview(prefix, URL.createObjectURL(processed));
+    if (btn) { btn.disabled = false; btn.innerHTML = '✅ მოხსნილია'; }
   } catch(e) {
     console.error('BG removal error:', e);
     showToast('ფონის მოხსნა ვერ მოხერხდა', 'error');
