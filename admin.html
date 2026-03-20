@@ -855,6 +855,7 @@ async function _storeFile(file, prefix) {
   } catch(e) {
     console.error('BG removal error:', e);
     document.getElementById(prefix + 'BgStatus')?.remove();
+    showToast('ფონის მოხსნა ვერ მოხერხდა: ' + e.message, 'error');
   }
 }
 
