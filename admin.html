@@ -725,8 +725,11 @@ let _removeBgFn = null;
 async function getRemoveBg() {
   if (_removeBgFn) return _removeBgFn;
   try {
-    const mod = await import('https://esm.sh/@imgly/background-removal');
-    _removeBgFn = mod.removeBackground || mod.default;
+    const mod = await import('https://cdn.img.ly/packages/imgly/background-removal-js/latest/dist/browser/index.mjs');
+    const fn = mod.removeBackground || mod.default;
+    _removeBgFn = (file) => fn(file, {
+      publicPath: 'https://cdn.img.ly/packages/imgly/background-removal-js/latest/dist/browser/'
+    });
   } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
   return _removeBgFn;
 }
