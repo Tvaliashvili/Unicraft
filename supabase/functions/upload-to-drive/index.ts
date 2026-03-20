@@ -74,7 +74,7 @@ serve(async (req) => {
       body: JSON.stringify({ role: "reader", type: "anyone" }),
     });
 
-    const url = `https://drive.google.com/uc?export=view&id=${fileId}`;
+    const url = `https://lh3.googleusercontent.com/d/${fileId}`;
     return new Response(JSON.stringify({ url, id: fileId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
