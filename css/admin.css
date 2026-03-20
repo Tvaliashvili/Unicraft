@@ -636,6 +636,7 @@ body {
   /* Product form: fix overflow on mobile */
   .product-form { padding: 12px; }
   #page-add-product .card { overflow-x: hidden; }
+  .form-label[style*="display:flex"] { width: 100%; box-sizing: border-box; min-width: 0; }
   #unitMgrPanel,
   #catMgrPanel,
   #storeMgrPanel { overflow: hidden; }
