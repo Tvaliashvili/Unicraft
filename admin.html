@@ -808,7 +808,7 @@ async function uploadProductImage(file) {
   formData.append('file', new File([webpBlob], fileName, { type: 'image/webp' }));
   const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
     method: 'POST',
-    headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+    headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
     body: formData
   });
   const data = await res.json();
