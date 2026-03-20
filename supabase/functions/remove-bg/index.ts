@@ -25,6 +25,7 @@ serve(async (req) => {
         headers: {
           Authorization: `Bearer ${HF_TOKEN}`,
           "Content-Type": file.type || "image/png",
+          "X-Wait-For-Model": "true",
         },
         body: arrayBuffer,
       }
