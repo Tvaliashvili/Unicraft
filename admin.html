@@ -1334,9 +1334,12 @@ function renderProductRows(rows) {
       </div>
     </div>`;
 
+  const inactiveOpen = document.getElementById('sec-inactive-body')?.style.display !== 'none' ?? false;
+  const activeOpen = document.getElementById('sec-active-body')?.style.display !== 'none' ?? false;
+
   el.innerHTML =
-    sectionHTML('sec-inactive', 'არააქტიური პროდუქტები', inactive.length, '#fff7ed', inactive, false) +
-    sectionHTML('sec-active', 'აქტიური პროდუქტები', active.length, '#f0fdf4', active, false);
+    sectionHTML('sec-inactive', 'არააქტიური პროდუქტები', inactive.length, '#fff7ed', inactive, inactiveOpen) +
+    sectionHTML('sec-active', 'აქტიური პროდუქტები', active.length, '#f0fdf4', active, activeOpen);
 }
 
 window.applyProductFilters = function() {
