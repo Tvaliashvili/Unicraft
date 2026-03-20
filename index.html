@@ -612,12 +612,12 @@ function fmtPrice(price, unit) {
   const dot = s.indexOf('.');
   const whole = s.slice(0, dot);
   const dec = s.slice(dot);
-  return `<div class="flex items-baseline leading-none gap-1">
+  return `<div class="flex items-baseline leading-none gap-1 whitespace-nowrap">
     <div class="flex items-start">
-      <span class="font-display text-3xl tracking-wide text-dark">${whole}</span>
-      <span class="text-[11px] font-bold text-dark pt-[3px]">${dec}</span>
+      <span class="font-display text-2xl tracking-wide text-dark">${whole}</span>
+      <span class="text-[10px] font-bold text-dark pt-[2px]">${dec}</span>
     </div>
-    <span class="font-display text-lg tracking-wide text-dark">₾${unit ? `<span style="font-size:0.75em;font-weight:700;color:#1A1714">/${unit}</span>` : ''}</span>
+    <span class="font-display text-base tracking-wide text-dark">₾${unit ? `<span style="font-size:0.75em;font-weight:700;color:#1A1714">/${unit}</span>` : ''}</span>
   </div>`;
 }
 
