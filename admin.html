@@ -327,6 +327,7 @@
       </div>
       <div class="card">
         <div class="table-row table-header">
+          <span></span>
           <span>ფოტო</span>
           <span>პროდუქტი</span>
           <span>კოდი</span>
@@ -1288,7 +1289,9 @@ function productRowHTML(p, isActive) {
     ${bgrBtn}
     <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;transition:background 0.15s" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" title="აქტიურში გადატანა">✓ აქტ.</button>
     <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;transition:background 0.15s" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'" title="წაშლა">🗑 წაშლა</button>`;
+  const secId = isActive ? 'sec-active' : 'sec-inactive';
   return `<div class="table-row">
+    <input type="checkbox" class="prod-check" data-id="${p.id}" onclick="event.stopPropagation()" onchange="onProductCheck('${secId}')" style="width:16px;height:16px;cursor:pointer;accent-color:var(--orange)">
     <div class="prod-img-thumb">
       ${p.image_url ? `<img src="${p.image_url}" alt="" style="cursor:zoom-in" onclick="openLightbox(this.src)">` : (p.emoji || '📦')}
     </div>
@@ -1323,16 +1326,29 @@ function renderProductRows(rows) {
   const active = filtered.filter(p => p.active);
   const inactive = filtered.filter(p => !p.active);
 
-  const sectionHTML = (id, title, count, color, rows, defaultOpen) =>
-    `<div>
-      <div onclick="toggleSection('${id}')" style="padding:10px 20px;background:${color};font-size:12px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none">
-        <span>${title} <span style="font-weight:400">(${count})</span></span>
-        <span id="${id}-chevron" style="font-size:14px;transition:transform 0.2s">${defaultOpen ? '▲' : '▼'}</span>
+  const sectionHTML = (id, title, count, color, rows, defaultOpen) => {
+    const isActiveSec = id === 'sec-active';
+    const bulkLabel = isActiveSec ? 'ყველა მონიშნული OFF' : 'ყველა მონიშნული ✓ აქტ.';
+    const bulkAction = isActiveSec ? `bulkDeactivate('${id}')` : `bulkActivate('${id}')`;
+    const bulkStyle = isActiveSec
+      ? 'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa'
+      : 'background:#f0fdf4;color:#166534;border:1px solid #bbf7d0';
+    return `<div>
+      <div style="padding:10px 20px;background:${color};font-size:12px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;user-select:none">
+        <input type="checkbox" id="${id}-selectall" onclick="event.stopPropagation()" onchange="toggleSelectAll('${id}',this.checked)" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--orange)">
+        <div onclick="toggleSection('${id}')" style="flex:1;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+          <span>${title} <span style="font-weight:400">(${count})</span></span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button id="${id}-bulk-btn" onclick="event.stopPropagation();${bulkAction}" style="display:none;${bulkStyle};border-radius:8px;padding:0 10px;height:26px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity 0.15s">${bulkLabel}</button>
+            <span id="${id}-chevron" style="font-size:14px;transition:transform 0.2s">${defaultOpen ? '▲' : '▼'}</span>
+          </div>
+        </div>
       </div>
       <div id="${id}-body" style="display:${defaultOpen ? 'block' : 'none'}">
         ${rows.length ? rows.map(p => productRowHTML(p, id === 'sec-active')).join('') : '<div class="table-empty" style="padding:16px"><p style="margin:0;color:var(--gray-mid);font-size:13px">პროდუქტი არ არის</p></div>'}
       </div>
     </div>`;
+  };
 
   const inactiveEl = document.getElementById('sec-inactive-body');
   const inactiveOpen = inactiveEl ? inactiveEl.style.display !== 'none' : false;
@@ -1424,6 +1440,45 @@ window.deleteProduct = async function(id) {
   }
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
+};
+
+window.onProductCheck = function(secId) {
+  const body = document.getElementById(secId + '-body');
+  const all = body.querySelectorAll('.prod-check');
+  const checked = body.querySelectorAll('.prod-check:checked');
+  const sa = document.getElementById(secId + '-selectall');
+  if (sa) { sa.checked = checked.length === all.length && all.length > 0; sa.indeterminate = checked.length > 0 && checked.length < all.length; }
+  const btn = document.getElementById(secId + '-bulk-btn');
+  if (btn) btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+};
+
+window.toggleSelectAll = function(secId, checked) {
+  const body = document.getElementById(secId + '-body');
+  body.querySelectorAll('.prod-check').forEach(cb => cb.checked = checked);
+  const btn = document.getElementById(secId + '-bulk-btn');
+  if (btn) btn.style.display = checked ? 'inline-flex' : 'none';
+};
+
+window.bulkDeactivate = async function(secId) {
+  const body = document.getElementById(secId + '-body');
+  const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) return;
+  if (!confirm(`${ids.length} პროდუქტი გაუქმდეს (OFF)?`)) return;
+  await supabase.from('products').update({ active: false }).in('id', ids);
+  ids.forEach(id => { if (productCache[id]) productCache[id].active = false; });
+  renderProductRows(Object.values(productCache));
+  showToast(`${ids.length} პროდუქტი გაუქმდა`, '');
+};
+
+window.bulkActivate = async function(secId) {
+  const body = document.getElementById(secId + '-body');
+  const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) return;
+  if (!confirm(`${ids.length} პროდუქტი გააქტიურდეს?`)) return;
+  await supabase.from('products').update({ active: true }).in('id', ids);
+  ids.forEach(id => { if (productCache[id]) productCache[id].active = true; });
+  renderProductRows(Object.values(productCache));
+  showToast(`✓ ${ids.length} პროდუქტი გააქტიურდა`, 'success');
 };
 
 window.toggleSection = function(id) {
