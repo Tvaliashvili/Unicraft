@@ -1279,10 +1279,10 @@ async function loadProductsList() {
 function productRowHTML(p, isActive) {
   const bgrBtn = p.image_url ? `<button class="btn btn-sm" id="bgr-${p.id}" onclick="removeBgForProduct('${p.id}')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;transition:background 0.15s" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">BGR</button>` : '';
   const activeButtons = `
-    ${bgrBtn}
-    <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;transition:background 0.15s" onmouseover="this.style.background='#ffedd5'" onmouseout="this.style.background='#fff7ed'" title="არააქტიურში გადატანა">OFF</button>
     <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
     <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
+    ${bgrBtn}
+    <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;transition:background 0.15s" onmouseover="this.style.background='#ffedd5'" onmouseout="this.style.background='#fff7ed'" title="არააქტიურში გადატანა">OFF</button>
     <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 წაშლა</button>`;
   const inactiveButtons = `
     ${bgrBtn}
