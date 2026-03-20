@@ -892,7 +892,7 @@ window.triggerBgRemoval = async function(prefix) {
     showDropPreview(prefix, URL.createObjectURL(processed));
   } catch(e) {
     console.error('BG removal error:', e);
-    showToast('ფონის მოხსნა ვერ მოხერხდა', 'error');
+    showToast('შეცდომა: ' + (e.message || String(e)), 'error');
     if (btn) { btn.disabled = false; btn.innerHTML = '✨ ფონის მოხსნა'; }
   }
 };
