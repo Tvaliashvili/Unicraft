@@ -19,7 +19,7 @@ serve(async (req) => {
     const arrayBuffer = await file.arrayBuffer();
 
     const res = await fetch(
-      "https://router.huggingface.co/models/briaai/RMBG-1.4",
+      "https://api-inference.huggingface.co/models/briaai/RMBG-1.4",
       {
         method: "POST",
         headers: {
