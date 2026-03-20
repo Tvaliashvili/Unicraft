@@ -2061,6 +2061,7 @@ function loadChatSessions() {
 
 window.deleteAllChats = async function() {
   if (!confirm('ნამდვილად გსურთ ყველა საუბრის წაშლა? ეს მოქმედება შეუქცევადია.')) return;
+  await supabase.from('chats').update({ status: 'closed' }).neq('status', 'closed');
   await supabase.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('chats').delete().neq('id', '');
   document.getElementById('chatSessionsList').innerHTML = '<div class="table-empty"><div class="icon">💬</div>შეტყობინება არ არის</div>';
@@ -2075,6 +2076,7 @@ window.deleteAllChats = async function() {
 
 window.deleteChat = async function(sessionId) {
   if (!confirm('ნამდვილად გსურთ ამ საუბრის წაშლა?')) return;
+  await supabase.from('chats').update({ status: 'closed' }).eq('id', sessionId).neq('status', 'closed');
   await supabase.from('chat_messages').delete().eq('session_id', sessionId);
   await supabase.from('chats').delete().eq('id', sessionId);
   const row = document.getElementById('chat-row-' + sessionId);
