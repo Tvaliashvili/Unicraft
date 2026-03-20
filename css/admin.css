@@ -699,6 +699,13 @@ body {
   }
 }
 
+@media (max-width: 390px) {
+  .product-form { padding: 8px; }
+  .form-label[style*="display:flex"] { flex-wrap: wrap; gap: 2px; }
+  .form-label[style*="display:flex"] span:last-child { margin-left: auto; }
+  .form-input, .form-select, .form-textarea { font-size: 14px; }
+}
+
 /* ── Store combo dropdown ── */
 .store-combo { position: relative; }
 .store-dropdown {
