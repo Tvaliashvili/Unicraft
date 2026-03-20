@@ -1434,7 +1434,18 @@ window.saveProductEdit = async function() {
 
 window.deleteProduct = async function(id) {
   if (!confirm('ნამდვილად წაშლა?')) return;
+  const { data } = await supabase.from('products').select('image_url').eq('id', id).single();
   await supabase.from('products').delete().eq('id', id);
+  if (data?.image_url) {
+    const match = data.image_url.match(/[?&]id=([^&]+)/);
+    if (match) {
+      fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId: match[1] })
+      }).catch(() => {});
+    }
+  }
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
 };

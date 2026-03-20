@@ -30,6 +30,22 @@ async function getAccessToken(): Promise<string> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // DELETE: remove file from Drive
+  if (req.method === "DELETE") {
+    try {
+      const { fileId } = await req.json();
+      if (!fileId) return new Response(JSON.stringify({ error: "No fileId" }), { status: 400, headers: corsHeaders });
+      const token = await getAccessToken();
+      await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: corsHeaders });
+    }
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
