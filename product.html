@@ -451,21 +451,37 @@ function renderRelated() {
   const related = allProducts.filter(p => p.id !== id && p.category === product.category).slice(0,4);
   const grid = document.getElementById('relatedGrid');
   if (!related.length) { grid.parentElement.classList.add('hidden'); return; }
-  grid.innerHTML = related.map(p => `
+  grid.innerHTML = related.map(p => {
+    const s = parseFloat(p.price).toFixed(2);
+    const dot = s.indexOf('.');
+    const whole = s.slice(0, dot), dec = s.slice(dot);
+    const priceHtml = `<div class="flex items-baseline leading-none gap-1">
+      <div class="flex items-start">
+        <span class="font-display text-3xl tracking-wide text-dark">${whole}</span>
+        <span class="text-[11px] font-bold text-dark pt-[3px]">${dec}</span>
+      </div>
+      <span class="font-display text-lg tracking-wide text-dark">₾${p.unit ? `<span style="font-size:0.75em;font-weight:700;color:#1A1714">/${p.unit}</span>` : ''}</span>
+    </div>`;
+    return `
     <div onclick="location.href='product.html?id=${p.id}'" class="card-hover bg-white border border-gray-300 cursor-pointer relative overflow-hidden flex flex-col rounded-xl">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
       <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem;opacity:.3>${p.emoji||'📦'}</span>'">` : `<span style="font-size:2.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
+        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem;opacity:.3>${p.emoji||'📦'}</span>'">` : `<span style="font-size:2.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
-        <div class="text-[13px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
-        <div class="font-bold text-sm text-dark mb-1 leading-snug">${p.name}</div>
+        <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
+        <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         <div class="flex-1"></div>
-        <div class="flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
-          <div class="font-display text-2xl tracking-wide">${p.price} <span class="font-sans text-xs text-gray-400 font-normal">₾/${p.unit||'ც'}</span></div>
+        <div class="flex items-center justify-between border-t border-gray-100 pt-3 mt-3">
+          ${priceHtml}
+          <button onclick="event.stopPropagation();addRelatedToCart('${p.id}')"
+            class="bg-dark hover:bg-orange text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center gap-1">
+            + კალათა
+          </button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function showError() {
@@ -476,6 +492,16 @@ function showError() {
 window.changeLocalQty = function(d) {
   localQty = Math.max(1, localQty + d);
   document.getElementById('localQty').textContent = localQty;
+};
+
+window.addRelatedToCart = function(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  const ex = cart.find(i => i.id === id);
+  if (ex) ex.qty += 1;
+  else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '' });
+  saveCart();
+  showToast('✓ ' + p.name + ' კალათაში დაემატა');
 };
 
 window.addProductToCart = function() {
