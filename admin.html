@@ -850,7 +850,8 @@ async function _storeFile(file, prefix) {
   if (prefix === 'prod') prodFileData = file;
   else editFileData = file;
   const wrap = document.getElementById(prefix + 'BgBtnWrap');
-  if (wrap) wrap.innerHTML = `<div style="text-align:center;margin-top:8px"><button onclick="triggerBgRemoval('${prefix}')" id="${prefix}BgBtn" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:6px 18px;font-size:12px;cursor:pointer;font-family:inherit">✨ ფონის მოხსნა</button></div>`;
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (wrap && !isMobile) wrap.innerHTML = `<div style="text-align:center;margin-top:8px"><button onclick="triggerBgRemoval('${prefix}')" id="${prefix}BgBtn" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:6px 18px;font-size:12px;cursor:pointer;font-family:inherit">✨ ფონის მოხსნა</button></div>`;
 }
 
 window.triggerBgRemoval = async function(prefix) {
