@@ -455,7 +455,7 @@ function renderRelated() {
     <div onclick="location.href='product.html?id=${p.id}'" class="card-hover bg-white border border-gray-300 cursor-pointer relative overflow-hidden flex flex-col rounded-xl">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
       <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-contain p-3" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem;opacity:.3>${p.emoji||'📦'}</span>'">` : `<span style="font-size:2.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
+        ${p.imageUrl ? `<img src="${p.imageUrl}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem;opacity:.3>${p.emoji||'📦'}</span>'">` : `<span style="font-size:2.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
         <div class="text-[13px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
