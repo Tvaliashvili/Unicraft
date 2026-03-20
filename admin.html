@@ -1305,7 +1305,7 @@ function renderProductRows(rows) {
       <span class="price-cell">${p.price} ₾${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
       <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
       <div style="display:flex;gap:6px">
-        ${p.image_url ? `<button class="btn btn-sm" id="bgr-${p.id}" onclick="removeBgForProduct('${p.id}')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">BGR</button>` : ''}
+        ${p.image_url ? `<button class="btn btn-sm" id="bgr-${p.id}" onclick="removeBgForProduct('${p.id}')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;transition:background 0.15s" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">BGR</button>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
         <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑 წაშლა</button>
