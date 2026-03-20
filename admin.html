@@ -451,16 +451,35 @@
         </div>
 
         <!-- Actions -->
-        <div style="padding:12px 24px 20px;display:flex;gap:10px;border-top:1px solid var(--border)">
+        <div style="padding:12px 24px 20px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border)">
           <button onclick="doAdminInvoicePDF()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             ჩამოტვირთე PDF
+          </button>
+          <button onclick="openImportModal()" class="btn btn-secondary" style="display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            შეკვეთის იმპორტი
           </button>
           <button onclick="resetInvGen()" class="btn btn-secondary">გასუფთავება</button>
         </div>
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Import from Order Modal -->
+<div id="importOrderModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeImportModal()">
+  <div style="background:white;border-radius:var(--radius);width:100%;max-width:600px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="font-weight:700;font-size:15px;color:var(--dark)">შეკვეთის იმპორტი</div>
+      <button onclick="closeImportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-mid);line-height:1;padding:0">✕</button>
+    </div>
+    <div style="padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <input id="importSearch" type="text" placeholder="ინვოისის ნომ. ან მყიდველის სახელი..." oninput="filterImportList()"
+        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;color:var(--dark);box-sizing:border-box">
+    </div>
+    <div id="importOrderList" style="overflow-y:auto;flex:1;min-height:0"></div>
   </div>
 </div>
 
@@ -2319,6 +2338,85 @@ window.removeInvRow = function(i) {
 };
 
 window.resetInvGen = function() { initInvGen(); };
+
+// ─── Import from Order ───
+let _importOrders = [];
+
+window.openImportModal = async function() {
+  const modal = document.getElementById('importOrderModal');
+  modal.style.display = 'flex';
+  const listEl = document.getElementById('importOrderList');
+  listEl.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray-mid)"><div class="spinner" style="margin:0 auto 10px"></div>იტვირთება...</div>';
+  document.getElementById('importSearch').value = '';
+
+  let orders = Object.values(ordersCache);
+  if (!orders.length) {
+    try {
+      const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (data) {
+        data.forEach(o => { ordersCache[o.id] = { ...o, _dateStr: o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–' }; });
+        orders = Object.values(ordersCache);
+      }
+    } catch(e) {}
+  }
+
+  _importOrders = orders.sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+  renderImportList(_importOrders);
+};
+
+function renderImportList(orders) {
+  const el = document.getElementById('importOrderList');
+  if (!orders.length) {
+    el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray-mid)">შეკვეთები ვერ მოიძებნა</div>';
+    return;
+  }
+  el.innerHTML = orders.map(o => {
+    const status = o.status || 'pending';
+    const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+    const total = parseFloat(o.total || 0) || items.reduce((s,i) => s + (parseFloat(i.qty)||0)*(parseFloat(i.price)||0), 0);
+    return `<div onclick="importFromOrder('${o.id}')" style="padding:13px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--dark);font-family:monospace">${o.invoice_no || o.invoiceNo || '–'}</div>
+          <div style="font-size:13px;color:var(--dark);margin-top:2px">${o.buyer_name || o.buyerName || '–'}</div>
+          <div style="font-size:11px;color:var(--gray-mid);margin-top:3px">${o._dateStr || '–'} · ${items.length} პროდ. · ${total.toFixed(2)} ₾</div>
+        </div>
+        <span class="order-status status-${status}" style="flex-shrink:0">${statusLabel(status)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.filterImportList = function() {
+  const q = document.getElementById('importSearch').value.toLowerCase();
+  const filtered = q ? _importOrders.filter(o =>
+    (o.invoice_no||o.invoiceNo||'').toLowerCase().includes(q) ||
+    (o.buyer_name||o.buyerName||'').toLowerCase().includes(q) ||
+    (o.buyer_id||o.buyerId||'').toLowerCase().includes(q)
+  ) : _importOrders;
+  renderImportList(filtered);
+};
+
+window.importFromOrder = function(id) {
+  const o = ordersCache[id];
+  if (!o) return;
+  document.getElementById('invGenBuyerName').value = o.buyer_name || o.buyerName || '';
+  document.getElementById('invGenBuyerId').value = o.buyer_id || o.buyerId || '';
+  const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+  invGenRows = items.map(item => ({
+    name: item.name || '',
+    qty: parseFloat(item.qty) || 1,
+    unit: item.unit || 'ც',
+    price: parseFloat(item.price) || 0
+  }));
+  if (!invGenRows.length) invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
+  renderInvRows();
+  closeImportModal();
+};
+
+window.closeImportModal = function() {
+  document.getElementById('importOrderModal').style.display = 'none';
+};
 
 window.doAdminInvoicePDF = function() {
   const dateStr   = document.getElementById('invGenDate').textContent;
