@@ -317,13 +317,12 @@
           <input id="prodCodeSearch" placeholder="🔍 კოდით ძიება..." oninput="applyProductFilters()"
             style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);outline:none;min-width:140px;flex:1">
           <div style="position:relative;flex-shrink:0">
-            <select id="storeFilterSelect" onchange="applyProductFilters();toggleStoreDeleteBtn()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:140px">
+            <select id="storeFilterSelect" onchange="applyProductFilters()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:140px">
               <option value="">ყველა მაღაზია</option>
             </select>
             <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--gray-mid)">▾</span>
           </div>
-          <button id="storeDeleteAllBtn" onclick="deleteAllStoreProducts()" style="display:none;flex-shrink:0;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🗑 მაღაზიის ყველა პროდუქტი</button>
-          <button class="btn btn-primary" onclick="showPage('add-product')" style="flex-shrink:0">+ დამატება</button>
+<button class="btn btn-primary" onclick="showPage('add-product')" style="flex-shrink:0">+ დამატება</button>
         </div>
       </div>
       <div class="card">
@@ -1264,6 +1263,12 @@ window.clearForm = function() {
 
 async function loadProductsList() {
   const el = document.getElementById('productsList');
+  const _inactiveEl = document.getElementById('sec-inactive-body');
+  const _activeEl = document.getElementById('sec-active-body');
+  window._savedSectionState = {
+    inactive: _inactiveEl ? _inactiveEl.style.display !== 'none' : false,
+    active: _activeEl ? _activeEl.style.display !== 'none' : false,
+  };
   el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
   const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
   const rows = data || [];
@@ -1341,6 +1346,7 @@ function renderProductRows(rows) {
           <span>${title} <span style="font-weight:400">(${count})</span></span>
           <div style="display:flex;align-items:center;gap:8px">
             <button id="${id}-bulk-btn" onclick="event.stopPropagation();${bulkAction}" style="display:none;${bulkStyle};border-radius:8px;padding:0 10px;height:26px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity 0.15s;align-items:center">${bulkLabel}</button>
+            <button id="${id}-bulk-delete-btn" onclick="event.stopPropagation();bulkDelete('${id}')" style="display:none;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:0 10px;height:26px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;align-items:center">🗑 მონიშნულის წაშლა</button>
             <span id="${id}-chevron" style="font-size:14px;transition:transform 0.2s">${defaultOpen ? '▲' : '▼'}</span>
           </div>
         </div>
@@ -1352,9 +1358,11 @@ function renderProductRows(rows) {
   };
 
   const inactiveEl = document.getElementById('sec-inactive-body');
-  const inactiveOpen = inactiveEl ? inactiveEl.style.display !== 'none' : false;
+  const saved = window._savedSectionState;
+  const inactiveOpen = inactiveEl ? inactiveEl.style.display !== 'none' : (saved ? saved.inactive : false);
   const activeEl = document.getElementById('sec-active-body');
-  const activeOpen = activeEl ? activeEl.style.display !== 'none' : false;
+  const activeOpen = activeEl ? activeEl.style.display !== 'none' : (saved ? saved.active : false);
+  window._savedSectionState = null;
 
   el.innerHTML =
     sectionHTML('sec-inactive', 'არააქტიური პროდუქტები', inactive.length, '#fff7ed', inactive, inactiveOpen) +
@@ -1443,23 +1451,6 @@ window.deleteProduct = async function(id) {
   loadProductsList();
 };
 
-window.toggleStoreDeleteBtn = function() {
-  const val = document.getElementById('storeFilterSelect')?.value || '';
-  const btn = document.getElementById('storeDeleteAllBtn');
-  if (btn) btn.style.display = val ? 'inline-block' : 'none';
-};
-
-window.deleteAllStoreProducts = async function() {
-  const store = document.getElementById('storeFilterSelect')?.value;
-  if (!store) return;
-  const ids = Object.values(productCache).filter(p => (p.store || '') === store).map(p => p.id);
-  if (!ids.length) { showToast('ამ მაღაზიაზე პროდუქტი არ არის', ''); return; }
-  if (!confirm(`"${store}" — ${ids.length} პროდუქტი სამუდამოდ წაიშალოს?`)) return;
-  await supabase.from('products').delete().in('id', ids);
-  ids.forEach(id => delete productCache[id]);
-  renderProductRows(Object.values(productCache));
-  showToast(`🗑 ${ids.length} პროდუქტი წაიშალა`, 'error');
-};
 
 window.onProductCheck = function(secId) {
   const body = document.getElementById(secId + '-body');
@@ -1467,15 +1458,21 @@ window.onProductCheck = function(secId) {
   const checked = body.querySelectorAll('.prod-check:checked');
   const sa = document.getElementById(secId + '-selectall');
   if (sa) { sa.checked = checked.length === all.length && all.length > 0; sa.indeterminate = checked.length > 0 && checked.length < all.length; }
+  const show = checked.length > 0 ? 'inline-flex' : 'none';
   const btn = document.getElementById(secId + '-bulk-btn');
-  if (btn) btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+  if (btn) btn.style.display = show;
+  const delBtn = document.getElementById(secId + '-bulk-delete-btn');
+  if (delBtn) delBtn.style.display = show;
 };
 
 window.toggleSelectAll = function(secId, checked) {
   const body = document.getElementById(secId + '-body');
   body.querySelectorAll('.prod-check').forEach(cb => cb.checked = checked);
+  const show = checked ? 'inline-flex' : 'none';
   const btn = document.getElementById(secId + '-bulk-btn');
-  if (btn) btn.style.display = checked ? 'inline-flex' : 'none';
+  if (btn) btn.style.display = show;
+  const delBtn = document.getElementById(secId + '-bulk-delete-btn');
+  if (delBtn) delBtn.style.display = show;
 };
 
 window.bulkDeactivate = async function(secId) {
@@ -1487,6 +1484,17 @@ window.bulkDeactivate = async function(secId) {
   ids.forEach(id => { if (productCache[id]) productCache[id].active = false; });
   renderProductRows(Object.values(productCache));
   showToast(`${ids.length} პროდუქტი გაუქმდა`, '');
+};
+
+window.bulkDelete = async function(secId) {
+  const body = document.getElementById(secId + '-body');
+  const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) return;
+  if (!confirm(`${ids.length} პROdouqti სამუდამოდ წაიშალოს?`)) return;
+  await supabase.from('products').delete().in('id', ids);
+  ids.forEach(id => delete productCache[id]);
+  renderProductRows(Object.values(productCache));
+  showToast(`🗑 ${ids.length} პROdouqti წაიშალა`, 'error');
 };
 
 window.bulkActivate = async function(secId) {
