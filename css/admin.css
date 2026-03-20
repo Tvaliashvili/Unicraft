@@ -596,6 +596,12 @@ body {
   .order-row { min-width: 700px; }
   .table-header { min-width: 660px; }
 
+  /* Products section headers: match row width */
+  #productsList > div > div:first-child { min-width: 660px; }
+
+  /* Orders stats: wrap to 3 cols so all 5 are visible */
+  #orderStats { grid-template-columns: repeat(3, 1fr) !important; }
+
   /* Edit modal full screen on mobile */
   #editModal { padding: 0; align-items: flex-end; }
   #editModal > div {
