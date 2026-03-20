@@ -721,15 +721,7 @@
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
 
-let _removeBgFn = null;
-async function getRemoveBg() {
-  if (_removeBgFn) return _removeBgFn;
-  try {
-    const mod = await import('https://esm.sh/@imgly/background-removal');
-    _removeBgFn = mod.removeBackground || mod.default;
-  } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
-  return _removeBgFn;
-}
+const REMOVE_BG_URL = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/remove-bg';
 
 // ─── Product cache for edit ───
 let productCache = {};
@@ -879,14 +871,17 @@ window.triggerBgRemoval = async function(prefix) {
   const file = prefix === 'prod' ? prodFileData : editFileData;
   if (!file) return;
   try {
-    const removeBg = await getRemoveBg();
-    if (!removeBg) { showToast('ბიბლიოთეკა ვერ ჩაიტვირთა', 'error'); btn && (btn.disabled = false); return; }
     const pngFile = await _toPng(file, 1024);
-    const noBgBlob = await removeBg(pngFile); // publicPath already bound inside getRemoveBg
-    const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
+    const fd = new FormData();
+    fd.append('file', pngFile);
+    const res = await fetch(REMOVE_BG_URL, { method: 'POST', body: fd });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Error'); }
+    const blob = await res.blob();
+    const processed = new File([blob], 'image.png', { type: 'image/png' });
     if (prefix === 'prod') prodFileData = processed;
     else editFileData = processed;
     showDropPreview(prefix, URL.createObjectURL(processed));
+    if (btn) { btn.disabled = false; btn.innerHTML = '✨ ფონის მოხსნა'; }
   } catch(e) {
     console.error('BG removal error:', e);
     showToast('შეცდომა: ' + (e.message || String(e)), 'error');
