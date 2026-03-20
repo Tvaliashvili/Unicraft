@@ -34,7 +34,10 @@ tailwind.config = {
 <!-- HEADER -->
 <header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <!-- Main row: Logo | Nav+Cart -->
     <div class="flex items-center justify-between h-14 md:h-16">
+
+      <!-- Logo -->
       <a href="index.html" class="flex items-center flex-shrink-0 no-underline">
         <svg xml:space="preserve" viewBox="118.62 84.45016077170418 387 117.94212218649518" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" height="48" style="width:auto">
 <g transform="matrix(1.1 0 0 1.1 175 140)">
@@ -87,12 +90,14 @@ tailwind.config = {
 </g>
         </svg>
       </a>
+
+      <!-- Nav + Cart -->
       <div class="flex items-center gap-2 flex-shrink-0">
         <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
           კალათა
           <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
         </button>
-        <button onclick="toggleChat()" id="chatToggleBtn" class="relative flex items-center justify-center w-10 h-10 rounded-full" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
+        <button onclick="toggleChat()" id="chatToggleBtn" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
         </button>
