@@ -1490,11 +1490,11 @@ window.bulkDelete = async function(secId) {
   const body = document.getElementById(secId + '-body');
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
-  if (!confirm(`${ids.length} პROdouqti სამუდამოდ წაიშალოს?`)) return;
+  if (!confirm(`${ids.length} პროდუქტი სამუდამოდ წაიშალოს?`)) return;
   await supabase.from('products').delete().in('id', ids);
   ids.forEach(id => delete productCache[id]);
   renderProductRows(Object.values(productCache));
-  showToast(`🗑 ${ids.length} პROdouqti წაიშალა`, 'error');
+  showToast(`🗑 ${ids.length} პროდუქტი წაიშალა`, 'error');
 };
 
 window.bulkActivate = async function(secId) {
