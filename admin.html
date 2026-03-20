@@ -1334,8 +1334,10 @@ function renderProductRows(rows) {
       </div>
     </div>`;
 
-  const inactiveOpen = document.getElementById('sec-inactive-body')?.style.display !== 'none' ?? false;
-  const activeOpen = document.getElementById('sec-active-body')?.style.display !== 'none' ?? false;
+  const inactiveEl = document.getElementById('sec-inactive-body');
+  const inactiveOpen = inactiveEl ? inactiveEl.style.display !== 'none' : false;
+  const activeEl = document.getElementById('sec-active-body');
+  const activeOpen = activeEl ? activeEl.style.display !== 'none' : false;
 
   el.innerHTML =
     sectionHTML('sec-inactive', 'არააქტიური პროდუქტები', inactive.length, '#fff7ed', inactive, inactiveOpen) +
