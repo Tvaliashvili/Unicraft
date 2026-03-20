@@ -719,7 +719,15 @@
 <script data-cfasync="false"></script><script type="module">
 import { supabase } from './js/supabase-config.js';
 
-const REMOVE_BG_URL = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/remove-bg';
+let _removeBgFn = null;
+async function getRemoveBg() {
+  if (_removeBgFn) return _removeBgFn;
+  try {
+    const mod = await import('https://esm.sh/@imgly/background-removal');
+    _removeBgFn = mod.removeBackground || mod.default;
+  } catch(e) { console.error('bg lib load error:', e); _removeBgFn = null; }
+  return _removeBgFn;
+}
 
 // ─── Product cache for edit ───
 let productCache = {};
@@ -842,20 +850,17 @@ async function _storeFile(file, prefix) {
   const previewEl = document.getElementById(prefix + 'Preview');
   previewEl.innerHTML += `<div id="${prefix}BgStatus" style="text-align:center;padding:6px 0;font-size:12px;color:#6b7280"><div class="spinner" style="display:inline-block;margin-right:6px;width:12px;height:12px;border-width:2px"></div>ფონი იხსნება...</div>`;
   try {
+    const removeBg = await getRemoveBg();
+    if (!removeBg) { document.getElementById(prefix + 'BgStatus')?.remove(); return; }
     const pngFile = await _toPng(file, 1024);
-    const fd = new FormData();
-    fd.append('file', pngFile);
-    const res = await fetch(REMOVE_BG_URL, { method: 'POST', headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' }, body: fd });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Error'); }
-    const blob = await res.blob();
-    const processed = new File([blob], 'image.png', { type: 'image/png' });
+    const noBgBlob = await removeBg(pngFile);
+    const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
     if (prefix === 'prod') prodFileData = processed;
     else editFileData = processed;
     showDropPreview(prefix, URL.createObjectURL(processed));
   } catch(e) {
     console.error('BG removal error:', e);
     document.getElementById(prefix + 'BgStatus')?.remove();
-    showToast('ფონის მოხსნა ვერ მოხერხდა: ' + e.message, 'error');
   }
 }
 
