@@ -1300,7 +1300,7 @@ function productRowHTML(p, isActive) {
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
     <span class="price-cell">${p.price} ₾${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
     <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
-    <div style="display:flex;gap:6px;justify-content:center">${isActive ? activeButtons : inactiveButtons}</div>
+    <div style="display:flex;gap:4px;justify-content:center;flex-wrap:nowrap">${isActive ? activeButtons : inactiveButtons}</div>
   </div>`;
 }
 
@@ -1323,16 +1323,20 @@ function renderProductRows(rows) {
   const active = filtered.filter(p => p.active);
   const inactive = filtered.filter(p => !p.active);
 
-  const sectionHeader = (title, count, color) =>
-    `<div style="padding:10px 20px;background:${color};font-size:12px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border-bottom:1px solid var(--border)">${title} <span style="font-weight:400">(${count})</span></div>`;
+  const sectionHTML = (id, title, count, color, rows, defaultOpen) =>
+    `<div>
+      <div onclick="toggleSection('${id}')" style="padding:10px 20px;background:${color};font-size:12px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none">
+        <span>${title} <span style="font-weight:400">(${count})</span></span>
+        <span id="${id}-chevron" style="font-size:14px;transition:transform 0.2s">${defaultOpen ? '▲' : '▼'}</span>
+      </div>
+      <div id="${id}-body" style="display:${defaultOpen ? 'block' : 'none'}">
+        ${rows.length ? rows.map(p => productRowHTML(p, id === 'sec-active')).join('') : '<div class="table-empty" style="padding:16px"><p style="margin:0;color:var(--gray-mid);font-size:13px">პროდუქტი არ არის</p></div>'}
+      </div>
+    </div>`;
 
-  let html = '';
-  html += sectionHeader('აქტიური პროდუქტები', active.length, '#f0fdf4');
-  html += active.length ? active.map(p => productRowHTML(p, true)).join('') : '<div class="table-empty" style="padding:16px"><p style="margin:0;color:var(--gray-mid);font-size:13px">აქტიური პროდუქტი არ არის</p></div>';
-  html += sectionHeader('არააქტიური პროდუქტები', inactive.length, '#fff7ed');
-  html += inactive.length ? inactive.map(p => productRowHTML(p, false)).join('') : '<div class="table-empty" style="padding:16px"><p style="margin:0;color:var(--gray-mid);font-size:13px">არააქტიური პროდუქტი არ არის</p></div>';
-
-  el.innerHTML = html;
+  el.innerHTML =
+    sectionHTML('sec-inactive', 'არააქტიური პროდუქტები', inactive.length, '#fff7ed', inactive, true) +
+    sectionHTML('sec-active', 'აქტიური პროდუქტები', active.length, '#f0fdf4', active, true);
 }
 
 window.applyProductFilters = function() {
@@ -1415,6 +1419,14 @@ window.deleteProduct = async function(id) {
   }
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
+};
+
+window.toggleSection = function(id) {
+  const body = document.getElementById(id + '-body');
+  const chevron = document.getElementById(id + '-chevron');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chevron.textContent = open ? '▲' : '▼';
 };
 
 window.activateProduct = async function(id) {
