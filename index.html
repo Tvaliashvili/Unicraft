@@ -603,6 +603,7 @@ tailwind.config = {
 
 <script>
 function fmtPrice(price, unit) {
+  unit = unit ? unit.replace(/\.+$/, '') : unit;
   const s = parseFloat(price).toFixed(2);
   const dot = s.indexOf('.');
   const whole = s.slice(0, dot);
@@ -638,7 +639,7 @@ function buildSidebar() {
   const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full text-left">ყველა <span class="text-xs text-gray-400 font-normal">${allProducts.length}</span></button>`;
   const catBtns = cats.map(c => `
     <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full text-left transition-all">
-      ${c} <span class="text-xs text-gray-400 font-normal">${counts[c]||0}</span>
+      <span class="min-w-0 break-words text-left">${c}</span><span class="text-xs text-gray-400 font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
     </button>`).join('');
   el.innerHTML = allBtn + catBtns;
 
@@ -894,7 +895,7 @@ window.openOrder = function() {
   document.getElementById('invoiceItems').innerHTML = cart.map(i => `
     <tr class="border-b border-gray-50">
       <td class="py-2 text-dark">${i.name}</td>
-      <td class="py-2 text-center text-gray-500">${i.qty} ${i.unit||'ც'}</td>
+      <td class="py-2 text-center text-gray-500">${i.qty} ${(i.unit||'ც').replace(/\.+$/,'')}</td>
       <td class="py-2 text-right text-gray-500">${parseFloat(i.price).toFixed(2)} ₾</td>
       <td class="py-2 text-right font-semibold text-dark">${(i.price*i.qty).toFixed(2)} ₾</td>
     </tr>`).join('');
