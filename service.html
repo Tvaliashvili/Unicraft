@@ -58,6 +58,10 @@ tailwind.config = {
     padding: 28px 24px;
     transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
     cursor: default;
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    align-content: start;
   }
   @media (max-width: 640px) {
     .service-card { padding: 22px 16px; }
@@ -223,7 +227,7 @@ tailwind.config = {
       </h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" style="grid-template-rows: auto auto auto;">
 
       <!-- Service 1: Vulcanization -->
       <div class="service-card fade-up" style="animation-delay:0.05s">
