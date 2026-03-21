@@ -36,8 +36,13 @@ tailwind.config = {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: background 0.3s;
+    transition: background 0.4s ease;
   }
+
+  /* left panel hover background */
+  a.split-panel[href="shop.html"]:hover    { background: #231d19 !important; }
+  /* right panel hover background */
+  a.split-panel[href="service.html"]:hover { background: #160d0d !important; }
 
   .split-panel .panel-accent {
     position: absolute;
@@ -58,7 +63,9 @@ tailwind.config = {
     padding: 4rem 2rem;
     max-width: 480px;
     width: 100%;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
   }
+  .split-panel:hover .panel-inner { transform: scale(1.03); }
 
   .cta-shop {
     display: inline-flex; align-items: center; gap: 10px;
