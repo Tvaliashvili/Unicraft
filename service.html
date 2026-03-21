@@ -101,6 +101,10 @@ tailwind.config = {
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  @media (max-width: 480px) {
+    #heroDesc { white-space: normal !important; }
+  }
 </style>
 </head>
 <body class="bg-[#0E0C0A] text-white">
@@ -193,7 +197,7 @@ tailwind.config = {
       ერთი ზარი — ჩვენ გზაში ვართ
     </p>
 
-    <p style="color:rgba(255,255,255,0.45); font-size:0.9rem; line-height:1.8; white-space:nowrap; margin: 0 auto 2.5rem;">
+    <p id="heroDesc" style="color:rgba(255,255,255,0.45); font-size:clamp(0.72rem, 2.2vw, 0.9rem); line-height:1.8; white-space:nowrap; margin: 0 auto 2.5rem;">
       ტექნიკოსი დროულად მოვა თქვენს ლოკაციაზე.<br>
       სერვისი ხელმისაწვდომია მხოლოდ <strong class="text-white">თბილისში და შემოგარენში</strong>.
     </p>
