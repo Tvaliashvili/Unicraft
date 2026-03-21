@@ -40,6 +40,17 @@ tailwind.config = {
   opacity: 1;
   pointer-events: all;
 }
+@media (max-width: 480px) {
+  #deliveryWidget {
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+  }
+  #deliveryPanel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
 #chatPanel {
   transform-origin: top right;
   transform: scaleY(0.85) translateY(-10px);

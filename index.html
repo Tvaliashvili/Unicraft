@@ -440,6 +440,17 @@ tailwind.config = {
   opacity: 1;
   pointer-events: all;
 }
+@media (max-width: 480px) {
+  #deliveryWidget {
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+  }
+  #deliveryPanel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
 </style>
 <div id="deliveryWidget" style="position:fixed;top:62px;right:60px;z-index:999;max-width:calc(100vw - 32px)">
   <div id="deliveryPanel" style="width:420px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden">
