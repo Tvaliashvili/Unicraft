@@ -195,6 +195,24 @@ tailwind.config = {
   </div>
 </div>
 
+<script type="module">
+import { supabase } from './js/supabase-config.js';
+const _ms = document.getElementById('maintenanceScreen');
+const _sc = document.getElementById('siteContent');
+const _isPreview = new URLSearchParams(location.search).has('preview');
+const { data: _d } = await supabase.from('settings').select('value').eq('key','service_maintenance_mode').maybeSingle();
+const _on = _d?.value === 'true' && !_isPreview;
+_ms.style.display = _on ? 'flex' : 'none';
+_sc.style.display = _on ? 'none' : 'block';
+supabase.channel('svc-maint').on('postgres_changes',
+  { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.service_maintenance_mode' },
+  p => {
+    const on = p.new?.value === 'true';
+    _ms.style.display = on ? 'flex' : 'none';
+    _sc.style.display = on ? 'none' : 'block';
+  }
+).subscribe();
+</script>
 
 <div id="siteContent">
 
@@ -550,24 +568,7 @@ tailwind.config = {
 <script type="module">
 import { supabase } from './js/supabase-config.js';
 
-// ── Service maintenance mode check ──
-(async () => {
-  const { data } = await supabase.from('settings').select('value').eq('key', 'service_maintenance_mode').maybeSingle();
-  const ms = document.getElementById('maintenanceScreen');
-  const sc = document.getElementById('siteContent');
-  const isPreview = new URLSearchParams(location.search).has('preview');
-  const showMaintenance = data?.value === 'true' && !isPreview;
-  ms.style.display = showMaintenance ? 'flex' : 'none';
-  if (showMaintenance) sc.style.display = 'none';
-  supabase.channel('service-settings').on('postgres_changes',
-    { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.service_maintenance_mode' },
-    payload => {
-      const on = payload.new?.value === 'true';
-      ms.style.display = on ? 'flex' : 'none';
-      sc.style.display = on ? 'none' : 'block';
-    }
-  ).subscribe();
-})();
+// ── Chat session ──
 
 let chatSessionId = localStorage.getItem('uc_chat_session');
 if (!chatSessionId) {
