@@ -32,40 +32,51 @@ tailwind.config = {
     overflow: hidden;
     cursor: pointer;
     text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     transition: background 0.4s ease;
+    min-height: 50vh;
   }
 
-  /* left panel hover background */
   a.split-panel[href="shop.html"]:hover    { background: #231d19 !important; }
-  /* right panel hover background */
   a.split-panel[href="service.html"]:hover { background: #160d0d !important; }
 
   .split-panel .panel-accent {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    transform: scaleX(0);
-    transform-origin: left;
+    bottom: 0; left: 0; right: 0; height: 3px; z-index: 2;
+    transform: scaleX(0); transform-origin: left;
     transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
   }
   .split-panel:hover .panel-accent { transform: scaleX(1); }
 
-  .split-panel .panel-inner {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 4rem 2rem;
-    max-width: 480px;
-    width: 100%;
+  .p-sec {
+    display: flex; align-items: center; justify-content: center;
+    padding-left: 2.5rem; padding-right: 2.5rem; width: 100%;
     transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
   }
-  .split-panel:hover .panel-inner { transform: scale(1.03); }
+  .split-panel:hover .p-sec { transform: scale(1.03); }
+  .p-badge   { padding-top: 3.5rem;  padding-bottom: 1.75rem; }
+  .p-heading { padding-bottom: 1.25rem; }
+  .p-desc    { padding-bottom: 1.75rem; }
+  .p-list    { padding-bottom: 2rem; }
+  .p-cta     { padding-bottom: 3.5rem; }
+
+  @media (min-width: 768px) {
+    #splitWrapper {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      grid-template-rows: auto auto auto auto auto;
+      min-height: calc(100vh - 56px);
+    }
+    .split-panel {
+      display: grid;
+      grid-template-rows: subgrid;
+      grid-row: 1 / 6;
+      min-height: unset;
+    }
+    .panel-divider {
+      grid-row: 1 / 6;
+      background: rgba(255,255,255,0.06);
+    }
+  }
 
   .cta-shop {
     display: inline-flex; align-items: center; gap: 10px;
@@ -207,37 +218,38 @@ tailwind.config = {
 
 
 <!-- ══ SPLIT SCREEN ══ -->
-<div class="flex flex-col-reverse md:flex-row" style="min-height: calc(100vh - 56px);">
+<div id="splitWrapper" class="flex flex-col-reverse">
 
   <!-- ── LEFT: ONLINE SHOP ── -->
-  <a href="shop.html" class="split-panel flex-1" style="background:#1A1714; min-height:50vh;">
+  <a href="shop.html" class="split-panel" style="background:#1A1714;">
     <div class="panel-accent" style="background:#E8541A;"></div>
 
-    <div class="panel-inner">
-
-      <!-- Tag -->
-      <div class="badge-pulse-orange flex items-center gap-2 mb-7 px-4 py-2 rounded-full"
+    <div class="p-sec p-badge">
+      <div class="badge-pulse-orange flex items-center gap-2 px-4 py-2 rounded-full"
            style="border:1px solid rgba(232,84,26,0.4); background:rgba(232,84,26,0.1);">
         <span class="pulse-dot w-2 h-2 rounded-full flex-shrink-0" style="background:#E8541A;"></span>
         <span style="color:#FB923C; font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;">ონლაინ მაღაზია</span>
       </div>
+    </div>
 
-      <!-- Heading -->
-      <h2 class="font-display text-center mb-5 text-white leading-tight"
-          style="font-size: clamp(2.4rem, 5vw, 4rem); letter-spacing: 0.05em;">
+    <div class="p-sec p-heading">
+      <h2 class="font-display text-center text-white leading-tight"
+          style="font-size: clamp(1.8rem, 3.2vw, 2.8rem); letter-spacing: 0.05em;">
         შეიძინე<br>
         <span style="color:#E8541A;">საბურავები</span><br>
         და ზეთები
       </h2>
+    </div>
 
-      <!-- Desc -->
-      <p class="text-center mb-8 leading-relaxed"
+    <div class="p-sec p-desc">
+      <p class="text-center leading-relaxed"
          style="color:rgba(255,255,255,0.38); font-size:0.82rem; max-width:280px;">
         ხარისხიანი პროდუქცია, სწრაფი მიტანა კურიერით მთელ საქართველოში.
       </p>
+    </div>
 
-      <!-- Features list -->
-      <ul class="mb-10 flex flex-col gap-2.5 w-full max-w-xs">
+    <div class="p-sec p-list">
+      <ul class="flex flex-col gap-2.5 w-full max-w-xs">
         <li class="flex items-center gap-3" style="color:rgba(255,255,255,0.5); font-size:0.8rem;">
           <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#E8541A;"></span>
           საბურავები
@@ -251,49 +263,49 @@ tailwind.config = {
           ფილტრები
         </li>
       </ul>
+    </div>
 
-      <!-- CTA -->
+    <div class="p-sec p-cta">
       <span class="cta-shop">
         მაღაზიაში გადასვლა
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </span>
-
     </div>
   </a>
 
-  <!-- divider (desktop only) -->
-  <div class="panel-divider hidden md:block"></div>
+  <div class="panel-divider"></div>
 
   <!-- ── RIGHT: SOS SERVICE ── -->
-  <a href="service.html" class="split-panel flex-1" style="background:#0E0C0A; min-height:50vh;">
+  <a href="service.html" class="split-panel" style="background:#0E0C0A;">
     <div class="panel-accent" style="background:#DC2626;"></div>
 
-    <div class="panel-inner">
-
-      <!-- 24/7 badge -->
-      <div class="badge-pulse flex items-center gap-2 mb-7 px-4 py-2 rounded-full"
+    <div class="p-sec p-badge">
+      <div class="badge-pulse flex items-center gap-2 px-4 py-2 rounded-full"
            style="border:1px solid rgba(220,38,38,0.4); background:rgba(220,38,38,0.1);">
         <span class="pulse-dot w-2 h-2 rounded-full flex-shrink-0" style="background:#EF4444;"></span>
         <span style="color:#F87171; font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;">
           მობილური სერვისი 24/7
         </span>
       </div>
+    </div>
 
-      <!-- Heading -->
-      <h2 class="font-display text-center mb-5 text-white leading-tight"
+    <div class="p-sec p-heading">
+      <h2 class="font-display text-center text-white leading-tight"
           style="font-size: clamp(2.4rem, 5vw, 4rem); letter-spacing: 0.05em;">
         დახმარება<br>
         <span style="color:#DC2626;">გზებზე</span>
       </h2>
+    </div>
 
-      <!-- Desc -->
-      <p class="text-center mb-8 leading-relaxed"
+    <div class="p-sec p-desc">
+      <p class="text-center leading-relaxed"
          style="color:rgba(255,255,255,0.38); font-size:0.82rem; max-width:280px;">
         ვულკანიზაცია, დაქოქვა, საწვავის მიწოდება ადგილზე მისვლით 30 წუთში.
       </p>
+    </div>
 
-      <!-- Services list -->
-      <ul class="mb-10 flex flex-col gap-2.5 w-full max-w-xs">
+    <div class="p-sec p-list">
+      <ul class="flex flex-col gap-2.5 w-full max-w-xs">
         <li class="flex items-center gap-3" style="color:rgba(255,255,255,0.5); font-size:0.8rem;">
           <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
           მობილური ვულკანიზაცია
@@ -307,13 +319,13 @@ tailwind.config = {
           საწვავის მიწოდება ადგილზე
         </li>
       </ul>
+    </div>
 
-      <!-- CTA -->
+    <div class="p-sec p-cta">
       <span class="cta-sos">
         სერვისში გადასვლა
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </span>
-
     </div>
   </a>
 
