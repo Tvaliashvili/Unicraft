@@ -190,6 +190,13 @@ tailwind.config = {
   </div>
 </div>
 
+<script>
+// Fallback: if module fails to load within 4s, show content anyway
+setTimeout(() => {
+  const sc = document.getElementById('siteContent');
+  if (sc && sc.style.display === 'none') sc.style.display = 'block';
+}, 4000);
+</script>
 <script type="module">
 import { supabase } from './js/supabase-config.js';
 const _ms = document.getElementById('maintenanceScreen');
@@ -209,7 +216,7 @@ supabase.channel('svc-maint').on('postgres_changes',
 ).subscribe();
 </script>
 
-<div id="siteContent">
+<div id="siteContent" style="display:none">
 
 <!-- ══ STICKY HEADER ══ -->
 <header class="sticky top-0 z-50 bg-[#0E0C0A] border-b border-white/10">
