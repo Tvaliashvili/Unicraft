@@ -285,23 +285,7 @@
                 </div>
               </div>
             </div>
-            <div class="form-group full">
-              <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                მაღაზია
-                <span onclick="toggleStoreMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
-              </label>
-              <select class="form-select" id="prodStore">
-                <option value="">მაღაზია...</option>
-              </select>
-              <!-- Store manager inline -->
-              <div id="storeMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                <div style="display:flex;gap:6px;margin-bottom:10px">
-                  <input class="form-input" id="newStoreInput" placeholder="ახალი მაღაზია" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addStore()">
-                  <button class="btn btn-primary" onclick="addStore()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                </div>
-                <div id="storeList"></div>
-              </div>
-            </div>
+
           </div>
           <div class="form-actions">
             <button class="btn btn-primary" id="addProductBtn" onclick="addProduct()">
@@ -324,12 +308,7 @@
         <div class="prod-filters">
           <input id="prodCodeSearch" placeholder="🔍 კოდით ძიება..." oninput="applyProductFilters()"
             style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);outline:none;min-width:140px;flex:1">
-          <div style="position:relative;flex-shrink:0">
-            <select id="storeFilterSelect" onchange="applyProductFilters()" style="appearance:none;-webkit-appearance:none;border:1px solid var(--border);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--gray-dark);background:var(--white);cursor:pointer;outline:none;min-width:140px">
-              <option value="">ყველა მაღაზია</option>
-            </select>
-            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--gray-mid)">▾</span>
-          </div>
+
 <button class="btn btn-primary" onclick="showPage('add-product')" style="flex-shrink:0">+ დამატება</button>
         </div>
       </div>
@@ -341,7 +320,6 @@
           <span>კოდი</span>
           <span>კატეგორია</span>
           <span>ფასი</span>
-          <span>მაღაზია</span>
           <span>მოქმედება</span>
         </div>
         <div id="productsList">
@@ -529,7 +507,6 @@
           <tr style="border-bottom:2px solid var(--dark)">
             <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">დასახელება</th>
             <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">კოდი</th>
-            <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">მაღ.</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">რ-ბა</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">ერთ. ფასი</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">სულ</th>
@@ -690,12 +667,7 @@
             </div>
           </div>
         </div>
-        <div class="form-group full">
-          <label class="form-label">მაღაზია</label>
-          <select class="form-select" id="editStore">
-            <option value="">მაღაზია...</option>
-          </select>
-        </div>
+
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" id="saveEditBtn" onclick="saveProductEdit()">✓ შენახვა</button>
@@ -974,7 +946,6 @@ window.showPage = function(name) {
   if (name === 'products') loadProductsList();
   if (name === 'add-product') {
     loadCategories();
-    loadStores();
   }
   if (name === 'orders') loadOrdersList();
   if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
@@ -1003,7 +974,6 @@ async function initApp() {
 
   loadCategories();
   loadUnits();
-  loadStores();
   loadMaintenanceStatus();
   loadServiceMaintenanceStatus();
   renderDescRows('prodDescRows');
@@ -1307,7 +1277,6 @@ window.addProduct = async function() {
       description: getDescValue('prodDescRows'),
       image_url: imageUrl,
       active: false,
-      store: document.getElementById('prodStore').value.trim(),
       code: await genProductCode(),
       added_by: _me.name || _me.email,
     });
@@ -1321,7 +1290,7 @@ window.addProduct = async function() {
 };
 
 window.clearForm = function() {
-  ['prodName','prodPrice','prodStore']
+  ['prodName','prodPrice']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderDescRows('prodDescRows');
   document.getElementById('prodCategory').value = '';
@@ -1378,16 +1347,14 @@ function productRowHTML(p, isActive) {
     <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
     <span class="price-cell">${p.price} ₾${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
-    <span style="font-size:13px;color:var(--gray-dark)">${p.store || '<span style="color:var(--gray-mid)">—</span>'}</span>
     <div style="display:flex;gap:4px;justify-content:center;flex-wrap:nowrap">${isActive ? activeButtons : inactiveButtons}</div>
   </div>`;
 }
 
 function renderProductRows(rows) {
   const el = document.getElementById('productsList');
-  const filterVal = (document.getElementById('storeFilterSelect')?.value || '').toLowerCase();
   const codeSearch = (document.getElementById('prodCodeSearch')?.value || '').trim().toLowerCase();
-  let filtered = filterVal ? rows.filter(p => (p.store || '').toLowerCase() === filterVal) : rows;
+  let filtered = rows;
   if (codeSearch) filtered = filtered.filter(p => (p.code || '').toLowerCase().includes(codeSearch));
 
   const total = Object.keys(productCache).length;
@@ -1455,7 +1422,6 @@ window.editProduct = function(id) {
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', parseDescValue(p.description || ''));
   document.getElementById('editExistingImage').value = p.image_url || '';
-  document.getElementById('editStore').value = p.store || '';
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
   document.getElementById('editFile').value = '';
   if (p.image_url) {
@@ -1492,7 +1458,6 @@ window.saveProductEdit = async function() {
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
       active: true,
-      store: document.getElementById('editStore').value.trim(),
     }).eq('id', id);
     showToast('✓ პროდუქტი განახლდა!', 'success');
     closeEditModal();
@@ -1945,7 +1910,6 @@ window.openOrderModal = function(id) {
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:8px 4px">${item.name}</td>
       <td style="padding:8px 4px;font-family:monospace;font-size:12px;color:var(--gray-mid)">${item.code||'–'}</td>
-      <td style="padding:8px 4px;font-size:12px;color:var(--gray-mid)">${item.store||'–'}</td>
       <td style="padding:8px 4px;text-align:right">${item.qty} ${item.unit||'ც'}</td>
       <td style="padding:8px 4px;text-align:right">${parseFloat(item.price||0).toFixed(2)} ₾</td>
       <td style="padding:8px 4px;text-align:right;font-weight:600">${line.toFixed(2)} ₾</td>
@@ -1954,10 +1918,10 @@ window.openOrderModal = function(id) {
   const vat = total * 18 / 118;
   const grandTotal = parseFloat(o.total||0) || total;
   document.getElementById('modalItemsFoot').innerHTML = `
-    <tr><td colspan="5" style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">მ.შ. დღგ 18%</td>
+    <tr><td colspan="4" style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">მ.შ. დღგ 18%</td>
       <td style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">${vat.toFixed(2)} ₾</td></tr>
     <tr style="border-top:2px solid var(--dark)">
-      <td colspan="5" style="padding:10px 4px;text-align:right;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px">სულ გადასახდელი</td>
+      <td colspan="4" style="padding:10px 4px;text-align:right;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px">სულ გადასახდელი</td>
       <td style="padding:10px 4px;text-align:right;font-weight:700;font-size:20px;font-family:'Bebas Neue',sans-serif">${grandTotal.toFixed(2)} ₾</td></tr>`;
   document.getElementById('orderModal').style.display = 'flex';
 };
@@ -2491,56 +2455,6 @@ window.doAdminInvoicePDF = function() {
 };
 
 // init when page is shown
-// ── Store combo helpers ──
-// ── Stores ──
-let _stores = [];
-async function loadStores() {
-  const { data } = await supabase.from('stores').select('*').order('name');
-  _stores = data || [];
-  const opts = '<option value="">მაღაზია...</option>' + _stores.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-  ['prodStore','editStore'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
-  renderStoreList();
-  // update filter dropdown
-  const filterSel = document.getElementById('storeFilterSelect');
-  if (filterSel) {
-    const current = filterSel.value;
-    filterSel.innerHTML = '<option value="">ყველა მაღაზია</option>' + _stores.map(s => `<option value="${s.name}"${s.name === current ? ' selected' : ''}>${s.name}</option>`).join('');
-  }
-}
-function renderStoreList() {
-  const el = document.getElementById('storeList');
-  if (!el) return;
-  if (!_stores.length) { el.innerHTML = '<div style="font-size:12px;color:var(--gray-mid);text-align:center;padding:6px 0">მაღაზია არ არის</div>'; return; }
-  el.innerHTML = _stores.map(s => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:13px">${s.name}</span>
-      <button onclick="deleteStore('${s.id}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
-    </div>
-  `).join('');
-}
-window.toggleStoreMgr = function() {
-  const p = document.getElementById('storeMgrPanel');
-  if (p.style.display === 'none') { p.style.display = 'block'; renderStoreList(); }
-  else p.style.display = 'none';
-};
-window.addStore = async function() {
-  const input = document.getElementById('newStoreInput');
-  const val = input.value.trim();
-  if (!val) return;
-  const { error } = await supabase.from('stores').insert({ name: val });
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  input.value = '';
-  showToast('✓ მაღაზია დაემატა', 'success');
-  loadStores();
-};
-window.deleteStore = async function(id, name) {
-  if (!confirm(`მაღაზია "${name}" წაიშალოს?`)) return;
-  await supabase.from('stores').delete().eq('id', id);
-  showToast('მაღაზია წაიშალა', 'error');
-  loadStores();
-};
-function refreshStoreList() { loadStores(); }
-
 const _origShowPage = window.showPage;
 window.showPage = function(name) {
   _origShowPage(name);
