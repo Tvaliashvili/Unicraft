@@ -560,9 +560,9 @@ import { supabase } from './js/supabase-config.js';
   ms.style.display = showMaintenance ? 'flex' : 'none';
   if (showMaintenance) sc.style.display = 'none';
   supabase.channel('service-settings').on('postgres_changes',
-    { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.service_maintenance_mode' },
+    { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.service_maintenance_mode' },
     payload => {
-      const on = payload.new.value === 'true';
+      const on = payload.new?.value === 'true';
       ms.style.display = on ? 'flex' : 'none';
       sc.style.display = on ? 'none' : 'block';
     }
