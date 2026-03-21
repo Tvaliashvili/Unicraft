@@ -59,6 +59,9 @@ tailwind.config = {
     transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
     cursor: default;
   }
+  @media (max-width: 640px) {
+    .service-card { padding: 22px 16px; }
+  }
   .service-card:hover {
     border-color: rgba(220,38,38,0.35);
     transform: translateY(-3px);
@@ -226,13 +229,22 @@ tailwind.config = {
       <div class="service-card fade-up" style="animation-delay:0.05s">
         <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 mx-auto"
              style="background:rgba(220,38,38,0.12);">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Outer tire -->
             <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="12" r="4"/>
-            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/>
-            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>
-            <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/>
-            <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>
+            <!-- Inner rim -->
+            <circle cx="12" cy="12" r="5.5"/>
+            <!-- Hub -->
+            <circle cx="12" cy="12" r="1.8" fill="#DC2626" stroke="none"/>
+            <!-- Spokes -->
+            <line x1="12" y1="6.5" x2="12" y2="10.2"/>
+            <line x1="12" y1="13.8" x2="12" y2="17.5"/>
+            <line x1="6.5" y1="12" x2="10.2" y2="12"/>
+            <line x1="13.8" y1="12" x2="17.5" y2="12"/>
+            <line x1="8.4" y1="8.4" x2="10.9" y2="10.9"/>
+            <line x1="13.1" y1="13.1" x2="15.6" y2="15.6"/>
+            <line x1="15.6" y1="8.4" x2="13.1" y2="10.9"/>
+            <line x1="8.4" y1="15.6" x2="10.9" y2="13.1"/>
           </svg>
         </div>
         <h3 class="font-display text-white text-xl tracking-wider mb-3">
@@ -258,10 +270,18 @@ tailwind.config = {
       <div class="service-card fade-up" style="animation-delay:0.12s">
         <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 mx-auto"
              style="background:rgba(220,38,38,0.12);">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="7" width="20" height="11" rx="2" ry="2"/>
-            <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-            <line x1="12" y1="12" x2="12" y2="12"/>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Battery body -->
+            <rect x="2" y="9" width="20" height="11" rx="2"/>
+            <!-- Left terminal (positive) -->
+            <rect x="5" y="6" width="4" height="3" rx="1"/>
+            <!-- Right terminal (negative) -->
+            <rect x="15" y="6" width="4" height="3" rx="1"/>
+            <!-- Plus sign -->
+            <line x1="7" y1="14.5" x2="11" y2="14.5"/>
+            <line x1="9" y1="12.5" x2="9" y2="16.5"/>
+            <!-- Minus sign -->
+            <line x1="13" y1="14.5" x2="17" y2="14.5"/>
           </svg>
         </div>
         <h3 class="font-display text-white text-xl tracking-wider mb-3">
@@ -287,9 +307,17 @@ tailwind.config = {
       <div class="service-card fade-up" style="animation-delay:0.19s">
         <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 mx-auto"
              style="background:rgba(220,38,38,0.12);">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 22V8l9-6 9 6v14"/>
-            <path d="M9 22V12h6v10"/>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Can body -->
+            <path d="M6 21V11a2 2 0 012-2h8a2 2 0 012 2v10a1 1 0 01-1 1H7a1 1 0 01-1-1z"/>
+            <!-- Neck -->
+            <rect x="9" y="6" width="4" height="3" rx="1"/>
+            <!-- Cap -->
+            <rect x="9.5" y="4" width="5" height="2.5" rx="1"/>
+            <!-- Handle -->
+            <path d="M15 7h2.5a1 1 0 011 1v3"/>
+            <!-- Fuel window line -->
+            <line x1="9" y1="15" x2="15" y2="15"/>
           </svg>
         </div>
         <h3 class="font-display text-white text-xl tracking-wider mb-3">
