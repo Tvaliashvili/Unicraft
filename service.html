@@ -192,7 +192,7 @@ tailwind.config = {
 </div>
 
 
-<div id="siteContent" style="display:none">
+<div id="siteContent">
 
 <!-- ══ STICKY HEADER ══ -->
 <header class="sticky top-0 z-50 bg-[#0E0C0A] border-b border-white/10">
@@ -553,7 +553,7 @@ import { supabase } from './js/supabase-config.js';
   const isPreview = new URLSearchParams(location.search).has('preview');
   const showMaintenance = data?.value === 'true' && !isPreview;
   ms.style.display = showMaintenance ? 'flex' : 'none';
-  sc.style.display = showMaintenance ? 'none' : 'block';
+  if (showMaintenance) sc.style.display = 'none';
   supabase.channel('service-settings').on('postgres_changes',
     { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'key=eq.service_maintenance_mode' },
     payload => {
