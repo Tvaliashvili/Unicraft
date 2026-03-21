@@ -441,6 +441,9 @@ tailwind.config = {
   opacity: 1;
   pointer-events: all;
 }
+#deliveryWidget:has(.panel-open) {
+  pointer-events: all;
+}
 @media (max-width: 480px) {
   #deliveryWidget {
     right: 8px !important;
@@ -453,7 +456,7 @@ tailwind.config = {
   }
 }
 </style>
-<div id="deliveryWidget" style="position:fixed;top:62px;right:60px;z-index:999;max-width:calc(100vw - 32px)">
+<div id="deliveryWidget" style="position:fixed;top:62px;right:60px;z-index:999;max-width:calc(100vw - 32px);pointer-events:none">
   <div id="deliveryPanel" style="width:420px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden">
     <!-- Header -->
     <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:16px 16px 0 0">
