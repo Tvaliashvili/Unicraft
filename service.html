@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniCraft — SOS მობილური სერვისი 24/7</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        orange: { DEFAULT: '#E8541A', dark: '#C4400E' },
+        dark:   { DEFAULT: '#1A1714', black: '#0E0C0A' },
+        cream:  { DEFAULT: '#F5F2EE' },
+      },
+      fontFamily: {
+        display: ['Bebas Neue', 'sans-serif'],
+        body:    ['Noto Sans Georgian', 'sans-serif'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  html { font-size: clamp(14px, 1.25vw, 20px); }
+  body { font-family: 'Noto Sans Georgian', sans-serif; }
+
+  @keyframes sosGlow {
+    0%,100% { box-shadow: 0 4px 20px rgba(220,38,38,0.45), 0 0 0 0 rgba(220,38,38,0.6); }
+    40%     { box-shadow: 0 4px 20px rgba(220,38,38,0.45), 0 0 0 14px rgba(220,38,38,0); }
+    50%,99% { box-shadow: 0 4px 20px rgba(220,38,38,0.45), 0 0 0 0 rgba(220,38,38,0); }
+  }
+  @keyframes headerSosGlow {
+    0%,100% { box-shadow: 0 2px 12px rgba(220,38,38,0.4), 0 0 0 0 rgba(220,38,38,0.5); }
+    40%     { box-shadow: 0 2px 12px rgba(220,38,38,0.4), 0 0 0 8px rgba(220,38,38,0); }
+    50%,99% { box-shadow: 0 2px 12px rgba(220,38,38,0.4), 0 0 0 0 rgba(220,38,38,0); }
+  }
+  @keyframes pulseDot {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%     { opacity:.45; transform:scale(.75); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .pulse-dot  { animation: pulseDot 1.4s ease-in-out infinite; }
+  .header-sos { animation: headerSosGlow 2.5s ease-out infinite; }
+  .sos-glow   { animation: sosGlow 2.5s ease-out infinite; }
+  .fade-up    { animation: fadeUp 0.55s cubic-bezier(0.4,0,0.2,1) both; }
+
+  .service-card {
+    background: #1A1714;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    cursor: default;
+  }
+  .service-card:hover {
+    border-color: rgba(220,38,38,0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+  }
+
+  .btn-call {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    background: #DC2626; color: white;
+    font-weight: 700; font-size: 1rem; letter-spacing: 0.02em;
+    padding: 16px 36px; border-radius: 14px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+    width: 100%;
+  }
+  .btn-call:hover { background: #B91C1C; transform: translateY(-2px); }
+  .btn-call:active { transform: translateY(0); }
+
+  .btn-whatsapp {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    background: #16A34A; color: white;
+    font-weight: 700; font-size: 0.9rem;
+    padding: 14px 28px; border-radius: 14px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+    width: 100%;
+  }
+  .btn-whatsapp:hover { background: #15803D; transform: translateY(-2px); }
+  .btn-whatsapp:active { transform: translateY(0); }
+
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.45);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .btn-back:hover { color: white; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+</style>
+</head>
+<body class="bg-[#0E0C0A] text-white">
+
+<!-- ══ STICKY HEADER ══ -->
+<header class="sticky top-0 z-50 bg-[#0E0C0A] border-b border-white/10">
+  <div class="max-w-3xl mx-auto px-4 flex items-center justify-between h-14">
+
+    <!-- Logo + back -->
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        მთავარი
+      </a>
+      <div class="w-px h-4 bg-white/10"></div>
+      <a href="index.html" class="flex items-center gap-2 no-underline select-none">
+        <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+          <path fill="#E8541A" d="M89 50c0-3.18 2.47-5.77 5.59-5.98a39 39 0 00-1.09-5.57 6.3 6.3 0 01-7.47-3.38 6.3 6.3 0 012.88-7.66 38.5 38.5 0 00-3.16-4.73 6.3 6.3 0 01-8.17-.26 6.3 6.3 0 01-.26-8.17 38.5 38.5 0 00-4.73-3.16 6.3 6.3 0 01-7.66 2.88 6.3 6.3 0 01-3.38-7.47A39 39 0 0055.98 5.4 6.3 6.3 0 0150 11a6.3 6.3 0 01-5.98-5.59 39 39 0 00-5.57 1.09A6.3 6.3 0 0135.07 14a6.3 6.3 0 01-7.66-2.88 38.5 38.5 0 00-4.73 3.16 6.3 6.3 0 01-.26 8.17 6.3 6.3 0 01-8.17.26 38.5 38.5 0 00-3.16 4.73A6.3 6.3 0 0113.97 35a6.3 6.3 0 01-7.47 3.38 39 39 0 00-1.09 5.57A6.3 6.3 0 0111 50a6.3 6.3 0 01-5.59 5.98 39 39 0 001.09 5.57A6.3 6.3 0 0114 68.97a6.3 6.3 0 01-2.88 7.66 38.5 38.5 0 003.16 4.73 6.3 6.3 0 018.17.26 6.3 6.3 0 01.26 8.17 38.5 38.5 0 004.73 3.16A6.3 6.3 0 0135 90.07a6.3 6.3 0 013.38 7.47 39 39 0 005.57 1.09A6.3 6.3 0 0150 92.6a6.3 6.3 0 015.98 5.59 39 39 0 005.57-1.09A6.3 6.3 0 0165 89.62a6.3 6.3 0 017.66 2.88 38.5 38.5 0 004.73-3.16 6.3 6.3 0 01.26-8.17 6.3 6.3 0 018.17-.26 38.5 38.5 0 003.16-4.73A6.3 6.3 0 0186.03 65a6.3 6.3 0 017.47-3.38 39 39 0 001.09-5.57A6.3 6.3 0 0189 50zM50 85a35 35 0 110-70 35 35 0 010 70z"/>
+          <circle cx="50" cy="50" r="10" fill="#E8541A"/>
+        </svg>
+        <span class="font-display text-xl tracking-widest leading-none">
+          <span class="text-white">UNI</span><span style="color:#E8541A">CRAFT</span>
+        </span>
+      </a>
+    </div>
+
+    <!-- Phone + SOS -->
+    <div class="flex items-center gap-3">
+      <a href="tel:+995568082541"
+         class="hidden sm:flex items-center gap-2 text-white/60 hover:text-white text-sm font-medium no-underline transition-colors">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        568 08 25 41
+      </a>
+      <a href="tel:+995568082541"
+         class="header-sos flex items-center gap-2 text-white text-sm font-bold px-4 py-2 rounded-lg no-underline"
+         style="background:#DC2626;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        დარეკვა
+      </a>
+    </div>
+
+  </div>
+</header>
+
+
+<!-- ══ HERO ══ -->
+<section style="background: radial-gradient(ellipse at 50% 0%, rgba(220,38,38,0.18) 0%, rgba(220,38,38,0.04) 50%, transparent 70%), #0E0C0A;"
+         class="pt-16 pb-12 px-4 text-center fade-up">
+  <div class="max-w-2xl mx-auto">
+
+    <!-- 24/7 badge -->
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+         style="border:1px solid rgba(220,38,38,0.4); background:rgba(220,38,38,0.1);">
+      <span class="pulse-dot w-2 h-2 rounded-full" style="background:#EF4444; display:inline-block;"></span>
+      <span style="color:#F87171; font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;">
+        24/7 — მუდამ ხაზზე
+      </span>
+    </div>
+
+    <!-- Heading -->
+    <h1 class="font-display text-white mb-5"
+        style="font-size: clamp(3rem, 8vw, 5.5rem); letter-spacing: 0.05em; line-height: 1.05;">
+      SOS<br>
+      <span style="color:#DC2626;">დახმარება</span><br>
+      გზებზე
+    </h1>
+
+    <p style="color:rgba(255,255,255,0.45); font-size:0.9rem; line-height:1.8; max-width:360px; margin: 0 auto 2.5rem;">
+      ტექნიკოსი მოვა თქვენს ლოკაციაზე <strong class="text-white">30 წუთში</strong>.<br>
+      სერვისი ხელმისაწვდომია მთელი საქართველოს მასშტაბით.
+    </p>
+
+    <!-- Primary CTA -->
+    <div class="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
+      <a href="tel:+995568082541" class="btn-call sos-glow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        ახლავე დარეკვა
+      </a>
+      <!-- WhatsApp — replace 995568082541 with actual WhatsApp number if different -->
+      <a href="https://wa.me/995568082541?text=%E1%83%92%E1%83%90%E1%83%9B%E1%83%90%E1%83%A0%E1%83%AF%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%91%E1%83%90%20%E1%83%9B%E1%83%A1%E1%83%A3%E1%83%A0%E1%83%9D%E1%83%91%E1%83%90%20%E1%83%9B%E1%83%98%E1%83%9C%E1%83%93%E1%83%90%20%E1%83%93%E1%83%90%E1%83%AE%E1%83%9B%E1%83%90%E1%83%A0%E1%83%94%E1%83%91%E1%83%90"
+         target="_blank" rel="noopener" class="btn-whatsapp">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp ლოკაცია
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══ SERVICES ══ -->
+<section class="px-4 py-12">
+  <div class="max-w-3xl mx-auto">
+
+    <div class="text-center mb-10">
+      <p style="color:rgba(255,255,255,0.3); font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:8px;">
+        სერვისების სია
+      </p>
+      <h2 class="font-display text-white text-3xl tracking-wider">
+        რას ვთავაზობთ
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      <!-- Service 1: Vulcanization -->
+      <div class="service-card fade-up" style="animation-delay:0.05s">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+             style="background:rgba(220,38,38,0.12);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="4"/>
+            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/>
+            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>
+            <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/>
+            <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-white text-xl tracking-wider mb-3">
+          მობილური ვულკანიზაცია
+        </h3>
+        <ul class="flex flex-col gap-2">
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            საბურავის ადგილზე შეცვლა
+          </li>
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            პუნქტის შეკეთება (დაწებება)
+          </li>
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            საბურავის გაბერვა
+          </li>
+        </ul>
+      </div>
+
+      <!-- Service 2: Battery -->
+      <div class="service-card fade-up" style="animation-delay:0.12s">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+             style="background:rgba(220,38,38,0.12);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="11" rx="2" ry="2"/>
+            <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+            <line x1="12" y1="12" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-white text-xl tracking-wider mb-3">
+          აკუმულატორი
+        </h3>
+        <ul class="flex flex-col gap-2">
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            დაქოქვა (პერემიჩკა)
+          </li>
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            ახალი აკუმულატორის მოტანა
+          </li>
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            ადგილზე დაყენება
+          </li>
+        </ul>
+      </div>
+
+      <!-- Service 3: Fuel -->
+      <div class="service-card fade-up" style="animation-delay:0.19s">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+             style="background:rgba(220,38,38,0.12);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 22V8l9-6 9 6v14"/>
+            <path d="M9 22V12h6v10"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-white text-xl tracking-wider mb-3">
+          საწვავი ადგილზე
+        </h3>
+        <ul class="flex flex-col gap-2">
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            ბენზინის მიწოდება
+          </li>
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            დიზელის მიწოდება
+          </li>
+          <li class="flex items-start gap-2" style="color:rgba(255,255,255,0.45); font-size:0.78rem;">
+            <span class="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style="background:#DC2626;"></span>
+            პირდაპირ თქვენს ლოკაციაზე
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ HOW IT WORKS ══ -->
+<section class="px-4 py-12" style="background:#111010;">
+  <div class="max-w-3xl mx-auto text-center">
+    <p style="color:rgba(255,255,255,0.3); font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:8px;">
+      პროცესი
+    </p>
+    <h2 class="font-display text-white text-3xl tracking-wider mb-10">
+      როგორ მუშაობს
+    </h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-2xl"
+             style="background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); color:#DC2626;">
+          1
+        </div>
+        <p style="color:rgba(255,255,255,0.6); font-size:0.82rem; line-height:1.6; max-width:180px;">
+          <strong class="text-white">დარეკეთ ან მოგვწერეთ</strong><br>WhatsApp-ით ლოკაცია
+        </p>
+      </div>
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-2xl"
+             style="background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); color:#DC2626;">
+          2
+        </div>
+        <p style="color:rgba(255,255,255,0.6); font-size:0.82rem; line-height:1.6; max-width:180px;">
+          <strong class="text-white">ტექნიკოსი გამოგიგზავნით</strong><br>30 წუთში ადგილზე
+        </p>
+      </div>
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-2xl"
+             style="background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); color:#DC2626;">
+          3
+        </div>
+        <p style="color:rgba(255,255,255,0.6); font-size:0.82rem; line-height:1.6; max-width:180px;">
+          <strong class="text-white">პრობლემა მოგვარებულია</strong><br>გზა კვლავ თქვენია
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ BOTTOM CTA ══ -->
+<section class="px-4 py-14 text-center">
+  <div class="max-w-sm mx-auto">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+         style="border:1px solid rgba(220,38,38,0.35); background:rgba(220,38,38,0.08);">
+      <span class="pulse-dot w-2 h-2 rounded-full" style="background:#EF4444; display:inline-block;"></span>
+      <span style="color:#F87171; font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;">
+        ახლა ხელმისაწვდომი
+      </span>
+    </div>
+    <h2 class="font-display text-white text-4xl tracking-wider mb-3">
+      გჭირდებათ დახმარება?
+    </h2>
+    <p style="color:rgba(255,255,255,0.38); font-size:0.82rem; margin-bottom:2rem;">
+      ერთი ზარი — ჩვენ გზაზე ვართ.
+    </p>
+    <div class="flex flex-col gap-3">
+      <a href="tel:+995568082541" class="btn-call sos-glow" style="font-size:1.05rem; padding:18px 36px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        568 08 25 41
+      </a>
+      <a href="https://wa.me/995568082541?text=%E1%83%92%E1%83%90%E1%83%9B%E1%83%90%E1%83%A0%E1%83%AF%E1%83%95%E1%83%94%E1%83%9B%E1%83%90%20%E1%83%93%E1%83%90%E1%83%AE%E1%83%9B%E1%83%90%E1%83%A0%E1%83%94%E1%83%91%E1%83%90"
+         target="_blank" rel="noopener" class="btn-whatsapp">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp-ით მოგვწერეთ
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ FOOTER ══ -->
+<div class="border-t border-white/10">
+  <div class="max-w-screen-xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <span style="color:rgba(255,255,255,0.2); font-size:0.72rem;">© 2025 შპს უნიკრაფტი</span>
+    <div class="flex items-center gap-4">
+      <a href="shop.html" class="no-underline transition-colors" style="color:rgba(255,255,255,0.35); font-size:0.78rem;"
+         onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
+        ონლაინ მაღაზია
+      </a>
+      <a href="index.html" class="no-underline transition-colors" style="color:rgba(255,255,255,0.35); font-size:0.78rem;"
+         onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
+        მთავარი
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
