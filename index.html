@@ -132,7 +132,7 @@ tailwind.config = {
 @keyframes mPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 @keyframes mShift { 0%{background-position:0 0} 100%{background-position:200% 0} }
 @keyframes chatGlow { 0%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0.6)} 70%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 14px rgba(232,84,26,0)} 100%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0)} }
-#chatToggleBtn { animation: chatGlow 2s ease-out infinite; }
+#chatToggleBtn, #deliveryToggleBtn { animation: chatGlow 2s ease-out infinite; }
 </style>
 
 
@@ -273,11 +273,13 @@ tailwind.config = {
           კალათა
           <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
         </button>
-        <button onclick="toggleDelivery()" title="ტრანსპორტირების პირობები" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <button onclick="toggleDelivery()" id="deliveryToggleBtn" title="ტრანსპორტირების პირობები" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
+          <svg id="deliveryIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <svg id="deliveryCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
         <button onclick="toggleChat()" id="chatToggleBtn" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg id="chatIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg id="chatCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
         </button>
       </div>
@@ -440,14 +442,14 @@ tailwind.config = {
 }
 </style>
 <div id="deliveryWidget" style="position:fixed;top:62px;right:60px;z-index:999;max-width:calc(100vw - 32px)">
-  <div id="deliveryPanel" style="width:420px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;overflow:hidden">
+  <div id="deliveryPanel" style="width:420px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden">
     <!-- Header -->
-    <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:16px 16px 0 0">
       <span style="color:white;font-weight:700;font-size:13px;font-family:'Noto Sans Georgian',sans-serif">🚚 ტრანსპორტირება და მიტანა</span>
       <button onclick="toggleDelivery()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
     </div>
     <!-- Content -->
-    <div style="max-height:480px;overflow-y:auto;padding:20px;font-family:'Noto Sans Georgian',sans-serif;font-size:13px;color:#1A1714;line-height:1.75;display:flex;flex-direction:column;gap:16px">
+    <div style="height:420px;overflow-y:auto;padding:20px;font-family:'Noto Sans Georgian',sans-serif;font-size:13px;color:#1A1714;line-height:1.75;display:flex;flex-direction:column;gap:16px">
       <div>
         <p style="font-weight:700;margin-bottom:8px">1. მიტანის ტარიფები</p>
         <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px">
@@ -912,9 +914,13 @@ window.toggleDelivery = function() {
     if (cp.classList.contains('panel-open')) {
       cp.classList.remove('panel-open');
       chatOpen = false;
+      document.getElementById('chatIcon').style.display = '';
+      document.getElementById('chatCloseIcon').style.display = 'none';
     }
   }
   dp.classList.toggle('panel-open', !isOpen);
+  document.getElementById('deliveryIcon').style.display = isOpen ? '' : 'none';
+  document.getElementById('deliveryCloseIcon').style.display = isOpen ? 'none' : '';
 };
 
 window.toggleCart = function() {
@@ -1181,9 +1187,15 @@ window.toggleChat = function() {
   // close delivery if open
   if (chatOpen) {
     const dp = document.getElementById('deliveryPanel');
-    if (dp.classList.contains('panel-open')) dp.classList.remove('panel-open');
+    if (dp.classList.contains('panel-open')) {
+      dp.classList.remove('panel-open');
+      document.getElementById('deliveryIcon').style.display = '';
+      document.getElementById('deliveryCloseIcon').style.display = 'none';
+    }
   }
   panel.classList.toggle('panel-open', chatOpen);
+  document.getElementById('chatIcon').style.display = chatOpen ? 'none' : '';
+  document.getElementById('chatCloseIcon').style.display = chatOpen ? '' : 'none';
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
     document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
