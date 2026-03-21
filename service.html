@@ -107,15 +107,9 @@ tailwind.config = {
 
 <!-- ══ STICKY HEADER ══ -->
 <header class="sticky top-0 z-50 bg-[#0E0C0A] border-b border-white/10">
-  <div class="max-w-3xl mx-auto px-4 flex items-center justify-between h-14">
+  <div class="max-w-3xl mx-auto px-4 flex items-center justify-center h-14">
 
-    <!-- Logo + back -->
-    <div class="flex items-center gap-4">
-      <a href="index.html" class="btn-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-        მთავარი
-      </a>
-      <div class="w-px h-4 bg-white/10"></div>
+    <!-- Logo centered -->
       <a href="index.html" class="flex items-center flex-shrink-0 no-underline">
           <svg xml:space="preserve" viewBox="118.62 84.45016077170418 387 117.94212218649518" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" height="56" style="width:auto">
 <g transform="matrix(1.1 0 0 1.1 175 140)">
@@ -168,8 +162,6 @@ tailwind.config = {
 </g>
       </svg>
         </a>
-    </div>
-
 
   </div>
 </header>
@@ -190,14 +182,18 @@ tailwind.config = {
     </div>
 
     <!-- Heading -->
-    <h1 class="font-display text-white mb-5"
+    <h1 class="font-display text-white mb-4"
         style="font-size: clamp(3rem, 8vw, 5.5rem); letter-spacing: 0.05em; line-height: 1.05;">
       SOS<br>
       <span style="color:#DC2626;">დახმარება</span><br>
       გზებზე
     </h1>
 
-    <p style="color:rgba(255,255,255,0.45); font-size:0.9rem; line-height:1.8; max-width:360px; margin: 0 auto 2.5rem;">
+    <p class="font-display mb-6" style="font-size: clamp(1.1rem, 2.5vw, 1.6rem); letter-spacing: 0.08em; color: rgba(255,255,255,0.75);">
+      ერთი ზარი — ჩვენ გზაში ვართ
+    </p>
+
+    <p style="color:rgba(255,255,255,0.45); font-size:0.9rem; line-height:1.8; white-space:nowrap; margin: 0 auto 2.5rem;">
       ტექნიკოსი დროულად მოვა თქვენს ლოკაციაზე.<br>
       სერვისი ხელმისაწვდომია მხოლოდ <strong class="text-white">თბილისში და შემოგარენში</strong>.
     </p>

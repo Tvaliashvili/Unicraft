@@ -30,14 +30,12 @@ tailwind.config = {
   .split-panel {
     position: relative;
     overflow: hidden;
-    cursor: pointer;
-    text-decoration: none;
     transition: background 0.4s ease;
     min-height: 50vh;
   }
 
-  a.split-panel[href="shop.html"]:hover    { background: #231d19 !important; }
-  a.split-panel[href="service.html"]:hover { background: #160d0d !important; }
+  .split-panel:nth-child(1):hover { background: #231d19 !important; }
+  .split-panel:nth-child(3):hover { background: #160d0d !important; }
 
   .split-panel .panel-accent {
     position: absolute;
@@ -221,7 +219,7 @@ tailwind.config = {
 <div id="splitWrapper" class="flex flex-col-reverse">
 
   <!-- ── LEFT: ONLINE SHOP ── -->
-  <a href="shop.html" class="split-panel" style="background:#1A1714;">
+  <div class="split-panel" style="background:#1A1714;">
     <div class="panel-accent" style="background:#E8541A;"></div>
 
     <div class="p-sec p-badge">
@@ -266,17 +264,17 @@ tailwind.config = {
     </div>
 
     <div class="p-sec p-cta">
-      <span class="cta-shop">
+      <a href="shop.html" class="cta-shop">
         მაღაზიაში გადასვლა
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </span>
+      </a>
     </div>
-  </a>
+  </div>
 
   <div class="panel-divider"></div>
 
   <!-- ── RIGHT: SOS SERVICE ── -->
-  <a href="service.html" class="split-panel" style="background:#0E0C0A;">
+  <div class="split-panel" style="background:#0E0C0A;">
     <div class="panel-accent" style="background:#DC2626;"></div>
 
     <div class="p-sec p-badge">
@@ -322,12 +320,12 @@ tailwind.config = {
     </div>
 
     <div class="p-sec p-cta">
-      <span class="cta-sos">
+      <a href="service.html" class="cta-sos">
         სერვისში გადასვლა
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </span>
+      </a>
     </div>
-  </a>
+  </div>
 
 </div>
 
