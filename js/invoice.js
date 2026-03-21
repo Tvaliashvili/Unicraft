@@ -39,9 +39,10 @@ window.downloadInvoicePDF = function() {
     + '.pval-mono{font-family:monospace;font-weight:700;font-size:14px;color:#141210;letter-spacing:0.5px}'
     // ── products section ──
     + '.section-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E8541A;margin-bottom:12px}'
-    + 'table{width:100%;border-collapse:collapse;margin-bottom:4px}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:4px;table-layout:fixed}'
     + 'thead tr{border-bottom:2px solid #f3f4f6}'
     + 'th{font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#141210;padding:0 4px 8px;text-align:left}'
+    + 'th:nth-child(1){width:46%}th:nth-child(2){width:16%}th:nth-child(3){width:19%}th:nth-child(4){width:19%}'
     + 'th.r{text-align:right}th.c{text-align:center}'
     + 'td{font-size:14px;padding:8px 4px;border-bottom:1px solid #F5F2EE}'
     + '.vat-row td{font-size:12px;color:#141210;padding:12px 4px 4px;border-bottom:none}'
@@ -55,7 +56,7 @@ window.downloadInvoicePDF = function() {
     + '.disclaimer{margin-top:12px;padding:12px 16px;background:#F5F2EE;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#141210;line-height:1.625}'
     + '.disclaimer strong{color:#141210}'
     // ── print ──
-    + '@media print{@page{margin:0;size:A4}body{padding:20px 28px}}'
+    + '@media print{@page{margin:12mm 14mm;size:A4}body{padding:0}-webkit-print-color-adjust:exact;print-color-adjust:exact;table{table-layout:fixed!important}}'
     + '</style></head><body>'
 
     // header
