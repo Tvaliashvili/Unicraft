@@ -273,11 +273,11 @@ tailwind.config = {
           კალათა
           <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
         </button>
-        <button onclick="openDeliveryModal()" title="ტრანსპორტირების პირობები" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
-          <img src="images/box-car.png" width="22" height="22" style="object-fit:contain">
+        <button onclick="toggleDelivery()" title="ტრანსპორტირების პირობები" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         </button>
         <button onclick="toggleChat()" id="chatToggleBtn" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
-          <img src="images/chat.png" width="22" height="22" style="object-fit:contain">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
         </button>
       </div>
@@ -423,49 +423,43 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ══ DELIVERY MODAL ══ -->
-<div id="deliveryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:9999" onclick="if(event.target===this)closeDeliveryModal()">
-  <div class="bg-white w-full max-w-2xl border-t-4 border-orange rounded-b-lg max-h-[90vh] overflow-y-auto transition-transform duration-300 translate-y-5" id="deliveryModalBox">
-    <div class="flex items-start justify-between px-7 pt-6 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-      <h2 class="font-display text-2xl tracking-wide text-dark">🚚 ტრანსპორტირება და მიტანა</h2>
-      <button onclick="closeDeliveryModal()" class="text-gray-400 hover:text-dark transition-colors text-xl leading-none mt-1">&times;</button>
+<!-- ══ DELIVERY WIDGET ══ -->
+<div id="deliveryWidget" style="position:fixed;top:62px;right:60px;z-index:999;max-width:calc(100vw - 32px)">
+  <div id="deliveryPanel" style="display:none;width:360px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;overflow:hidden">
+    <!-- Header -->
+    <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="color:white;font-weight:700;font-size:13px;font-family:'Noto Sans Georgian',sans-serif">🚚 ტრანსპორტირება და მიტანა</span>
+      <button onclick="toggleDelivery()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
     </div>
-    <div class="px-7 py-6 text-sm text-dark font-body leading-relaxed space-y-5">
-
-      <p>ჩვენი მიზანია, თქვენს ობიექტამდე მასალების მოტანა იყოს სწრაფი და უსაფრთხო. გთხოვთ, გაეცნოთ მიტანის წესებს:</p>
-
+    <!-- Content -->
+    <div style="max-height:420px;overflow-y:auto;padding:18px;font-family:'Noto Sans Georgian',sans-serif;font-size:13px;color:#1A1714;line-height:1.7;display:flex;flex-direction:column;gap:14px">
+      <p>ჩვენი მიზანია, თქვენს ობიექტამდე მასალების მოტანა იყოს სწრაფი და უსაფრთხო.</p>
       <div>
-        <h3 class="font-semibold text-base mb-2">1. მიტანის ტარიფები (წონისა და მოცულობის მიხედვით)</h3>
-        <p class="mb-2">შეკვეთის ტრანსპორტირების ფასი ავტომატურად ითვლება კალათაში პროდუქციის ჯამური წონისა და გაბარიტების მიხედვით:</p>
-        <ul class="space-y-1 pl-4">
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span><strong>მცირე ამანათი (5 კგ-მდე):</strong> თბილისის მასშტაბით — 7 ლარი.</span></li>
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span><strong>საშუალო ტვირთი (5-დან 50 კგ-მდე):</strong> თბილისის მასშტაბით — 15–25 ლარი.</span></li>
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span><strong>მძიმე და გაბარიტული ტვირთი (50 კგ +):</strong> ფასი დგინდება ინდივიდუალურად მანძილისა და საჭირო ტექნიკის მიხედვით.</span></li>
+        <p style="font-weight:700;margin-bottom:6px">1. მიტანის ტარიფები</p>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px">
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>მცირე ამანათი (5 კგ-მდე):</strong> თბილისი — 7 ₾</span></li>
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>საშუალო ტვირთი (5–50 კგ):</strong> თბილისი — 15–25 ₾</span></li>
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>მძიმე/გაბარიტული (50 კგ+):</strong> ინდივიდუალური</span></li>
         </ul>
       </div>
-
       <div>
-        <h3 class="font-semibold text-base mb-2">2. მიტანის ადგილი და სართულზე ატანა</h3>
-        <p class="mb-2"><strong>მნიშვნელოვანია:</strong> სტანდარტული მიტანის სერვისი გულისხმობს ტვირთის მიყვანას მითითებულ მისამართზე, შენობასთან მაქსიმალურად ახლოს, სადაც სატვირთო ავტომობილი შეძლებს მისვლას.</p>
-        <ul class="space-y-1 pl-4">
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span>ტვირთის ჩამოცლა და სართულზე ატანა <strong>არ შედის</strong> ტრანსპორტირების საბაზისო ღირებულებაში.</span></li>
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span>სართულზე ატანის სურვილის შემთხვევაში, გთხოვთ, წინასწარ აცნობოთ ოპერატორს, რათა დაიგეგმოს შესაბამისი დამხმარე ძალის მობილიზება (დამატებითი საფასურით).</span></li>
+        <p style="font-weight:700;margin-bottom:6px">2. მიტანის ადგილი და სართულზე ატანა</p>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px">
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span>სტანდარტული სერვისი გულისხმობს ტვირთის მიტანას შენობასთან ახლოს, სადაც მანქანა მივა.</span></li>
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span>სართულზე ატანა <strong>არ შედის</strong> ბაზისო ღირებულებაში — დამატებითი საფასური.</span></li>
         </ul>
       </div>
-
       <div>
-        <h3 class="font-semibold text-base mb-2">3. მიტანის ვადები</h3>
-        <ul class="space-y-1 pl-4">
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span>სამუშაო დღეებში <strong>14:00 საათამდე</strong> გაფორმებული შეკვეთის მიტანა ხდება <strong>იმავე დღეს</strong>.</span></li>
-          <li class="flex gap-2"><span class="text-orange font-bold">•</span><span>14:00 საათის შემდეგ გაფორმებული შეკვეთები მოგეწოდებათ <strong>მომდევნო სამუშაო დღეს</strong>.</span></li>
+        <p style="font-weight:700;margin-bottom:6px">3. მიტანის ვადები</p>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px">
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>14:00-მდე</strong> შეკვეთა — <strong>იმავე დღეს</strong></span></li>
+          <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>14:00-ის შემდეგ</strong> — <strong>მომდევნო სამუშაო დღეს</strong></span></li>
         </ul>
       </div>
-
       <div>
-        <h3 class="font-semibold text-base mb-2">4. პროდუქციის მიღება და შემოწმება</h3>
-        <p>გთხოვთ, ნივთის ჩაბარებისას კურიერთან ერთად შეამოწმოთ პროდუქციის მთლიანობა და რაოდენობა. პროდუქციის ჩაბარების შემდეგ პრეტენზიები დაზიანებაზე აღარ მიიღება.</p>
+        <p style="font-weight:700;margin-bottom:6px">4. პროდუქციის მიღება</p>
+        <p>ჩაბარებისას კურიერთან ერთად შეამოწმეთ პროდუქციის მთლიანობა. ჩაბარების შემდეგ პრეტენზიები დაზიანებაზე აღარ მიიღება.</p>
       </div>
-
     </div>
   </div>
 </div>
@@ -879,17 +873,9 @@ function saveCart() {
   document.getElementById('cartCount').textContent = cart.length;
 }
 
-window.openDeliveryModal = function() {
-  const m = document.getElementById('deliveryModal');
-  const b = document.getElementById('deliveryModalBox');
-  m.classList.remove('opacity-0','pointer-events-none');
-  b.classList.remove('translate-y-5');
-};
-window.closeDeliveryModal = function() {
-  const m = document.getElementById('deliveryModal');
-  const b = document.getElementById('deliveryModalBox');
-  m.classList.add('opacity-0','pointer-events-none');
-  b.classList.add('translate-y-5');
+window.toggleDelivery = function() {
+  const panel = document.getElementById('deliveryPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
 };
 
 window.toggleCart = function() {
