@@ -436,10 +436,16 @@ tailwind.config = {
   transition: transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s ease;
   display: block !important;
 }
+#deliveryPanel * {
+  pointer-events: none;
+}
 #deliveryPanel.panel-open {
   transform: scaleY(1) translateY(0);
   opacity: 1;
   pointer-events: all;
+}
+#deliveryPanel.panel-open * {
+  pointer-events: auto;
 }
 #deliveryWidget:has(.panel-open) {
   pointer-events: all;
