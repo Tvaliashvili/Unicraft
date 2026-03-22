@@ -1016,9 +1016,9 @@ window.openOrder = function() {
   document.getElementById('invoiceItems').innerHTML = cart.map(i => `
     <tr class="border-b border-gray-50">
       <td class="py-2 text-dark">${i.name}</td>
-      <td class="py-2 text-center text-gray-500">${i.qty}</td>
-      <td class="py-2 text-center text-gray-500">${(i.unit||'ც').replace(/\.+$/,'')}</td>
-      <td class="py-2 text-right text-gray-500">${parseFloat(i.price).toFixed(2)} ₾</td>
+      <td class="py-2 text-center text-dark">${i.qty}</td>
+      <td class="py-2 text-center text-dark">${(i.unit||'ც').replace(/\.+$/,'')}</td>
+      <td class="py-2 text-right text-dark">${parseFloat(i.price).toFixed(2)} ₾</td>
       <td class="py-2 text-right font-semibold text-dark">${(i.price*i.qty).toFixed(2)} ₾</td>
     </tr>`).join('');
 
