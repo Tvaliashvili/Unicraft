@@ -569,18 +569,19 @@ tailwind.config = {
             <tr class="text-xs font-semibold tracking-widest text-dark uppercase border-b-2 border-gray-100">
               <th class="text-left pb-2">დასახელება</th>
               <th class="text-center pb-2 w-16">რ-ბა</th>
-              <th class="text-right pb-2 w-24">ერთ. ფასი</th>
+              <th class="text-center pb-2 w-14">ერთ.</th>
+              <th class="text-right pb-2 w-24">ფასი</th>
               <th class="text-right pb-2 w-24">სულ</th>
             </tr>
           </thead>
           <tbody id="invoiceItems"></tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="pt-3 pb-1 text-right text-xs text-dark pr-4">მათ შორის დღგ (18%)</td>
+              <td colspan="4" class="pt-3 pb-1 text-right text-xs text-dark pr-4">მათ შორის დღგ (18%)</td>
               <td class="pt-3 pb-1 text-right text-xs text-dark" id="invoiceVat"></td>
             </tr>
             <tr class="border-t-2 border-dark">
-              <td colspan="3" class="pt-3 text-right text-xs font-bold tracking-widest text-dark uppercase pr-4">სულ გადასახდელი</td>
+              <td colspan="4" class="pt-3 text-right text-xs font-bold tracking-widest text-dark uppercase pr-4">სულ გადასახდელი</td>
               <td class="pt-3 text-right" id="invoiceTotal"></td>
             </tr>
           </tfoot>
@@ -1015,7 +1016,8 @@ window.openOrder = function() {
   document.getElementById('invoiceItems').innerHTML = cart.map(i => `
     <tr class="border-b border-gray-50">
       <td class="py-2 text-dark">${i.name}</td>
-      <td class="py-2 text-center text-gray-500">${i.qty} ${(i.unit||'ც').replace(/\.+$/,'')}</td>
+      <td class="py-2 text-center text-gray-500">${i.qty}</td>
+      <td class="py-2 text-center text-gray-500">${(i.unit||'ც').replace(/\.+$/,'')}</td>
       <td class="py-2 text-right text-gray-500">${parseFloat(i.price).toFixed(2)} ₾</td>
       <td class="py-2 text-right font-semibold text-dark">${(i.price*i.qty).toFixed(2)} ₾</td>
     </tr>`).join('');
