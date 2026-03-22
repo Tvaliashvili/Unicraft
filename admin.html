@@ -152,12 +152,6 @@
               <div id="maintenanceDot" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <span id="svcMaintenanceBtnLabel" style="font-size:13px;font-weight:600;color:var(--gray-mid)">სერვისი ჩართულია</span>
-            <div onclick="toggleServiceMaintenanceMode()" id="svcMaintenanceToggleBtn" style="width:48px;height:26px;border-radius:13px;background:#22c55e;cursor:pointer;position:relative;transition:background .25s;flex-shrink:0">
-              <div id="svcMaintenanceDot" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="stats-grid">
@@ -975,7 +969,6 @@ async function initApp() {
   loadCategories();
   loadUnits();
   loadMaintenanceStatus();
-  loadServiceMaintenanceStatus();
   renderDescRows('prodDescRows');
   initChatBadgeListener();
   initOrdersBadgeListener();
@@ -1095,44 +1088,6 @@ function updateMaintenanceBtn(isOn) {
     label.style.color = 'var(--gray-mid)';
   }
 }
-
-// ─── Service Maintenance Mode ───
-async function loadServiceMaintenanceStatus() {
-  const { data } = await supabase.from('settings').select('value').eq('key', 'service_maintenance_mode').maybeSingle();
-  updateServiceMaintenanceBtn(data?.value === 'true');
-}
-
-function updateServiceMaintenanceBtn(isOn) {
-  const dot = document.getElementById('svcMaintenanceDot');
-  const label = document.getElementById('svcMaintenanceBtnLabel');
-  const btn = document.getElementById('svcMaintenanceToggleBtn');
-  if (!dot) return;
-  if (isOn) {
-    btn.style.background = '#ef4444';
-    dot.style.transform = 'translateX(22px)';
-    label.textContent = 'სერვისი გამორთულია';
-    label.style.color = '#ef4444';
-  } else {
-    btn.style.background = '#22c55e';
-    dot.style.transform = 'translateX(0)';
-    label.textContent = 'სერვისი ჩართულია';
-    label.style.color = 'var(--gray-mid)';
-  }
-}
-
-window.toggleServiceMaintenanceMode = async function() {
-  const { data } = await supabase.from('settings').select('value').eq('key', 'maint_pass_hash').maybeSingle();
-  const title = data?.value ? 'პაროლის შეყვანა' : 'პაროლის დაყენება (პირველი შესვლა)';
-  openMaintPassModal(title, async () => {
-    const { data } = await supabase.from('settings').select('value').eq('key', 'service_maintenance_mode').maybeSingle();
-    const current = data?.value === 'true';
-    const newVal = (!current).toString();
-    const { error } = await supabase.from('settings').upsert({ key: 'service_maintenance_mode', value: newVal }, { onConflict: 'key' });
-    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-    updateServiceMaintenanceBtn(!current);
-    showToast(!current ? '🔒 სერვისი გამორთულია' : '✓ სერვისი ჩართულია', !current ? 'error' : 'success');
-  });
-};
 
 // ─── Maintenance Password ───
 async function sha256(text) {
