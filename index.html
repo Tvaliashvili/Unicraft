@@ -1,211 +1,308 @@
 <!DOCTYPE html>
-<html lang="ka" class="">
+<html lang="ka">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ═══ SEO META TAGS ═══ -->
+  <!-- ═══ SEO ═══ -->
   <title>Unicraft News - ქართული სიახლეები</title>
   <meta name="description" content="Unicraft News - ყველაზე განახლებული ქართული სიახლეები ტექნოლოგიების, ბიზნესის, მსოფლიოს და მეცნიერების სფეროდან.">
   <meta name="keywords" content="ქართული სიახლეები, ახალი ამბები, ტექნოლოგია, ბიზნესი, მეცნიერება, unicraft news">
   <meta name="author" content="Unicraft News">
   <meta name="robots" content="index, follow">
-  <meta name="language" content="ka">
-  <link rel="canonical" href="https://unicraftnews.ge">
-
-  <!-- Open Graph -->
+  <link rel="canonical" href="https://unicraft.ge">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://unicraftnews.ge">
-  <meta property="og:title" content="Unicraft News - ქართული სიახლეები">
-  <meta property="og:description" content="ყველაზე განახლებული ქართული სიახლეები AI-ის დახმარებით.">
-  <meta property="og:image" content="https://unicraftnews.ge/og-image.jpg">
-  <meta property="og:locale" content="ka_GE">
-
-  <!-- Twitter Card -->
+  <meta property="og:url" content="https://unicraft.ge">
+  <meta property="og:title" content="Unicraft News">
+  <meta property="og:description" content="ყველაზე განახლებული ქართული სიახლეები">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Unicraft News">
-  <meta name="twitter:description" content="ყველაზე განახლებული ქართული სიახლეები">
 
   <!-- ═══ FONTS ═══ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=FiraGO:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- ═══ TAILWIND CSS ═══ -->
+  <!-- ═══ TAILWIND ═══ -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: { firago: ['FiraGO', 'sans-serif'] },
           colors: {
-            primary: '#E63946',
-            'primary-dark': '#c1121f',
+            orange:  { DEFAULT: '#FF6B00', light: '#FF8C35', glow: '#FF6B0033' },
+            dark:    { DEFAULT: '#0A0A0A', card: '#141414', border: '#222222', muted: '#1E1E1E' }
           }
         }
       }
     }
   </script>
 
-  <!-- ═══ INTERNAL CSS ═══ -->
   <style>
-    * { font-family: 'FiraGO', sans-serif; }
+    *, *::before, *::after { font-family: 'FiraGO', sans-serif; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
-    /* Ticker */
-    @keyframes ticker-scroll {
+    /* ── COLORS ── */
+    :root {
+      --orange: #FF6B00;
+      --orange-light: #FF8C35;
+      --bg: #0A0A0A;
+      --card: #141414;
+      --border: #222;
+      --muted: #1E1E1E;
+      --text: #F0F0F0;
+      --sub: #888;
+    }
+
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── TICKER ── */
+    @keyframes ticker-move {
       0%   { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
     .ticker-track {
       display: inline-block;
       white-space: nowrap;
-      animation: ticker-scroll 40s linear infinite;
+      animation: ticker-move 45s linear infinite;
     }
     .ticker-track:hover { animation-play-state: paused; }
 
-    /* Card hover */
-    .news-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .news-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+    /* ── ORANGE GLOW ── */
+    .glow-orange {
+      box-shadow: 0 0 20px rgba(255, 107, 0, 0.25), 0 0 60px rgba(255, 107, 0, 0.08);
+    }
+    .glow-orange-sm { box-shadow: 0 0 12px rgba(255, 107, 0, 0.3); }
+    .text-glow { text-shadow: 0 0 20px rgba(255, 107, 0, 0.6); }
 
-    /* Dark mode transition */
-    body { transition: background-color 0.3s, color 0.3s; }
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: #FF6B0055;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,107,0,0.1);
+    }
 
-    /* Mobile menu */
-    #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; }
+    /* ── FEATURED IMAGE ZOOM ── */
+    .img-zoom { overflow: hidden; }
+    .img-zoom img { transition: transform 0.6s ease; }
+    .img-zoom:hover img { transform: scale(1.04); }
 
-    /* Scrollbar */
+    /* ── ORANGE LINE ── */
+    .orange-line::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: var(--orange);
+      border-radius: 2px;
+      margin-right: 10px;
+      vertical-align: middle;
+      box-shadow: 0 0 8px rgba(255,107,0,0.5);
+    }
+
+    /* ── NAV LINK ── */
+    .nav-link {
+      position: relative;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #aaa;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: #1a1a1a; }
+    .nav-link.active { color: var(--orange); background: rgba(255,107,0,0.08); }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-tech     { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-business { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-world    { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .badge-science  { background: rgba(255,107,0,0.15);  color: #FF8C35; border: 1px solid rgba(255,107,0,0.3); }
+
+    /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: #E63946; border-radius: 4px; }
-    .dark ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 4px; }
 
-    /* Line clamp */
+    /* ── CLAMP ── */
     .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-    /* Modal */
-    #article-modal { backdrop-filter: blur(4px); }
+    /* ── MOBILE MENU ── */
+    #mobile-menu { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; }
+
+    /* ── MODAL BACKDROP ── */
+    #article-modal { backdrop-filter: blur(6px); }
+
+    /* ── AI SCORE BAR ── */
+    .ai-bar { background: linear-gradient(90deg, #FF6B00, #FF8C35); }
+
+    /* ── ORANGE BTN ── */
+    .btn-orange {
+      background: linear-gradient(135deg, #FF6B00, #FF8C35);
+      color: white;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 14px;
+      transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 4px 15px rgba(255,107,0,0.4);
+    }
+    .btn-orange:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ── DIVIDER ── */
+    .divider { border-color: var(--border); }
+
+    /* ── SIDEBAR SECTION ── */
+    .sidebar-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
   </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen">
+<body>
 
-  <!-- ══════════════════════════════════════
+  <!-- ══════════════════════════════
+       TOP BAR
+  ══════════════════════════════ -->
+  <div style="background:#0d0d0d; border-bottom:1px solid #1a1a1a;" class="py-2 px-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-xs" style="color:#555;">
+      <span id="current-date"></span>
+      <span>unicraft.ge</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
        NAVBAR
-  ══════════════════════════════════════ -->
-  <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 shadow-sm">
+  ══════════════════════════════ -->
+  <nav style="background:#0d0d0d; border-bottom:1px solid #1e1e1e;" class="sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex items-center justify-between h-16">
 
         <!-- Logo -->
-        <a href="#" onclick="filterCategory('all'); return false;" class="flex items-center gap-2 flex-shrink-0">
-          <div class="w-9 h-9 bg-[#E63946] rounded-md flex items-center justify-center shadow-md">
-            <span class="text-white font-black text-sm tracking-tight">UN</span>
+        <a href="#" onclick="filterCategory('all'); return false;" class="flex items-center gap-3">
+          <div style="background:linear-gradient(135deg,#FF6B00,#FF8C35);" class="w-10 h-10 rounded-lg flex items-center justify-center glow-orange-sm flex-shrink-0">
+            <span class="text-white font-black text-sm">UN</span>
           </div>
           <div class="leading-none">
-            <span class="text-gray-900 dark:text-white font-black text-lg">Unicraft</span>
-            <span class="text-[#E63946] font-black text-lg"> News</span>
+            <div class="text-white font-black text-xl tracking-tight">Unicraft <span style="color:#FF6B00;" class="text-glow">News</span></div>
           </div>
         </a>
 
-        <!-- Desktop Categories -->
+        <!-- Desktop Nav -->
         <div class="hidden md:flex items-center gap-1">
-          <a href="#" onclick="filterCategory('all'); return false;" data-cat="all"
-             class="nav-link px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">ყველა</a>
-          <a href="#" onclick="filterCategory('tech'); return false;" data-cat="tech"
-             class="nav-link px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">ტექნოლოგიები</a>
-          <a href="#" onclick="filterCategory('business'); return false;" data-cat="business"
-             class="nav-link px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">ბიზნესი</a>
-          <a href="#" onclick="filterCategory('world'); return false;" data-cat="world"
-             class="nav-link px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">მსოფლიო</a>
-          <a href="#" onclick="filterCategory('science'); return false;" data-cat="science"
-             class="nav-link px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">მეცნიერება</a>
+          <a href="#" onclick="filterCategory('all'); return false;" data-cat="all" class="nav-link active">ყველა</a>
+          <a href="#" onclick="filterCategory('tech'); return false;" data-cat="tech" class="nav-link">ტექნოლოგიები</a>
+          <a href="#" onclick="filterCategory('business'); return false;" data-cat="business" class="nav-link">ბიზნესი</a>
+          <a href="#" onclick="filterCategory('world'); return false;" data-cat="world" class="nav-link">მსოფლიო</a>
+          <a href="#" onclick="filterCategory('science'); return false;" data-cat="science" class="nav-link">მეცნიერება</a>
         </div>
 
-        <!-- Right controls -->
+        <!-- Right -->
         <div class="flex items-center gap-2">
-          <!-- Dark mode toggle -->
-          <button onclick="toggleDarkMode()" id="theme-btn"
-            class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="თემის შეცვლა">
-            <svg id="icon-moon" class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-            </svg>
-            <svg id="icon-sun" class="hidden w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+          <!-- Search -->
+          <button onclick="toggleSearch()" style="background:#1a1a1a; border:1px solid #2a2a2a;" class="p-2 rounded-lg hover:border-orange-500/50 transition-all">
+            <svg class="w-4 h-4" style="color:#888;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
           </button>
-
-          <!-- Hamburger (mobile) -->
-          <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="მენიუ">
-            <svg id="icon-ham" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <!-- Hamburger -->
+          <button onclick="toggleMobileMenu()" style="background:#1a1a1a; border:1px solid #2a2a2a;" class="md:hidden p-2 rounded-lg">
+            <svg id="icon-ham" class="w-4 h-4" style="color:#888;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
-            <svg id="icon-close" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg id="icon-x" class="hidden w-4 h-4" style="color:#888;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
       </div>
 
+      <!-- Search Bar -->
+      <div id="search-bar" class="hidden pb-3">
+        <div class="relative">
+          <input type="text" id="search-input" placeholder="სიახლის ძიება..."
+            oninput="searchNews(this.value)"
+            style="background:#1a1a1a; border:1px solid #333; color:#f0f0f0;"
+            class="w-full rounded-xl px-4 py-3 pl-10 text-sm outline-none focus:border-orange-500/60 transition-colors placeholder-gray-600">
+          <svg class="absolute left-3 top-3.5 w-4 h-4" style="color:#555;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+      </div>
+
       <!-- Mobile Menu -->
-      <div id="mobile-menu" class="md:hidden overflow-hidden">
-        <div class="pb-4 pt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-1">
+      <div id="mobile-menu">
+        <div style="border-top:1px solid #1e1e1e;" class="py-3 flex flex-col gap-1">
           <a href="#" onclick="filterCategory('all'); toggleMobileMenu(); return false;" data-mob="all"
-             class="mob-link block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">ყველა</a>
-          <a href="#" onclick="filterCategory('tech'); toggleMobileMenu(); return false;" data-mob="tech"
-             class="mob-link block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">ტექნოლოგიები</a>
-          <a href="#" onclick="filterCategory('business'); toggleMobileMenu(); return false;" data-mob="business"
-             class="mob-link block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">ბიზნესი</a>
-          <a href="#" onclick="filterCategory('world'); toggleMobileMenu(); return false;" data-mob="world"
-             class="mob-link block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">მსოფლიო</a>
-          <a href="#" onclick="filterCategory('science'); toggleMobileMenu(); return false;" data-mob="science"
-             class="mob-link block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">მეცნიერება</a>
+             class="block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-white/5" style="color:#aaa;">ყველა</a>
+          <a href="#" onclick="filterCategory('tech'); toggleMobileMenu(); return false;"
+             class="block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-white/5" style="color:#aaa;">ტექნოლოგიები</a>
+          <a href="#" onclick="filterCategory('business'); toggleMobileMenu(); return false;"
+             class="block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-white/5" style="color:#aaa;">ბიზნესი</a>
+          <a href="#" onclick="filterCategory('world'); toggleMobileMenu(); return false;"
+             class="block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-white/5" style="color:#aaa;">მსოფლიო</a>
+          <a href="#" onclick="filterCategory('science'); toggleMobileMenu(); return false;"
+             class="block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:bg-white/5" style="color:#aaa;">მეცნიერება</a>
         </div>
       </div>
     </div>
   </nav>
 
-  <!-- ══════════════════════════════════════
+  <!-- ══════════════════════════════
        BREAKING NEWS TICKER
-  ══════════════════════════════════════ -->
-  <div class="bg-[#E63946] text-white overflow-hidden relative" style="height:38px;">
+  ══════════════════════════════ -->
+  <div style="background:linear-gradient(90deg,#1a0800,#0d0d0d); border-bottom:1px solid #2a1500; height:40px; overflow:hidden;">
     <div class="flex items-center h-full">
-      <div class="flex-shrink-0 bg-white text-[#E63946] font-black text-xs px-3 py-1 mx-3 uppercase tracking-widest rounded-sm z-10 shadow">
+      <div style="background:linear-gradient(135deg,#FF6B00,#FF8C35); flex-shrink:0; font-size:10px; font-weight:900; letter-spacing:0.1em; text-transform:uppercase; padding:4px 14px; margin:0 12px;"
+           class="text-white rounded-sm">
         სიახლე
       </div>
-      <div class="overflow-hidden flex-1 h-full flex items-center">
-        <div class="ticker-track text-sm font-medium" id="ticker-track"></div>
+      <div class="overflow-hidden flex-1">
+        <div class="ticker-track text-sm font-medium" style="color:#FF8C35;" id="ticker-track"></div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════
-       MAIN LAYOUT
-  ══════════════════════════════════════ -->
-  <main class="max-w-7xl mx-auto px-4 py-7">
+  <!-- ══════════════════════════════
+       MAIN
+  ══════════════════════════════ -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
     <div class="flex flex-col lg:flex-row gap-7">
 
-      <!-- ── LEFT / MAIN COLUMN ── -->
+      <!-- LEFT COLUMN -->
       <div class="flex-1 min-w-0">
 
-        <!-- Featured Story -->
-        <section id="featured-section" class="mb-8">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="w-1 h-6 bg-[#E63946] rounded-full"></div>
-            <h2 class="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">მთავარი ამბავი</h2>
-          </div>
+        <!-- Featured -->
+        <section id="featured-section" class="mb-10">
+          <h2 class="orange-line text-xs font-black uppercase tracking-widest mb-5" style="color:#666;">მთავარი ამბავი</h2>
           <div id="featured-story"></div>
         </section>
 
-        <!-- News Grid -->
+        <!-- Grid -->
         <section>
-          <div class="flex items-center gap-3 mb-5">
-            <div class="w-1 h-6 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-            <h2 id="grid-title" class="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">უახლესი სიახლეები</h2>
-          </div>
+          <h2 id="grid-title" class="orange-line text-xs font-black uppercase tracking-widest mb-5" style="color:#666;">უახლესი სიახლეები</h2>
           <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
-          <div id="no-results" class="hidden text-center py-20 text-gray-400">
-            <svg class="w-14 h-14 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div id="no-results" class="hidden text-center py-20" style="color:#444;">
+            <svg class="w-12 h-12 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <p class="font-semibold">სიახლეები ვერ მოიძებნა</p>
@@ -213,37 +310,39 @@
         </section>
       </div>
 
-      <!-- ── SIDEBAR ── -->
+      <!-- SIDEBAR -->
       <aside class="lg:w-72 xl:w-80 flex-shrink-0 space-y-5">
 
         <!-- Most Read -->
-        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-          <div class="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100 dark:border-gray-800">
-            <svg class="w-4 h-4 text-[#E63946]" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-            </svg>
-            <h3 class="text-xs font-black uppercase tracking-widest text-gray-700 dark:text-gray-300">ყველაზე კითხვადი</h3>
+        <div class="sidebar-box">
+          <div style="border-bottom:1px solid #222;" class="flex items-center gap-2 mb-5 pb-4">
+            <div style="background:rgba(255,107,0,0.15); border:1px solid rgba(255,107,0,0.3);" class="w-7 h-7 rounded-lg flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" style="color:#FF6B00;" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="text-xs font-black uppercase tracking-widest" style="color:#888;">ყველაზე კითხვადი</span>
           </div>
           <div id="most-read-list" class="space-y-5"></div>
         </div>
 
         <!-- AI Recommendations -->
-        <div class="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/20 dark:to-indigo-950/20 rounded-2xl border border-violet-200 dark:border-violet-900/50 p-5">
-          <div class="flex items-center gap-2 mb-5 pb-3 border-b border-violet-200 dark:border-violet-900/50">
-            <div class="w-5 h-5 bg-violet-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <div class="sidebar-box" style="background:linear-gradient(135deg, #100800, #0d0a14); border-color:#2a1e00;">
+          <div style="border-bottom:1px solid #2a1e00;" class="flex items-center gap-2 mb-5 pb-4">
+            <div style="background:linear-gradient(135deg,#FF6B00,#FF8C35);" class="w-7 h-7 rounded-lg flex items-center justify-center glow-orange-sm">
+              <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.001z"/>
               </svg>
             </div>
-            <h3 class="text-xs font-black uppercase tracking-widest text-violet-700 dark:text-violet-400">AI-ის რეკომენდაცია</h3>
+            <span class="text-xs font-black uppercase tracking-widest" style="color:#FF8C35;">AI-ის რეკომენდაცია</span>
           </div>
           <div id="ai-recommendations" class="space-y-4"></div>
         </div>
 
         <!-- Category Stats -->
-        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-          <h3 class="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">კატეგორიები</h3>
+        <div class="sidebar-box">
+          <h3 class="text-xs font-black uppercase tracking-widest mb-4 pb-3" style="color:#555; border-bottom:1px solid #1e1e1e;">კატეგორიები</h3>
           <div id="category-stats" class="space-y-3"></div>
         </div>
 
@@ -251,44 +350,44 @@
     </div>
   </main>
 
-  <!-- ══════════════════════════════════════
+  <!-- ══════════════════════════════
        FOOTER
-  ══════════════════════════════════════ -->
-  <footer class="bg-gray-900 dark:bg-black mt-12 text-gray-400">
+  ══════════════════════════════ -->
+  <footer style="background:#080808; border-top:1px solid #1a1a1a;" class="mt-12">
     <div class="max-w-7xl mx-auto px-4 py-10">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-5">
         <div>
-          <div class="flex items-center gap-2 mb-1">
-            <div class="w-8 h-8 bg-[#E63946] rounded-md flex items-center justify-center">
+          <div class="flex items-center gap-3 mb-2">
+            <div style="background:linear-gradient(135deg,#FF6B00,#FF8C35);" class="w-9 h-9 rounded-lg flex items-center justify-center">
               <span class="text-white font-black text-sm">UN</span>
             </div>
-            <span class="text-white font-black text-lg">Unicraft <span class="text-[#E63946]">News</span></span>
+            <span class="text-white font-black text-lg">Unicraft <span style="color:#FF6B00;">News</span></span>
           </div>
-          <p class="text-xs mt-1">© 2025 Unicraft News. ყველა უფლება დაცულია.</p>
+          <p class="text-xs" style="color:#444;">© 2025 Unicraft News. ყველა უფლება დაცულია.</p>
         </div>
-        <p class="text-xs text-gray-600">Powered by AI &bull; Built with Tailwind CSS &bull; FiraGO Font</p>
+        <p class="text-xs" style="color:#333;">Powered by AI &bull; unicraft.ge</p>
       </div>
     </div>
   </footer>
 
-  <!-- ══════════════════════════════════════
+  <!-- ══════════════════════════════
        ARTICLE MODAL
-  ══════════════════════════════════════ -->
-  <div id="article-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/60 p-4"
+  ══════════════════════════════ -->
+  <div id="article-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4" style="background:rgba(0,0,0,0.85);"
        onclick="if(event.target===this) closeModal()">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div style="background:#141414; border:1px solid #2a2a2a;" class="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <div id="modal-content"></div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════
+  <!-- ══════════════════════════════
        JAVASCRIPT
-  ══════════════════════════════════════ -->
+  ══════════════════════════════ -->
   <script>
-  // ════════════════════════════════════════
-  // DATA — Replace this array with AI-generated JSON
-  // Each object: { id, title, description, image, category, date, readTime, views, featured, aiScore }
-  // ════════════════════════════════════════
+  // ════════════════════════
+  // NEWS DATA
+  // Replace with AI-generated JSON — same structure
+  // ════════════════════════
   const newsData = [
     {
       id: 1,
@@ -341,7 +440,7 @@
     {
       id: 5,
       title: "OpenAI ChatGPT-5 — ახალი ეპოქა: ვებ-ძიება, ვიდეო, კოდი ერთ ადგილას",
-      description: "GPT-5 გამოირჩევა multimodal შესაძლებლობებით — ახლა real-time ვებ-ძიება, სურათების გენერაცია და კოდის დაბაგვა ერთ ინტერფეისში ხდება. Pro გამომწერებისთვის უკვე ხელმისაწვდომია.",
+      description: "GPT-5 გამოირჩევა multimodal შესაძლებლობებით — ახლა real-time ვებ-ძიება, სურათების გენერაცია და კოდის დაბაგვა ერთ ინტერფეისში ხდება.",
       image: "https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=700&q=80",
       category: "tech",
       date: "20 მარტი, 2025",
@@ -353,7 +452,7 @@
     {
       id: 6,
       title: "საქართველოს GDP 8.2%-ით გაიზარდა — ისტორიული მაქსიმუმი",
-      description: "საქართველოს სტატისტიკის ეროვნული სამსახურის მონაცემებით, ეკონომიკური ზრდის მამოძრავებელი ძალა ტურიზმი და IT სექტორია. მშპ-ის ზრდა 2015 წლის შემდეგ ყველაზე მაღალია.",
+      description: "საქართველოს სტატისტიკის ეროვნული სამსახურის მონაცემებით, ეკონომიკური ზრდის მამოძრავებელი ძალა ტურიზმი და IT სექტორია.",
       image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=700&q=80",
       category: "business",
       date: "20 მარტი, 2025",
@@ -365,7 +464,7 @@
     {
       id: 7,
       title: "IBM-მა 1,000-კუბიტიანი პროცესორით კვანტური უპირატესობა დაამტკიცა",
-      description: "IBM-ის Heron r3 პროცესორმა კლასიკური სუპერკომპიუტერებისთვის 10,000 წლის საჭირო გამოთვლა 3 წამში შეასრულა. ეს ნიშნავს, რომ კვანტური კომპიუტინგი პრაქტიკულ ეტაპს აღწევს.",
+      description: "IBM-ის Heron r3 პროცესორმა კლასიკური სუპერკომპიუტერებისთვის 10,000 წლის საჭირო გამოთვლა 3 წამში შეასრულა.",
       image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=700&q=80",
       category: "science",
       date: "19 მარტი, 2025",
@@ -377,7 +476,7 @@
     {
       id: 8,
       title: "SpaceX Starship — მეოთხე ტესტი წარმატებულია: სრული ორბიტა და ოკეანეში დაშვება",
-      description: "Elon Musk-ის Starship-მა პირველად წარმატებით შეასრულა სრული ორბიტალური ტური. Booster-ი ჩამოიჭერა სამსხდომი კოშკური მანიპულატორებით, Super Heavy კი Mexiko-ს ყურეში ჩავიდა.",
+      description: "Elon Musk-ის Starship-მა პირველად წარმატებით შეასრულა სრული ორბიტალური ტური. Booster-ი ჩამოიჭერა სამსხდომი კოშკური მანიპულატორებით.",
       image: "https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?w=700&q=80",
       category: "science",
       date: "19 მარტი, 2025",
@@ -412,91 +511,83 @@
     }
   ];
 
-  // ════════════════════════════════════════
+  // ════════════════════════
   // CATEGORY CONFIG
-  // ════════════════════════════════════════
+  // ════════════════════════
   const CAT = {
-    tech:     { label: 'ტექნოლოგიები', badge: 'bg-blue-500',    bar: 'bg-blue-500',    text: 'text-blue-600 dark:text-blue-400' },
-    business: { label: 'ბიზნესი',       badge: 'bg-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
-    world:    { label: 'მსოფლიო',       badge: 'bg-purple-500',  bar: 'bg-purple-500',  text: 'text-purple-600 dark:text-purple-400' },
-    science:  { label: 'მეცნიერება',    badge: 'bg-amber-500',   bar: 'bg-amber-500',   text: 'text-amber-600 dark:text-amber-400' }
+    tech:     { label: 'ტექნოლოგიები', badgeClass: 'badge-tech',     bar: '#3b82f6' },
+    business: { label: 'ბიზნესი',       badgeClass: 'badge-business', bar: '#10b981' },
+    world:    { label: 'მსოფლიო',       badgeClass: 'badge-world',    bar: '#8b5cf6' },
+    science:  { label: 'მეცნიერება',    badgeClass: 'badge-science',  bar: '#FF6B00' }
   };
 
-  let currentCategory = 'all';
   let mobileOpen = false;
+  let searchOpen = false;
 
-  // ════════════════════════════════════════
+  // ════════════════════════
   // HELPERS
-  // ════════════════════════════════════════
+  // ════════════════════════
   function badge(cat) {
-    const c = CAT[cat];
-    return `<span class="${c.badge} text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide">${c.label}</span>`;
+    return `<span class="badge ${CAT[cat].badgeClass}">${CAT[cat].label}</span>`;
   }
+  function fmtViews(n) { return n >= 1000 ? (n/1000).toFixed(1)+'K' : n; }
 
-  function fmtViews(n) {
-    return n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n;
-  }
-
-  // ════════════════════════════════════════
+  // ════════════════════════
   // RENDER: FEATURED
-  // ════════════════════════════════════════
-  function renderFeatured(article) {
+  // ════════════════════════
+  function renderFeatured(a) {
     document.getElementById('featured-story').innerHTML = `
-      <article class="news-card rounded-2xl overflow-hidden cursor-pointer relative group" onclick="openArticle(${article.id})">
-        <img src="${article.image}" alt="${article.title}"
-             class="w-full h-72 md:h-[420px] object-cover group-hover:scale-[1.02] transition-transform duration-500">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+      <article class="card img-zoom cursor-pointer overflow-hidden relative group rounded-2xl" onclick="openArticle(${a.id})">
+        <img src="${a.image}" alt="${a.title}" class="w-full h-72 md:h-[440px] object-cover">
+        <div style="background:linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);" class="absolute inset-0"></div>
+        <!-- Orange accent line top -->
+        <div style="background:linear-gradient(90deg,#FF6B00,transparent); height:3px;" class="absolute top-0 left-0 right-0"></div>
         <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
           <div class="flex items-center flex-wrap gap-2 mb-3">
-            ${badge(article.category)}
-            <span class="text-gray-300 text-xs">${article.date} &bull; ${article.readTime} კითხვა</span>
+            ${badge(a.category)}
+            <span class="text-xs" style="color:#888;">${a.date} &bull; ${a.readTime} კითხვა</span>
           </div>
-          <h1 class="text-white text-xl sm:text-2xl md:text-3xl font-black leading-tight mb-2 max-w-3xl">${article.title}</h1>
-          <p class="text-gray-300 text-sm clamp-2 max-w-2xl">${article.description}</p>
-          <div class="flex items-center gap-4 mt-4 text-xs text-gray-400">
+          <h1 class="text-white font-black text-xl sm:text-2xl md:text-3xl leading-tight mb-3 max-w-3xl">${a.title}</h1>
+          <p class="text-sm clamp-2 max-w-2xl" style="color:#aaa;">${a.description}</p>
+          <div class="flex items-center gap-4 mt-4 text-xs" style="color:#666;">
             <span class="flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
-              ${article.views.toLocaleString()}
+              ${a.views.toLocaleString()}
             </span>
-            <span class="text-emerald-400 font-semibold">✦ AI Score: ${article.aiScore}%</span>
+            <span style="color:#FF8C35;" class="font-bold">✦ AI ${a.aiScore}%</span>
           </div>
         </div>
       </article>
     `;
   }
 
-  // ════════════════════════════════════════
-  // RENDER: NEWS GRID
-  // ════════════════════════════════════════
+  // ════════════════════════
+  // RENDER: GRID
+  // ════════════════════════
   function renderGrid(articles) {
     const grid = document.getElementById('news-grid');
     const empty = document.getElementById('no-results');
     if (!articles.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
     grid.innerHTML = articles.map(a => `
-      <article class="news-card bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 cursor-pointer flex flex-col"
-               onclick="openArticle(${a.id})">
-        <div class="relative overflow-hidden">
-          <img src="${a.image}" alt="${a.title}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-500">
+      <article class="card img-zoom cursor-pointer flex flex-col overflow-hidden rounded-xl" onclick="openArticle(${a.id})">
+        <div class="relative">
+          <img src="${a.image}" alt="${a.title}" class="w-full h-48 object-cover">
+          <!-- Orange top line on hover via card -->
+          <div style="background:linear-gradient(to bottom,rgba(0,0,0,0.4),transparent); height:60px;" class="absolute top-0 left-0 right-0"></div>
           <div class="absolute top-3 left-3">${badge(a.category)}</div>
         </div>
         <div class="p-4 flex flex-col flex-1">
-          <h3 class="font-bold text-gray-900 dark:text-white text-sm leading-snug mb-2 clamp-3 flex-1">${a.title}</h3>
-          <p class="text-gray-500 dark:text-gray-400 text-xs clamp-2 mb-3">${a.description}</p>
-          <div class="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 pt-3 border-t border-gray-100 dark:border-gray-800">
+          <h3 class="font-bold text-sm leading-snug clamp-3 flex-1 mb-2" style="color:#e8e8e8;">${a.title}</h3>
+          <p class="text-xs clamp-2 mb-3" style="color:#555;">${a.description}</p>
+          <div class="flex items-center justify-between text-xs pt-3" style="color:#444; border-top:1px solid #1e1e1e;">
             <span>${a.date}</span>
             <div class="flex items-center gap-2">
-              <span class="flex items-center gap-1">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                ${fmtViews(a.views)}
-              </span>
-              <span>${a.readTime}</span>
+              <span>${fmtViews(a.views)}</span>
+              <span style="color:#FF6B00; font-weight:700;">${a.readTime}</span>
             </div>
           </div>
         </div>
@@ -504,120 +595,137 @@
     `).join('');
   }
 
-  // ════════════════════════════════════════
+  // ════════════════════════
   // RENDER: MOST READ
-  // ════════════════════════════════════════
+  // ════════════════════════
   function renderMostRead() {
-    const sorted = [...newsData].sort((a, b) => b.views - a.views).slice(0, 5);
-    document.getElementById('most-read-list').innerHTML = sorted.map((a, i) => `
+    const sorted = [...newsData].sort((a,b) => b.views - a.views).slice(0,5);
+    document.getElementById('most-read-list').innerHTML = sorted.map((a,i) => `
       <div class="flex items-start gap-3 cursor-pointer group" onclick="openArticle(${a.id})">
-        <span class="font-black text-3xl leading-none w-7 flex-shrink-0 ${i === 0 ? 'text-[#E63946]' : 'text-gray-200 dark:text-gray-800'}">${i + 1}</span>
+        <span class="font-black text-2xl leading-none w-7 flex-shrink-0" style="color:${i===0?'#FF6B00':'#222'};">${i+1}</span>
         <div>
-          <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 clamp-2 leading-snug group-hover:text-[#E63946] transition-colors">${a.title}</p>
+          <p class="text-sm font-semibold clamp-2 leading-snug transition-colors group-hover:text-orange-400" style="color:#ccc;">${a.title}</p>
           <div class="flex items-center gap-2 mt-1.5">
             ${badge(a.category)}
-            <span class="text-xs text-gray-400">${fmtViews(a.views)} ნახვა</span>
+            <span class="text-xs" style="color:#444;">${fmtViews(a.views)}</span>
           </div>
         </div>
       </div>
     `).join('');
   }
 
-  // ════════════════════════════════════════
-  // RENDER: AI RECOMMENDATIONS
-  // ════════════════════════════════════════
+  // ════════════════════════
+  // RENDER: AI RECS
+  // ════════════════════════
   function renderAI() {
-    const sorted = [...newsData].sort((a, b) => b.aiScore - a.aiScore).slice(0, 4);
+    const sorted = [...newsData].sort((a,b) => b.aiScore - a.aiScore).slice(0,4);
     document.getElementById('ai-recommendations').innerHTML = sorted.map(a => `
       <div class="flex items-start gap-3 cursor-pointer group" onclick="openArticle(${a.id})">
-        <img src="${a.image}" alt="" class="w-14 h-14 rounded-xl object-cover flex-shrink-0">
+        <img src="${a.image}" alt="" class="w-14 h-14 rounded-xl object-cover flex-shrink-0" style="border:1px solid #2a2a2a;">
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 clamp-2 leading-snug group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">${a.title}</p>
+          <p class="text-sm font-semibold clamp-2 leading-snug group-hover:text-orange-400 transition-colors" style="color:#ccc;">${a.title}</p>
           <div class="flex items-center gap-2 mt-2">
-            <div class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div class="h-full bg-violet-500 rounded-full" style="width:${a.aiScore}%"></div>
+            <div style="flex:1; height:4px; background:#1e1e1e; border-radius:2px; overflow:hidden;">
+              <div class="ai-bar h-full rounded-full" style="width:${a.aiScore}%;"></div>
             </div>
-            <span class="text-xs font-bold text-violet-600 dark:text-violet-400 flex-shrink-0">${a.aiScore}%</span>
+            <span class="text-xs font-black flex-shrink-0" style="color:#FF8C35;">${a.aiScore}%</span>
           </div>
         </div>
       </div>
     `).join('');
   }
 
-  // ════════════════════════════════════════
-  // RENDER: CATEGORY STATS
-  // ════════════════════════════════════════
+  // ════════════════════════
+  // RENDER: CAT STATS
+  // ════════════════════════
   function renderCatStats() {
     const stats = {};
-    newsData.forEach(a => { stats[a.category] = (stats[a.category] || 0) + 1; });
+    newsData.forEach(a => { stats[a.category] = (stats[a.category]||0)+1; });
     const total = newsData.length;
-    document.getElementById('category-stats').innerHTML = Object.entries(stats).map(([cat, count]) => {
+    document.getElementById('category-stats').innerHTML = Object.entries(stats).map(([cat,count]) => {
       const c = CAT[cat];
-      const pct = Math.round((count / total) * 100);
+      const pct = Math.round((count/total)*100);
       return `
         <div class="cursor-pointer group" onclick="filterCategory('${cat}')">
           <div class="flex justify-between items-center text-sm mb-1.5">
-            <span class="font-semibold text-gray-700 dark:text-gray-300 group-hover:${c.text.split(' ')[0]} transition-colors">${c.label}</span>
-            <span class="text-xs text-gray-400">${count}</span>
+            <span class="font-semibold group-hover:text-orange-400 transition-colors" style="color:#888;">${c.label}</span>
+            <span class="text-xs font-bold" style="color:#444;">${count}</span>
           </div>
-          <div class="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div class="${c.bar} h-full rounded-full transition-all duration-700" style="width:${pct}%"></div>
+          <div style="height:3px; background:#1e1e1e; border-radius:2px; overflow:hidden;">
+            <div style="width:${pct}%; height:100%; background:${c.bar}; border-radius:2px; transition:width 0.7s ease;"></div>
           </div>
         </div>
       `;
     }).join('');
   }
 
-  // ════════════════════════════════════════
+  // ════════════════════════
   // RENDER: TICKER
-  // ════════════════════════════════════════
+  // ════════════════════════
   function renderTicker() {
-    const items = newsData.slice(0, 7).map(a => `<span class="mx-10">&bull; ${a.title}</span>`).join('');
-    document.getElementById('ticker-track').innerHTML = items + items; // duplicate for seamless loop
+    const items = newsData.slice(0,7).map(a => `<span class="mx-10">&bull; ${a.title}</span>`).join('');
+    document.getElementById('ticker-track').innerHTML = items + items;
   }
 
-  // ════════════════════════════════════════
-  // FILTER BY CATEGORY
-  // ════════════════════════════════════════
+  // ════════════════════════
+  // FILTER
+  // ════════════════════════
   function filterCategory(cat) {
-    currentCategory = cat;
-
-    // Update desktop nav
     document.querySelectorAll('.nav-link').forEach(el => {
-      el.classList.remove('text-[#E63946]', 'bg-red-50', 'dark:bg-red-950/20');
-      if (el.dataset.cat === cat) el.classList.add('text-[#E63946]', 'bg-red-50', 'dark:bg-red-950/20');
+      el.classList.remove('active');
+      if (el.dataset.cat === cat) el.classList.add('active');
     });
-
     const featured = newsData.find(a => a.featured);
-    const featuredSec = document.getElementById('featured-section');
-    const gridTitle = document.getElementById('grid-title');
-
+    const fs = document.getElementById('featured-section');
+    const gt = document.getElementById('grid-title');
     if (cat === 'all') {
-      featuredSec.classList.remove('hidden');
-      gridTitle.textContent = 'უახლესი სიახლეები';
+      fs.classList.remove('hidden');
+      gt.textContent = 'უახლესი სიახლეები';
       renderFeatured(featured);
       renderGrid(newsData.filter(a => !a.featured));
     } else {
-      featuredSec.classList.add('hidden');
-      gridTitle.textContent = CAT[cat]?.label || '';
+      fs.classList.add('hidden');
+      gt.textContent = CAT[cat]?.label || '';
       renderGrid(newsData.filter(a => a.category === cat));
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ════════════════════════════════════════
-  // OPEN ARTICLE MODAL
-  // ════════════════════════════════════════
+  // ════════════════════════
+  // SEARCH
+  // ════════════════════════
+  function toggleSearch() {
+    searchOpen = !searchOpen;
+    const bar = document.getElementById('search-bar');
+    bar.classList.toggle('hidden', !searchOpen);
+    if (searchOpen) document.getElementById('search-input').focus();
+  }
+
+  function searchNews(query) {
+    const q = query.toLowerCase().trim();
+    if (!q) { filterCategory('all'); return; }
+    const results = newsData.filter(a =>
+      a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)
+    );
+    document.getElementById('featured-section').classList.add('hidden');
+    document.getElementById('grid-title').textContent = `ძიება: "${query}"`;
+    renderGrid(results);
+  }
+
+  // ════════════════════════
+  // OPEN ARTICLE
+  // ════════════════════════
   function openArticle(id) {
     const a = newsData.find(x => x.id === id);
     if (!a) return;
     a.views++;
-
     document.getElementById('modal-content').innerHTML = `
-      <div class="relative">
-        <img src="${a.image}" alt="${a.title}" class="w-full h-56 sm:h-72 object-cover rounded-t-2xl">
-        <button onclick="closeModal()"
-          class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors">
+      <div class="relative img-zoom overflow-hidden rounded-t-2xl">
+        <img src="${a.image}" alt="${a.title}" class="w-full h-56 sm:h-72 object-cover">
+        <div style="background:linear-gradient(to bottom,transparent,rgba(0,0,0,0.7)); height:80px;" class="absolute bottom-0 left-0 right-0"></div>
+        <div style="background:linear-gradient(90deg,#FF6B00,transparent); height:3px;" class="absolute top-0 left-0 right-0"></div>
+        <button onclick="closeModal()" style="background:rgba(0,0,0,0.6); border:1px solid #333;"
+          class="absolute top-3 right-3 w-9 h-9 rounded-full text-white flex items-center justify-center hover:bg-black transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -626,31 +734,25 @@
       <div class="p-6 sm:p-8">
         <div class="flex flex-wrap items-center gap-2 mb-4">
           ${badge(a.category)}
-          <span class="text-gray-500 dark:text-gray-400 text-sm">${a.date}</span>
-          <span class="text-gray-400 text-sm">&bull; ${a.readTime} კითხვა</span>
-          <span class="text-emerald-500 text-sm font-semibold">✦ AI Score: ${a.aiScore}%</span>
+          <span class="text-sm" style="color:#555;">${a.date}</span>
+          <span class="text-sm" style="color:#444;">&bull; ${a.readTime} კითხვა</span>
+          <span class="text-sm font-bold" style="color:#FF8C35;">✦ AI ${a.aiScore}%</span>
         </div>
-        <h1 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white leading-tight mb-5">${a.title}</h1>
-        <p class="text-gray-600 dark:text-gray-300 leading-relaxed text-base">${a.description}</p>
-        <p class="mt-4 text-sm text-gray-400 dark:text-gray-500 italic">
-          სტატია AI-ის მიერ გენერირებული კონტენტია. სრული ვერსია მალე დაემატება.
-        </p>
-        <div class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <span class="text-sm text-gray-400 flex items-center gap-1.5">
+        <h1 class="font-black text-xl sm:text-2xl leading-tight mb-5" style="color:#f0f0f0;">${a.title}</h1>
+        <p class="leading-relaxed" style="color:#999;">${a.description}</p>
+        <p class="mt-4 text-sm italic" style="color:#444;">სტატია AI-ის მიერ გენერირებული კონტენტია. სრული ვერსია მალე დაემატება.</p>
+        <div class="flex items-center justify-between mt-6 pt-5" style="border-top:1px solid #222;">
+          <span class="text-sm flex items-center gap-1.5" style="color:#444;">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
             ${a.views.toLocaleString()} ნახვა
           </span>
-          <button onclick="closeModal()"
-            class="px-6 py-2 bg-[#E63946] text-white rounded-xl text-sm font-bold hover:bg-[#c1121f] transition-colors">
-            დახურვა
-          </button>
+          <button onclick="closeModal()" class="btn-orange">დახურვა</button>
         </div>
       </div>
     `;
-
     const modal = document.getElementById('article-modal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -658,53 +760,40 @@
   }
 
   function closeModal() {
-    const modal = document.getElementById('article-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    document.getElementById('article-modal').classList.add('hidden');
+    document.getElementById('article-modal').classList.remove('flex');
     document.body.style.overflow = '';
   }
 
-  // ESC key closes modal
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  // ════════════════════════════════════════
-  // DARK MODE
-  // ════════════════════════════════════════
-  function toggleDarkMode() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeIcons(isDark);
-  }
-
-  function updateThemeIcons(isDark) {
-    document.getElementById('icon-moon').classList.toggle('hidden', isDark);
-    document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
-  }
-
-  // ════════════════════════════════════════
+  // ════════════════════════
   // MOBILE MENU
-  // ════════════════════════════════════════
+  // ════════════════════════
   function toggleMobileMenu() {
     mobileOpen = !mobileOpen;
     const menu = document.getElementById('mobile-menu');
     menu.style.maxHeight = mobileOpen ? '300px' : '0';
     menu.style.opacity = mobileOpen ? '1' : '0';
     document.getElementById('icon-ham').classList.toggle('hidden', mobileOpen);
-    document.getElementById('icon-close').classList.toggle('hidden', !mobileOpen);
+    document.getElementById('icon-x').classList.toggle('hidden', !mobileOpen);
   }
 
-  // ════════════════════════════════════════
-  // INIT
-  // ════════════════════════════════════════
-  function init() {
-    // Theme
-    const saved = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = saved === 'dark' || (!saved && prefersDark);
-    if (isDark) document.documentElement.classList.add('dark');
-    updateThemeIcons(isDark);
+  // ════════════════════════
+  // DATE
+  // ════════════════════════
+  function setDate() {
+    const months = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+    const d = new Date();
+    document.getElementById('current-date').textContent =
+      `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
+  }
 
-    // Render all sections
+  // ════════════════════════
+  // INIT
+  // ════════════════════════
+  function init() {
+    setDate();
     const featured = newsData.find(a => a.featured) || newsData[0];
     renderFeatured(featured);
     renderGrid(newsData.filter(a => !a.featured));
@@ -712,9 +801,6 @@
     renderAI();
     renderCatStats();
     renderTicker();
-
-    // Active nav
-    document.querySelector('[data-cat="all"]')?.classList.add('text-[#E63946]', 'bg-red-50', 'dark:bg-red-950/20');
   }
 
   document.addEventListener('DOMContentLoaded', init);
