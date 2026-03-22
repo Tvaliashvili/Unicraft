@@ -1,0 +1,105 @@
+html { font-size: clamp(16px, 1.25vw, 28px); }
+body { font-family: 'Noto Sans Georgian', sans-serif; }
+.font-display { font-family: 'Bebas Neue', sans-serif; }
+.hero-stripe {
+  background: repeating-linear-gradient(90deg,#E8541A 0,#E8541A 40px,transparent 40px,transparent 50px);
+  height: 3px;
+}
+.card-hover { transition: transform .2s, box-shadow .2s; }
+.card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
+.card-hover:hover .card-top-bar { transform: scaleX(1); }
+.card-top-bar { transition: transform .25s; transform: scaleX(0); transform-origin: left; }
+.drawer-enter { transform: translateX(0) !important; }
+.overlay-enter { opacity: 1 !important; pointer-events: all !important; }
+.toast-show { transform: translateX(-50%) translateY(0) !important; }
+.modal-enter { opacity: 1 !important; pointer-events: all !important; }
+.modal-enter .modal-box { transform: translateY(0) !important; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* ── Trust bar: single column on mobile ── */
+@media (max-width: 767px) {
+  .trust-bar-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 767px) {
+  /* Cart drawer full width on mobile */
+  #cartDrawer { width: 100% !important; }
+
+  /* Order modal full screen on mobile */
+  #orderModal { padding: 0; align-items: flex-end; }
+  #orderModal .modal-box { border-radius: 16px 16px 0 0; max-height: 92vh; overflow-y: auto; overflow-x: hidden; }
+
+  /* Footer stacked */
+  .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+
+  /* Sync both search inputs */
+  #searchInput { display: none; }
+
+  /* Chat panel full width on mobile */
+  #chatPanel { width: calc(100vw - 40px) !important; }
+
+  /* Sidebar filter: hide on mobile (uses mobile drawer) */
+  aside { display: none !important; }
+
+  /* Prevent iOS auto-zoom on inputs (must be ≥16px) */
+  #mobilePriceMin, #mobilePriceMax,
+  #searchInputMobile,
+  #chatNameInput, #chatPhoneInput, #chatMsgInput { font-size: 16px !important; }
+}
+
+@media (max-width: 600px) {
+  /* Invoice: reduce side padding */
+  #orderFormWrap .inv-px { padding-left: 1rem !important; padding-right: 1rem !important; }
+
+  /* Invoice header: smaller logo & number */
+  #orderFormWrap .font-display.text-3xl { font-size: 1.4rem !important; }
+  #orderFormWrap #invoiceNo { font-size: 0.9rem !important; word-break: break-all; }
+
+  /* Seller/buyer: stack vertically */
+  #orderFormWrap .flex.border-b { flex-direction: column; }
+  #orderFormWrap .flex.border-b > div {
+    border-right: none !important;
+    border-bottom: 1px solid #E8E2DC;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  #orderFormWrap .flex.border-b > div:last-child { border-bottom: none; }
+
+  /* IBAN wrap */
+  #orderFormWrap .font-mono { word-break: break-all; font-size: 0.75rem; }
+
+  /* Products table: reduce padding, remove fixed widths */
+  #orderFormWrap table { font-size: 0.75rem; }
+  #orderFormWrap table th, #orderFormWrap table td { padding: 6px 3px; }
+  #orderFormWrap table th.w-24, #orderFormWrap table td:nth-child(3) { width: auto; }
+  #orderFormWrap table th.w-16, #orderFormWrap table td:nth-child(2) { width: auto; }
+  /* Hide unit-price column on very small screens, keep total */
+  #orderFormWrap table th:nth-child(3),
+  #orderFormWrap table td:nth-child(3) { display: none; }
+  #orderFormWrap table td:nth-child(4) { white-space: nowrap; }
+
+  /* Products section padding */
+  #orderFormWrap .px-7 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  #orderFormWrap .mx-7 { margin-left: 1rem !important; margin-right: 1rem !important; }
+
+  /* Total row */
+  #orderFormWrap tfoot td { font-size: 0.75rem; }
+
+  /* Actions: wrap to two rows */
+  #orderFormWrap .flex.items-center.gap-3 {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  #orderFormWrap .flex.items-center.gap-3 button.flex-1 { order: -1; width: 100%; }
+  #orderFormWrap .flex.items-center.gap-3 #submitBtn,
+  #orderFormWrap .flex.items-center.gap-3 button:last-child { flex: 1; }
+}
+
+/* 320px — very small screens */
+@media (max-width: 400px) {
+  /* Card bottom: stack price above button */
+  .card-bottom { flex-direction: column !important; align-items: flex-start !important; gap: 10px; }
+  .card-bottom button { width: 100%; justify-content: center; }
+}
