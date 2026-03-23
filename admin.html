@@ -1449,9 +1449,10 @@ window.addProduct = async function() {
       catch(imgErr) { showToast('ფოტო ვერ აიტვირთა — ემატება ფოტოს გარეშე', 'error'); }
     }
     const code = await genProductCode();
+    const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
     const { error } = await supabase.from('products').insert({
       name,
-      category: _currentProdType,
+      category: TYPE_LABELS[_currentProdType] || _currentProdType,
       product_type: _currentProdType,
       specs,
       country: document.getElementById('prodCountry').value || null,

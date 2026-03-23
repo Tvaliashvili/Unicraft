@@ -540,7 +540,6 @@ function renderProduct() {
   const meta = document.getElementById('productMeta');
   const rows = [
     product.code ? ['კოდი', product.code] : null,
-    product.country ? ['ქვეყანა', `${flagImg(product.country,18)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`] : null,
     product.stock ? ['მარაგი', product.stock + ' ც'] : null,
   ].filter(Boolean);
   meta.innerHTML = rows.map(([k,v]) => `
@@ -562,16 +561,19 @@ function renderProduct() {
       if (specs.rim)     specsRows.push(['დიამეტრი', specs.rim]);
     }
     if (specs.season)       specsRows.push(['სეზონი', specs.season]);
+    if (product.country)    specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
     if (specs.vehicle_type) specsRows.push(['ავტომობ. ტიპი', specs.vehicle_type]);
   } else if (type === 'oil') {
     if (specs.oil_type)    specsRows.push(['ტიპი', specs.oil_type]);
     if (specs.viscosity)   specsRows.push(['სიბლანტე', specs.viscosity]);
     if (specs.volume)      specsRows.push(['მოცულობა', specs.volume]);
     if (specs.application) specsRows.push(['დანიშნულება', specs.application]);
+    if (product.country)   specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
   } else if (type === 'filter') {
     if (specs.filter_type) specsRows.push(['ფილტრის ტიპი', specs.filter_type]);
     if (specs.oem)         specsRows.push(['OEM ნომერი', specs.oem]);
     if (specs.car_make)    specsRows.push(['ავტომობ. მარკა', specs.car_make]);
+    if (product.country)   specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
   }
   const specsEl = document.getElementById('productSpecs');
   if (specsEl) {
