@@ -22,7 +22,7 @@ serve(async (req) => {
 
     const offHoursNote = is_working_hours
       ? `If the customer needs a live operator (order issue, return, special discount) — set suggest_human: true in JSON.`
-      : `It is currently outside working hours (09:00-20:00 Tbilisi time). If a live operator is needed, tell the customer in Georgian: "სამუშაო საათებია 09:00–20:00. ამ დროს მოგვწერე და ოპერატორი დაგეხმარება." Set suggest_human: false.`;
+      : `It is currently outside working hours (09:00-20:00 Tbilisi time). If a live operator is needed, tell the customer EXACTLY this in Georgian: "იმისათვის, რომ შევძლო თქვენი ოპერატორთან დაკავშირება, გთხოვთ მოგვწეროთ სამუშაო საათებში 09:00–20:00." Set suggest_human: false.`;
 
     const systemPrompt = `You are the AI assistant for UniCraft — a Georgian auto parts store selling tires, oils, and filters.
 Customer name: ${customer_name || "მომხმარებელი"}.
