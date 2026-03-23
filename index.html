@@ -333,6 +333,7 @@ tailwind.config = {
     <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">კატეგორია</div>
     <div id="mobileFilterCats" class="flex flex-col gap-0 mt-1"></div>
   </div>
+  <div id="mobileFilterSpecs"></div>
   <div>
     <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">ფასი</div>
     <div class="flex items-end gap-2 mt-1">
@@ -364,6 +365,9 @@ tailwind.config = {
       <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">კატეგორია</div>
       <div id="sidebarCats" class="flex flex-col gap-0"></div>
     </div>
+
+    <!-- Spec filters -->
+    <div id="sidebarSpecs"></div>
 
     <!-- Price -->
     <div class="pb-6">
@@ -735,10 +739,84 @@ let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
 document.getElementById('cartCount').textContent = cart.length;
 let activeCategory = '';
 let activePrice = null;
+let activeSpecs = {};
 let searchQ = '';
 let filteredProducts = [];
 let currentPage = 1;
 const PAGE_SIZE = 40;
+
+const SPEC_LABELS = {
+  brand:'ბრენდი', season:'სეზონი', width:'სიგანე', profile:'პროფილი', rim:'დიამეტრი',
+  vehicle_type:'ავტომ. ტიპი', oil_type:'ტიპი', viscosity:'სიბლანტე', volume:'მოცულობა',
+  application:'დანიშნულება', filter_type:'ფილტრის ტიპი', car_make:'ავტომ. მარკა'
+};
+const TIRE_SPECS   = ['brand','season','width','profile','rim','vehicle_type'];
+const OIL_SPECS    = ['brand','oil_type','viscosity','volume','application'];
+const FILTER_SPECS = ['brand','filter_type','car_make'];
+
+function getSpecKeys(cat) {
+  if (cat === 'tire') return TIRE_SPECS;
+  if (cat === 'oil') return OIL_SPECS;
+  if (cat === 'filter') return FILTER_SPECS;
+  return [...new Set([...TIRE_SPECS,...OIL_SPECS,...FILTER_SPECS])];
+}
+
+function buildSpecFilterHTML(prods, cat, isMobile) {
+  const keys = getSpecKeys(cat);
+  const idSuffix = isMobile ? '_m' : '';
+  let html = '';
+  keys.forEach(key => {
+    const vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
+    if (vals.length < 2) return;
+    const sel = activeSpecs[key] || '';
+    html += `<div class="mb-4">
+      <div class="text-[10px] font-bold tracking-[2px] text-gray-500 uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
+      <select onchange="setSpecFilter('${key}',this.value)" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-600 outline-none focus:border-orange bg-white">
+        <option value="">ყველა</option>
+        ${vals.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
+      </select>
+    </div>`;
+  });
+  if (!html) return '';
+  return `<div class="mb-4 pt-1">
+    <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">ფილტრი</div>
+    ${html}
+  </div>`;
+}
+
+window.setSpecFilter = function(key, val) {
+  if (val) activeSpecs[key] = val; else delete activeSpecs[key];
+  applyFilters();
+  // re-render spec filters to keep selects in sync
+  const prods = allProducts.filter(p => !activeCategory || p.category === activeCategory);
+  const d = document.getElementById('sidebarSpecs');
+  if (d) d.innerHTML = buildSpecFilterHTML(prods, activeCategory, false);
+  const m = document.getElementById('mobileFilterSpecs');
+  if (m) m.innerHTML = buildSpecFilterHTML(prods, activeCategory, true);
+};
+
+function getCardSpecs(p) {
+  const s = p.specs;
+  if (!s) return '';
+  const type = p.product_type || p.category;
+  const rows = [];
+  if (s.brand) rows.push(['ბრენდი', s.brand]);
+  if (type === 'tire') {
+    if (s.width && s.profile && s.rim) rows.push(['ზომა', `${s.width}/${s.profile} ${s.rim}`]);
+    if (s.season) rows.push(['სეზონი', s.season]);
+  } else if (type === 'oil') {
+    if (s.viscosity) rows.push(['სიბლანტე', s.viscosity]);
+    if (s.oil_type)  rows.push(['ტიპი', s.oil_type]);
+  } else if (type === 'filter') {
+    if (s.filter_type) rows.push(['ტიპი', s.filter_type]);
+  }
+  if (!rows.length) return '';
+  return `<div class="mt-1.5 mb-2 space-y-0.5">${rows.map(([k,v])=>`
+    <div class="flex items-center gap-1 text-[11px]">
+      <span class="text-gray-400">${k}:</span>
+      <span class="text-gray-600 font-medium">${v}</span>
+    </div>`).join('')}</div>`;
+}
 
 const MOCK_PRODUCTS = [];
 
@@ -757,6 +835,12 @@ function buildSidebar() {
     </button>`).join('');
   el.innerHTML = allBtn + catBtns;
 
+  // Spec filters
+  const specProds = allProducts.filter(p => !activeCategory || p.category === activeCategory);
+  const specHtml = buildSpecFilterHTML(specProds, activeCategory, false);
+  const sd = document.getElementById('sidebarSpecs');
+  if (sd) sd.innerHTML = specHtml;
+
   // Mobile filter cats
   const mel = document.getElementById('mobileFilterCats');
   if (mel) {
@@ -767,6 +851,9 @@ function buildSidebar() {
       </button>`).join('');
     mel.innerHTML = mAllBtn + mCatBtns;
   }
+  const mSpecHtml = buildSpecFilterHTML(specProds, activeCategory, true);
+  const md = document.getElementById('mobileFilterSpecs');
+  if (md) md.innerHTML = mSpecHtml;
 }
 
 function renderProducts(products) {
@@ -803,6 +890,7 @@ function renderPage() {
       <div class="p-4 flex flex-col flex-1">
         <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
+        ${getCardSpecs(p)}
         <div class="flex-1"></div>
         <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
           <div>
@@ -854,6 +942,9 @@ function applyFilters() {
   if (activeCategory) list = list.filter(p => p.category === activeCategory);
   if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
+  Object.entries(activeSpecs).forEach(([key, val]) => {
+    if (val) list = list.filter(p => p.specs?.[key] === val);
+  });
   renderProducts(list);
 }
 
@@ -870,12 +961,14 @@ window.setCategory = function(el, cat) {
 
 window.setSidebarCat = function(el, cat) {
   activeCategory = cat;
+  activeSpecs = {};
   document.querySelectorAll('.sidebar-cat').forEach(t => {
     t.classList.remove('text-orange','bg-orange-light','border-orange','font-bold');
     t.classList.add('text-gray-500','bg-transparent','border-transparent');
   });
   el.classList.remove('text-gray-500','bg-transparent','border-transparent');
   el.classList.add('text-orange','bg-orange-light','border-orange','font-bold');
+  buildSidebar();
   applyFilters();
 };
 
