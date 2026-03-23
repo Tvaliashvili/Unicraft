@@ -1445,9 +1445,11 @@ window.addProduct = async function() {
     let imageUrl = '';
     if (prodFileData) {
       btn.textContent = 'ფოტო იტვირთება...';
-      imageUrl = await uploadProductImage(prodFileData);
+      try { imageUrl = await uploadProductImage(prodFileData); }
+      catch(imgErr) { showToast('ფოტო ვერ აიტვირთა — ემატება ფოტოს გარეშე', 'error'); }
     }
-    await supabase.from('products').insert({
+    const code = await genProductCode();
+    const { error } = await supabase.from('products').insert({
       name,
       category: _currentProdType,
       product_type: _currentProdType,
@@ -1458,9 +1460,10 @@ window.addProduct = async function() {
       description: getDescValue('prodDescRows'),
       image_url: imageUrl,
       active: false,
-      code: await genProductCode(),
+      code,
       added_by: _me.name || _me.email,
     });
+    if (error) throw new Error(error.message);
     showToast('✓ პროდუქტი დაემატა!', 'success');
     clearForm();
     initApp();
@@ -1472,15 +1475,21 @@ window.addProduct = async function() {
 
 window.clearForm = function() {
   _currentProdType = '';
-  ['prodName','prodPrice','prodBrand','prodCountry','specWidth','specProfile','specRim','specSeason','specVehicleType',
-   'specOilType','specViscosity','specVolume','specOilApp','specFilterType','specOEM','specCarMake']
+  // reset all select/input fields
+  ['prodName','prodPrice','prodBrand','prodCountry','prodUnit',
+   'specWidth','specProfile','specRim','specSeason','specVehicleType',
+   'specOilType','specViscosity','specVolume','specOilApp',
+   'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  renderDescRows('prodDescRows');
   document.getElementById('prodUnit').value = 'ც';
+  // clear textarea
+  const descEl = document.getElementById('prodDescRows');
+  if (descEl) descEl.value = '';
+  // clear photo
   prodFileData = null;
+  ['prodFile','prodFileCamera'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
-  document.getElementById('prodFile').value = '';
-  // reset type buttons
+  // reset type buttons and hide form
   ['tire','oil','filter'].forEach(t => {
     const btn = document.getElementById('typeBtn_' + t);
     if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.background = '#fff'; btn.style.color = 'var(--dark)'; }
