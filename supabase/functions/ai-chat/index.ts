@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GROQ_KEY = Deno.env.get("GROQ_API_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +12,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    if (!GROQ_KEY) {
+      return new Response(JSON.stringify({ reply: "error", suggest_human: false, _debug: "GROQ_API_KEY not set" }), {
+        status: 200, headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
+
     const { messages, is_working_hours, customer_name } = await req.json();
 
     const offHoursNote = is_working_hours
@@ -32,32 +38,30 @@ serve(async (req) => {
 
 ${offHoursNote}
 
-ᲛᲜᲘᲨᲕᲜᲔᲚᲝᲕᲐᲜᲘ: პასუხი ᲛᲮᲝᲚᲝᲓ JSON ფორმატში:
+ᲛᲜᲘᲨᲕᲜᲔᲚᲝᲕᲐᲜᲘ: პასუხი ᲛᲮᲝᲚᲝᲓ JSON ფორმატში, სხვა ტექსტი არ დაამატო:
 {"reply": "შენი პასუხი", "suggest_human": false}`;
 
-    // Convert Claude-format messages to Gemini format
-    const geminiContents = messages.map((m: { role: string; content: string }) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: geminiContents,
-          generationConfig: { maxOutputTokens: 600, temperature: 0.7 },
-        }),
-      }
-    );
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROQ_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+        max_tokens: 600,
+        temperature: 0.7,
+      }),
+    });
 
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    const raw = data.choices?.[0]?.message?.content?.trim() || "";
 
     let parsed;
     try {
