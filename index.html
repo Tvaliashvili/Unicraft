@@ -824,8 +824,8 @@ function getCardSpecs(p) {
   if (!rows.length) return '';
   return `<div class="mt-1.5 mb-2 space-y-0.5">${rows.map(([k,v])=>`
     <div class="flex items-center gap-1 text-[11px]">
-      <span class="text-gray-400">${k}:</span>
-      <span class="text-gray-600 font-medium">${v}</span>
+      <span class="text-gray-500">${k}:</span>
+      <span class="text-dark font-medium">${v}</span>
     </div>`).join('')}</div>`;
 }
 
@@ -901,7 +901,7 @@ function renderPage() {
         <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${catLabel(p.category)}</div>
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
-        ${p.country ? `<div class="flex items-center gap-1.5 mt-1.5"><span class="text-gray-400 text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-gray-600 font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
+        ${p.country ? `<div class="flex items-center gap-1.5 mt-1.5"><span class="text-gray-500 text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
         <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
           <div>
