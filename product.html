@@ -498,7 +498,7 @@ function flagImg(country, size=20) {
   const name = country.split(' ').slice(1).join(' ');
   const code = FLAG_CODES[name];
   if (!code) return '';
-  return `<img src="https://flagcdn.com/w${size}/${code}.png" width="${size}" alt="${name}" style="border-radius:2px;display:inline-block;vertical-align:middle">`;
+  return `<img src="https://flagcdn.com/w40/${code}.png" width="${size}" height="${Math.round(size*0.75)}" alt="${name}" style="border-radius:2px;display:inline-block;vertical-align:middle;object-fit:cover">`;
 }
 
 function renderProduct() {
