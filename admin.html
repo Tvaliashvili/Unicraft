@@ -351,6 +351,33 @@
                 <label class="form-label">ავტომობილის მარკა</label>
                 <input class="form-input" id="specCarMake" placeholder="მაგ: Toyota, BMW">
               </div>
+              <!-- Country -->
+              <div class="form-group">
+                <label class="form-label">წარმოშობის ქვეყანა</label>
+                <select class="form-select" id="prodCountry">
+                  <option value="">ქვეყანა...</option>
+                  <option>🇩🇪 გერმანია</option>
+                  <option>🇫🇷 საფრანგეთი</option>
+                  <option>🇯🇵 იაპონია</option>
+                  <option>🇺🇸 აშშ</option>
+                  <option>🇮🇹 იტალია</option>
+                  <option>🇰🇷 სამხრეთ კორეა</option>
+                  <option>🇬🇧 ბრიტანეთი</option>
+                  <option>🇳🇱 ნიდერლანდი</option>
+                  <option>🇷🇺 რუსეთი</option>
+                  <option>🇨🇳 ჩინეთი</option>
+                  <option>🇹🇷 თურქეთი</option>
+                  <option>🇦🇹 ავსტრია</option>
+                  <option>🇸🇪 შვედეთი</option>
+                  <option>🇨🇿 ჩეხეთი</option>
+                  <option>🇵🇱 პოლონეთი</option>
+                  <option>🇧🇪 ბელგია</option>
+                  <option>🇮🇳 ინდოეთი</option>
+                  <option>🇧🇷 ბრაზილია</option>
+                  <option>🇺🇦 უკრაინა</option>
+                  <option>🇬🇪 საქართველო</option>
+                </select>
+              </div>
               <!-- Price -->
               <div class="form-group">
                 <label class="form-label">ფასი (₾) <span class="required">*</span></label>
@@ -1425,6 +1452,7 @@ window.addProduct = async function() {
       category: _currentProdType,
       product_type: _currentProdType,
       specs,
+      country: document.getElementById('prodCountry').value || null,
       price,
       unit: document.getElementById('prodUnit').value,
       description: getDescValue('prodDescRows'),
@@ -1444,7 +1472,7 @@ window.addProduct = async function() {
 
 window.clearForm = function() {
   _currentProdType = '';
-  ['prodName','prodPrice','prodBrand','specWidth','specProfile','specRim','specSeason','specVehicleType',
+  ['prodName','prodPrice','prodBrand','prodCountry','specWidth','specProfile','specRim','specSeason','specVehicleType',
    'specOilType','specViscosity','specVolume','specOilApp','specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderDescRows('prodDescRows');

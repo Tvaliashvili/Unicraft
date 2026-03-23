@@ -530,6 +530,7 @@ function renderProduct() {
   const rows = [
     product.code ? ['კოდი', product.code] : null,
     ['კატეგორია', product.category],
+    product.country ? ['ქვეყანა', product.country] : null,
     product.stock ? ['მარაგი', product.stock + ' ც'] : null,
   ].filter(Boolean);
   meta.innerHTML = rows.map(([k,v]) => `
