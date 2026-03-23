@@ -960,11 +960,16 @@ window.showPage = function(name) {
 
 // ─── Init ───
 async function initApp() {
-  const d = new Date();
   const _days = ['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
   const _months = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
-  document.getElementById('todayDate').textContent =
-    _days[d.getDay()] + ', ' + d.getDate() + ' ' + _months[d.getMonth()] + ', ' + d.getFullYear();
+  function updateDateTime() {
+    const d = new Date();
+    const dateStr = _days[d.getDay()] + ', ' + d.getDate() + ' ' + _months[d.getMonth()] + ', ' + d.getFullYear();
+    const timeStr = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+    document.getElementById('todayDate').textContent = dateStr + ' · ' + timeStr;
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
 
   loadCategories();
   loadUnits();
