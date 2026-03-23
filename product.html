@@ -181,11 +181,11 @@ tailwind.config = {
 
     <!-- Image -->
     <div class="flex flex-col gap-4">
-      <div class="bg-white border border-gray-200 relative overflow-hidden">
+      <div class="bg-white border border-gray-800 relative overflow-hidden">
         <div id="productBadge" class="hidden absolute top-0 left-0 bg-orange text-white text-[10px] font-bold px-3 py-1.5 tracking-widest uppercase z-10"></div>
         <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
       </div>
-      <div id="productDescContainer" class="hidden border border-gray-200 rounded-xl p-4">
+      <div id="productDescContainer" class="hidden border border-gray-800 rounded-xl p-4">
         <div class="text-[10px] font-bold tracking-[2px] text-gray-500 uppercase mb-2">სხვა ინფორმაცია</div>
         <p id="productDesc" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
       </div>
@@ -197,16 +197,16 @@ tailwind.config = {
       <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
 
       <!-- Price block -->
-      <div class="bg-cream border border-gray-200 p-5 mb-5">
+      <div class="bg-cream border border-gray-800 p-5 mb-5">
         <div id="productOldPrice" class="hidden text-sm text-gray-300 line-through mb-1"></div>
         <div id="productPriceBlock" class="flex items-baseline gap-2"></div>
       </div>
 
       <!-- Qty + Add -->
       <div class="flex items-center gap-3 mb-5">
-        <div class="flex items-center border border-gray-200 bg-white">
+        <div class="flex items-center border border-gray-800 bg-white">
           <button onclick="changeLocalQty(-1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">−</button>
-          <span id="localQty" class="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-gray-200">1</span>
+          <span id="localQty" class="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-gray-800">1</span>
           <button onclick="changeLocalQty(1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">+</button>
         </div>
         <button id="addBtn" onclick="addProductToCart()" class="w-1/2 bg-dark hover:bg-orange text-white font-bold py-3 text-sm transition-colors rounded-lg">
@@ -214,10 +214,12 @@ tailwind.config = {
         </button>
       </div>
 
+      <!-- Code -->
+      <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
       <!-- Specs -->
-      <div id="productSpecs" class="hidden border border-gray-200 rounded-xl p-4 mb-4"></div>
+      <div id="productSpecs" class="hidden border border-gray-800 rounded-xl p-4 mb-4"></div>
       <!-- Meta -->
-      <div class="border-t border-gray-200 pt-4 space-y-2" id="productMeta"></div>
+      <div class="border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
     </div>
   </div>
 
@@ -547,15 +549,23 @@ function renderProduct() {
     imgEl.innerHTML = `<span style="font-size:5rem;opacity:0.3">${product.emoji||'📦'}</span>`;
   }
 
+  const codeEl = document.getElementById('productCode');
+  if (product.code) {
+    codeEl.classList.remove('hidden');
+    codeEl.innerHTML = `<div class="flex justify-between items-center text-sm">
+      <span class="text-gray-400">კოდი</span>
+      <span class="font-bold font-mono tracking-widest text-dark">${product.code}</span>
+    </div>`;
+  }
+
   const meta = document.getElementById('productMeta');
   const rows = [
-    product.code ? ['კოდი', product.code] : null,
     product.stock ? ['მარაგი', product.stock + ' ც'] : null,
   ].filter(Boolean);
   meta.innerHTML = rows.map(([k,v]) => `
     <div class="flex justify-between items-center text-sm">
       <span class="text-gray-400">${k}</span>
-      <span class="${k==='კოდი' ? 'font-bold font-mono tracking-widest text-dark' : 'font-medium flex items-center gap-1.5'}">${v||'—'}</span>
+      <span class="font-medium flex items-center gap-1.5">${v||'—'}</span>
     </div>`).join('');
 
   // specs section
@@ -591,7 +601,7 @@ function renderProduct() {
       specsEl.classList.remove('hidden');
       specsEl.innerHTML = `<div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-3">სპეციფიკაცია</div>` +
         specsRows.map(([k,v]) => `
-          <div class="flex justify-between items-center text-sm py-1.5 border-b border-gray-100">
+          <div class="flex justify-between items-center text-sm py-1.5 border-b border-gray-800">
             <span class="text-gray-400">${k}</span>
             <span class="font-semibold text-dark">${v}</span>
           </div>`).join('');
