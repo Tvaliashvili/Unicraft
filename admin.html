@@ -219,7 +219,31 @@
                 <span style="font-size:40px">🛢️</span>ზეთი
               </button>
               <button id="typeBtn_filter" onclick="selectProdType('filter')" style="flex:1;min-width:100px;padding:18px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;color:var(--dark);transition:all 0.15s">
-                <span style="font-size:40px">🔧</span>ფილტრი
+                <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- filter body (tilted cylinder) -->
+                  <g transform="rotate(-35,21,21)">
+                    <!-- top ellipse -->
+                    <ellipse cx="21" cy="9" rx="11" ry="4" fill="currentColor" opacity="0.85"/>
+                    <!-- body -->
+                    <rect x="10" y="9" width="22" height="20" fill="currentColor" opacity="0.15"/>
+                    <!-- vertical lines (pleats) -->
+                    <line x1="12" y1="9" x2="12" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="14.5" y1="9" x2="14.5" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="17" y1="9" x2="17" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="19.5" y1="9" x2="19.5" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="22" y1="9" x2="22" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="24.5" y1="9" x2="24.5" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="27" y1="9" x2="27" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="29.5" y1="9" x2="29.5" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    <!-- outline -->
+                    <rect x="10" y="9" width="22" height="20" stroke="currentColor" stroke-width="2" fill="none" rx="1"/>
+                    <!-- bottom ellipse -->
+                    <ellipse cx="21" cy="29" rx="11" ry="4" fill="currentColor" opacity="0.85"/>
+                    <!-- neck/connector -->
+                    <rect x="15" y="29" width="12" height="6" rx="2" fill="currentColor" opacity="0.9"/>
+                    <ellipse cx="21" cy="35" rx="6" ry="2.5" fill="currentColor"/>
+                  </g>
+                </svg>ფილტრი
               </button>
             </div>
           </div>
@@ -361,7 +385,7 @@
               <!-- Description -->
               <div class="form-group full">
                 <label class="form-label">აღწერა</label>
-                <div id="prodDescRows" style="border:1px solid var(--border);border-radius:10px;overflow:hidden"></div>
+                <textarea class="form-input" id="prodDescRows" rows="4" placeholder="დამატებითი ინფორმაცია..." style="width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px"></textarea>
               </div>
               <!-- Photo -->
               <div class="form-group full">
@@ -741,7 +765,7 @@
         </div>
         <div class="form-group full">
           <label class="form-label">აღწერა</label>
-          <div id="editDescRows" style="border:1px solid var(--border);border-radius:10px;overflow:hidden"></div>
+          <textarea class="form-input" id="editDescRows" rows="4" placeholder="დამატებითი ინფორმაცია..." style="width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px"></textarea>
         </div>
         <div class="form-group full">
           <label class="form-label">ფოტო</label>
@@ -833,39 +857,15 @@ const DESC_FIELDS = [
   'სხვა ინფორმაცია',
 ];
 
-function renderDescRows(containerId, values = {}) {
+function renderDescRows(containerId, value = '') {
   const el = document.getElementById(containerId);
   if (!el) return;
-  el.innerHTML = DESC_FIELDS.map((label, i) => `
-    <div class="desc-field-row" id="${containerId}_row_${i}" style="display:flex;align-items:center;border-bottom:1px solid var(--border)">
-      <span style="flex-shrink:0;font-size:12px;font-weight:600;color:var(--gray-mid);padding:0 10px;min-width:170px;border-right:1px solid var(--border)">${label}:</span>
-      <input style="flex:1;border:none;outline:none;font-size:13px;font-family:inherit;padding:8px 10px;background:transparent;color:var(--gray-dark)" placeholder="—" value="${(values[label]||'').replace(/"/g,'&quot;')}">
-    </div>
-  `).join('');
+  el.value = typeof value === 'string' ? value : '';
 }
-
 
 function getDescValue(containerId) {
-  return DESC_FIELDS.map((label, i) => {
-    const row = document.getElementById(containerId + '_row_' + i);
-    if (!row || row.style.display === 'none') return null;
-    const val = row.querySelector('input').value.trim();
-    return val ? `${label}: ${val}` : null;
-  }).filter(Boolean).join('\n');
-}
-
-function parseDescValue(text) {
-  const map = {};
-  if (!text) return map;
-  text.split('\n').forEach(line => {
-    const ci = line.indexOf(':');
-    if (ci > 0) {
-      const label = line.slice(0, ci).trim();
-      const val = line.slice(ci + 1).trim();
-      map[label] = val;
-    }
-  });
-  return map;
+  const el = document.getElementById(containerId);
+  return el ? el.value.trim() : '';
 }
 
 const DROPZONE_EMPTY = `
@@ -1581,7 +1581,7 @@ window.editProduct = function(id) {
   document.getElementById('editCategory').value = p.category || '';
   document.getElementById('editPrice').value = p.price || '';
   document.getElementById('editUnit').value = p.unit || 'ც';
-  renderDescRows('editDescRows', parseDescValue(p.description || ''));
+  renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
   document.getElementById('editFile').value = '';
