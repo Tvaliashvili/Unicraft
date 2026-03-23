@@ -740,6 +740,8 @@ function flagImg(country, size=20) {
   if (!code) return '';
   return `<img src="https://flagcdn.com/w40/${code}.png" width="${size}" height="${Math.round(size*0.75)}" alt="${name}" style="border-radius:2px;display:inline-block;vertical-align:middle;object-fit:cover">`;
 }
+const CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები' };
+function catLabel(cat) { return CAT_DISPLAY[cat] || cat || 'სხვა'; }
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
 document.getElementById('cartCount').textContent = cart.length;
@@ -840,7 +842,7 @@ function buildSidebar() {
   const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full text-left">ყველა <span class="text-xs text-gray-400 font-normal">${allProducts.length}</span></button>`;
   const catBtns = cats.map(c => `
     <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full text-left transition-all">
-      <span class="min-w-0 break-words text-left">${c}</span><span class="text-xs text-gray-400 font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
+      <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs text-gray-400 font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
     </button>`).join('');
   el.innerHTML = allBtn + catBtns;
 
@@ -896,7 +898,7 @@ function renderPage() {
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
-        <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
+        <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${catLabel(p.category)}</div>
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
         ${p.country ? `<div class="flex items-center gap-1.5 mt-1.5"><span class="text-gray-400 text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-gray-600 font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
