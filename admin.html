@@ -208,84 +208,183 @@
       </div>
       <div class="card">
         <div class="product-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
-              <input class="form-input" id="prodName" placeholder="მაგ: ცემენტი M400">
+          <!-- Product type selector -->
+          <div style="margin-bottom:24px">
+            <div class="form-label" style="margin-bottom:12px">პროდუქტის ტიპი <span class="required">*</span></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button id="typeBtn_tire" onclick="selectProdType('tire')" style="flex:1;min-width:100px;padding:18px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;color:var(--dark);transition:all 0.15s">
+                <span style="font-size:40px">🛞</span>საბურავი
+              </button>
+              <button id="typeBtn_oil" onclick="selectProdType('oil')" style="flex:1;min-width:100px;padding:18px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;color:var(--dark);transition:all 0.15s">
+                <span style="font-size:40px">🛢️</span>ზეთი
+              </button>
+              <button id="typeBtn_filter" onclick="selectProdType('filter')" style="flex:1;min-width:100px;padding:18px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;color:var(--dark);transition:all 0.15s">
+                <span style="font-size:40px">🔧</span>ფილტრი
+              </button>
             </div>
-            <div class="form-group">
-              <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                კატეგორია <span class="required">*</span>
-                <span onclick="toggleCatMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
-              </label>
-              <select class="form-select" id="prodCategory">
-                <option value="">კატეგორია...</option>
-              </select>
-              <!-- Category manager inline -->
-              <div id="catMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                <div style="display:flex;gap:6px;margin-bottom:10px">
-                  <input class="form-input" id="newCatInput" placeholder="ახალი კატეგორია" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addCategory()">
-                  <button class="btn btn-primary" onclick="addCategory()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                </div>
-                <div id="categoryList"></div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">ფასი (₾) <span class="required">*</span></label>
-              <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                ერთეული
-                <span onclick="toggleUnitMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
-              </label>
-              <select class="form-select" id="prodUnit">
-                <option value="ც">ცალი</option>
-                <option value="კგ">კგ</option>
-                <option value="ტ">ტონა</option>
-                <option value="მ²">მ²</option>
-                <option value="მ³">მ³</option>
-                <option value="მ">მეტრი</option>
-                <option value="კონტ">კონტეინერი</option>
-                <option value="ტომ">ტომარა</option>
-              </select>
-              <div id="unitMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                <div style="display:flex;gap:6px;margin-bottom:10px">
-                  <input class="form-input" id="newUnitValue" placeholder="მნიშვნელობა (მაგ: ლ)" style="flex:1;font-size:13px;padding:6px 10px">
-                  <input class="form-input" id="newUnitLabel" placeholder="სახელი (მაგ: ლიტრი)" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addUnit()">
-                  <button class="btn btn-primary" onclick="addUnit()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                </div>
-                <div id="unitList"></div>
-              </div>
-            </div>
-            <div class="form-group full">
-              <label class="form-label">აღწერა</label>
-              <div id="prodDescRows" style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
-              </div>
-            </div>
-            <div class="form-group full">
-              <label class="form-label">ფოტო</label>
-              <input type="file" id="prodFile" accept="image/*" style="display:none" onchange="handleFile(this,'prod')">
-              <input type="file" id="prodFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'prod')">
-              <div class="dropzone" id="prodDropzone"
-                onclick="openFilePickerMenu('prod')"
-                ondragover="event.preventDefault();this.classList.add('drag-over')"
-                ondragleave="this.classList.remove('drag-over')"
-                ondrop="handleDrop(event,'prod')">`
-                <div id="prodPreview">
-                  <div class="dropzone-icon">📷</div>
-                  <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
-                  <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>
-                </div>
-              </div>
-            </div>
-
           </div>
-          <div class="form-actions">
-            <button class="btn btn-primary" id="addProductBtn" onclick="addProduct()">
-              ✓ კატალოგში დამატება
-            </button>
-            <button class="btn btn-secondary" onclick="clearForm()">გასუფთავება</button>
+          <!-- Form (visible after type selection) -->
+          <div id="prodFormBody" style="display:none">
+            <div class="form-grid">
+              <!-- Name -->
+              <div class="form-group">
+                <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
+                <input class="form-input" id="prodName" placeholder="მაგ: Michelin Pilot Sport 4">
+              </div>
+              <!-- Brand with manager -->
+              <div class="form-group">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  ბრენდი
+                  <span onclick="toggleBrandMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+                </label>
+                <select class="form-select" id="prodBrand"><option value="">ბრენდი...</option></select>
+                <div id="brandMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newBrandInput" placeholder="ახალი ბრენდი" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addBrand()">
+                    <button class="btn btn-primary" onclick="addBrand()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="brandList"></div>
+                </div>
+              </div>
+              <!-- TIRE specs -->
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">სიგანე</label>
+                <select class="form-select" id="specWidth">
+                  <option value="">სიგანე...</option>
+                  <option>155</option><option>165</option><option>175</option><option>185</option><option>195</option><option>205</option><option>215</option><option>225</option><option>235</option><option>245</option><option>255</option><option>265</option><option>275</option><option>285</option><option>295</option><option>305</option>
+                </select>
+              </div>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">პროფილი</label>
+                <select class="form-select" id="specProfile">
+                  <option value="">პროფილი...</option>
+                  <option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option><option>60</option><option>65</option><option>70</option><option>75</option><option>80</option>
+                </select>
+              </div>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">დიამეტრი (R)</label>
+                <select class="form-select" id="specRim">
+                  <option value="">დიამეტრი...</option>
+                  <option>R13</option><option>R14</option><option>R15</option><option>R16</option><option>R17</option><option>R18</option><option>R19</option><option>R20</option><option>R21</option><option>R22</option>
+                </select>
+              </div>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">სეზონი</label>
+                <select class="form-select" id="specSeason">
+                  <option value="">სეზონი...</option>
+                  <option>საზაფხულო</option><option>საზამთრო</option><option>ყოვლი სეზონი</option>
+                </select>
+              </div>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">ავტომობილის ტიპი</label>
+                <select class="form-select" id="specVehicleType">
+                  <option value="">ტიპი...</option>
+                  <option>სამგზავრო</option><option>SUV / 4x4</option><option>სატვირთო</option>
+                </select>
+              </div>
+              <!-- OIL specs -->
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">ტიპი</label>
+                <select class="form-select" id="specOilType">
+                  <option value="">ტიპი...</option>
+                  <option>სინთეტიკური</option><option>ნახევრად სინთეტიკური</option><option>მინერალური</option>
+                </select>
+              </div>
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">სიბლანტე</label>
+                <select class="form-select" id="specViscosity">
+                  <option value="">სიბლანტე...</option>
+                  <option>0W-20</option><option>5W-30</option><option>5W-40</option><option>10W-30</option><option>10W-40</option><option>15W-40</option><option>20W-50</option>
+                </select>
+              </div>
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">მოცულობა</label>
+                <select class="form-select" id="specVolume">
+                  <option value="">მოცულობა...</option>
+                  <option>1 ლ</option><option>4 ლ</option><option>5 ლ</option><option>10 ლ</option><option>20 ლ</option><option>60 ლ</option><option>205 ლ</option>
+                </select>
+              </div>
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">დანიშნულება</label>
+                <select class="form-select" id="specOilApp">
+                  <option value="">დანიშნულება...</option>
+                  <option>ძრავი</option><option>გადაცემათა კოლოფი</option><option>ჰიდრავლიკა</option><option>სამუხრუჭე</option>
+                </select>
+              </div>
+              <!-- FILTER specs -->
+              <div class="form-group specs-filter" style="display:none">
+                <label class="form-label">ტიპი</label>
+                <select class="form-select" id="specFilterType">
+                  <option value="">ტიპი...</option>
+                  <option>ზეთის ფილტრი</option><option>საჰაერო ფილტრი</option><option>საწვავის ფილტრი</option><option>სალონის ფილტრი</option>
+                </select>
+              </div>
+              <div class="form-group specs-filter" style="display:none">
+                <label class="form-label">OEM ნომერი</label>
+                <input class="form-input" id="specOEM" placeholder="მაგ: 90915-YZZD2">
+              </div>
+              <div class="form-group specs-filter" style="display:none">
+                <label class="form-label">ავტომობილის მარკა</label>
+                <input class="form-input" id="specCarMake" placeholder="მაგ: Toyota, BMW">
+              </div>
+              <!-- Price -->
+              <div class="form-group">
+                <label class="form-label">ფასი (₾) <span class="required">*</span></label>
+                <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
+              </div>
+              <!-- Unit -->
+              <div class="form-group">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  ერთეული
+                  <span onclick="toggleUnitMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+                </label>
+                <select class="form-select" id="prodUnit">
+                  <option value="ც">ცალი</option>
+                  <option value="ლ">ლიტრი</option>
+                  <option value="კგ">კგ</option>
+                  <option value="ტ">ტონა</option>
+                  <option value="მ²">მ²</option>
+                  <option value="მ³">მ³</option>
+                  <option value="მ">მეტრი</option>
+                  <option value="კონტ">კონტეინერი</option>
+                  <option value="ტომ">ტომარა</option>
+                </select>
+                <div id="unitMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newUnitValue" placeholder="მნიშვნელობა (მაგ: ლ)" style="flex:1;font-size:13px;padding:6px 10px">
+                    <input class="form-input" id="newUnitLabel" placeholder="სახელი (მაგ: ლიტრი)" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addUnit()">
+                    <button class="btn btn-primary" onclick="addUnit()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="unitList"></div>
+                </div>
+              </div>
+              <!-- Description -->
+              <div class="form-group full">
+                <label class="form-label">აღწერა</label>
+                <div id="prodDescRows" style="border:1px solid var(--border);border-radius:10px;overflow:hidden"></div>
+              </div>
+              <!-- Photo -->
+              <div class="form-group full">
+                <label class="form-label">ფოტო</label>
+                <input type="file" id="prodFile" accept="image/*" style="display:none" onchange="handleFile(this,'prod')">
+                <input type="file" id="prodFileCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this,'prod')">
+                <div class="dropzone" id="prodDropzone"
+                  onclick="openFilePickerMenu('prod')"
+                  ondragover="event.preventDefault();this.classList.add('drag-over')"
+                  ondragleave="this.classList.remove('drag-over')"
+                  ondrop="handleDrop(event,'prod')">
+                  <div id="prodPreview">
+                    <div class="dropzone-icon">📷</div>
+                    <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
+                    <div class="dropzone-hint">PNG · JPG · WEBP · მაქს 5MB</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="addProductBtn" onclick="addProduct()">✓ კატალოგში დამატება</button>
+              <button class="btn btn-secondary" onclick="clearForm()">გასუფთავება</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1154,6 +1253,80 @@ window.toggleMaintenanceMode = async function() {
   });
 };
 
+// ─── Brands ───
+let _brands = [];
+let _currentProdType = '';
+
+async function loadBrands(type) {
+  const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
+  _brands = data || [];
+  const opts = '<option value="">ბრენდი...</option>' + _brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+  document.getElementById('prodBrand').innerHTML = opts;
+  renderBrandList();
+}
+
+function renderBrandList() {
+  const el = document.getElementById('brandList');
+  if (!el) return;
+  if (!_brands.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ბრენდი არ არის</div>'; return; }
+  el.innerHTML = _brands.map(b => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${b.name}</span>
+      <button onclick="deleteBrand('${b.id}','${b.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.toggleBrandMgr = function() {
+  const p = document.getElementById('brandMgrPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+};
+
+window.addBrand = async function() {
+  const input = document.getElementById('newBrandInput');
+  const name = input.value.trim();
+  if (!name || !_currentProdType) return;
+  if (_brands.find(b => b.name.toLowerCase() === name.toLowerCase())) { showToast('ეს ბრენდი უკვე არსებობს', 'error'); return; }
+  const { error } = await supabase.from('brands').insert({ product_type: _currentProdType, name });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ ბრენდი დაემატა', 'success');
+  loadBrands(_currentProdType);
+};
+
+window.deleteBrand = async function(id, name) {
+  if (!confirm(`ბრენდი "${name}" წაიშალოს?`)) return;
+  await supabase.from('brands').delete().eq('id', id);
+  showToast('ბრენდი წაიშალა', 'error');
+  loadBrands(_currentProdType);
+};
+
+window.selectProdType = function(type) {
+  _currentProdType = type;
+  // highlight selected button
+  ['tire','oil','filter'].forEach(t => {
+    const btn = document.getElementById('typeBtn_' + t);
+    if (t === type) {
+      btn.style.borderColor = 'var(--orange)';
+      btn.style.background = '#fff5f0';
+      btn.style.color = 'var(--orange)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background = '#fff';
+      btn.style.color = 'var(--dark)';
+    }
+  });
+  // show/hide spec fields
+  document.querySelectorAll('.specs-tire,.specs-oil,.specs-filter').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.specs-' + type).forEach(el => el.style.display = '');
+  // set default unit
+  const unitMap = { tire: 'ც', oil: 'ლ', filter: 'ც' };
+  document.getElementById('prodUnit').value = unitMap[type] || 'ც';
+  // show form
+  document.getElementById('prodFormBody').style.display = 'block';
+  loadBrands(type);
+};
+
 // ─── Categories ───
 let _categories = [];
 
@@ -1161,7 +1334,8 @@ async function loadCategories() {
   const { data } = await supabase.from('categories').select('*').order('name');
   _categories = data || [];
   const opts = '<option value="">კატეგორია...</option>' + _categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-  document.getElementById('prodCategory').innerHTML = opts;
+  const catEl = document.getElementById('prodCategory');
+  if (catEl) catEl.innerHTML = opts;
   document.getElementById('editCategory').innerHTML = opts;
   renderCategoryList();
 }
@@ -1216,10 +1390,27 @@ async function genProductCode() {
 
 window.addProduct = async function() {
   const name = document.getElementById('prodName').value.trim();
-  const category = document.getElementById('prodCategory').value;
   const price = parseFloat(document.getElementById('prodPrice').value);
-  if (!name || !category || isNaN(price)) {
+  if (!name || !_currentProdType || isNaN(price)) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
+  }
+  // collect specs
+  const specs = { brand: document.getElementById('prodBrand').value || '' };
+  if (_currentProdType === 'tire') {
+    specs.width       = document.getElementById('specWidth').value;
+    specs.profile     = document.getElementById('specProfile').value;
+    specs.rim         = document.getElementById('specRim').value;
+    specs.season      = document.getElementById('specSeason').value;
+    specs.vehicle_type = document.getElementById('specVehicleType').value;
+  } else if (_currentProdType === 'oil') {
+    specs.oil_type    = document.getElementById('specOilType').value;
+    specs.viscosity   = document.getElementById('specViscosity').value;
+    specs.volume      = document.getElementById('specVolume').value;
+    specs.application = document.getElementById('specOilApp').value;
+  } else if (_currentProdType === 'filter') {
+    specs.filter_type = document.getElementById('specFilterType').value;
+    specs.oem         = document.getElementById('specOEM').value.trim();
+    specs.car_make    = document.getElementById('specCarMake').value.trim();
   }
   const btn = document.getElementById('addProductBtn');
   btn.disabled = true; btn.textContent = 'ემატება...';
@@ -1231,7 +1422,9 @@ window.addProduct = async function() {
     }
     await supabase.from('products').insert({
       name,
-      category,
+      category: _currentProdType,
+      product_type: _currentProdType,
+      specs,
       price,
       unit: document.getElementById('prodUnit').value,
       description: getDescValue('prodDescRows'),
@@ -1250,14 +1443,22 @@ window.addProduct = async function() {
 };
 
 window.clearForm = function() {
-  ['prodName','prodPrice']
+  _currentProdType = '';
+  ['prodName','prodPrice','prodBrand','specWidth','specProfile','specRim','specSeason','specVehicleType',
+   'specOilType','specViscosity','specVolume','specOilApp','specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderDescRows('prodDescRows');
-  document.getElementById('prodCategory').value = '';
   document.getElementById('prodUnit').value = 'ც';
   prodFileData = null;
   document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
   document.getElementById('prodFile').value = '';
+  // reset type buttons
+  ['tire','oil','filter'].forEach(t => {
+    const btn = document.getElementById('typeBtn_' + t);
+    if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.background = '#fff'; btn.style.color = 'var(--dark)'; }
+  });
+  document.getElementById('prodFormBody').style.display = 'none';
+  document.querySelectorAll('.specs-tire,.specs-oil,.specs-filter').forEach(el => el.style.display = 'none');
 };
 
 async function loadProductsList() {
