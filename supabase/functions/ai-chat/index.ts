@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GROQ_KEY = Deno.env.get("GROQ_API_KEY")!;
+const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,8 +12,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    if (!GROQ_KEY) {
-      return new Response(JSON.stringify({ reply: "error", suggest_human: false, _debug: "GROQ_API_KEY not set" }), {
+    if (!ANTHROPIC_KEY) {
+      return new Response(JSON.stringify({ reply: "error", suggest_human: false, _debug: "ANTHROPIC_API_KEY not set" }), {
         status: 200, headers: { ...corsHeaders, "content-type": "application/json" },
       });
     }
@@ -21,51 +21,48 @@ serve(async (req) => {
     const { messages, is_working_hours, customer_name } = await req.json();
 
     const offHoursNote = is_working_hours
-      ? `თუ კლიენტს სჭირდება ცოცხალი ოპერატორი (შეკვეთის პრობლემა, დაბრუნება, სპეციალური ფასდაკლება) — JSON-ში suggest_human: true.`
-      : `ახლა არასამუშაო საათებია. თუ კლიენტს ოპერატორი სჭირდება — უთხარი: "სამუშაო საათებია 09:00–20:00. ამ დროს მოგვწერე და ოპერატორი დაგეხმარება." JSON-ში suggest_human: false.`;
+      ? `If the customer needs a live operator (order issue, return, special discount) — set suggest_human: true in JSON.`
+      : `It is currently outside working hours (09:00-20:00 Tbilisi time). If a live operator is needed, tell the customer in Georgian: "სამუშაო საათებია 09:00–20:00. ამ დროს მოგვწერე და ოპერატორი დაგეხმარება." Set suggest_human: false.`;
 
-    const systemPrompt = `შენ ხარ UniCraft-ის AI ასისტენტი. UniCraft — ქართული ავტოსაქონლის მაღაზია: საბურავები, ზეთები, ფილტრები.
+    const systemPrompt = `You are the AI assistant for UniCraft — a Georgian auto parts store selling tires, oils, and filters.
+Customer name: ${customer_name || "მომხმარებელი"}.
 
-მომხმარებლის სახელია: ${customer_name || "მომხმარებელი"}.
+CRITICAL: Always respond ONLY in correct, natural Georgian language (ქართული). Never use Russian or English in your reply text.
 
-პასუხობ მხოლოდ ქართულად. იყავი მეგობრული, მოკლე, კონკრეტული.
-გამოიყენე სწორი ქართული: "რით შემიძლია დაგეხმარო" და არა "რა შემიძლია დაგეხმარო".
+You can ONLY help with:
+- Tire selection (size, season, brand)
+- Engine oil selection (type, viscosity)
+- Filter questions (oil, air, cabin filters)
+- UniCraft store information (working hours 09:00-20:00, delivery available)
+- General automotive/technical questions
 
-შეგიძლია ეხმარო ᲛᲮᲝᲚᲝᲓ ამ თემებზე:
-• საბურავის ზომის, სეზონის, ბრენდის შეთავაზებაში
-• ძრავის ზეთის ტიპისა და სიბლანტის შერჩევაში
-• ფილტრების შესახებ კითხვებში
-• UniCraft-ის მაღაზიის შესახებ (მისამართი, სამუშაო საათები, მიტანის სერვისი)
-• ზოგადი საავტომობილო/ტექნიკური კითხვების გადაჭრაში
-
-თუ კლიენტი კითხულობს რაიმეს რაც არ უკავშირდება ავტომობილებს, საბურავებს, ზეთებს, ფილტრებს ან UniCraft-ს — თავაზიანად უთხარი: "ბოდიში, მე მხოლოდ UniCraft-ის პროდუქციასთან — საბურავებთან, ზეთებთან და ფილტრებთან — დაკავშირებულ კითხვებში შემიძლია დახმარება."
+If asked about anything unrelated to cars, tires, oils, filters, or UniCraft, politely say in Georgian:
+"ბოდიში, მე მხოლოდ UniCraft-ის პროდუქციასთან — საბურავებთან, ზეთებთან და ფილტრებთან — დაკავშირებულ კითხვებში შემიძლია დახმარება."
 
 ${offHoursNote}
 
-ᲛᲜᲘᲨᲕᲜᲔᲚᲝᲕᲐᲜᲘ: პასუხი ᲛᲮᲝᲚᲝᲓ JSON ფორმატში, სხვა ტექსტი არ დაამატო:
-{"reply": "შენი პასუხი", "suggest_human": false}`;
+IMPORTANT: Respond ONLY with valid JSON, no other text outside the JSON:
+{"reply": "your Georgian response here", "suggest_human": false}`;
 
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_KEY}`,
-        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 600,
-        temperature: 0.7,
+        system: systemPrompt,
+        messages,
       }),
     });
 
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
-    const raw = data.choices?.[0]?.message?.content?.trim() || "";
+    const raw = data.content[0].text.trim();
 
     let parsed;
     try {

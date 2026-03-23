@@ -1508,7 +1508,7 @@ window.startChat = function() {
   const greeting = working
     ? `გამარჯობა, ${name}! 👋 მე ვარ UniCraft-ის AI ასისტენტი. საბურავებთან, ზეთებთან ან ფილტრებთან დაკავშირებული კითხვა გაქვს?`
     : `გამარჯობა, ${name}! 🤖 მე ვარ UniCraft-ის AI ასისტენტი. სამუშაო საათები ამჟამად დასრულებულია, მაგრამ შეგიძლია ჩემთან ისაუბრო.`;
-  aiMessages.push({ role: 'assistant', content: greeting });
+  // Don't push greeting to aiMessages — API requires user message first
   appendMsg(greeting, 'ai');
 };
 
