@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
+const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,8 +15,8 @@ serve(async (req) => {
     const { messages, is_working_hours, customer_name } = await req.json();
 
     const offHoursNote = is_working_hours
-      ? `თუ კლიენტს სჭირდება ცოცხალი ოპერატორი (შეკვეთის პრობლემა, დაბრუნება, სპეციალური ფასდაკლება, ტექნიკური ხარვეზი) — JSON-ში suggest_human: true. სხვა შემთხვევაში suggest_human: false.`
-      : `ახლა არასამუშაო საათებია. თუ კლიენტს სჭირდება ოპერატორი — პირდაპირ უთხარი: "სამუშაო საათებია 09:00–20:00. ამ დროს მოგვწერე და ოპერატორი დაგეხმარება." JSON-ში suggest_human: false (AI თავადვე ეხმარება ან უხსნის off-hours სიტუაციას).`;
+      ? `თუ კლიენტს სჭირდება ცოცხალი ოპერატორი (შეკვეთის პრობლემა, დაბრუნება, სპეციალური ფასდაკლება) — JSON-ში suggest_human: true.`
+      : `ახლა არასამუშაო საათებია. თუ კლიენტს ოპერატორი სჭირდება — უთხარი: "სამუშაო საათებია 09:00–20:00. ამ დროს მოგვწერე და ოპერატორი დაგეხმარება." JSON-ში suggest_human: false.`;
 
     const systemPrompt = `შენ ხარ UniCraft-ის AI ასისტენტი. UniCraft — ქართული ავტოსაქონლის მაღაზია: საბურავები, ზეთები, ფილტრები.
 
@@ -26,41 +26,45 @@ serve(async (req) => {
 
 შეგიძლია ეხმარო:
 • საბურავის ზომის, სეზონის, ბრენდის შეთავაზებაში
-• ძრავის ზეთის ტიპისა და სიბლანტის (viscosity) შერჩევაში
-• ფილტრების (ზეთის, ჰაერის, სალონის) შესახებ კითხვებში
+• ძრავის ზეთის ტიპისა და სიბლანტის შერჩევაში
+• ფილტრების შესახებ კითხვებში
 • ზოგადი საავტომობილო კითხვების გადაჭრაში
 
 ${offHoursNote}
 
-ᲛᲜᲘᲨᲕᲜᲔᲚᲝᲕᲐᲜᲘ: პასუხი ᲛᲮᲝᲚᲝᲓ JSON ფორმატში, სხვა ტექსტი არ დაამატო:
+ᲛᲜᲘᲨᲕᲜᲔᲚᲝᲕᲐᲜᲘ: პასუხი ᲛᲮᲝᲚᲝᲓ JSON ფორმატში:
 {"reply": "შენი პასუხი", "suggest_human": false}`;
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 600,
-        system: systemPrompt,
-        messages,
-      }),
-    });
+    // Convert Claude-format messages to Gemini format
+    const geminiContents = messages.map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: geminiContents,
+          generationConfig: { maxOutputTokens: 600, temperature: 0.7 },
+        }),
+      }
+    );
 
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
-    const raw = data.content[0].text.trim();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
     let parsed;
     try {
       const cleaned = raw.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
       parsed = JSON.parse(cleaned);
     } catch {
-      parsed = { reply: raw, suggest_human: false };
+      parsed = { reply: raw || "ბოდიში, ვერ გავიგე. სცადეთ თავიდან.", suggest_human: false };
     }
 
     return new Response(JSON.stringify(parsed), {
