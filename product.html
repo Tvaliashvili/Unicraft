@@ -199,10 +199,7 @@ tailwind.config = {
       <!-- Price block -->
       <div class="bg-cream border border-gray-200 p-5 mb-5">
         <div id="productOldPrice" class="hidden text-sm text-gray-300 line-through mb-1"></div>
-        <div class="flex items-baseline gap-2">
-          <span id="productPrice" class="font-display text-5xl tracking-wide leading-none"></span>
-          <span id="productUnit" class="text-dark text-sm"></span>
-        </div>
+        <div id="productPriceBlock" class="flex items-baseline gap-2"></div>
       </div>
 
       <!-- Qty + Add -->
@@ -521,8 +518,15 @@ function renderProduct() {
   } else {
     descContainer.classList.add('hidden');
   }
-  document.getElementById('productPrice').textContent = product.price;
-  document.getElementById('productUnit').textContent = '₾ / ' + (product.unit || 'ც').replace(/\.+$/, '');
+  const _unit = (product.unit || 'ც').replace(/\.+$/, '');
+  const _s = parseFloat(product.price).toFixed(2);
+  const _dot = _s.indexOf('.');
+  document.getElementById('productPriceBlock').innerHTML = `
+    <div class="flex items-start leading-none">
+      <span class="font-display text-5xl tracking-wide text-dark">${_s.slice(0, _dot)}</span>
+      <span class="text-sm font-bold text-dark pt-1">${_s.slice(_dot)}</span>
+    </div>
+    <span class="font-display text-xl tracking-wide text-dark">₾<span style="font-size:0.75em;font-weight:700;color:#1A1714">/${_unit}</span></span>`;
 
   if (product.oldPrice) {
     const el = document.getElementById('productOldPrice');
