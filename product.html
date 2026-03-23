@@ -211,6 +211,8 @@ tailwind.config = {
         </button>
       </div>
 
+      <!-- Specs -->
+      <div id="productSpecs" class="hidden border border-gray-200 rounded-xl p-4 mb-4"></div>
       <!-- Meta -->
       <div class="border-t border-gray-200 pt-4 space-y-2" id="productMeta"></div>
     </div>
@@ -490,6 +492,15 @@ async function init() {
   }
 }
 
+const FLAG_CODES = {'გერმანია':'de','საფრანგეთი':'fr','იაპონია':'jp','აშშ':'us','იტალია':'it','სამხრეთ კორეა':'kr','ბრიტანეთი':'gb','ნიდერლანდი':'nl','რუსეთი':'ru','ჩინეთი':'cn','თურქეთი':'tr','ავსტრია':'at','შვედეთი':'se','ჩეხეთი':'cz','პოლონეთი':'pl','ბელგია':'be','ინდოეთი':'in','ბრაზილია':'br','უკრაინა':'ua','საქართველო':'ge'};
+function flagImg(country, size=20) {
+  if (!country) return '';
+  const name = country.split(' ').slice(1).join(' ');
+  const code = FLAG_CODES[name];
+  if (!code) return '';
+  return `<img src="https://flagcdn.com/w${size}/${code}.png" width="${size}" alt="${name}" style="border-radius:2px;display:inline-block;vertical-align:middle">`;
+}
+
 function renderProduct() {
   document.title = product.name + ' — UniCraft';
   document.getElementById('breadcrumbName').textContent = product.name;
@@ -529,15 +540,53 @@ function renderProduct() {
   const meta = document.getElementById('productMeta');
   const rows = [
     product.code ? ['კოდი', product.code] : null,
-    ['კატეგორია', product.category],
-    product.country ? ['ქვეყანა', product.country] : null,
+    product.country ? ['ქვეყანა', `${flagImg(product.country,18)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`] : null,
     product.stock ? ['მარაგი', product.stock + ' ც'] : null,
   ].filter(Boolean);
   meta.innerHTML = rows.map(([k,v]) => `
-    <div class="flex justify-between text-sm">
+    <div class="flex justify-between items-center text-sm">
       <span class="text-gray-400">${k}</span>
-      <span class="${k==='კოდი' ? 'font-bold font-mono tracking-widest text-dark' : 'font-medium'}">${v||'—'}</span>
+      <span class="${k==='კოდი' ? 'font-bold font-mono tracking-widest text-dark' : 'font-medium flex items-center gap-1.5'}">${v||'—'}</span>
     </div>`).join('');
+
+  // specs section
+  const specs = product.specs || {};
+  const type = product.product_type;
+  let specsRows = [];
+  if (specs.brand) specsRows.push(['ბრენდი', specs.brand]);
+  if (type === 'tire') {
+    if (specs.width && specs.profile && specs.rim) specsRows.push(['ზომა', `${specs.width}/${specs.profile} ${specs.rim}`]);
+    else {
+      if (specs.width)   specsRows.push(['სიგანე', specs.width]);
+      if (specs.profile) specsRows.push(['პროფილი', specs.profile]);
+      if (specs.rim)     specsRows.push(['დიამეტრი', specs.rim]);
+    }
+    if (specs.season)       specsRows.push(['სეზონი', specs.season]);
+    if (specs.vehicle_type) specsRows.push(['ავტომობ. ტიპი', specs.vehicle_type]);
+  } else if (type === 'oil') {
+    if (specs.oil_type)    specsRows.push(['ტიპი', specs.oil_type]);
+    if (specs.viscosity)   specsRows.push(['სიბლანტე', specs.viscosity]);
+    if (specs.volume)      specsRows.push(['მოცულობა', specs.volume]);
+    if (specs.application) specsRows.push(['დანიშნულება', specs.application]);
+  } else if (type === 'filter') {
+    if (specs.filter_type) specsRows.push(['ფილტრის ტიპი', specs.filter_type]);
+    if (specs.oem)         specsRows.push(['OEM ნომერი', specs.oem]);
+    if (specs.car_make)    specsRows.push(['ავტომობ. მარკა', specs.car_make]);
+  }
+  const specsEl = document.getElementById('productSpecs');
+  if (specsEl) {
+    if (specsRows.length) {
+      specsEl.classList.remove('hidden');
+      specsEl.innerHTML = `<div class="text-[10px] font-bold tracking-[2px] text-gray-400 uppercase mb-3">სპეციფიკაცია</div>` +
+        specsRows.map(([k,v]) => `
+          <div class="flex justify-between items-center text-sm py-1.5 border-b border-gray-100">
+            <span class="text-gray-400">${k}</span>
+            <span class="font-semibold text-dark">${v}</span>
+          </div>`).join('');
+    } else {
+      specsEl.classList.add('hidden');
+    }
+  }
 
   document.getElementById('loadingState').classList.add('hidden');
   document.getElementById('productContent').classList.remove('hidden');
