@@ -890,16 +890,16 @@ function renderPage() {
   grid.innerHTML = pageItems.map(p => `
     <div class="card-hover bg-white border border-gray-300 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
-      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
         ${p.imageUrl
           ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
-        ${p.country ? `<span style="position:absolute;bottom:6px;right:7px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))" title="${p.country.split(' ').slice(1).join(' ')}">${flagImg(p.country,24)}</span>` : ''}
       </div>
       <div class="p-4 flex flex-col flex-1">
         <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${p.category||'სხვა'}</div>
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
+        ${p.country ? `<div class="flex items-center gap-1.5 mt-1.5"><span class="text-gray-400 text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-gray-600 font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
         <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
           <div>
