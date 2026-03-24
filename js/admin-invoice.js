@@ -24,6 +24,7 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
     + '<title>ინვოისი ' + invoiceNo + '</title>'
     + '<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">'
     + '<style>'
+    + '@page{margin:0}'
     + '*{box-sizing:border-box;margin:0;padding:0}'
     + 'body{font-family:\'Noto Sans Georgian\',sans-serif;color:#141210;padding:40px 48px;font-size:14px}'
     + '.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid #f3f4f6;margin-bottom:0}'

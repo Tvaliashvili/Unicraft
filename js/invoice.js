@@ -21,6 +21,7 @@ window.downloadInvoicePDF = function() {
     + '<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">'
     + '<style>'
     // ── reset & base ──
+    + '@page{margin:0}'
     + '*{box-sizing:border-box;margin:0;padding:0}'
     + 'body{font-family:\'Noto Sans Georgian\',sans-serif;color:#141210;padding:40px 48px;font-size:14px}'
     // ── header ──
