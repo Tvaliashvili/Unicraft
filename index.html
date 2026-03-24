@@ -770,20 +770,50 @@ function getSpecKeys(cat) {
   return [...new Set([...TIRE_SPECS,...OIL_SPECS,...FILTER_SPECS])];
 }
 
+const TIRE_WIDTHS   = ['155','165','175','185','195','205','215','225','235','245','255','265','275','285','295','305'];
+const TIRE_PROFILES = ['25','30','35','40','45','50','55','60','65','70','75','80'];
+const TIRE_RIMS     = ['R13','R14','R15','R16','R17','R18','R19','R20','R21','R22'];
+
 function buildSpecFilterHTML(prods, cat, isMobile) {
-  // cat may be Georgian label — derive type from product_type field
   const typeFromProds = prods.length ? (prods[0].product_type || '') : '';
   const resolvedType = cat ? typeFromProds : '';
   const keys = getSpecKeys(resolvedType || cat);
   const idSuffix = isMobile ? '_m' : '';
+  const isTire = (resolvedType || cat) === 'tire';
   let html = '';
+
+  // Tire size: dedicated 3-column block
+  if (isTire) {
+    const sw = activeSpecs['width'] || '', sp = activeSpecs['profile'] || '', sr = activeSpecs['rim'] || '';
+    html += `<div class="mb-4">
+      <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">ზომა</div>
+      <div class="grid grid-cols-3 gap-1">
+        <select onchange="setSpecFilter('width',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
+          <option value="">სიგ.</option>
+          ${TIRE_WIDTHS.map(v=>`<option value="${v}"${v===sw?' selected':''}>${v}</option>`).join('')}
+        </select>
+        <select onchange="setSpecFilter('profile',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
+          <option value="">პროფ.</option>
+          ${TIRE_PROFILES.map(v=>`<option value="${v}"${v===sp?' selected':''}>${v}</option>`).join('')}
+        </select>
+        <select onchange="setSpecFilter('rim',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
+          <option value="">დიამ.</option>
+          ${TIRE_RIMS.map(v=>`<option value="${v}"${v===sr?' selected':''}>${v}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }
+
+  // Other spec filters (skip width/profile/rim for tires — handled above)
+  const skipKeys = isTire ? new Set(['width','profile','rim']) : new Set();
   keys.forEach(key => {
+    if (skipKeys.has(key)) return;
     const vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
     if (vals.length < 2) return;
     const sel = activeSpecs[key] || '';
     html += `<div class="mb-4">
       <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
-      <select onchange="setSpecFilter('${key}',this.value)" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-600 outline-none focus:border-orange bg-white">
+      <select onchange="setSpecFilter('${key}',this.value)" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
         <option value="">ყველა</option>
         ${vals.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
       </select>
