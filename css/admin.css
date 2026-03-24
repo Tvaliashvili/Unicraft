@@ -124,7 +124,7 @@ body {
 }
 
 .sidebar-logo span { color: var(--orange); }
-.sidebar-subtitle { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 2px; }
+.sidebar-subtitle { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 4px; }
 
 .nav { padding: 12px 0; flex: 1; }
 
