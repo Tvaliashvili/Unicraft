@@ -1707,7 +1707,7 @@ function renderProductRows(rows) {
 
   const sectionHTML = (id, title, count, color, rows, defaultOpen) => {
     const isActiveSec = id === 'sec-active';
-    const bulkLabel = isActiveSec ? 'ყველა მონიშნული OFF' : 'ყველა მონიშნული ✓ აქტ.';
+    const bulkLabel = isActiveSec ? 'ყველა მონიშნული OFF' : 'ყველა მონიშნული ON';
     const bulkAction = isActiveSec ? `bulkDeactivate('${id}')` : `bulkActivate('${id}')`;
     const bulkStyle = isActiveSec
       ? 'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa'
