@@ -184,7 +184,7 @@
           <span class="card-title">ბოლო შეკვეთები</span>
           <button class="btn btn-secondary btn-sm" onclick="showPage('orders')">ყველა →</button>
         </div>
-        <div class="order-row table-header" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px;align-items:center">
+        <div class="order-row table-header" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px;align-items:center;justify-items:center;text-align:center">
           <span>თარიღი</span>
           <span>ინვ. ნომ.</span>
           <span>მყიდველი</span>
@@ -486,7 +486,7 @@
       </div>
       <div id="orderStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px"></div>
       <div class="card" style="overflow-x:auto">
-        <div class="order-row table-header" style="grid-template-columns:90px 140px minmax(120px,auto) minmax(90px,auto) minmax(90px,auto) minmax(140px,auto) 90px 110px 36px;align-items:center;min-width:900px">
+        <div class="order-row table-header" style="grid-template-columns:90px 140px minmax(120px,auto) minmax(90px,auto) minmax(90px,auto) minmax(140px,auto) 90px 110px 36px;align-items:center;justify-items:center;text-align:center;min-width:900px">
           <span>თარიღი</span>
           <span>ინვ. ნომ.</span>
           <span>მყიდველი</span>
@@ -1237,7 +1237,7 @@ function renderRecentOrders(rows) {
   el.innerHTML = rows.map(o => {
     const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
     const status = o.status || 'pending';
-    return `<div class="order-row" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px;align-items:center;cursor:pointer" onclick="showPage('orders')">
+    return `<div class="order-row" style="grid-template-columns:90px 140px 160px 110px 120px 170px 85px 110px;align-items:center;justify-items:center;text-align:center;cursor:pointer" onclick="showPage('orders')">
       <span style="font-size:12px;color:var(--gray-mid)">${date}</span>
       <span style="font-family:monospace;font-size:12px;font-weight:600">${o.invoice_no || '–'}</span>
       <span style="font-weight:600;font-size:13px">${o.buyer_name || '–'}</span>
@@ -2058,7 +2058,7 @@ const DEMO_ORDERS = [];
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
   const status = o.status || 'pending';
-  return `<div class="order-row" style="grid-template-columns:90px 140px minmax(120px,auto) minmax(90px,auto) minmax(90px,auto) minmax(140px,auto) 90px 110px 36px;min-width:900px;cursor:pointer;align-items:center" onclick="openOrderModal('${id}')"
+  return `<div class="order-row" style="grid-template-columns:90px 140px minmax(120px,auto) minmax(90px,auto) minmax(90px,auto) minmax(140px,auto) 90px 110px 36px;min-width:900px;cursor:pointer;align-items:center;justify-items:center;text-align:center" onclick="openOrderModal('${id}')"
     onmouseover="this.querySelector('.del-btn-wrap').style.background='var(--gray-light)'" onmouseout="this.querySelector('.del-btn-wrap').style.background='transparent'">
     <span style="font-size:12px;color:var(--gray-mid)">${dateStr}</span>
     <span style="font-family:monospace;font-size:12px;color:var(--dark);font-weight:600">${o.invoice_no || o.invoiceNo || '–'}</span>
