@@ -425,10 +425,15 @@ tailwind.config = {
   <div id="chatPanel" style="width:320px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;overflow:hidden">
     <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
+        <div id="chatStatusDot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
         <span style="color:white;font-weight:700;font-size:13px;font-family:'Noto Sans Georgian',sans-serif">UniCraft · მხარდაჭერა</span>
       </div>
       <button onclick="toggleChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
+    </div>
+    <div id="chatOffHours" style="display:none;padding:24px 18px;font-family:'Noto Sans Georgian',sans-serif;text-align:center;flex-direction:column;align-items:center;gap:14px">
+      <div style="font-size:32px">🕘</div>
+      <div style="font-size:14px;font-weight:700;color:#1A1714">ჩვენ ამჟამად არ ვმუშაობთ</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.7"><strong style="color:#1A1714">სამუშაო საათები:</strong><br><strong style="color:#E8541A">09:00 – 20:00</strong></div>
     </div>
     <div id="chatIntro" style="padding:20px 18px;display:flex;flex-direction:column;gap:14px;font-family:'Noto Sans Georgian',sans-serif">
       <p style="font-size:13px;color:#374151;line-height:1.6;margin:0">გამარჯობა! 👋 სასაუბროდ გთხოვთ შეიყვანოთ თქვენი <strong>სახელი</strong> და <strong>ტელეფონის ნომერი</strong>.</p>
@@ -834,6 +839,20 @@ let _chatUserName = chatUserInfo?.name || '', _chatUserPhone = chatUserInfo?.pho
 let _customerIp = null;
 fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => { _customerIp = d.ip; }).catch(() => {});
 
+function isWorkingHours() {
+  const now = new Date();
+  const tbilisiHour = (now.getUTCHours() + 4) % 24;
+  return tbilisiHour >= 9 && tbilisiHour < 20;
+}
+
+window.toggleDelivery = function() {
+  const dp = document.getElementById('deliveryPanel');
+  const isOpen = dp.classList.contains('panel-open');
+  dp.classList.toggle('panel-open', !isOpen);
+  document.getElementById('deliveryIcon').style.display = isOpen ? '' : 'none';
+  document.getElementById('deliveryCloseIcon').style.display = isOpen ? 'none' : '';
+};
+
 window.toggleChat = function() {
   chatOpen = !chatOpen;
   const panel = document.getElementById('chatPanel');
@@ -850,13 +869,21 @@ window.toggleChat = function() {
   document.getElementById('chatCloseIcon').style.display = chatOpen ? '' : 'none';
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
-    if (chatUserInfo) {
+    document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
+    if (!isWorkingHours()) {
+      document.getElementById('chatOffHours').style.display = 'flex';
+      document.getElementById('chatOffHours').style.flexDirection = 'column';
+      document.getElementById('chatIntro').style.display = 'none';
+      document.getElementById('chatBody').style.display = 'none';
+    } else if (chatUserInfo) {
+      document.getElementById('chatOffHours').style.display = 'none';
       document.getElementById('chatIntro').style.display = 'none';
       document.getElementById('chatBody').style.display = 'flex';
       document.getElementById('chatBody').style.flexDirection = 'column';
       document.getElementById('chatInput').focus();
       initChatSession();
     } else {
+      document.getElementById('chatOffHours').style.display = 'none';
       document.getElementById('chatIntro').style.display = 'flex';
       document.getElementById('chatIntro').style.flexDirection = 'column';
       document.getElementById('chatBody').style.display = 'none';
@@ -949,6 +976,10 @@ function showChatBanned() {
 }
 
 window.restartChat = async function() {
+  if (_customerIp) {
+    const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();
+    if (banCheck) { showChatBanned(); return; }
+  }
   chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
   localStorage.setItem('uc_chat_session', chatSessionId);
   chatUserInfo = null; localStorage.removeItem('uc_chat_user');
