@@ -724,7 +724,9 @@ function flagImg(country, size=20) {
   return `<img src="https://flagcdn.com/w40/${code}.png" width="${size}" height="${Math.round(size*0.75)}" alt="${name}" style="border-radius:2px;display:inline-block;vertical-align:middle;object-fit:cover">`;
 }
 const CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები' };
+const CAT_TYPE = { 'საბურავები':'tire', 'ზეთები':'oil', 'ფილტრები':'filter' };
 function catLabel(cat) { return CAT_DISPLAY[cat] || cat || 'სხვა'; }
+function prodCat(p) { return p.product_type || CAT_TYPE[p.category] || p.category || ''; }
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
 document.getElementById('cartCount').textContent = cart.length;
@@ -813,7 +815,7 @@ window.setSpecFilter = function(key, val) {
   if (val) activeSpecs[key] = val; else delete activeSpecs[key];
   applyFilters();
   // re-render spec filters to keep selects in sync
-  const prods = allProducts.filter(p => !activeCategory || p.category === activeCategory);
+  const prods = allProducts.filter(p => !activeCategory || prodCat(p) === activeCategory);
   const d = document.getElementById('sidebarSpecs');
   if (d) d.innerHTML = buildSpecFilterHTML(prods, activeCategory, false);
   const m = document.getElementById('mobileFilterSpecs');
@@ -847,9 +849,9 @@ const MOCK_PRODUCTS = [];
 
 
 function buildSidebar() {
-  const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+  const cats = [...new Set(allProducts.map(p => prodCat(p)).filter(Boolean))];
   const counts = {};
-  allProducts.forEach(p => { counts[p.category] = (counts[p.category]||0)+1; });
+  allProducts.forEach(p => { const c = prodCat(p); counts[c] = (counts[c]||0)+1; });
 
   // Desktop sidebar
   const el = document.getElementById('sidebarCats');
@@ -864,7 +866,7 @@ function buildSidebar() {
   el.innerHTML = allBtn + catBtns;
 
   // Spec filters
-  const specProds = allProducts.filter(p => !activeCategory || p.category === activeCategory);
+  const specProds = allProducts.filter(p => !activeCategory || prodCat(p) === activeCategory);
   const specHtml = buildSpecFilterHTML(specProds, activeCategory, false);
   const sd = document.getElementById('sidebarSpecs');
   if (sd) sd.innerHTML = specHtml;
@@ -970,7 +972,7 @@ window.goPage = function(page) {
 
 function applyFilters() {
   let list = allProducts;
-  if (activeCategory) list = list.filter(p => p.category === activeCategory);
+  if (activeCategory) list = list.filter(p => prodCat(p) === activeCategory);
   if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
   Object.entries(activeSpecs).forEach(([key, val]) => {
