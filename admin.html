@@ -1243,18 +1243,18 @@ function renderRecentOrders(rows) {
   el.innerHTML = rows.map(o => {
     const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
     const status = o.status || 'pending';
-    const td = 'style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:13px"';
+    const td = 'style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"';
     return `<tr style="cursor:pointer" onclick="showPage('orders')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--gray-mid)">${date}</td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:12px;font-weight:600">${o.invoice_no || '–'}</td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:13px">${o.buyer_name || '–'}</td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || '–'}</td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border)">
-        ${o.assigned_name ? `<span style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>` : '<span style="color:var(--gray-mid);font-size:12px">–</span>'}
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid)">${date}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600">${o.invoice_no || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
+        ${o.assigned_name ? `<span style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>` : '<span style="color:var(--gray-mid);font-size:11px">–</span>'}
       </td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:13px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
-      <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border)"><span class="order-status status-${status}">${statusLabel(status)}</span></td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)"><span class="order-status status-${status}">${statusLabel(status)}</span></td>
     </tr>`;
   }).join('');
 }
@@ -2065,22 +2065,22 @@ const DEMO_ORDERS = [];
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
   const status = o.status || 'pending';
-  const td = `style="padding:12px;text-align:center;border-bottom:1px solid var(--border)"`;
+  const td = `style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"`;
   return `<tr style="cursor:pointer" onclick="openOrderModal('${id}')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:13px">${o.buyer_name || o.buyerName || '–'}</td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border)">
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || o.buyerName || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
       ${o.assigned_name
         ? `<span id="assigned-badge-${id}" style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>`
         : `<span id="assigned-badge-${id}" style="display:none;font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600"></span>`}
     </td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:13px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border)"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></td>
-    <td ${td} style="padding:12px;text-align:center;border-bottom:1px solid var(--border)">
-      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:16px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">✕</button>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
+      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">✕</button>
     </td>
   </tr>`;
 }
