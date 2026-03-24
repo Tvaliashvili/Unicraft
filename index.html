@@ -793,7 +793,7 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
   keys.forEach(key => {
     if (skipKeys.has(key)) return;
     const vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
-    if (vals.length < 2) return;
+    if (vals.length < 1) return;
     const sel = activeSpecs[key] || '';
     html += `<div class="mb-4">
       <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
@@ -854,11 +854,14 @@ function buildSidebar() {
 
   // Desktop sidebar
   const el = document.getElementById('sidebarCats');
-  const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full text-left">ყველა <span class="text-xs text-dark font-normal">${allProducts.length}</span></button>`;
-  const catBtns = cats.map(c => `
-    <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm text-dark hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full text-left transition-all">
-      <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs text-dark font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
-    </button>`).join('');
+  const allActive = !activeCategory;
+  const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold w-full text-left border-l-2 ${allActive ? 'text-orange bg-orange-light border-orange' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">ყველა <span class="text-xs font-normal">${allProducts.length}</span></button>`;
+  const catBtns = cats.map(c => {
+    const active = activeCategory === c;
+    return `<button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm w-full text-left border-l-2 ${active ? 'text-orange bg-orange-light border-orange font-bold' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">
+      <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
+    </button>`;
+  }).join('');
   el.innerHTML = allBtn + catBtns;
 
   // Spec filters
@@ -870,11 +873,14 @@ function buildSidebar() {
   // Mobile filter cats
   const mel = document.getElementById('mobileFilterCats');
   if (mel) {
-    const mAllBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat text-left px-3 py-1.5 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full">ყველა (${allProducts.length})</button>`;
-    const mCatBtns = cats.map(c => `
-      <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm text-dark hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full transition-all">
-        ${c} <span class="text-xs text-dark">${counts[c]||0}</span>
-      </button>`).join('');
+    const mAllActive = !activeCategory;
+    const mAllBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat text-left px-3 py-1.5 text-sm font-bold w-full border-l-2 ${mAllActive ? 'text-orange bg-orange-light border-orange' : 'text-dark border-transparent'} transition-all">ყველა (${allProducts.length})</button>`;
+    const mCatBtns = cats.map(c => {
+      const active = activeCategory === c;
+      return `<button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm w-full border-l-2 ${active ? 'text-orange bg-orange-light border-orange font-bold' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">
+        ${catLabel(c)} <span class="text-xs">${counts[c]||0}</span>
+      </button>`;
+    }).join('');
     mel.innerHTML = mAllBtn + mCatBtns;
   }
   const mSpecHtml = buildSpecFilterHTML(specProds, activeCategory, true);
@@ -988,12 +994,6 @@ window.setCategory = function(el, cat) {
 window.setSidebarCat = function(el, cat) {
   activeCategory = cat;
   activeSpecs = {};
-  document.querySelectorAll('.sidebar-cat').forEach(t => {
-    t.classList.remove('text-orange','bg-orange-light','border-orange','font-bold');
-    t.classList.add('text-gray-500','bg-transparent','border-transparent');
-  });
-  el.classList.remove('text-gray-500','bg-transparent','border-transparent');
-  el.classList.add('text-orange','bg-orange-light','border-orange','font-bold');
   buildSidebar();
   applyFilters();
 };
