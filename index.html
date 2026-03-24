@@ -332,17 +332,17 @@ tailwind.config = {
     <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">ფასი</div>
     <div class="flex items-end gap-2 mt-1">
       <div class="flex-1">
-        <div class="text-[10px] font-semibold text-gray-600 mb-1 text-center">საწყისი</div>
+        <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
         <input type="number" id="mobilePriceMin" min="0" oninput="updatePriceInputs()"
           class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
       </div>
-      <span class="text-gray-300 flex-shrink-0 pb-2">—</span>
+      <span class="text-dark flex-shrink-0 pb-2">—</span>
       <div class="flex-1">
-        <div class="text-[10px] font-semibold text-gray-600 mb-1 text-center">ბოლო</div>
+        <div class="text-[10px] font-semibold text-dark mb-1 text-center">ბოლო</div>
         <input type="number" id="mobilePriceMax" min="0" oninput="updatePriceInputs()"
           class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
       </div>
-      <span class="text-gray-400 flex-shrink-0 text-sm pb-2">₾</span>
+      <span class="text-dark flex-shrink-0 text-sm pb-2">₾</span>
     </div>
   </div>
 </div>
@@ -368,17 +368,17 @@ tailwind.config = {
       <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">ფასი</div>
       <div class="flex items-end gap-2 mt-1">
         <div class="flex-1">
-          <div class="text-[10px] font-semibold text-gray-600 mb-1 text-center">საწყისი</div>
+          <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
           <input type="number" id="sidebarPriceMin" min="0" oninput="updatePriceInputs()"
             class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
         </div>
-        <span class="text-gray-300 flex-shrink-0 pb-2">—</span>
+        <span class="text-dark flex-shrink-0 pb-2">—</span>
         <div class="flex-1">
-          <div class="text-[10px] font-semibold text-gray-600 mb-1 text-center">ბოლო</div>
+          <div class="text-[10px] font-semibold text-dark mb-1 text-center">ბოლო</div>
           <input type="number" id="sidebarPriceMax" min="0" oninput="updatePriceInputs()"
             class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
         </div>
-        <span class="text-gray-400 flex-shrink-0 text-sm pb-2">₾</span>
+        <span class="text-dark flex-shrink-0 text-sm pb-2">₾</span>
       </div>
     </div>
 
@@ -705,7 +705,7 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
     if (vals.length < 2) return;
     const sel = activeSpecs[key] || '';
     html += `<div class="mb-4">
-      <div class="text-[10px] font-bold tracking-[2px] text-gray-500 uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
+      <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
       <select onchange="setSpecFilter('${key}',this.value)" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-600 outline-none focus:border-orange bg-white">
         <option value="">ყველა</option>
         ${vals.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
@@ -748,7 +748,7 @@ function getCardSpecs(p) {
   if (!rows.length) return '';
   return `<div class="mt-1.5 mb-2 space-y-0.5">${rows.map(([k,v])=>`
     <div class="flex items-center gap-1 text-[11px]">
-      <span class="text-gray-500">${k}:</span>
+      <span class="text-dark">${k}:</span>
       <span class="text-dark font-medium">${v}</span>
     </div>`).join('')}</div>`;
 }
@@ -763,10 +763,10 @@ function buildSidebar() {
 
   // Desktop sidebar
   const el = document.getElementById('sidebarCats');
-  const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full text-left">ყველა <span class="text-xs text-gray-400 font-normal">${allProducts.length}</span></button>`;
+  const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full text-left">ყველა <span class="text-xs text-dark font-normal">${allProducts.length}</span></button>`;
   const catBtns = cats.map(c => `
-    <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full text-left transition-all">
-      <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs text-gray-400 font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
+    <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm text-dark hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full text-left transition-all">
+      <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs text-dark font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
     </button>`).join('');
   el.innerHTML = allBtn + catBtns;
 
@@ -781,8 +781,8 @@ function buildSidebar() {
   if (mel) {
     const mAllBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat text-left px-3 py-1.5 text-sm font-bold text-orange bg-orange-light border-l-2 border-orange w-full">ყველა (${allProducts.length})</button>`;
     const mCatBtns = cats.map(c => `
-      <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm text-gray-500 hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full transition-all">
-        ${c} <span class="text-xs text-gray-400">${counts[c]||0}</span>
+      <button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm text-dark hover:text-orange hover:bg-orange-light border-l-2 border-transparent hover:border-orange w-full transition-all">
+        ${c} <span class="text-xs text-dark">${counts[c]||0}</span>
       </button>`).join('');
     mel.innerHTML = mAllBtn + mCatBtns;
   }
@@ -825,11 +825,11 @@ function renderPage() {
         <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${catLabel(p.category)}</div>
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
-        ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-gray-500 text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
+        ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
         <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
           <div>
-            ${p.oldPrice ? `<div class="text-xs text-gray-300 line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
+            ${p.oldPrice ? `<div class="text-xs text-dark line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
             ${fmtPrice(p.price, p.unit)}
           </div>
           <button onclick="event.stopPropagation();addToCart('${p.id}')"
