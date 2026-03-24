@@ -758,29 +758,137 @@
     </div>
     <div class="product-form">
       <input type="hidden" id="editProdId">
+      <input type="hidden" id="editProdType">
       <div style="padding:10px 20px 0;display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--gray-mid)">პროდუქტის კოდი:</span>
         <span id="editCodeDisplay" style="font-family:monospace;font-size:14px;font-weight:700;color:var(--gray-dark);background:var(--gray-light);padding:2px 10px;border-radius:6px;letter-spacing:1px"></span>
       </div>
-      <div class="form-grid">
+      <!-- Type selector -->
+      <div style="padding:16px 20px 0">
+        <div class="form-label" style="margin-bottom:10px">პროდუქტის ტიპი</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button id="editTypeBtn_tire" onclick="editSelectType('tire')" style="flex:1;min-width:90px;padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--dark);transition:all 0.15s">
+            <span style="font-size:28px">🛞</span>საბურავი
+          </button>
+          <button id="editTypeBtn_oil" onclick="editSelectType('oil')" style="flex:1;min-width:90px;padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--dark);transition:all 0.15s">
+            <span style="font-size:28px">🛢️</span>ზეთი
+          </button>
+          <button id="editTypeBtn_filter" onclick="editSelectType('filter')" style="flex:1;min-width:90px;padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--dark);transition:all 0.15s">
+            <span style="font-size:28px">🔧</span>ფილტრი
+          </button>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:8px">
+        <!-- Name -->
         <div class="form-group">
           <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
-          <input class="form-input" id="editName" placeholder="მაგ: ცემენტი M400">
+          <input class="form-input" id="editName" placeholder="მაგ: Michelin Pilot Sport 4">
         </div>
+        <!-- Brand -->
         <div class="form-group">
-          <label class="form-label">კატეგორია <span class="required">*</span></label>
-          <select class="form-select" id="editCategory">
-            <option value="">კატეგორია...</option>
+          <label class="form-label">ბრენდი</label>
+          <select class="form-select" id="editBrand"><option value="">ბრენდი...</option></select>
+        </div>
+        <!-- TIRE specs -->
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">სიგანე</label>
+          <select class="form-select" id="editSpecWidth">
+            <option value="">სიგანე...</option>
+            <option>155</option><option>165</option><option>175</option><option>185</option><option>195</option><option>205</option><option>215</option><option>225</option><option>235</option><option>245</option><option>255</option><option>265</option><option>275</option><option>285</option><option>295</option><option>305</option>
           </select>
         </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">პროფილი</label>
+          <select class="form-select" id="editSpecProfile">
+            <option value="">პროფილი...</option>
+            <option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option><option>60</option><option>65</option><option>70</option><option>75</option><option>80</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">დიამეტრი (R)</label>
+          <select class="form-select" id="editSpecRim">
+            <option value="">დიამეტრი...</option>
+            <option>R13</option><option>R14</option><option>R15</option><option>R16</option><option>R17</option><option>R18</option><option>R19</option><option>R20</option><option>R21</option><option>R22</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">სეზონი</label>
+          <select class="form-select" id="editSpecSeason">
+            <option value="">სეზონი...</option>
+            <option>საზაფხულო</option><option>საზამთრო</option><option>ყოვლი სეზონი</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">ავტომობილის ტიპი</label>
+          <select class="form-select" id="editSpecVehicleType">
+            <option value="">ტიპი...</option>
+            <option>სამგზავრო</option><option>SUV / 4x4</option><option>სატვირთო</option>
+          </select>
+        </div>
+        <!-- OIL specs -->
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">ტიპი</label>
+          <select class="form-select" id="editSpecOilType">
+            <option value="">ტიპი...</option>
+            <option>სინთეტიკური</option><option>ნახევრად სინთეტიკური</option><option>მინერალური</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">სიბლანტე</label>
+          <select class="form-select" id="editSpecViscosity">
+            <option value="">სიბლანტე...</option>
+            <option>0W-20</option><option>5W-30</option><option>5W-40</option><option>10W-30</option><option>10W-40</option><option>15W-40</option><option>20W-50</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">მოცულობა</label>
+          <select class="form-select" id="editSpecVolume">
+            <option value="">მოცულობა...</option>
+            <option>1 ლ</option><option>4 ლ</option><option>5 ლ</option><option>10 ლ</option><option>20 ლ</option><option>60 ლ</option><option>205 ლ</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">დანიშნულება</label>
+          <select class="form-select" id="editSpecOilApp">
+            <option value="">დანიშნულება...</option>
+            <option>ძრავი</option><option>გადაცემათა კოლოფი</option><option>ჰიდრავლიკა</option><option>სამუხრუჭე</option>
+          </select>
+        </div>
+        <!-- FILTER specs -->
+        <div class="form-group edit-specs-filter" style="display:none">
+          <label class="form-label">ტიპი</label>
+          <select class="form-select" id="editSpecFilterType">
+            <option value="">ტიპი...</option>
+            <option>ზეთის ფილტრი</option><option>საჰაერო ფილტრი</option><option>საწვავის ფილტრი</option><option>სალონის ფილტრი</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-filter" style="display:none">
+          <label class="form-label">OEM ნომერი</label>
+          <input class="form-input" id="editSpecOEM" placeholder="მაგ: 90915-YZZD2">
+        </div>
+        <div class="form-group edit-specs-filter" style="display:none">
+          <label class="form-label">ავტომობილის მარკა</label>
+          <input class="form-input" id="editSpecCarMake" placeholder="მაგ: Toyota, BMW">
+        </div>
+        <!-- Country -->
+        <div class="form-group">
+          <label class="form-label">წარმოშობის ქვეყანა</label>
+          <select class="form-select" id="editCountry">
+            <option value="">ქვეყანა...</option>
+            <option>🇩🇪 გერმანია</option><option>🇫🇷 საფრანგეთი</option><option>🇯🇵 იაპონია</option><option>🇺🇸 აშშ</option><option>🇮🇹 იტალია</option><option>🇰🇷 სამხრეთ კორეა</option><option>🇬🇧 ბრიტანეთი</option><option>🇳🇱 ნიდერლანდი</option><option>🇷🇺 რუსეთი</option><option>🇨🇳 ჩინეთი</option><option>🇹🇷 თურქეთი</option><option>🇦🇹 ავსტრია</option><option>🇸🇪 შვედეთი</option><option>🇨🇿 ჩეხეთი</option><option>🇵🇱 პოლონეთი</option><option>🇧🇪 ბელგია</option><option>🇮🇳 ინდოეთი</option><option>🇧🇷 ბრაზილია</option><option>🇺🇦 უკრაინა</option><option>🇬🇪 საქართველო</option>
+          </select>
+        </div>
+        <!-- Price -->
         <div class="form-group">
           <label class="form-label">ფასი (₾) <span class="required">*</span></label>
           <input class="form-input" id="editPrice" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
+        <!-- Unit -->
         <div class="form-group">
           <label class="form-label">ერთეული</label>
           <select class="form-select" id="editUnit">
             <option value="ც">ცალი</option>
+            <option value="ლ">ლიტრი</option>
             <option value="კგ">კგ</option>
             <option value="ტ">ტონა</option>
             <option value="მ²">მ²</option>
@@ -790,10 +898,12 @@
             <option value="ტომ">ტომარა</option>
           </select>
         </div>
+        <!-- Description -->
         <div class="form-group full">
           <label class="form-label">აღწერა</label>
-          <textarea class="form-input" id="editDescRows" rows="4" placeholder="დამატებითი ინფორმაცია..." style="width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px"></textarea>
+          <textarea class="form-input" id="editDescRows" rows="3" placeholder="დამატებითი ინფორმაცია..." style="width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px"></textarea>
         </div>
+        <!-- Image -->
         <div class="form-group full">
           <label class="form-label">ფოტო</label>
           <input type="hidden" id="editExistingImage">
@@ -803,7 +913,7 @@
             onclick="openFilePickerMenu('edit')"
             ondragover="event.preventDefault();this.classList.add('drag-over')"
             ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'edit')">`
+            ondrop="handleDrop(event,'edit')">
             <div id="editPreview">
               <div class="dropzone-icon">📷</div>
               <div class="dropzone-text">ფოტო ჩააგდე ან დააჭირე ასარჩევად</div>
@@ -811,7 +921,6 @@
             </div>
           </div>
         </div>
-
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" id="saveEditBtn" onclick="saveProductEdit()">✓ შენახვა</button>
@@ -1292,6 +1401,13 @@ async function loadBrands(type) {
   renderBrandList();
 }
 
+async function loadEditBrands(type, selectedBrand) {
+  const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
+  const brands = data || [];
+  const opts = '<option value="">ბრენდი...</option>' + brands.map(b => `<option value="${b.name}"${b.name === selectedBrand ? ' selected' : ''}>${b.name}</option>`).join('');
+  document.getElementById('editBrand').innerHTML = opts;
+}
+
 function renderBrandList() {
   const el = document.getElementById('brandList');
   if (!el) return;
@@ -1326,6 +1442,25 @@ window.deleteBrand = async function(id, name) {
   await supabase.from('brands').delete().eq('id', id);
   showToast('ბრენდი წაიშალა', 'error');
   loadBrands(_currentProdType);
+};
+
+window.editSelectType = function(type, selectedBrand) {
+  document.getElementById('editProdType').value = type;
+  ['tire','oil','filter'].forEach(t => {
+    const btn = document.getElementById('editTypeBtn_' + t);
+    if (t === type) {
+      btn.style.borderColor = 'var(--orange)';
+      btn.style.background = '#fff5f0';
+      btn.style.color = 'var(--orange)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background = '#fff';
+      btn.style.color = 'var(--dark)';
+    }
+  });
+  document.querySelectorAll('.edit-specs-tire,.edit-specs-oil,.edit-specs-filter').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.edit-specs-' + type).forEach(el => el.style.display = '');
+  loadEditBrands(type, selectedBrand);
 };
 
 window.selectProdType = function(type) {
@@ -1363,7 +1498,7 @@ async function loadCategories() {
   const opts = '<option value="">კატეგორია...</option>' + _categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   const catEl = document.getElementById('prodCategory');
   if (catEl) catEl.innerHTML = opts;
-  document.getElementById('editCategory').innerHTML = opts;
+  // editCategory removed from new modal
   renderCategoryList();
 }
 
@@ -1530,8 +1665,10 @@ function productRowHTML(p, isActive) {
     <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;transition:background 0.15s" onmouseover="this.style.background='#ffedd5'" onmouseout="this.style.background='#fff7ed'" title="არააქტიურში გადატანა">OFF</button>
     <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none">🗑 წაშლა</button>`;
   const inactiveButtons = `
+    <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
+    <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
     ${bgrBtn}
-    <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;transition:background 0.15s" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" title="აქტიურში გადატანა">✓ აქტ.</button>
+    <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;transition:background 0.15s" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" title="აქტიურში გადატანა">ON</button>
     <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none" title="წაშლა">🗑 წაშლა</button>`;
   const secId = isActive ? 'sec-active' : 'sec-inactive';
   return `<div class="table-row">
@@ -1614,15 +1751,44 @@ window.editProduct = function(id) {
   const p = productCache[id];
   if (!p) return;
   editFileData = null;
+  const specs = p.specs || {};
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
-  document.getElementById('editCategory').value = p.category || '';
   document.getElementById('editPrice').value = p.price || '';
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
   document.getElementById('editFile').value = '';
+
+  // country
+  const countryEl = document.getElementById('editCountry');
+  const countryVal = p.country || '';
+  const countryOpt = Array.from(countryEl.options).find(o => o.value === countryVal);
+  countryEl.value = countryOpt ? countryVal : '';
+
+  // type + brand + specs
+  const type = p.product_type || 'tire';
+  editSelectType(type, specs.brand || '');
+
+  // populate spec fields after type switch
+  if (type === 'tire') {
+    document.getElementById('editSpecWidth').value = specs.width || '';
+    document.getElementById('editSpecProfile').value = specs.profile || '';
+    document.getElementById('editSpecRim').value = specs.rim || '';
+    document.getElementById('editSpecSeason').value = specs.season || '';
+    document.getElementById('editSpecVehicleType').value = specs.vehicle_type || '';
+  } else if (type === 'oil') {
+    document.getElementById('editSpecOilType').value = specs.oil_type || '';
+    document.getElementById('editSpecViscosity').value = specs.viscosity || '';
+    document.getElementById('editSpecVolume').value = specs.volume || '';
+    document.getElementById('editSpecOilApp').value = specs.application || '';
+  } else if (type === 'filter') {
+    document.getElementById('editSpecFilterType').value = specs.filter_type || '';
+    document.getElementById('editSpecOEM').value = specs.oem || '';
+    document.getElementById('editSpecCarMake').value = specs.car_make || '';
+  }
+
   if (p.image_url) {
     showDropPreview('edit', p.image_url);
   } else {
@@ -1638,11 +1804,30 @@ window.closeEditModal = function() {
 window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
   const name = document.getElementById('editName').value.trim();
-  const category = document.getElementById('editCategory').value;
+  const type = document.getElementById('editProdType').value;
   const price = parseFloat(document.getElementById('editPrice').value);
-  if (!name || !category || isNaN(price)) {
+  if (!name || !type || isNaN(price)) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
+  // collect specs
+  const specs = { brand: document.getElementById('editBrand').value || '' };
+  if (type === 'tire') {
+    specs.width        = document.getElementById('editSpecWidth').value;
+    specs.profile      = document.getElementById('editSpecProfile').value;
+    specs.rim          = document.getElementById('editSpecRim').value;
+    specs.season       = document.getElementById('editSpecSeason').value;
+    specs.vehicle_type = document.getElementById('editSpecVehicleType').value;
+  } else if (type === 'oil') {
+    specs.oil_type    = document.getElementById('editSpecOilType').value;
+    specs.viscosity   = document.getElementById('editSpecViscosity').value;
+    specs.volume      = document.getElementById('editSpecVolume').value;
+    specs.application = document.getElementById('editSpecOilApp').value;
+  } else if (type === 'filter') {
+    specs.filter_type = document.getElementById('editSpecFilterType').value;
+    specs.oem         = document.getElementById('editSpecOEM').value.trim();
+    specs.car_make    = document.getElementById('editSpecCarMake').value.trim();
+  }
+  const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
   try {
@@ -1652,11 +1837,15 @@ window.saveProductEdit = async function() {
       imageUrl = await uploadProductImage(editFileData);
     }
     await supabase.from('products').update({
-      name, category, price,
+      name,
+      category: TYPE_LABELS[type] || type,
+      product_type: type,
+      specs,
+      country: document.getElementById('editCountry').value || null,
+      price,
       unit: document.getElementById('editUnit').value,
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
-      active: true,
     }).eq('id', id);
     showToast('✓ პროდუქტი განახლდა!', 'success');
     closeEditModal();
