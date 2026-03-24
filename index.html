@@ -823,7 +823,7 @@ function getCardSpecs(p) {
     if (s.filter_type) rows.push(['ტიპი', s.filter_type]);
   }
   if (!rows.length) return '';
-  return `<div class="mt-1.5 mb-2 space-y-0.5">${rows.map(([k,v])=>`
+  return `<div class="mt-1.5 space-y-0.5">${rows.map(([k,v])=>`
     <div class="flex items-center gap-1 text-[11px]">
       <span class="text-dark">${k}:</span>
       <span class="text-dark font-medium">${v}</span>
