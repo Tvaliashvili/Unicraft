@@ -26,7 +26,7 @@ tailwind.config = {
 <link rel="stylesheet" href="css/index.css">
 
 </head>
-<body class="bg-cream text-dark">
+<body class="bg-cream text-dark min-h-screen flex flex-col">
 
 <!-- ══ MAINTENANCE SCREEN ══ -->
 <div id="maintenanceScreen" style="position:fixed;inset:0;background:#0E0C0A;z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;font-family:'Noto Sans Georgian',sans-serif">
@@ -337,7 +337,7 @@ tailwind.config = {
 </div>
 
 <!-- ══ MAIN CONTENT ══ -->
-<div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 flex gap-6">
+<div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 flex gap-6 flex-1 w-full">
 
   <!-- Sidebar -->
   <aside class="w-48 flex-shrink-0 hidden lg:block sticky top-20 self-start">
@@ -388,9 +388,9 @@ tailwind.config = {
 <!-- ══ TRUST BAR ══ -->
 <div class="bg-dark border-t-2 border-orange mt-8">
   <div class="trust-bar-grid max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
-    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">24 საათში მიტანა</div><div class="text-white/30 text-xs mt-0.5">თბილისში</div></div></div>
-    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">დაბალი ფასები</div><div class="text-white/30 text-xs mt-0.5">პირდაპირ გამყიდველისგან</div></div></div>
-    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">უფასო კონსულტაცია</div><div class="text-white/30 text-xs mt-0.5">568 08 25 41</div></div></div>
+    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">24 საათში მიტანა</div></div></div>
+    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">დაბალი ფასები</div></div></div>
+    <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">უფასო კონსულტაცია</div></div></div>
   </div>
 </div>
 
