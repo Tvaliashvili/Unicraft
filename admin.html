@@ -280,25 +280,37 @@
               </div>
               <!-- TIRE specs -->
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">სიგანე</label>
-                <select class="form-select" id="specWidth">
-                  <option value="">სიგანე...</option>
-                  <option>155</option><option>165</option><option>175</option><option>185</option><option>195</option><option>205</option><option>215</option><option>225</option><option>235</option><option>245</option><option>255</option><option>265</option><option>275</option><option>285</option><option>295</option><option>305</option>
-                </select>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">სიგანე<span onclick="toggleTireSpecMgr('width')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <select class="form-select" id="specWidth"><option value="">სიგანე...</option></select>
+                <div id="widthMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newWidthInput" placeholder="მაგ: 195" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('width')">
+                    <button class="btn btn-primary" onclick="addTireSpec('width')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="widthList"></div>
+                </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">პროფილი</label>
-                <select class="form-select" id="specProfile">
-                  <option value="">პროფილი...</option>
-                  <option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option><option>60</option><option>65</option><option>70</option><option>75</option><option>80</option>
-                </select>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">პროფილი<span onclick="toggleTireSpecMgr('profile')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <select class="form-select" id="specProfile"><option value="">პროფილი...</option></select>
+                <div id="profileMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newProfileInput" placeholder="მაგ: 55" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('profile')">
+                    <button class="btn btn-primary" onclick="addTireSpec('profile')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="profileList"></div>
+                </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">დიამეტრი (R)</label>
-                <select class="form-select" id="specRim">
-                  <option value="">დიამეტრი...</option>
-                  <option>R13</option><option>R14</option><option>R15</option><option>R16</option><option>R17</option><option>R18</option><option>R19</option><option>R20</option><option>R21</option><option>R22</option>
-                </select>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">დიამეტრი (R)<span onclick="toggleTireSpecMgr('rim')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <select class="form-select" id="specRim"><option value="">დიამეტრი...</option></select>
+                <div id="rimMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newRimInput" placeholder="მაგ: R17" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('rim')">
+                    <button class="btn btn-primary" onclick="addTireSpec('rim')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="rimList"></div>
+                </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
                 <label class="form-label">კოდი <span style="font-size:11px;color:var(--gray-mid);font-weight:400">(სურვილისამებრ)</span></label>
@@ -779,24 +791,15 @@
         <!-- TIRE specs -->
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">სიგანე</label>
-          <select class="form-select" id="editSpecWidth">
-            <option value="">სიგანე...</option>
-            <option>155</option><option>165</option><option>175</option><option>185</option><option>195</option><option>205</option><option>215</option><option>225</option><option>235</option><option>245</option><option>255</option><option>265</option><option>275</option><option>285</option><option>295</option><option>305</option>
-          </select>
+          <select class="form-select" id="editSpecWidth"><option value="">სიგანე...</option></select>
         </div>
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">პროფილი</label>
-          <select class="form-select" id="editSpecProfile">
-            <option value="">პროფილი...</option>
-            <option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option><option>60</option><option>65</option><option>70</option><option>75</option><option>80</option>
-          </select>
+          <select class="form-select" id="editSpecProfile"><option value="">პროფილი...</option></select>
         </div>
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">დიამეტრი (R)</label>
-          <select class="form-select" id="editSpecRim">
-            <option value="">დიამეტრი...</option>
-            <option>R13</option><option>R14</option><option>R15</option><option>R16</option><option>R17</option><option>R18</option><option>R19</option><option>R20</option><option>R21</option><option>R22</option>
-          </select>
+          <select class="form-select" id="editSpecRim"><option value="">დიამეტრი...</option></select>
         </div>
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">სეზონი</label>
@@ -1486,6 +1489,65 @@ window.deleteSeason = async function(id, name) {
   loadSeasons();
 };
 
+// ─── Tire Spec Managers (width, profile, rim) ───
+const _tireSpecData = { width: [], profile: [], rim: [] };
+const _tireSpecCfg = {
+  width:   { type: 'tire_width',   addId: 'specWidth',   editId: 'editSpecWidth',   inputId: 'newWidthInput',   listId: 'widthList',   panelId: 'widthMgrPanel',   emptyOpt: 'სიგანე...' },
+  profile: { type: 'tire_profile', addId: 'specProfile', editId: 'editSpecProfile', inputId: 'newProfileInput', listId: 'profileList', panelId: 'profileMgrPanel', emptyOpt: 'პროფილი...' },
+  rim:     { type: 'tire_rim',     addId: 'specRim',     editId: 'editSpecRim',     inputId: 'newRimInput',     listId: 'rimList',     panelId: 'rimMgrPanel',     emptyOpt: 'დიამეტრი...' },
+};
+
+async function loadTireSpec(key, pendingEditValue) {
+  const cfg = _tireSpecCfg[key];
+  const { data } = await supabase.from('brands').select('*').eq('product_type', cfg.type).order('name');
+  _tireSpecData[key] = data || [];
+  const opts = `<option value="">${cfg.emptyOpt}</option>` + _tireSpecData[key].map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  const addEl = document.getElementById(cfg.addId);
+  if (addEl) addEl.innerHTML = opts;
+  const editEl = document.getElementById(cfg.editId);
+  if (editEl) { editEl.innerHTML = opts; if (pendingEditValue) editEl.value = pendingEditValue; }
+  renderTireSpecList(key);
+}
+
+function renderTireSpecList(key) {
+  const cfg = _tireSpecCfg[key];
+  const el = document.getElementById(cfg.listId);
+  if (!el) return;
+  const items = _tireSpecData[key];
+  if (!items.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ჩანაწერი არ არის</div>'; return; }
+  el.innerHTML = items.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${s.name}</span>
+      <button onclick="deleteTireSpec('${key}','${s.id}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.toggleTireSpecMgr = function(key) {
+  const panel = document.getElementById(_tireSpecCfg[key].panelId);
+  if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+};
+
+window.addTireSpec = async function(key) {
+  const cfg = _tireSpecCfg[key];
+  const input = document.getElementById(cfg.inputId);
+  const name = input.value.trim();
+  if (!name) return;
+  if (_tireSpecData[key].find(s => s.name === name)) { showToast('უკვე არსებობს', 'error'); return; }
+  const { error } = await supabase.from('brands').insert({ product_type: cfg.type, name });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ დაემატა', 'success');
+  loadTireSpec(key);
+};
+
+window.deleteTireSpec = async function(key, id, name) {
+  if (!confirm(`"${name}" წაიშალოს?`)) return;
+  await supabase.from('brands').delete().eq('id', id);
+  showToast('წაიშალა', 'error');
+  loadTireSpec(key);
+};
+
 window.editSelectType = function(type, selectedBrand) {
   document.getElementById('editProdType').value = type;
   ['tire','oil','filter'].forEach(t => {
@@ -1503,7 +1565,7 @@ window.editSelectType = function(type, selectedBrand) {
   document.querySelectorAll('.edit-specs-tire,.edit-specs-oil,.edit-specs-filter').forEach(el => el.style.display = 'none');
   document.querySelectorAll('.edit-specs-' + type).forEach(el => el.style.display = '');
   loadEditBrands(type, selectedBrand);
-  if (type === 'tire') loadSeasons();
+  if (type === 'tire') { loadSeasons(); loadTireSpec('width'); loadTireSpec('profile'); loadTireSpec('rim'); }
 };
 
 window.selectProdType = function(type) {
@@ -1530,7 +1592,7 @@ window.selectProdType = function(type) {
   // show form
   document.getElementById('prodFormBody').style.display = 'block';
   loadBrands(type);
-  if (type === 'tire') loadSeasons();
+  if (type === 'tire') { loadSeasons(); loadTireSpec('width'); loadTireSpec('profile'); loadTireSpec('rim'); }
 };
 
 // ─── Categories ───
@@ -1819,10 +1881,10 @@ window.editProduct = function(id) {
 
   // populate spec fields after type switch
   if (type === 'tire') {
-    document.getElementById('editSpecWidth').value = specs.width || '';
-    document.getElementById('editSpecProfile').value = specs.profile || '';
-    document.getElementById('editSpecRim').value = specs.rim || '';
     loadSeasons(specs.season || '');
+    loadTireSpec('width', specs.width || '');
+    loadTireSpec('profile', specs.profile || '');
+    loadTireSpec('rim', specs.rim || '');
   } else if (type === 'oil') {
     document.getElementById('editSpecOilType').value = specs.oil_type || '';
     document.getElementById('editSpecViscosity').value = specs.viscosity || '';
