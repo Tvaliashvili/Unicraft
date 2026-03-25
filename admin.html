@@ -301,6 +301,10 @@
                 </select>
               </div>
               <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">კოდი <span style="font-size:11px;color:var(--gray-mid);font-weight:400">(სურვილისამებრ)</span></label>
+                <input class="form-input" id="specCustomCode" placeholder="ცარიელია = ავტომატური">
+              </div>
+              <div class="form-group specs-tire" style="display:none">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
                   სეზონი
                   <span onclick="toggleSeasonMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
@@ -1622,7 +1626,16 @@ window.addProduct = async function() {
       try { imageUrl = await uploadProductImage(prodFileData); }
       catch(imgErr) { showToast('ფოტო ვერ აიტვირთა — ემატება ფოტოს გარეშე', 'error'); }
     }
-    const code = await genProductCode();
+    const customCodeInput = document.getElementById('specCustomCode');
+    const customCode = customCodeInput ? customCodeInput.value.trim() : '';
+    let code;
+    if (customCode) {
+      const { data: existing } = await supabase.from('products').select('id').eq('code', customCode).maybeSingle();
+      if (existing) { showToast('ეს კოდი უკვე გამოყენებულია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return; }
+      code = customCode;
+    } else {
+      code = await genProductCode();
+    }
     const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
     const { error } = await supabase.from('products').insert({
       name,
@@ -1652,7 +1665,7 @@ window.clearForm = function() {
   _currentProdType = '';
   // reset all select/input fields
   ['prodName','prodPrice','prodBrand','prodUnit',
-   'specWidth','specProfile','specRim','specSeason',
+   'specCustomCode','specWidth','specProfile','specRim','specSeason',
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
