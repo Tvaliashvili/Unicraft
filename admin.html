@@ -267,8 +267,12 @@
                 </label>
                 <select class="form-select" id="prodBrand"><option value="">ბრენდი...</option></select>
                 <div id="brandMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                  <div style="display:flex;gap:6px;margin-bottom:10px">
-                    <input class="form-input" id="newBrandInput" placeholder="ახალი ბრენდი" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addBrand()">
+                  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+                    <input class="form-input" id="newBrandInput" placeholder="ახალი ბრენდი" style="flex:1;min-width:120px;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addBrand()">
+                    <select class="form-select" id="newBrandCountry" style="flex:1;min-width:140px;font-size:13px;padding:6px 10px">
+                      <option value="">ქვეყანა...</option>
+                      <option>🇩🇪 გერმანია</option><option>🇫🇷 საფრანგეთი</option><option>🇯🇵 იაპონია</option><option>🇺🇸 აშშ</option><option>🇮🇹 იტალია</option><option>🇰🇷 სამხრეთ კორეა</option><option>🇬🇧 ბრიტანეთი</option><option>🇳🇱 ნიდერლანდი</option><option>🇷🇺 რუსეთი</option><option>🇨🇳 ჩინეთი</option><option>🇹🇷 თურქეთი</option><option>🇦🇹 ავსტრია</option><option>🇸🇪 შვედეთი</option><option>🇨🇿 ჩეხეთი</option><option>🇵🇱 პოლონეთი</option><option>🇧🇪 ბელგია</option><option>🇮🇳 ინდოეთი</option><option>🇧🇷 ბრაზილია</option><option>🇺🇦 უკრაინა</option><option>🇬🇪 საქართველო</option>
+                    </select>
                     <button class="btn btn-primary" onclick="addBrand()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
                   </div>
                   <div id="brandList"></div>
@@ -297,18 +301,18 @@
                 </select>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">სეზონი</label>
-                <select class="form-select" id="specSeason">
-                  <option value="">სეზონი...</option>
-                  <option>ზაფხული</option><option>ზამთარი</option><option>ყველა სეზონი</option>
-                </select>
-              </div>
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">ავტომობილის ტიპი</label>
-                <select class="form-select" id="specVehicleType">
-                  <option value="">ტიპი...</option>
-                  <option>სამგზავრო</option><option>SUV / 4x4</option><option>სატვირთო</option>
-                </select>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  სეზონი
+                  <span onclick="toggleSeasonMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+                </label>
+                <select class="form-select" id="specSeason"><option value="">სეზონი...</option></select>
+                <div id="seasonMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newSeasonInput" placeholder="ახალი სეზონი" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addSeason()">
+                    <button class="btn btn-primary" onclick="addSeason()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="seasonList"></div>
+                </div>
               </div>
               <!-- OIL specs -->
               <div class="form-group specs-oil" style="display:none">
@@ -354,33 +358,6 @@
               <div class="form-group specs-filter" style="display:none">
                 <label class="form-label">ავტომობილის მარკა</label>
                 <input class="form-input" id="specCarMake" placeholder="მაგ: Toyota, BMW">
-              </div>
-              <!-- Country -->
-              <div class="form-group">
-                <label class="form-label">წარმოშობის ქვეყანა</label>
-                <select class="form-select" id="prodCountry">
-                  <option value="">ქვეყანა...</option>
-                  <option>🇩🇪 გერმანია</option>
-                  <option>🇫🇷 საფრანგეთი</option>
-                  <option>🇯🇵 იაპონია</option>
-                  <option>🇺🇸 აშშ</option>
-                  <option>🇮🇹 იტალია</option>
-                  <option>🇰🇷 სამხრეთ კორეა</option>
-                  <option>🇬🇧 ბრიტანეთი</option>
-                  <option>🇳🇱 ნიდერლანდი</option>
-                  <option>🇷🇺 რუსეთი</option>
-                  <option>🇨🇳 ჩინეთი</option>
-                  <option>🇹🇷 თურქეთი</option>
-                  <option>🇦🇹 ავსტრია</option>
-                  <option>🇸🇪 შვედეთი</option>
-                  <option>🇨🇿 ჩეხეთი</option>
-                  <option>🇵🇱 პოლონეთი</option>
-                  <option>🇧🇪 ბელგია</option>
-                  <option>🇮🇳 ინდოეთი</option>
-                  <option>🇧🇷 ბრაზილია</option>
-                  <option>🇺🇦 უკრაინა</option>
-                  <option>🇬🇪 საქართველო</option>
-                </select>
               </div>
               <!-- Price -->
               <div class="form-group">
@@ -819,17 +796,7 @@
         </div>
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">სეზონი</label>
-          <select class="form-select" id="editSpecSeason">
-            <option value="">სეზონი...</option>
-            <option>ზაფხული</option><option>ზამთარი</option><option>ყველა სეზონი</option>
-          </select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">ავტომობილის ტიპი</label>
-          <select class="form-select" id="editSpecVehicleType">
-            <option value="">ტიპი...</option>
-            <option>სამგზავრო</option><option>SUV / 4x4</option><option>სატვირთო</option>
-          </select>
+          <select class="form-select" id="editSpecSeason"><option value="">სეზონი...</option></select>
         </div>
         <!-- OIL specs -->
         <div class="form-group edit-specs-oil" style="display:none">
@@ -875,14 +842,6 @@
         <div class="form-group edit-specs-filter" style="display:none">
           <label class="form-label">ავტომობილის მარკა</label>
           <input class="form-input" id="editSpecCarMake" placeholder="მაგ: Toyota, BMW">
-        </div>
-        <!-- Country -->
-        <div class="form-group">
-          <label class="form-label">წარმოშობის ქვეყანა</label>
-          <select class="form-select" id="editCountry">
-            <option value="">ქვეყანა...</option>
-            <option>🇩🇪 გერმანია</option><option>🇫🇷 საფრანგეთი</option><option>🇯🇵 იაპონია</option><option>🇺🇸 აშშ</option><option>🇮🇹 იტალია</option><option>🇰🇷 სამხრეთ კორეა</option><option>🇬🇧 ბრიტანეთი</option><option>🇳🇱 ნიდერლანდი</option><option>🇷🇺 რუსეთი</option><option>🇨🇳 ჩინეთი</option><option>🇹🇷 თურქეთი</option><option>🇦🇹 ავსტრია</option><option>🇸🇪 შვედეთი</option><option>🇨🇿 ჩეხეთი</option><option>🇵🇱 პოლონეთი</option><option>🇧🇪 ბელგია</option><option>🇮🇳 ინდოეთი</option><option>🇧🇷 ბრაზილია</option><option>🇺🇦 უკრაინა</option><option>🇬🇪 საქართველო</option>
-          </select>
         </div>
         <!-- Price -->
         <div class="form-group">
@@ -1396,6 +1355,20 @@ window.toggleMaintenanceMode = async function() {
   });
 };
 
+// ─── Brand-Country localStorage ───
+function _getBrandCountries() {
+  try { return JSON.parse(localStorage.getItem('unicraft_brand_countries') || '{}'); } catch { return {}; }
+}
+function _saveBrandCountry(name, country) {
+  const m = _getBrandCountries(); m[name] = country;
+  localStorage.setItem('unicraft_brand_countries', JSON.stringify(m));
+}
+function _removeBrandCountry(name) {
+  const m = _getBrandCountries(); delete m[name];
+  localStorage.setItem('unicraft_brand_countries', JSON.stringify(m));
+}
+function getCountryForBrand(name) { return _getBrandCountries()[name] || ''; }
+
 // ─── Brands ───
 let _brands = [];
 let _currentProdType = '';
@@ -1403,7 +1376,8 @@ let _currentProdType = '';
 async function loadBrands(type) {
   const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
   _brands = data || [];
-  const opts = '<option value="">ბრენდი...</option>' + _brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+  const bc = _getBrandCountries();
+  const opts = '<option value="">ბრენდი...</option>' + _brands.map(b => `<option value="${b.name}" data-country="${bc[b.name]||''}">${b.name}</option>`).join('');
   document.getElementById('prodBrand').innerHTML = opts;
   renderBrandList();
 }
@@ -1411,17 +1385,19 @@ async function loadBrands(type) {
 async function loadEditBrands(type, selectedBrand) {
   const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
   const brands = data || [];
-  const opts = '<option value="">ბრენდი...</option>' + brands.map(b => `<option value="${b.name}"${b.name === selectedBrand ? ' selected' : ''}>${b.name}</option>`).join('');
+  const bc = _getBrandCountries();
+  const opts = '<option value="">ბრენდი...</option>' + brands.map(b => `<option value="${b.name}" data-country="${bc[b.name]||''}"${b.name === selectedBrand ? ' selected' : ''}>${b.name}</option>`).join('');
   document.getElementById('editBrand').innerHTML = opts;
 }
 
 function renderBrandList() {
   const el = document.getElementById('brandList');
   if (!el) return;
+  const bc = _getBrandCountries();
   if (!_brands.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ბრენდი არ არის</div>'; return; }
   el.innerHTML = _brands.map(b => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:14px">${b.name}</span>
+      <span style="font-size:14px">${b.name}${bc[b.name] ? ' <span style="font-size:12px;color:var(--gray-mid)">— '+bc[b.name]+'</span>' : ''}</span>
       <button onclick="deleteBrand('${b.id}','${b.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
@@ -1434,12 +1410,16 @@ window.toggleBrandMgr = function() {
 
 window.addBrand = async function() {
   const input = document.getElementById('newBrandInput');
+  const countryEl = document.getElementById('newBrandCountry');
   const name = input.value.trim();
+  const country = countryEl ? countryEl.value : '';
   if (!name || !_currentProdType) return;
   if (_brands.find(b => b.name.toLowerCase() === name.toLowerCase())) { showToast('ეს ბრენდი უკვე არსებობს', 'error'); return; }
   const { error } = await supabase.from('brands').insert({ product_type: _currentProdType, name });
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (country) _saveBrandCountry(name, country);
   input.value = '';
+  if (countryEl) countryEl.value = '';
   showToast('✓ ბრენდი დაემატა', 'success');
   loadBrands(_currentProdType);
 };
@@ -1447,8 +1427,59 @@ window.addBrand = async function() {
 window.deleteBrand = async function(id, name) {
   if (!confirm(`ბრენდი "${name}" წაიშალოს?`)) return;
   await supabase.from('brands').delete().eq('id', id);
+  _removeBrandCountry(name);
   showToast('ბრენდი წაიშალა', 'error');
   loadBrands(_currentProdType);
+};
+
+// ─── Seasons ───
+let _seasons = [];
+
+async function loadSeasons(pendingEditValue) {
+  const { data } = await supabase.from('brands').select('*').eq('product_type', 'tire_season').order('name');
+  _seasons = data || [];
+  const opts = '<option value="">სეზონი...</option>' + _seasons.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  const addEl = document.getElementById('specSeason');
+  if (addEl) addEl.innerHTML = opts;
+  const editEl = document.getElementById('editSpecSeason');
+  if (editEl) { editEl.innerHTML = opts; if (pendingEditValue) editEl.value = pendingEditValue; }
+  renderSeasonList();
+}
+
+function renderSeasonList() {
+  const el = document.getElementById('seasonList');
+  if (!el) return;
+  if (!_seasons.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">სეზონი არ არის</div>'; return; }
+  el.innerHTML = _seasons.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${s.name}</span>
+      <button onclick="deleteSeason('${s.id}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.toggleSeasonMgr = function() {
+  const p = document.getElementById('seasonMgrPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+};
+
+window.addSeason = async function() {
+  const input = document.getElementById('newSeasonInput');
+  const name = input.value.trim();
+  if (!name) return;
+  if (_seasons.find(s => s.name.toLowerCase() === name.toLowerCase())) { showToast('ეს სეზონი უკვე არსებობს', 'error'); return; }
+  const { error } = await supabase.from('brands').insert({ product_type: 'tire_season', name });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ სეზონი დაემატა', 'success');
+  loadSeasons();
+};
+
+window.deleteSeason = async function(id, name) {
+  if (!confirm(`სეზონი "${name}" წაიშალოს?`)) return;
+  await supabase.from('brands').delete().eq('id', id);
+  showToast('სეზონი წაიშალა', 'error');
+  loadSeasons();
 };
 
 window.editSelectType = function(type, selectedBrand) {
@@ -1468,6 +1499,7 @@ window.editSelectType = function(type, selectedBrand) {
   document.querySelectorAll('.edit-specs-tire,.edit-specs-oil,.edit-specs-filter').forEach(el => el.style.display = 'none');
   document.querySelectorAll('.edit-specs-' + type).forEach(el => el.style.display = '');
   loadEditBrands(type, selectedBrand);
+  if (type === 'tire') loadSeasons();
 };
 
 window.selectProdType = function(type) {
@@ -1494,6 +1526,7 @@ window.selectProdType = function(type) {
   // show form
   document.getElementById('prodFormBody').style.display = 'block';
   loadBrands(type);
+  if (type === 'tire') loadSeasons();
 };
 
 // ─── Categories ───
@@ -1570,7 +1603,6 @@ window.addProduct = async function() {
     specs.profile     = document.getElementById('specProfile').value;
     specs.rim         = document.getElementById('specRim').value;
     specs.season      = document.getElementById('specSeason').value;
-    specs.vehicle_type = document.getElementById('specVehicleType').value;
   } else if (_currentProdType === 'oil') {
     specs.oil_type    = document.getElementById('specOilType').value;
     specs.viscosity   = document.getElementById('specViscosity').value;
@@ -1597,7 +1629,7 @@ window.addProduct = async function() {
       category: TYPE_LABELS[_currentProdType] || _currentProdType,
       product_type: _currentProdType,
       specs,
-      country: document.getElementById('prodCountry').value || null,
+      country: getCountryForBrand(specs.brand) || null,
       price,
       unit: document.getElementById('prodUnit').value,
       description: getDescValue('prodDescRows'),
@@ -1619,8 +1651,8 @@ window.addProduct = async function() {
 window.clearForm = function() {
   _currentProdType = '';
   // reset all select/input fields
-  ['prodName','prodPrice','prodBrand','prodCountry','prodUnit',
-   'specWidth','specProfile','specRim','specSeason','specVehicleType',
+  ['prodName','prodPrice','prodBrand','prodUnit',
+   'specWidth','specProfile','specRim','specSeason',
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -1768,12 +1800,6 @@ window.editProduct = function(id) {
   document.getElementById('editCodeDisplay').textContent = p.code || '—';
   document.getElementById('editFile').value = '';
 
-  // country
-  const countryEl = document.getElementById('editCountry');
-  const countryVal = p.country || '';
-  const countryOpt = Array.from(countryEl.options).find(o => o.value === countryVal);
-  countryEl.value = countryOpt ? countryVal : '';
-
   // type + brand + specs
   const type = p.product_type || 'tire';
   editSelectType(type, specs.brand || '');
@@ -1783,8 +1809,7 @@ window.editProduct = function(id) {
     document.getElementById('editSpecWidth').value = specs.width || '';
     document.getElementById('editSpecProfile').value = specs.profile || '';
     document.getElementById('editSpecRim').value = specs.rim || '';
-    document.getElementById('editSpecSeason').value = specs.season || '';
-    document.getElementById('editSpecVehicleType').value = specs.vehicle_type || '';
+    loadSeasons(specs.season || '');
   } else if (type === 'oil') {
     document.getElementById('editSpecOilType').value = specs.oil_type || '';
     document.getElementById('editSpecViscosity').value = specs.viscosity || '';
@@ -1823,7 +1848,6 @@ window.saveProductEdit = async function() {
     specs.profile      = document.getElementById('editSpecProfile').value;
     specs.rim          = document.getElementById('editSpecRim').value;
     specs.season       = document.getElementById('editSpecSeason').value;
-    specs.vehicle_type = document.getElementById('editSpecVehicleType').value;
   } else if (type === 'oil') {
     specs.oil_type    = document.getElementById('editSpecOilType').value;
     specs.viscosity   = document.getElementById('editSpecViscosity').value;
@@ -1848,7 +1872,7 @@ window.saveProductEdit = async function() {
       category: TYPE_LABELS[type] || type,
       product_type: type,
       specs,
-      country: document.getElementById('editCountry').value || null,
+      country: getCountryForBrand(specs.brand) || null,
       price,
       unit: document.getElementById('editUnit').value,
       description: getDescValue('editDescRows'),
