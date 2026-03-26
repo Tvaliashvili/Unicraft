@@ -531,7 +531,7 @@ function renderProduct() {
   if (product.oldPrice) {
     const el = document.getElementById('productOldPrice');
     el.classList.remove('hidden');
-    el.textContent = product.oldPrice + ' ₾';
+    el.textContent = parseFloat(product.oldPrice).toFixed(2) + ' ₾';
   }
 
   if (product.badge) {
