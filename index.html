@@ -733,6 +733,7 @@ document.getElementById('cartCount').textContent = cart.length;
 let activeCategory = '';
 let activePrice = null;
 let activeSpecs = {};
+let activeDiscountOnly = false;
 let searchQ = '';
 let filteredProducts = [];
 let currentPage = 1;
@@ -790,6 +791,12 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
         </select>
       </div>
     </div>`;
+    html += `<div class="mb-4">
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" onchange="setDiscountFilter(this.checked)" ${activeDiscountOnly ? 'checked' : ''} class="w-4 h-4 accent-orange cursor-pointer">
+        <span class="text-xs font-bold text-dark">ფასდაკლება</span>
+      </label>
+    </div>`;
   }
 
   // Other spec filters (skip width/profile/rim for tires — handled above)
@@ -813,6 +820,16 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
     ${html}
   </div>`;
 }
+
+window.setDiscountFilter = function(checked) {
+  activeDiscountOnly = checked;
+  applyFilters();
+  const prods = allProducts.filter(p => !activeCategory || prodCat(p) === activeCategory);
+  const d = document.getElementById('sidebarSpecs');
+  if (d) d.innerHTML = buildSpecFilterHTML(prods, activeCategory, false);
+  const m = document.getElementById('mobileFilterSpecs');
+  if (m) m.innerHTML = buildSpecFilterHTML(prods, activeCategory, true);
+};
 
 window.setSpecFilter = function(key, val) {
   if (val) activeSpecs[key] = val; else delete activeSpecs[key];
@@ -979,6 +996,7 @@ function applyFilters() {
   if (activeCategory) list = list.filter(p => prodCat(p) === activeCategory);
   if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
+  if (activeDiscountOnly) list = list.filter(p => p.oldPrice);
   Object.entries(activeSpecs).forEach(([key, val]) => {
     if (val) list = list.filter(p => p.specs?.[key] === val);
   });
@@ -999,6 +1017,7 @@ window.setCategory = function(el, cat) {
 window.setSidebarCat = function(el, cat) {
   activeCategory = cat;
   activeSpecs = {};
+  activeDiscountOnly = false;
   buildSidebar();
   applyFilters();
 };
