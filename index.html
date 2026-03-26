@@ -1267,7 +1267,7 @@ async function loadProducts() {
       .order('created_at', { ascending: false });
     window._productsLoading = false;
     if (!error && data && data.length > 0) {
-      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
+      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
       buildSidebar();
       renderProducts(allProducts);
     } else {
