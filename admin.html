@@ -860,6 +860,11 @@
           <label class="form-label">ფასი (₾) <span class="required">*</span></label>
           <input class="form-input" id="editPrice" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
+        <!-- Discount -->
+        <div class="form-group">
+          <label class="form-label">ფასდაკლება (₾)</label>
+          <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
         <!-- Unit -->
         <div class="form-group">
           <label class="form-label">ერთეული</label>
@@ -1877,7 +1882,8 @@ window.editProduct = function(id) {
   const specs = p.specs || {};
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
-  document.getElementById('editPrice').value = p.price || '';
+  document.getElementById('editPrice').value = p.old_price || p.price || '';
+  document.getElementById('editDiscount').value = p.old_price ? p.price : '';
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
@@ -1921,8 +1927,11 @@ window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
   const name = document.getElementById('editName').value.trim();
   const type = document.getElementById('editProdType').value;
-  const price = parseFloat(document.getElementById('editPrice').value);
-  if (!name || !type || isNaN(price)) {
+  const priceRaw = parseFloat(document.getElementById('editPrice').value);
+  const discountVal = parseFloat(document.getElementById('editDiscount').value) || 0;
+  const price = discountVal > 0 ? discountVal : priceRaw;
+  const oldPrice = discountVal > 0 ? priceRaw : null;
+  if (!name || !type || isNaN(priceRaw)) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
   // collect specs
@@ -1958,6 +1967,7 @@ window.saveProductEdit = async function() {
       specs,
       country: getCountryForBrand(specs.brand) || null,
       price,
+      old_price: oldPrice,
       unit: document.getElementById('editUnit').value,
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
