@@ -534,8 +534,11 @@ function renderProduct() {
     el.textContent = parseFloat(product.oldPrice).toFixed(2) + ' ₾';
   }
 
-  if (product.badge) {
-    const b = document.getElementById('productBadge');
+  const b = document.getElementById('productBadge');
+  if (product.oldPrice) {
+    b.classList.remove('hidden');
+    b.textContent = 'ფასდაკლება';
+  } else if (product.badge) {
     b.classList.remove('hidden');
     b.textContent = product.badge;
   }
