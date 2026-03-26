@@ -382,8 +382,8 @@
               </div>
               <!-- Discount -->
               <div class="form-group">
-                <label class="form-label">ფასდაკლება (%)</label>
-                <input class="form-input" id="prodDiscount" type="number" min="0" max="100" step="1" placeholder="0">
+                <label class="form-label">ფასდაკლება (₾)</label>
+                <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
               <!-- Unit -->
               <div class="form-group">
@@ -1704,9 +1704,9 @@ window.addProduct = async function() {
       code = await genProductCode();
     }
     const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
-    const discountPct = parseFloat(document.getElementById('prodDiscount').value) || 0;
-    const finalPrice = discountPct > 0 ? parseFloat((price * (1 - discountPct / 100)).toFixed(2)) : price;
-    const oldPriceVal = discountPct > 0 ? price : null;
+    const discountPrice = parseFloat(document.getElementById('prodDiscount').value) || 0;
+    const finalPrice = discountPrice > 0 ? discountPrice : price;
+    const oldPriceVal = discountPrice > 0 ? price : null;
     const { error } = await supabase.from('products').insert({
       name,
       category: TYPE_LABELS[_currentProdType] || _currentProdType,
