@@ -487,7 +487,7 @@ async function init() {
       supabase.from('products').select('*').eq('active', true).order('created_at', { ascending: false })
     ]);
     if (perr || !product_data) { showError(); return; }
-    product = { ...product_data, imageUrl: product_data.image_url };
+    product = { ...product_data, imageUrl: product_data.image_url, oldPrice: product_data.old_price || null };
     allProducts = (allData || []).map(p => ({ ...p, imageUrl: p.image_url }));
     renderProduct();
   } catch(e) {
