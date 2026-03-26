@@ -1960,7 +1960,7 @@ window.saveProductEdit = async function() {
       btn.textContent = 'ფოტო იტვირთება...';
       imageUrl = await uploadProductImage(editFileData);
     }
-    await supabase.from('products').update({
+    const { error: updateError } = await supabase.from('products').update({
       name,
       category: TYPE_LABELS[type] || type,
       product_type: type,
@@ -1972,6 +1972,7 @@ window.saveProductEdit = async function() {
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
     }).eq('id', id);
+    if (updateError) throw new Error(updateError.message);
     showToast('✓ პროდუქტი განახლდა!', 'success');
     closeEditModal();
     loadProductsList();
