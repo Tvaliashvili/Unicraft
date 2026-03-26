@@ -770,20 +770,23 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
   // Tire size: dedicated 3-column block
   if (isTire) {
     const sw = activeSpecs['width'] || '', sp = activeSpecs['profile'] || '', sr = activeSpecs['rim'] || '';
+    const widths   = [...new Set(prods.map(p => p.specs?.width).filter(Boolean))].sort((a,b)=>+a-+b);
+    const profiles = [...new Set(prods.map(p => p.specs?.profile).filter(Boolean))].sort((a,b)=>+a-+b);
+    const rims     = [...new Set(prods.map(p => p.specs?.rim).filter(Boolean))].sort((a,b)=>+a.replace(/\D/g,'')-+b.replace(/\D/g,''));
     html += `<div class="mb-4">
       <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">ზომა</div>
       <div class="grid grid-cols-3 gap-1">
         <select onchange="setSpecFilter('width',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
           <option value="">სიგ.</option>
-          ${TIRE_WIDTHS.map(v=>`<option value="${v}"${v===sw?' selected':''}>${v}</option>`).join('')}
+          ${widths.map(v=>`<option value="${v}"${v===sw?' selected':''}>${v}</option>`).join('')}
         </select>
         <select onchange="setSpecFilter('profile',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
           <option value="">პროფ.</option>
-          ${TIRE_PROFILES.map(v=>`<option value="${v}"${v===sp?' selected':''}>${v}</option>`).join('')}
+          ${profiles.map(v=>`<option value="${v}"${v===sp?' selected':''}>${v}</option>`).join('')}
         </select>
         <select onchange="setSpecFilter('rim',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
           <option value="">დიამ.</option>
-          ${TIRE_RIMS.map(v=>`<option value="${v}"${v===sr?' selected':''}>${v}</option>`).join('')}
+          ${rims.map(v=>`<option value="${v}"${v===sr?' selected':''}>${v}</option>`).join('')}
         </select>
       </div>
     </div>`;
