@@ -271,7 +271,7 @@
                     <input class="form-input" id="newBrandInput" placeholder="ახალი ბრენდი" style="flex:1;min-width:120px;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addBrand()">
                     <select class="form-select" id="newBrandCountry" style="flex:1;min-width:140px;font-size:13px;padding:6px 10px">
                       <option value="">ქვეყანა...</option>
-                      <option>🇩🇪 გერმანია</option><option>🇫🇷 საფრანგეთი</option><option>🇯🇵 იაპონია</option><option>🇺🇸 აშშ</option><option>🇮🇹 იტალია</option><option>🇰🇷 სამხრეთ კორეა</option><option>🇬🇧 ბრიტანეთი</option><option>🇳🇱 ნიდერლანდი</option><option>🇷🇺 რუსეთი</option><option>🇨🇳 ჩინეთი</option><option>🇹🇷 თურქეთი</option><option>🇦🇹 ავსტრია</option><option>🇸🇪 შვედეთი</option><option>🇨🇿 ჩეხეთი</option><option>🇵🇱 პოლონეთი</option><option>🇧🇪 ბელგია</option><option>🇮🇳 ინდოეთი</option><option>🇧🇷 ბრაზილია</option><option>🇺🇦 უკრაინა</option><option>🇬🇪 საქართველო</option>
+                      <option>🇩🇪 გერმანია</option><option>🇫🇷 საფრანგეთი</option><option>🇯🇵 იაპონია</option><option>🇺🇸 აშშ</option><option>🇮🇹 იტალია</option><option>🇰🇷 სამხრეთ კორეა</option><option>🇬🇧 ბრიტანეთი</option><option>🇳🇱 ნიდერლანდი</option><option>🇷🇺 რუსეთი</option><option selected>🇨🇳 ჩინეთი</option><option>🇹🇷 თურქეთი</option><option>🇦🇹 ავსტრია</option><option>🇸🇪 შვედეთი</option><option>🇨🇿 ჩეხეთი</option><option>🇵🇱 პოლონეთი</option><option>🇧🇪 ბელგია</option><option>🇮🇳 ინდოეთი</option><option>🇧🇷 ბრაზილია</option><option>🇺🇦 უკრაინა</option><option>🇬🇪 საქართველო</option>
                     </select>
                     <button class="btn btn-primary" onclick="addBrand()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
                   </div>
@@ -1381,7 +1381,10 @@ function _removeBrandCountry(name) {
   const m = _getBrandCountries(); delete m[name];
   localStorage.setItem('unicraft_brand_countries', JSON.stringify(m));
 }
-function getCountryForBrand(name) { return _getBrandCountries()[name] || ''; }
+function getCountryForBrand(name) {
+  const b = _brands.find(b => b.name === name);
+  return (b && b.country) || _getBrandCountries()[name] || '';
+}
 
 // ─── Brands ───
 let _brands = [];
@@ -1390,8 +1393,7 @@ let _currentProdType = '';
 async function loadBrands(type) {
   const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
   _brands = data || [];
-  const bc = _getBrandCountries();
-  const opts = '<option value="">ბრენდი...</option>' + _brands.map(b => `<option value="${b.name}" data-country="${bc[b.name]||''}">${b.name}</option>`).join('');
+  const opts = '<option value="">ბრენდი...</option>' + _brands.map(b => `<option value="${b.name}" data-country="${b.country||''}">${b.name}</option>`).join('');
   document.getElementById('prodBrand').innerHTML = opts;
   renderBrandList();
 }
@@ -1399,19 +1401,17 @@ async function loadBrands(type) {
 async function loadEditBrands(type, selectedBrand) {
   const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
   const brands = data || [];
-  const bc = _getBrandCountries();
-  const opts = '<option value="">ბრენდი...</option>' + brands.map(b => `<option value="${b.name}" data-country="${bc[b.name]||''}"${b.name === selectedBrand ? ' selected' : ''}>${b.name}</option>`).join('');
+  const opts = '<option value="">ბრენდი...</option>' + brands.map(b => `<option value="${b.name}" data-country="${b.country||''}"${b.name === selectedBrand ? ' selected' : ''}>${b.name}</option>`).join('');
   document.getElementById('editBrand').innerHTML = opts;
 }
 
 function renderBrandList() {
   const el = document.getElementById('brandList');
   if (!el) return;
-  const bc = _getBrandCountries();
   if (!_brands.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ბრენდი არ არის</div>'; return; }
   el.innerHTML = _brands.map(b => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:14px">${b.name}${bc[b.name] ? ' <span style="font-size:12px;color:var(--gray-mid)">— '+bc[b.name]+'</span>' : ''}</span>
+      <span style="font-size:14px">${b.name}${b.country ? ' <span style="font-size:12px;color:var(--gray-mid)">— '+b.country+'</span>' : ''}</span>
       <button onclick="deleteBrand('${b.id}','${b.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
@@ -1429,11 +1429,11 @@ window.addBrand = async function() {
   const country = countryEl ? countryEl.value : '';
   if (!name || !_currentProdType) return;
   if (_brands.find(b => b.name.toLowerCase() === name.toLowerCase())) { showToast('ეს ბრენდი უკვე არსებობს', 'error'); return; }
-  const { error } = await supabase.from('brands').insert({ product_type: _currentProdType, name });
+  const { error } = await supabase.from('brands').insert({ product_type: _currentProdType, name, country: country || null });
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   if (country) _saveBrandCountry(name, country);
   input.value = '';
-  if (countryEl) countryEl.value = '';
+  if (countryEl) countryEl.value = '🇨🇳 ჩინეთი';
   showToast('✓ ბრენდი დაემატა', 'success');
   loadBrands(_currentProdType);
 };
