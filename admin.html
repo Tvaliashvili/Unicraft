@@ -382,7 +382,13 @@
               </div>
               <!-- Discount -->
               <div class="form-group">
-                <label class="form-label">ფასდაკლება (₾)</label>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  ფასდაკლება (₾)
+                  <label style="display:flex;align-items:center;gap:5px;font-weight:600;color:var(--orange);cursor:pointer;font-size:12px">
+                    <input type="checkbox" id="prodDiscountActive" style="width:14px;height:14px;cursor:pointer;accent-color:var(--orange)">
+                    გააქტიურება
+                  </label>
+                </label>
                 <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
               <!-- Unit -->
@@ -862,7 +868,13 @@
         </div>
         <!-- Discount -->
         <div class="form-group">
-          <label class="form-label">ფასდაკლება (₾)</label>
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+            ფასდაკლება (₾)
+            <label style="display:flex;align-items:center;gap:5px;font-weight:600;color:var(--orange);cursor:pointer;font-size:12px">
+              <input type="checkbox" id="editDiscountActive" style="width:14px;height:14px;cursor:pointer;accent-color:var(--orange)">
+              გააქტიურება
+            </label>
+          </label>
           <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
         <!-- Unit -->
@@ -1693,8 +1705,9 @@ window.addProduct = async function() {
     }
     const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
     const discountPrice = parseFloat(document.getElementById('prodDiscount').value) || 0;
-    const finalPrice = discountPrice > 0 ? discountPrice : price;
-    const oldPriceVal = discountPrice > 0 ? price : null;
+    const discountActive = document.getElementById('prodDiscountActive').checked;
+    const finalPrice = (discountActive && discountPrice > 0) ? discountPrice : price;
+    const oldPriceVal = (discountActive && discountPrice > 0) ? price : null;
     const { error } = await supabase.from('products').insert({
       name,
       category: TYPE_LABELS[_currentProdType] || _currentProdType,
@@ -1867,6 +1880,7 @@ window.editProduct = function(id) {
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editPrice').value = p.old_price || p.price || '';
   document.getElementById('editDiscount').value = p.old_price ? p.price : '';
+  document.getElementById('editDiscountActive').checked = !!p.old_price;
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
@@ -1912,8 +1926,9 @@ window.saveProductEdit = async function() {
   const type = document.getElementById('editProdType').value;
   const priceRaw = parseFloat(document.getElementById('editPrice').value);
   const discountVal = parseFloat(document.getElementById('editDiscount').value) || 0;
-  const price = discountVal > 0 ? discountVal : priceRaw;
-  const oldPrice = discountVal > 0 ? priceRaw : null;
+  const discountActive = document.getElementById('editDiscountActive').checked;
+  const price = (discountActive && discountVal > 0) ? discountVal : priceRaw;
+  const oldPrice = (discountActive && discountVal > 0) ? priceRaw : null;
   if (!name || !type || isNaN(priceRaw)) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
