@@ -1277,10 +1277,12 @@ window.addUnit = async function() {
 };
 
 window.deleteUnit = async function(id, label) {
-  if (!confirm(`ერთეული "${label}" წაიშალოს?`)) return;
+  if (!confirm(`ერთეული "${label}" წაიშალოს?\n\nყველა პროდუქტი ამ ერთეულით ასევე წაიშლება!`)) return;
+  await supabase.from('products').delete().eq('unit', label);
   await supabase.from('units').delete().eq('id', id);
   showToast('ერთეული წაიშალა', 'error');
   loadUnits();
+  loadProductsList();
 };
 
 // ─── Maintenance Mode ───
@@ -1437,11 +1439,13 @@ window.addBrand = async function() {
 };
 
 window.deleteBrand = async function(id, name) {
-  if (!confirm(`ბრენდი "${name}" წაიშალოს?`)) return;
+  if (!confirm(`ბრენდი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ბრენდით ასევე წაიშლება!`)) return;
+  await supabase.from('products').filter('specs->>brand', 'eq', name).delete();
   await supabase.from('brands').delete().eq('id', id);
   _removeBrandCountry(name);
   showToast('ბრენდი წაიშალა', 'error');
   loadBrands(_currentProdType);
+  loadProductsList();
 };
 
 // ─── Seasons ───
@@ -1488,10 +1492,12 @@ window.addSeason = async function() {
 };
 
 window.deleteSeason = async function(id, name) {
-  if (!confirm(`სეზონი "${name}" წაიშალოს?`)) return;
+  if (!confirm(`სეზონი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ სეზონით ასევე წაიშლება!`)) return;
+  await supabase.from('products').filter('specs->>season', 'eq', name).delete();
   await supabase.from('brands').delete().eq('id', id);
   showToast('სეზონი წაიშალა', 'error');
   loadSeasons();
+  loadProductsList();
 };
 
 // ─── Tire Spec Managers (width, profile, rim) ───
@@ -1547,10 +1553,12 @@ window.addTireSpec = async function(key) {
 };
 
 window.deleteTireSpec = async function(key, id, name) {
-  if (!confirm(`"${name}" წაიშალოს?`)) return;
+  if (!confirm(`"${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ${key === 'width' ? 'სიგანით' : key === 'profile' ? 'პროფილით' : 'დიამეტრით'} ასევე წაიშლება!`)) return;
+  await supabase.from('products').filter(`specs->>${key}`, 'eq', name).delete();
   await supabase.from('brands').delete().eq('id', id);
   showToast('წაიშალა', 'error');
   loadTireSpec(key);
+  loadProductsList();
 };
 
 window.editSelectType = function(type, selectedBrand) {
