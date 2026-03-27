@@ -1366,14 +1366,12 @@ async function loadProducts() {
 
   // Load from Supabase in background
   try {
-    const { supabase } = await import('./js/supabase-config.js');
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .order('created_at', { ascending: false });
+    const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products', {
+      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' }
+    });
+    const data = await res.json();
     window._productsLoading = false;
-    if (!error && data && data.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
       buildSidebar();
       renderProducts(allProducts);

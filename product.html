@@ -531,13 +531,15 @@ async function init() {
   saveCart();
   if (!id) { showError(); return; }
   try {
-    const [{ data: product_data, error: perr }, { data: allData, error: aerr }] = await Promise.all([
-      supabase.from('products').select('*').eq('id', id).single(),
-      supabase.from('products').select('*').eq('active', true).order('created_at', { ascending: false })
+    const FUNC = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products';
+    const APIKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo';
+    const [product_data, allData] = await Promise.all([
+      fetch(`${FUNC}?id=${id}`, { headers: { apikey: APIKEY } }).then(r => r.json()),
+      fetch(FUNC, { headers: { apikey: APIKEY } }).then(r => r.json())
     ]);
-    if (perr || !product_data) { showError(); return; }
+    if (!product_data || product_data.error) { showError(); return; }
     product = { ...product_data, imageUrl: product_data.image_url, oldPrice: product_data.old_price || null };
-    allProducts = (allData || []).map(p => ({ ...p, imageUrl: p.image_url }));
+    allProducts = (Array.isArray(allData) ? allData : []).map(p => ({ ...p, imageUrl: p.image_url }));
     renderProduct();
   } catch(e) {
     showError();
