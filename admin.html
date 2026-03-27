@@ -2873,11 +2873,14 @@ function genInvNo() {
     + '-' + Math.floor(1000 + Math.random() * 9000);
 }
 
+const _GEO_MONTHS = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+function fmtGeoDate(d) { return d.getDate() + ' ' + _GEO_MONTHS[d.getMonth()] + ', ' + d.getFullYear(); }
+
 function initInvGen() {
   invGenNo = genInvNo();
   document.getElementById('invGenNo').textContent = invGenNo;
   const d = new Date();
-  document.getElementById('invGenDate').textContent = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  document.getElementById('invGenDate').textContent = fmtGeoDate(d);
   const nameEl = document.getElementById('invGenBuyerName');
   const idEl   = document.getElementById('invGenBuyerId');
   if (nameEl) nameEl.value = '';
@@ -3012,9 +3015,7 @@ window.importFromOrder = function(id) {
     document.getElementById('invGenNo').textContent = invGenNo;
   }
   if (o.created_at) {
-    const d = new Date(o.created_at);
-    document.getElementById('invGenDate').textContent =
-      String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+    document.getElementById('invGenDate').textContent = fmtGeoDate(new Date(o.created_at));
   }
   const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
   invGenRows = items.map(item => ({
