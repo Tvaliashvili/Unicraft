@@ -2063,7 +2063,8 @@ window.bulkDeactivate = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გაუქმდეს (OFF)?`)) return;
-  await supabase.from('products').update({ active: false }).in('id', ids);
+  const { error } = await supabase.from('products').update({ active: false }).in('id', ids);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   ids.forEach(id => { if (productCache[id]) productCache[id].active = false; });
   renderProductRows(Object.values(productCache));
   showToast(`${ids.length} პროდუქტი გაუქმდა`, '');
@@ -2085,7 +2086,8 @@ window.bulkActivate = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გააქტიურდეს?`)) return;
-  await supabase.from('products').update({ active: true }).in('id', ids);
+  const { error } = await supabase.from('products').update({ active: true }).in('id', ids);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   ids.forEach(id => { if (productCache[id]) productCache[id].active = true; });
   renderProductRows(Object.values(productCache));
   showToast(`✓ ${ids.length} პროდუქტი გააქტიურდა`, 'success');
@@ -2100,14 +2102,16 @@ window.toggleSection = function(id) {
 };
 
 window.activateProduct = async function(id) {
-  await supabase.from('products').update({ active: true }).eq('id', id);
+  const { error } = await supabase.from('products').update({ active: true }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   productCache[id].active = true;
   renderProductRows(Object.values(productCache));
   showToast('✓ პროდუქტი გააქტიურდა', 'success');
 };
 
 window.deactivateProduct = async function(id) {
-  await supabase.from('products').update({ active: false }).eq('id', id);
+  const { error } = await supabase.from('products').update({ active: false }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   productCache[id].active = false;
   renderProductRows(Object.values(productCache));
   showToast('პროდუქტი გაუქმდა', '');
