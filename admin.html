@@ -1253,7 +1253,7 @@ function renderUnitList() {
   el.innerHTML = _units.map(u => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:13px"><b>${u.value}</b> — ${u.label}</span>
-      <button onclick="deleteUnit('${u.id}','${u.label.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+      <button onclick="deleteUnit('${u.label.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
 }
@@ -1276,10 +1276,12 @@ window.addUnit = async function() {
   loadUnits();
 };
 
-window.deleteUnit = async function(id, label) {
+window.deleteUnit = async function(label) {
   if (!confirm(`ერთეული "${label}" წაიშალოს?\n\nყველა პროდუქტი ამ ერთეულით ასევე წაიშლება!`)) return;
-  await supabase.from('products').delete().eq('unit', label);
-  await supabase.from('units').delete().eq('id', id);
+  const { error: pe } = await supabase.from('products').delete().eq('unit', label);
+  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const { error: be } = await supabase.from('units').delete().eq('label', label);
+  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
   showToast('ერთეული წაიშალა', 'error');
   loadUnits();
   loadProductsList();
@@ -1412,7 +1414,7 @@ function renderBrandList() {
   el.innerHTML = _brands.map(b => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:14px">${b.name}${b.country ? ' <span style="font-size:12px;color:var(--gray-mid)">— '+b.country+'</span>' : ''}</span>
-      <button onclick="deleteBrand('${b.id}','${b.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+      <button onclick="deleteBrand('${b.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
 }
@@ -1438,10 +1440,12 @@ window.addBrand = async function() {
   loadBrands(_currentProdType);
 };
 
-window.deleteBrand = async function(id, name) {
+window.deleteBrand = async function(name) {
   if (!confirm(`ბრენდი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ბრენდით ასევე წაიშლება!`)) return;
-  await supabase.from('products').filter('specs->>brand', 'eq', name).delete();
-  await supabase.from('brands').delete().eq('id', id);
+  const { error: pe } = await supabase.from('products').filter('specs->>brand', 'eq', name).delete();
+  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', _currentProdType);
+  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
   _removeBrandCountry(name);
   showToast('ბრენდი წაიშალა', 'error');
   loadBrands(_currentProdType);
@@ -1469,7 +1473,7 @@ function renderSeasonList() {
   el.innerHTML = _seasons.map(s => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:14px">${s.name}</span>
-      <button onclick="deleteSeason('${s.id}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+      <button onclick="deleteSeason('${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
 }
@@ -1491,10 +1495,12 @@ window.addSeason = async function() {
   loadSeasons();
 };
 
-window.deleteSeason = async function(id, name) {
+window.deleteSeason = async function(name) {
   if (!confirm(`სეზონი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ სეზონით ასევე წაიშლება!`)) return;
-  await supabase.from('products').filter('specs->>season', 'eq', name).delete();
-  await supabase.from('brands').delete().eq('id', id);
+  const { error: pe } = await supabase.from('products').filter('specs->>season', 'eq', name).delete();
+  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', 'tire_season');
+  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
   showToast('სეზონი წაიშალა', 'error');
   loadSeasons();
   loadProductsList();
@@ -1529,7 +1535,7 @@ function renderTireSpecList(key) {
   el.innerHTML = items.map(s => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:14px">${s.name}</span>
-      <button onclick="deleteTireSpec('${key}','${s.id}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+      <button onclick="deleteTireSpec('${key}','${s.name.replace(/'/g,"\\'")}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
     </div>
   `).join('');
 }
@@ -1552,10 +1558,13 @@ window.addTireSpec = async function(key) {
   loadTireSpec(key);
 };
 
-window.deleteTireSpec = async function(key, id, name) {
+window.deleteTireSpec = async function(key, name) {
   if (!confirm(`"${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ${key === 'width' ? 'სიგანით' : key === 'profile' ? 'პროფილით' : 'დიამეტრით'} ასევე წაიშლება!`)) return;
-  await supabase.from('products').filter(`specs->>${key}`, 'eq', name).delete();
-  await supabase.from('brands').delete().eq('id', id);
+  const { error: pe } = await supabase.from('products').filter(`specs->>${key}`, 'eq', name).delete();
+  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const cfg = _tireSpecCfg[key];
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', cfg.type);
+  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
   showToast('წაიშალა', 'error');
   loadTireSpec(key);
   loadProductsList();
