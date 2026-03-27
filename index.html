@@ -1144,8 +1144,8 @@ function closeAllPanels() {
     document.getElementById('callIcon').style.display = '';
     document.getElementById('callCloseIcon').style.display = 'none';
   }
-  if (chatOpen) {
-    chatOpen = false;
+  if (window.chatOpen) {
+    window.chatOpen = false;
     document.getElementById('chatPanel').classList.remove('panel-open');
     document.getElementById('chatIcon').style.display = '';
     document.getElementById('chatCloseIcon').style.display = 'none';
@@ -1419,7 +1419,7 @@ if (!chatSessionId) {
   localStorage.setItem('uc_chat_session', chatSessionId);
 }
 let chatChannel = null;
-let chatOpen = false;
+window.chatOpen = false;
 let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '';
 let _chatUserPhone = chatUserInfo?.phone || '';
@@ -1433,14 +1433,14 @@ function isWorkingHours() {
 }
 
 window.toggleChat = function() {
-  const wasOpen = chatOpen;
+  const wasOpen = window.chatOpen;
   closeAllPanels();
-  chatOpen = !wasOpen;
+  window.chatOpen = !wasOpen;
   const panel = document.getElementById('chatPanel');
-  panel.classList.toggle('panel-open', chatOpen);
-  document.getElementById('chatIcon').style.display = chatOpen ? 'none' : '';
-  document.getElementById('chatCloseIcon').style.display = chatOpen ? '' : 'none';
-  if (chatOpen) {
+  panel.classList.toggle('panel-open', window.chatOpen);
+  document.getElementById('chatIcon').style.display = window.chatOpen ? 'none' : '';
+  document.getElementById('chatCloseIcon').style.display = window.chatOpen ? '' : 'none';
+  if (window.chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
     document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
     if (!isWorkingHours()) {
