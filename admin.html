@@ -1953,10 +1953,19 @@ window.saveProductEdit = async function() {
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
   try {
-    let imageUrl = document.getElementById('editExistingImage').value;
+    const oldImageUrl = document.getElementById('editExistingImage').value;
+    let imageUrl = oldImageUrl;
     if (editFileData) {
       btn.textContent = 'ფოტო იტვირთება...';
       imageUrl = await uploadProductImage(editFileData);
+      if (oldImageUrl) {
+        const oldMatch = oldImageUrl.match(/\/d\/([^/?]+)/) || oldImageUrl.match(/[?&]id=([^&]+)/);
+        if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+          body: JSON.stringify({ fileId: oldMatch[1] })
+        }).catch(() => {});
+      }
     }
     const { error: updateError } = await supabase.from('products').update({
       name,
