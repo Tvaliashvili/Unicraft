@@ -133,7 +133,7 @@ tailwind.config = {
 @keyframes chatGlow { 0%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0.6)} 35%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 14px rgba(232,84,26,0)} 50%,100%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0)} }
 #deliveryToggleBtn { animation: chatGlow 4s ease-out infinite; animation-delay: 0s; }
 #chatToggleBtn { animation: chatGlow 4s ease-out infinite; animation-delay: 2s; }
-#callBtn { animation: chatGlow 4s ease-out infinite; animation-delay: 1s; }
+#callToggleBtn { animation: chatGlow 4s ease-out infinite; animation-delay: 1s; }
 </style>
 
 
@@ -270,10 +270,6 @@ tailwind.config = {
 
       <!-- Nav + Cart -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
-          კალათა
-          <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
-        </button>
         <button onclick="toggleDelivery()" id="deliveryToggleBtn" title="ტრანსპორტირების პირობები" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
           <svg id="deliveryIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           <svg id="deliveryCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -283,9 +279,14 @@ tailwind.config = {
           <svg id="chatCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           <span id="chatUnreadBadge" style="display:none;position:absolute;top:-3px;right:-3px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
         </button>
-        <a href="tel:595194999" id="callBtn" title="დარეკვა" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer;text-decoration:none">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 5.95 5.95l1.92-1.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg>
-        </a>
+        <button onclick="toggleCall()" id="callToggleBtn" title="დარეკვა" class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors" style="flex-shrink:0;background:#E8541A;border:none;cursor:pointer">
+          <svg id="callIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 5.95 5.95l1.92-1.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg>
+          <svg id="callCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
+          კალათა
+          <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
+        </button>
       </div>
     </div>
 
@@ -628,6 +629,50 @@ tailwind.config = {
 </div>
 
 
+
+<!-- ══ CALL WIDGET ══ -->
+<style>
+#callPanel {
+  transform-origin: top right;
+  transform: scaleY(0.85) translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s ease;
+  display: block !important;
+}
+#callPanel * { pointer-events: none; }
+#callPanel.panel-open {
+  transform: scaleY(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+#callPanel.panel-open * { pointer-events: auto; }
+#callWidget:has(.panel-open) { pointer-events: all; }
+@media (max-width: 480px) {
+  #callWidget { right: 8px !important; left: 8px !important; width: auto !important; }
+  #callPanel { width: 100% !important; max-width: 100% !important; }
+}
+</style>
+<div id="callWidget" style="position:fixed;top:62px;right:16px;z-index:999;max-width:calc(100vw - 32px);pointer-events:none">
+  <div id="callPanel" style="width:300px;max-width:calc(100vw - 32px);background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden">
+    <div style="background:#1A1714;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:16px 16px 0 0">
+      <span style="color:white;font-weight:700;font-size:13px;font-family:'Noto Sans Georgian',sans-serif">📞 დაგვიკავშირდით</span>
+      <button onclick="toggleCall()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
+    </div>
+    <div style="padding:20px;font-family:'Noto Sans Georgian',sans-serif;font-size:13px;color:#1A1714;line-height:1.75;display:flex;flex-direction:column;gap:10px">
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+        <li style="display:flex;gap:8px;align-items:center">
+          <span style="color:#E8541A;font-weight:700">•</span>
+          <a href="tel:+995595194999" style="color:#1A1714;text-decoration:none;font-weight:600;font-size:14px">(+995) 595-19-49-99</a>
+        </li>
+        <li style="display:flex;gap:8px;align-items:center">
+          <span style="color:#E8541A;font-weight:700">•</span>
+          <a href="tel:+995568082541" style="color:#1A1714;text-decoration:none;font-weight:600;font-size:14px">(+995) 568-08-25-41</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 
 <!-- ══ CHAT WIDGET ══ -->
 <style>
@@ -1089,9 +1134,33 @@ function saveCart() {
 window.toggleDelivery = function() {
   const dp = document.getElementById('deliveryPanel');
   const isOpen = dp.classList.contains('panel-open');
+  if (!isOpen) {
+    const cp = document.getElementById('callPanel');
+    if (cp.classList.contains('panel-open')) {
+      cp.classList.remove('panel-open');
+      document.getElementById('callIcon').style.display = '';
+      document.getElementById('callCloseIcon').style.display = 'none';
+    }
+  }
   dp.classList.toggle('panel-open', !isOpen);
   document.getElementById('deliveryIcon').style.display = isOpen ? '' : 'none';
   document.getElementById('deliveryCloseIcon').style.display = isOpen ? 'none' : '';
+};
+
+window.toggleCall = function() {
+  const cp = document.getElementById('callPanel');
+  const isOpen = cp.classList.contains('panel-open');
+  if (!isOpen) {
+    const dp = document.getElementById('deliveryPanel');
+    if (dp.classList.contains('panel-open')) {
+      dp.classList.remove('panel-open');
+      document.getElementById('deliveryIcon').style.display = '';
+      document.getElementById('deliveryCloseIcon').style.display = 'none';
+    }
+  }
+  cp.classList.toggle('panel-open', !isOpen);
+  document.getElementById('callIcon').style.display = isOpen ? '' : 'none';
+  document.getElementById('callCloseIcon').style.display = isOpen ? 'none' : '';
 };
 
 window.toggleCart = function() {
@@ -1361,6 +1430,12 @@ window.toggleChat = function() {
       dp.classList.remove('panel-open');
       document.getElementById('deliveryIcon').style.display = '';
       document.getElementById('deliveryCloseIcon').style.display = 'none';
+    }
+    const cp = document.getElementById('callPanel');
+    if (cp.classList.contains('panel-open')) {
+      cp.classList.remove('panel-open');
+      document.getElementById('callIcon').style.display = '';
+      document.getElementById('callCloseIcon').style.display = 'none';
     }
   }
   panel.classList.toggle('panel-open', chatOpen);
