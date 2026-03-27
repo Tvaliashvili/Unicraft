@@ -389,7 +389,7 @@
                     გააქტიურება
                   </label>
                 </label>
-                <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+                <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00" oninput="document.getElementById('prodDiscountActive').checked = this.value > 0">
               </div>
               <!-- Unit -->
               <div class="form-group">
@@ -875,7 +875,7 @@
               გააქტიურება
             </label>
           </label>
-          <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+          <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00" oninput="document.getElementById('editDiscountActive').checked = this.value > 0">
         </div>
         <!-- Unit -->
         <div class="form-group">
@@ -1708,6 +1708,7 @@ window.addProduct = async function() {
     const discountActive = document.getElementById('prodDiscountActive').checked;
     const finalPrice = (discountActive && discountPrice > 0) ? discountPrice : price;
     const oldPriceVal = (discountActive && discountPrice > 0) ? price : null;
+    if (discountPrice > 0) specs.discount_price = discountPrice;
     const { error } = await supabase.from('products').insert({
       name,
       category: TYPE_LABELS[_currentProdType] || _currentProdType,
@@ -1879,7 +1880,7 @@ window.editProduct = function(id) {
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editPrice').value = p.old_price || p.price || '';
-  document.getElementById('editDiscount').value = p.old_price ? p.price : '';
+  document.getElementById('editDiscount').value = p.old_price ? p.price : (p.specs?.discount_price || '');
   document.getElementById('editDiscountActive').checked = !!p.old_price;
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
@@ -1949,6 +1950,7 @@ window.saveProductEdit = async function() {
     specs.oem         = document.getElementById('editSpecOEM').value.trim();
     specs.car_make    = document.getElementById('editSpecCarMake').value.trim();
   }
+  if (discountVal > 0) specs.discount_price = discountVal;
   const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
