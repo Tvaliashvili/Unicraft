@@ -1999,7 +1999,7 @@ window.saveProductEdit = async function() {
       category: TYPE_LABELS[type] || type,
       product_type: type,
       specs,
-      country: getCountryForBrand(specs.brand) || null,
+      country: getCountryForBrand(specs.brand) || productCache[id]?.country || null,
       price,
       old_price: oldPrice,
       unit: document.getElementById('editUnit').value,
