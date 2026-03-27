@@ -852,55 +852,54 @@ function isWorkingHours() {
   return tbilisiHour >= 9 && tbilisiHour < 20;
 }
 
+function closeAllPanels() {
+  const dp = document.getElementById('deliveryPanel');
+  if (dp.classList.contains('panel-open')) {
+    dp.classList.remove('panel-open');
+    document.getElementById('deliveryIcon').style.display = '';
+    document.getElementById('deliveryCloseIcon').style.display = 'none';
+  }
+  const cp = document.getElementById('callPanel');
+  if (cp.classList.contains('panel-open')) {
+    cp.classList.remove('panel-open');
+    document.getElementById('callIcon').style.display = '';
+    document.getElementById('callCloseIcon').style.display = 'none';
+  }
+  if (chatOpen) {
+    chatOpen = false;
+    document.getElementById('chatPanel').classList.remove('panel-open');
+    document.getElementById('chatIcon').style.display = '';
+    document.getElementById('chatCloseIcon').style.display = 'none';
+  }
+}
+
 window.toggleDelivery = function() {
   const dp = document.getElementById('deliveryPanel');
   const isOpen = dp.classList.contains('panel-open');
+  closeAllPanels();
   if (!isOpen) {
-    const cp = document.getElementById('callPanel');
-    if (cp.classList.contains('panel-open')) {
-      cp.classList.remove('panel-open');
-      document.getElementById('callIcon').style.display = '';
-      document.getElementById('callCloseIcon').style.display = 'none';
-    }
+    dp.classList.add('panel-open');
+    document.getElementById('deliveryIcon').style.display = 'none';
+    document.getElementById('deliveryCloseIcon').style.display = '';
   }
-  dp.classList.toggle('panel-open', !isOpen);
-  document.getElementById('deliveryIcon').style.display = isOpen ? '' : 'none';
-  document.getElementById('deliveryCloseIcon').style.display = isOpen ? 'none' : '';
 };
 
 window.toggleCall = function() {
   const cp = document.getElementById('callPanel');
   const isOpen = cp.classList.contains('panel-open');
+  closeAllPanels();
   if (!isOpen) {
-    const dp = document.getElementById('deliveryPanel');
-    if (dp.classList.contains('panel-open')) {
-      dp.classList.remove('panel-open');
-      document.getElementById('deliveryIcon').style.display = '';
-      document.getElementById('deliveryCloseIcon').style.display = 'none';
-    }
+    cp.classList.add('panel-open');
+    document.getElementById('callIcon').style.display = 'none';
+    document.getElementById('callCloseIcon').style.display = '';
   }
-  cp.classList.toggle('panel-open', !isOpen);
-  document.getElementById('callIcon').style.display = isOpen ? '' : 'none';
-  document.getElementById('callCloseIcon').style.display = isOpen ? 'none' : '';
 };
 
 window.toggleChat = function() {
-  chatOpen = !chatOpen;
+  const wasOpen = chatOpen;
+  closeAllPanels();
+  chatOpen = !wasOpen;
   const panel = document.getElementById('chatPanel');
-  if (chatOpen) {
-    const dp = document.getElementById('deliveryPanel');
-    if (dp.classList.contains('panel-open')) {
-      dp.classList.remove('panel-open');
-      document.getElementById('deliveryIcon').style.display = '';
-      document.getElementById('deliveryCloseIcon').style.display = 'none';
-    }
-    const cp = document.getElementById('callPanel');
-    if (cp.classList.contains('panel-open')) {
-      cp.classList.remove('panel-open');
-      document.getElementById('callIcon').style.display = '';
-      document.getElementById('callCloseIcon').style.display = 'none';
-    }
-  }
   panel.classList.toggle('panel-open', chatOpen);
   document.getElementById('chatIcon').style.display = chatOpen ? 'none' : '';
   document.getElementById('chatCloseIcon').style.display = chatOpen ? '' : 'none';
