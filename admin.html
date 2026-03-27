@@ -1077,10 +1077,6 @@ function showDropPreview(prefix, src) {
     `<img src="${src}" class="dropzone-img-preview"><div class="dropzone-change-hint">სხვა ფოტოს ასარჩევად კვლავ დააჭირე</div>`;
 }
 
-// ─── Demo credentials (Firebase-ის გარეშე) ───
-const DEMO_EMAIL = 'admin@unicraft.ge';
-const DEMO_PASS  = 'unicraft2025';
-
 let _me = { email: '', name: '' };
 
 async function showApp(email) {
@@ -1105,13 +1101,6 @@ window.doLogin = async function() {
   errEl.textContent = '';
   if (!email || !pass) { errEl.textContent = 'შეავსე ყველა ველი'; return; }
 
-  // Demo login
-  if (email === DEMO_EMAIL && pass === DEMO_PASS) {
-    sessionStorage.setItem('uc_demo_admin', '1');
-    showApp(email);
-    return;
-  }
-
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
   if (error) {
     errEl.textContent = 'არასწორი ელ. ფოსტა ან პაროლი';
@@ -1119,7 +1108,6 @@ window.doLogin = async function() {
 };
 
 window.doLogout = async function() {
-  sessionStorage.removeItem('uc_demo_admin');
   await supabase.auth.signOut();
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
@@ -1134,11 +1122,6 @@ supabase.auth.onAuthStateChange((event, session) => {
     document.getElementById('app').style.display = 'none';
   }
 });
-
-// Demo session restore
-if (sessionStorage.getItem('uc_demo_admin')) {
-  showApp(DEMO_EMAIL);
-}
 
 // ─── Mobile sidebar toggle ───
 window.toggleSidebar = function() {
