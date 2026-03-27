@@ -1278,10 +1278,12 @@ window.addUnit = async function() {
 
 window.deleteUnit = async function(label) {
   if (!confirm(`ერთეული "${label}" წაიშალოს?\n\nყველა პროდუქტი ამ ერთეულით ასევე წაიშლება!`)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
   const { error: pe } = await supabase.from('products').delete().eq('unit', label);
-  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
   const { error: be } = await supabase.from('units').delete().eq('label', label);
-  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
+  if (be) { alert('ერთეულის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
   showToast('ერთეული წაიშალა', 'error');
   loadUnits();
   loadProductsList();
@@ -1442,10 +1444,12 @@ window.addBrand = async function() {
 
 window.deleteBrand = async function(name, productType) {
   if (!confirm(`ბრენდი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ბრენდით ასევე წაიშლება!`)) return;
-  const { error: pe } = await supabase.from('products').filter('specs->>brand', 'eq', name).delete();
-  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
+  const { error: pe } = await supabase.from('products').delete().filter('specs->>brand', 'eq', name);
+  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
   const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || _currentProdType);
-  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
+  if (be) { alert('ბრენდის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
   _removeBrandCountry(name);
   showToast('ბრენდი წაიშალა', 'error');
   loadBrands(_currentProdType);
@@ -1497,10 +1501,12 @@ window.addSeason = async function() {
 
 window.deleteSeason = async function(name, productType) {
   if (!confirm(`სეზონი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ სეზონით ასევე წაიშლება!`)) return;
-  const { error: pe } = await supabase.from('products').filter('specs->>season', 'eq', name).delete();
-  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
+  const { error: pe } = await supabase.from('products').delete().filter('specs->>season', 'eq', name);
+  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
   const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || 'tire_season');
-  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
+  if (be) { alert('სეზონის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
   showToast('სეზონი წაიშალა', 'error');
   loadSeasons();
   loadProductsList();
@@ -1560,11 +1566,13 @@ window.addTireSpec = async function(key) {
 
 window.deleteTireSpec = async function(key, name, productType) {
   if (!confirm(`"${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ${key === 'width' ? 'სიგანით' : key === 'profile' ? 'პროფილით' : 'დიამეტრით'} ასევე წაიშლება!`)) return;
-  const { error: pe } = await supabase.from('products').filter(`specs->>${key}`, 'eq', name).delete();
-  if (pe) { showToast('შეცდომა: ' + pe.message, 'error'); return; }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
+  const { error: pe } = await supabase.from('products').delete().filter(`specs->>${key}`, 'eq', name);
+  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
   const cfg = _tireSpecCfg[key];
   const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || cfg.type);
-  if (be) { showToast('შეცდომა: ' + be.message, 'error'); return; }
+  if (be) { alert('სპეციფიკაციის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
   showToast('წაიშალა', 'error');
   loadTireSpec(key);
   loadProductsList();
