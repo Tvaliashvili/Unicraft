@@ -152,10 +152,6 @@ tailwind.config = {
           <svg id="callIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 5.95 5.95l1.92-1.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg>
           <svg id="callCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
-          კალათა
-          <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
-        </button>
       </div>
     </div>
   </div>
@@ -201,24 +197,6 @@ tailwind.config = {
       <div id="productCategory" class="text-[10px] font-bold tracking-[2px] text-orange uppercase mb-2"></div>
       <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
 
-      <!-- Price block -->
-      <div class="bg-cream border border-gray-800 rounded-xl p-5 mb-5">
-        <div id="productOldPrice" class="hidden text-sm text-dark line-through mb-1"></div>
-        <div id="productPriceBlock" class="flex items-baseline gap-2"></div>
-      </div>
-
-      <!-- Qty + Add -->
-      <div class="flex items-center gap-3 mb-5">
-        <div class="flex items-center border border-gray-800 rounded-lg bg-white overflow-hidden">
-          <button onclick="changeLocalQty(-1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">−</button>
-          <span id="localQty" class="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-gray-800">1</span>
-          <button onclick="changeLocalQty(1)" class="w-10 h-12 text-xl hover:bg-gray-100 transition-colors flex items-center justify-center">+</button>
-        </div>
-        <button id="addBtn" onclick="addProductToCart()" class="w-1/2 bg-dark hover:bg-orange text-white font-bold py-3 text-sm transition-colors rounded-lg">
-          + კალათაში დამატება
-        </button>
-      </div>
-
       <!-- Code -->
       <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
       <!-- Specs -->
@@ -238,146 +216,6 @@ tailwind.config = {
   <a href="index.html" class="text-orange text-sm hover:underline">← კატალოგში დაბრუნება</a>
 </div>
 
-<!-- CART DRAWER -->
-<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:1100"></div>
-<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full" style="z-index:1100">
-  <div class="bg-dark-black px-6 py-4 flex items-center justify-between">
-    <h2 class="font-display text-2xl tracking-wide text-white">კალათა</h2>
-    <button onclick="toggleCart()" class="text-white/40 hover:text-orange text-2xl leading-none transition-colors">✕</button>
-  </div>
-  <div id="cartItems" class="flex-1 overflow-y-auto px-6 py-4"></div>
-  <div id="cartFooter" class="hidden border-t border-gray-200 px-6 py-4 bg-white">
-    <div class="flex items-baseline justify-between mb-3">
-      <span class="text-xs font-bold tracking-widest text-dark uppercase">სულ</span>
-      <span id="cartTotal" class="font-display text-4xl tracking-wide text-dark">0 ₾</span>
-    </div>
-    <button onclick="openOrder()" class="w-full bg-orange hover:bg-orange-dark text-white font-semibold py-3.5 text-sm transition-colors rounded-lg">შეკვეთის გაფორმება →</button>
-  </div>
-</div>
-
-<!-- ORDER MODAL -->
-<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:2000">
-  <div class="modal-box bg-white w-full max-w-2xl border-t-4 border-orange transition-transform duration-300 translate-y-5 max-h-[92vh] overflow-y-auto">
-
-    <!-- Invoice form -->
-    <div id="orderFormWrap">
-      <!-- Header -->
-      <div class="flex items-start justify-between px-7 pt-6 pb-4 border-b border-gray-100">
-        <div>
-          <div class="font-display text-3xl tracking-wide"><span class="text-dark">UNI</span><span class="text-orange">CRAFT</span></div>
-          <div id="invoiceDate" class="text-xs text-dark mt-1"></div>
-        </div>
-        <div class="text-right">
-          <div class="text-xs font-bold tracking-[2px] text-dark uppercase">ინვოისი</div>
-          <div id="invoiceNo" class="text-lg font-bold text-dark font-mono mt-1"></div>
-        </div>
-      </div>
-
-      <!-- Seller & Buyer -->
-      <div class="flex border-b border-gray-100">
-        <div class="flex-1 px-7 py-4 bg-cream" style="border-right:1px solid #E8E2DC">
-          <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">გამყიდველი</div>
-          <div class="mb-2"><span class="text-dark text-xs">დასახელება</span><br><span class="font-semibold text-dark text-sm">შპს უნიკრაფტი</span></div>
-          <div class="mb-2"><span class="text-dark text-xs">ბანკი</span><br><span class="font-semibold text-dark text-sm">საქართველოს ბანკი</span></div>
-          <div><span class="text-dark text-xs">ა/ნ</span><br><span class="font-bold text-dark font-mono tracking-wide text-sm">GE95BG0000000609563008</span></div>
-        </div>
-        <div class="flex-1 px-7 py-4 bg-cream">
-          <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">მყიდველი</div>
-          <div class="mb-2">
-            <div class="text-xs text-dark mb-1">დასახელება / სახელი</div>
-            <input id="buyerNameInput" type="text" placeholder="კომპანიის ან პირის სახელი"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
-              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
-          </div>
-          <div class="mb-2">
-            <div class="text-xs text-dark mb-1">პირ. ნომ. / საიდ. კოდი</div>
-            <input id="buyerIdInput" type="text" maxlength="20" placeholder="მაგ: 01234567890"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
-              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
-          </div>
-          <div>
-            <div class="text-xs text-dark mb-1">ტელეფონი</div>
-            <input id="buyerPhoneInput" type="tel" placeholder="მაგ: 599 123 456"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
-              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
-          </div>
-        </div>
-      </div>
-
-      <!-- Products table -->
-      <div class="px-7 pt-5 pb-2">
-        <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">პროდუქციის ჩამონათვალი</div>
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-xs font-semibold tracking-widest text-dark uppercase border-b-2 border-gray-100">
-              <th class="text-left pb-2">დასახელება</th>
-              <th class="text-center pb-2 w-16">რ-ბა</th>
-              <th class="text-right pb-2 w-24">ერთ. ფასი</th>
-              <th class="text-right pb-2 w-24">სულ</th>
-            </tr>
-          </thead>
-          <tbody id="invoiceItems"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" class="pt-3 pb-1 text-right text-xs text-dark pr-4">მათ შორის დღგ (18%)</td>
-              <td class="pt-3 pb-1 text-right text-xs text-dark" id="invoiceVat"></td>
-            </tr>
-            <tr class="border-t-2 border-dark">
-              <td colspan="3" class="pt-3 text-right text-xs font-bold tracking-widest text-dark uppercase pr-4">სულ გადასახდელი</td>
-              <td class="pt-3 text-right" id="invoiceTotal"></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Payment note -->
-      <div class="px-7 py-3 text-xs text-dark text-center leading-relaxed border-t border-gray-50 mt-2">
-        თანხის გადმორიცხვისას დანიშნულებაში მიუთითეთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <span class="text-dark font-bold">LLCunicraft@gmail.com</span> ან მოგვწერეთ ონლაინ ჩატში საიტზე.
-      </div>
-
-      <!-- Disclaimer -->
-      <div class="mx-7 mb-4 bg-cream border border-gray-200 rounded-lg px-4 py-3 text-xs text-dark leading-relaxed">
-        <span class="font-bold text-dark">შენიშვნა:</span> აღნიშნული ინვოისი ძალაშია მისი დაგენერირების თარიღის დღეს და შეიძლება შეიცვალოს რამდენიმე დღის შემდეგ. შპს უნიკრაფტი იტოვებს უფლებას ნებისმიერ დროს შეცვალოს ფასები ცალმხრივად და შეტყობინების გარეშე. წინამდებარე ინვოისი არ წარმოადგენს ფასის ფიქსაციის ვალდებულებას.
-      </div>
-
-      <!-- Validation error -->
-      <div id="buyerValidationMsg" class="hidden px-7 pb-2 text-xs text-red-500 font-medium">გთხოვთ შეავსოთ ყველა საჭირო ველი</div>
-
-      <!-- Actions -->
-      <div class="px-7 pb-6 flex items-center gap-3">
-        <button id="submitBtn" onclick="submitOrder()"
-          class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 text-xs transition-colors rounded-lg whitespace-nowrap">
-          გაგზავნე მოთხოვნა →
-        </button>
-        <button onclick="downloadInvoicePDF()"
-          class="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-5 py-2.5 text-sm transition-colors rounded-lg border border-gray-200">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          ჩამოტვირთე ინვოისი
-        </button>
-        <button onclick="closeOrder()"
-          class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2.5 text-sm transition-colors rounded-lg whitespace-nowrap">
-          გაუქმება
-        </button>
-      </div>
-    </div>
-
-    <!-- Success -->
-    <div id="orderSuccess" class="hidden p-8 text-center">
-      <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
-      <h3 class="font-display text-2xl tracking-wide mb-2">მოთხოვნა გაიგზავნა!</h3>
-      <p class="text-sm text-dark mb-2">ინვოისის ნომერი: <strong id="successInvNo" class="text-dark font-mono"></strong></p>
-      <p class="text-sm text-dark mb-6">გთხოვთ განახორციელოთ გადახდა ინვოისში მითითებულ ანგარიშზე (GE95BG0000000609563008) და გამოაგზავნოთ დამადასტურებელი გადახდის ქვითარი ჩვენს ელექტრონულ მეილზე (<strong>LLCunicraft@gmail.com</strong>). მხოლოდ ამის შემდეგ დაიწყება თქვენს ინვოისზე მუშაობა.</p>
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <button onclick="downloadInvoicePDF()" class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-6 py-3 text-sm transition-colors rounded-lg border border-gray-200">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          ჩამოტვირთე ინვოისი
-        </button>
-        <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors rounded-lg">კარგი!</button>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 <!-- ══ DELIVERY WIDGET ══ -->
 <div id="deliveryWidget" style="position:fixed;top:62px;right:60px;z-index:999;max-width:calc(100vw - 32px);pointer-events:none">
@@ -526,24 +364,11 @@ import { supabase } from './js/supabase-config.js';
 
 let product = null;
 let allProducts = [];
-let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
-window.cart = cart;
-document.getElementById('cartCount').textContent = cart.length;
-let localQty = 1;
-let currentInvoiceNo = '';
-window.currentInvoiceNo = '';
-
-function genInvoiceNo() {
-  const d = new Date();
-  const date = d.getFullYear().toString() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-  return 'INV-' + date + '-' + Math.floor(1000 + Math.random() * 9000);
-}
 
 const params = new URLSearchParams(location.search);
 const id = params.get('id');
 
 async function init() {
-  saveCart();
   if (!id) { showError(); return; }
   try {
     const FUNC = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products';
@@ -584,27 +409,9 @@ function renderProduct() {
   } else {
     descContainer.classList.add('hidden');
   }
-  const _unit = (product.unit || 'ც').replace(/\.+$/, '');
-  const _s = parseFloat(product.price).toFixed(2);
-  const _dot = _s.indexOf('.');
-  document.getElementById('productPriceBlock').innerHTML = `
-    <div class="flex items-start leading-none">
-      <span class="font-display text-5xl tracking-wide text-dark">${_s.slice(0, _dot)}</span>
-      <span class="text-sm font-bold text-dark pt-1">${_s.slice(_dot)}</span>
-    </div>
-    <span class="font-display text-xl tracking-wide text-dark">₾<span style="font-size:0.75em;font-weight:700;color:#1A1714">/${_unit}</span></span>`;
-
-  if (product.oldPrice) {
-    const el = document.getElementById('productOldPrice');
-    el.classList.remove('hidden');
-    el.textContent = parseFloat(product.oldPrice).toFixed(2) + ' ₾';
-  }
 
   const b = document.getElementById('productBadge');
-  if (product.oldPrice) {
-    b.classList.remove('hidden');
-    b.textContent = 'ფასდაკლება';
-  } else if (product.badge) {
+  if (product.badge) {
     b.classList.remove('hidden');
     b.textContent = product.badge;
   }
@@ -689,166 +496,6 @@ function showError() {
   document.getElementById('loadingState').classList.add('hidden');
   document.getElementById('errorState').classList.remove('hidden');
 }
-
-window.changeLocalQty = function(d) {
-  localQty = Math.max(1, localQty + d);
-  document.getElementById('localQty').textContent = localQty;
-};
-
-window.addRelatedToCart = function(id) { // legacy, unused
-  const p = allProducts.find(x => x.id === id);
-  if (!p) return;
-  const ex = cart.find(i => i.id === id);
-  if (ex) ex.qty += 1;
-  else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '' });
-  saveCart();
-  showToast('✓ ' + p.name + ' კალათაში დაემატა');
-};
-
-window.addProductToCart = function() {
-  if (!product) return;
-  const ex = cart.find(i => i.id === product.id);
-  if (ex) ex.qty += localQty;
-  else cart.push({ id: product.id, name: product.name, price: product.price, qty: localQty, imageUrl: product.imageUrl, emoji: product.emoji, unit: product.unit, code: product.code || '', store: product.store || '', product_type: product.product_type || '', specs: product.specs || null, oldPrice: product.oldPrice || null });
-  saveCart();
-  showToast('✓ ' + product.name + ' კალათაში დაემატა');
-};
-
-window.changeQty = function(id, d) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty += d;
-  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
-  saveCart(); renderCart();
-};
-
-function saveCart() {
-  localStorage.setItem('uc_cart', JSON.stringify(cart));
-  window.cart = cart;
-  document.getElementById('cartCount').textContent = cart.length;
-}
-
-window.toggleCart = function() {
-  document.getElementById('overlay').classList.toggle('overlay-enter');
-  document.getElementById('cartDrawer').classList.toggle('drawer-enter');
-  renderCart();
-};
-
-function renderCart() {
-  const el = document.getElementById('cartItems');
-  const footer = document.getElementById('cartFooter');
-  if (!cart.length) {
-    el.innerHTML = `<div class="text-center py-16 text-gray-400"><p class="font-semibold text-dark mb-1">კალათა ცარიელია</p></div>`;
-    footer.classList.add('hidden'); return;
-  }
-  footer.classList.remove('hidden');
-  el.innerHTML = cart.map(i => `
-    <div class="flex items-center gap-3 py-3 border-b border-gray-200">
-      <div class="w-14 h-14 bg-cream flex items-center justify-center flex-shrink-0 overflow-hidden">
-        ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:1.5rem">${i.emoji||'📦'}</span>`}
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold truncate">${i.name}</div>
-        <div class="text-sm text-orange font-bold mt-0.5">${(i.price*i.qty).toFixed(2)} ₾</div>
-      </div>
-      <div class="flex items-center gap-1.5 flex-shrink-0">
-        <button onclick="changeQty('${i.id}',-1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 flex items-center justify-center text-base transition-colors">−</button>
-        <span class="text-sm font-bold w-5 text-center">${i.qty}</span>
-        <button onclick="changeQty('${i.id}',1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 flex items-center justify-center text-base transition-colors">+</button>
-      </div>
-    </div>`).join('');
-  document.getElementById('cartTotal').textContent = cart.reduce((s,i) => s+i.price*i.qty, 0).toFixed(2) + ' ₾';
-}
-
-window.openOrder = function() {
-  currentInvoiceNo = genInvoiceNo();
-  window.currentInvoiceNo = currentInvoiceNo;
-  const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
-  const vat = total * 18 / 118;
-  const d = new Date();
-  const _GEO_M = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
-  document.getElementById('invoiceDate').textContent = d.getDate() + ' ' + _GEO_M[d.getMonth()] + ', ' + d.getFullYear();
-  document.getElementById('invoiceNo').textContent = currentInvoiceNo;
-  document.getElementById('invoiceItems').innerHTML = cart.map(i => {
-    const tireSz = (i.product_type === 'tire' && i.specs?.width) ? ` ${i.specs.width}/${i.specs.profile} ${i.specs.rim}` : '';
-    return `
-    <tr class="border-b border-gray-50">
-      <td class="py-2 pr-2">${i.name}${tireSz}</td>
-      <td class="py-2 text-center">${i.qty} ${(i.unit||'ც').replace(/\.+$/,'')}</td>
-      <td class="py-2 text-right">${parseFloat(i.price).toFixed(2)} ₾</td>
-      <td class="py-2 text-right font-semibold">${(i.price*i.qty).toFixed(2)} ₾</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('invoiceVat').textContent = vat.toFixed(2) + ' ₾';
-  document.getElementById('invoiceTotal').innerHTML = `<span class="font-display text-2xl tracking-wide">${total.toFixed(2)} ₾</span>`;
-  document.getElementById('buyerNameInput').value = '';
-  document.getElementById('buyerIdInput').value = '';
-  document.getElementById('buyerPhoneInput').value = '';
-  document.getElementById('buyerValidationMsg').classList.add('hidden');
-  document.getElementById('orderFormWrap').classList.remove('hidden');
-  document.getElementById('orderSuccess').classList.add('hidden');
-  document.getElementById('orderModal').classList.add('modal-enter');
-};
-
-window.closeOrder = function() {
-  document.getElementById('orderModal').classList.remove('modal-enter');
-  document.getElementById('orderFormWrap').classList.remove('hidden');
-  document.getElementById('orderSuccess').classList.add('hidden');
-};
-
-window.clearCart = function() { cart = []; saveCart(); renderCart(); };
-
-window.submitOrder = async function() {
-  // localStorage rate limit
-  const now = Date.now();
-  const hour = 60 * 60 * 1000;
-  const timestamps = JSON.parse(localStorage.getItem('uc_inv_ts') || '[]').filter(t => now - t < hour);
-  if (timestamps.length >= 3) { alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო'); return; }
-
-  const buyerName  = document.getElementById('buyerNameInput').value.trim();
-  const buyerId    = document.getElementById('buyerIdInput').value.trim();
-  const buyerPhone = document.getElementById('buyerPhoneInput').value.trim();
-  if (!buyerName || !buyerId || !buyerPhone) {
-    document.getElementById('buyerNameInput').style.borderColor  = buyerName  ? '' : '#ef4444';
-    document.getElementById('buyerIdInput').style.borderColor    = buyerId    ? '' : '#ef4444';
-    document.getElementById('buyerPhoneInput').style.borderColor = buyerPhone ? '' : '#ef4444';
-    document.getElementById('buyerValidationMsg').classList.remove('hidden');
-    return;
-  }
-  document.getElementById('buyerValidationMsg').classList.add('hidden');
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'იგზავნება...';
-  try {
-    // IP rate limit
-    let clientIp = '';
-    try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); clientIp = d.ip || ''; } catch(e) {}
-    if (clientIp) {
-      const oneHourAgo = new Date(now - hour).toISOString();
-      const { data: recent } = await supabase.from('orders').select('id').eq('client_ip', clientIp).gte('created_at', oneHourAgo);
-      if (recent && recent.length >= 3) {
-        btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
-        alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო'); return;
-      }
-    }
-    const { error: insertError } = await supabase.from('orders').insert({
-      invoice_no: currentInvoiceNo,
-      buyer_name: buyerName,
-      buyer_id: buyerId,
-      buyer_phone: buyerPhone,
-      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit, code:i.code||'', store:i.store||'' })),
-      total: cart.reduce((s,i) => s+i.price*i.qty, 0),
-      status: 'pending',
-      client_ip: clientIp
-    });
-    if (insertError) { btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →'; alert('შეცდომა: ' + insertError.message); return; }
-    timestamps.push(Date.now());
-    localStorage.setItem('uc_inv_ts', JSON.stringify(timestamps));
-    document.getElementById('successInvNo').textContent = currentInvoiceNo;
-    document.getElementById('orderFormWrap').classList.add('hidden');
-    document.getElementById('orderSuccess').classList.remove('hidden');
-  } catch(e) { alert('შეცდომა: ' + e.message); }
-  btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
-};
 
 window.showToast = function(msg) {
   const t = document.getElementById('toast');

@@ -283,10 +283,6 @@ tailwind.config = {
           <svg id="callIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 5.95 5.95l1.92-1.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg>
           <svg id="callCloseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        <button onclick="toggleCart()" class="flex items-center gap-2 bg-orange hover:bg-orange-dark text-white text-sm font-semibold px-3 md:px-4 py-2 transition-colors rounded-lg">
-          კალათა
-          <span id="cartCount" class="bg-white text-orange rounded-full w-5 h-5 text-xs font-bold flex items-center justify-center">0</span>
-        </button>
       </div>
     </div>
 
@@ -300,15 +296,6 @@ tailwind.config = {
 
   </div>
 
-  <!-- ══ PROMO TICKER ══ -->
-  <div id="promoTicker" style="display:none;background:#141210;border-top:2px solid #E8541A;overflow:hidden;padding:0;height:40px;align-items:center">
-    <div style="display:flex;align-items:center;height:100%">
-      <div class="hidden sm:flex" style="background:#E8541A;color:white;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:0 18px;height:100%;align-items:center;flex-shrink:0;white-space:nowrap">ფასდაკლება</div>
-      <div style="overflow:hidden;flex:1;position:relative;height:100%">
-        <div id="tickerTrack" style="display:flex;align-items:center;height:100%;gap:0;white-space:nowrap;will-change:transform"></div>
-      </div>
-    </div>
-  </div>
 </header>
 
 
@@ -331,23 +318,6 @@ tailwind.config = {
     <div id="mobileFilterCats" class="flex flex-col gap-0 mt-1"></div>
   </div>
   <div id="mobileFilterSpecs"></div>
-  <div>
-    <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">ფასი</div>
-    <div class="flex items-end gap-2 mt-1">
-      <div class="flex-1">
-        <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
-        <input type="number" id="mobilePriceMin" min="0" oninput="updatePriceInputs()"
-          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-      </div>
-      <span class="text-dark flex-shrink-0 pb-2">—</span>
-      <div class="flex-1">
-        <div class="text-[10px] font-semibold text-dark mb-1 text-center">ბოლო</div>
-        <input type="number" id="mobilePriceMax" min="0" oninput="updatePriceInputs()"
-          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-      </div>
-      <span class="text-dark flex-shrink-0 text-sm pb-2">₾</span>
-    </div>
-  </div>
 </div>
 </div>
 
@@ -367,24 +337,6 @@ tailwind.config = {
     <!-- Spec filters -->
     <div id="sidebarSpecs"></div>
 
-    <!-- Price -->
-    <div class="pb-6">
-      <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">ფასი</div>
-      <div class="flex items-end gap-2 mt-1">
-        <div class="flex-1">
-          <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
-          <input type="number" id="sidebarPriceMin" min="0" oninput="updatePriceInputs()"
-            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-        </div>
-        <span class="text-dark flex-shrink-0 pb-2">—</span>
-        <div class="flex-1">
-          <div class="text-[10px] font-semibold text-dark mb-1 text-center">ბოლო</div>
-          <input type="number" id="sidebarPriceMax" min="0" oninput="updatePriceInputs()"
-            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
-        </div>
-        <span class="text-dark flex-shrink-0 text-sm pb-2">₾</span>
-      </div>
-    </div>
 
   </aside>
 
@@ -411,22 +363,6 @@ tailwind.config = {
 </div>
 
 
-<!-- ══ CART DRAWER ══ -->
-<div id="overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:1100"></div>
-<div id="cartDrawer" class="fixed top-0 right-0 w-96 max-w-full h-full bg-cream-light border-l-2 border-orange flex flex-col transition-transform duration-300 translate-x-full" style="z-index:1100">
-  <div class="bg-dark-black px-6 py-4 flex items-center justify-between">
-    <h2 class="font-display text-2xl tracking-wide text-white">კალათა</h2>
-    <button onclick="toggleCart()" class="text-white/40 hover:text-orange text-2xl leading-none transition-colors">✕</button>
-  </div>
-  <div id="cartItems" class="flex-1 overflow-y-auto px-6 py-4"></div>
-  <div id="cartFooter" class="hidden border-t border-gray-200 px-6 py-4 bg-white">
-    <div class="flex items-baseline justify-between mb-3">
-      <span class="text-xs font-bold tracking-widest text-dark uppercase">სულ</span>
-      <span id="cartTotal" class="font-display text-4xl tracking-wide text-dark">0 ₾</span>
-    </div>
-    <button onclick="openOrder()" class="w-full bg-orange hover:bg-orange-dark text-white font-semibold py-3.5 text-sm transition-colors rounded-lg">შეკვეთის გაფორმება →</button>
-  </div>
-</div>
 
 <!-- ══ DELIVERY WIDGET ══ -->
 <style>
@@ -518,141 +454,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ══ INVOICE MODAL ══ -->
-<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" style="z-index:9999">
-  <div class="modal-box bg-white w-full max-w-2xl border-t-4 border-orange transition-transform duration-300 translate-y-5 max-h-[92vh] overflow-y-auto">
-
-    <!-- Invoice -->
-    <div id="orderFormWrap">
-      <!-- Header (original) -->
-      <div class="inv-px flex items-start justify-between px-7 pt-6 pb-4 border-b border-gray-100">
-        <div>
-          <div class="font-display text-3xl tracking-wide"><span class="text-dark">UNI</span><span class="text-orange">CRAFT</span></div>
-          <div id="invoiceDate" class="text-xs text-dark mt-1"></div>
-        </div>
-        <div class="text-right">
-          <div class="text-xs font-bold tracking-[2px] text-dark uppercase">ინვოისი</div>
-          <div id="invoiceNo" class="text-lg font-bold text-dark font-mono mt-1"></div>
-        </div>
-      </div>
-
-      <!-- Seller & Buyer side by side -->
-      <div class="flex border-b border-gray-100">
-        <!-- გამყიდველი (მარცხნივ) -->
-        <div class="flex-1 px-7 py-4 bg-cream" style="border-right:1px solid #E8E2DC">
-          <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">გამყიდველი</div>
-          <div class="mb-2">
-            <span class="text-dark text-xs">დასახელება</span><br>
-            <span class="font-semibold text-dark text-sm">შპს უნიკრაფტი</span>
-          </div>
-          <div class="mb-2">
-            <span class="text-dark text-xs">ბანკი</span><br>
-            <span class="font-semibold text-dark text-sm">საქართველოს ბანკი</span>
-          </div>
-          <div>
-            <span class="text-dark text-xs">ა/ნ</span><br>
-            <span class="font-bold text-dark font-mono tracking-wide text-sm">GE95BG0000000609563008</span>
-          </div>
-        </div>
-        <!-- მყიდველი (მარჯვნივ) -->
-        <div class="flex-1 px-7 py-4 bg-cream">
-          <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">მყიდველი</div>
-          <div class="mb-2">
-            <div class="text-xs text-dark mb-1">დასახელება / სახელი</div>
-            <input id="buyerNameInput" type="text" placeholder="კომპანიის ან პირის სახელი"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
-              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
-          </div>
-          <div class="mb-2">
-            <div class="text-xs text-dark mb-1">პირ. ნომ. / საიდ. კოდი</div>
-            <input id="buyerIdInput" type="text" maxlength="20" placeholder="მაგ: 01234567890"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
-              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
-          </div>
-          <div>
-            <div class="text-xs text-dark mb-1">ტელეფონი</div>
-            <input id="buyerPhoneInput" type="tel" placeholder="მაგ: 599 123 456"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-dark outline-none"
-              style="background:white;transition:border-color .15s" onfocus="this.style.borderColor='#E8541A'" onblur="this.style.borderColor=''">
-          </div>
-        </div>
-      </div>
-
-      <!-- Products table -->
-      <div class="px-7 pt-5 pb-2">
-        <div class="text-xs font-bold tracking-[2px] text-orange uppercase mb-3">პროდუქციის ჩამონათვალი</div>
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-xs font-semibold tracking-widest text-dark uppercase border-b-2 border-gray-100">
-              <th class="text-left pb-2">დასახელება</th>
-              <th class="text-center pb-2 w-16">რ-ბა</th>
-              <th class="text-center pb-2 w-14">ერთ.</th>
-              <th class="text-right pb-2 w-24">ფასი</th>
-              <th class="text-right pb-2 w-24">სულ</th>
-            </tr>
-          </thead>
-          <tbody id="invoiceItems"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4" class="pt-3 pb-1 text-right text-xs text-dark pr-4">მათ შორის დღგ (18%)</td>
-              <td class="pt-3 pb-1 text-right text-xs text-dark" id="invoiceVat"></td>
-            </tr>
-            <tr class="border-t-2 border-dark">
-              <td colspan="4" class="pt-3 text-right text-xs font-bold tracking-widest text-dark uppercase pr-4">სულ გადასახდელი</td>
-              <td class="pt-3 text-right" id="invoiceTotal"></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Payment note -->
-      <div class="px-7 py-3 text-xs text-dark text-center leading-relaxed border-t border-gray-50 mt-2">
-        თანხის გადმორიცხვისას დანიშნულებაში მიუთითეთ ინვოისის ნომერი, ხოლო გადახდის ქვითარი გადმოგვიგზავნოთ ელექტრონულ ფოსტაზე: <span class="text-dark font-bold">LLCunicraft@gmail.com</span> ან მოგვწერეთ ონლაინ ჩატში საიტზე.
-      </div>
-
-      <!-- Disclaimer -->
-      <div class="mx-7 mb-4 bg-cream border border-gray-200 rounded-lg px-4 py-3 text-xs text-dark leading-relaxed">
-        <span class="font-bold text-dark">შენიშვნა:</span> აღნიშნული ინვოისი ძალაშია მისი დაგენერირების თარიღის დღეს და შეიძლება შეიცვალოს რამდენიმე დღის შემდეგ. შპს უნიკრაფტი იტოვებს უფლებას ნებისმიერ დროს შეცვალოს ფასები ცალმხრივად და შეტყობინების გარეშე. წინამდებარე ინვოისი არ წარმოადგენს ფასის ფიქსაციის ვალდებულებას.
-      </div>
-
-      <!-- Validation error -->
-      <div id="buyerValidationMsg" class="hidden px-7 pb-2 text-xs text-red-500 font-medium">გთხოვთ შეავსოთ ყველა საჭირო ველი</div>
-
-      <!-- Actions -->
-      <div class="px-7 pb-6 flex items-center gap-3">
-        <button id="submitBtn" onclick="submitOrder()"
-          class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 text-xs transition-colors rounded-lg whitespace-nowrap">
-          გაგზავნე მოთხოვნა →
-        </button>
-        <button onclick="downloadInvoicePDF()"
-          class="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-5 py-2.5 text-sm transition-colors rounded-lg border border-gray-200">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          ჩამოტვირთე ინვოისი
-        </button>
-        <button onclick="closeOrder()"
-          class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2.5 text-sm transition-colors rounded-lg whitespace-nowrap">
-          გაუქმება
-        </button>
-      </div>
-    </div>
-
-    <!-- Success -->
-    <div id="orderSuccess" class="hidden p-8 text-center">
-      <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">✓</div>
-      <h3 class="font-display text-2xl tracking-wide mb-2">მოთხოვნა გაიგზავნა!</h3>
-      <p class="text-sm text-dark mb-2">ინვოისის ნომერი: <strong id="successInvNo" class="text-dark font-mono"></strong></p>
-      <p class="text-sm text-dark mb-6">გთხოვთ განახორციელოთ გადახდა ინვოისში მითითებულ ანგარიშზე (GE95BG0000000609563008) და გამოაგზავნოთ დამადასტურებელი გადახდის ქვითარი ჩვენს ელექტრონულ მეილზე (<strong>LLCunicraft@gmail.com</strong>). მხოლოდ ამის შემდეგ დაიწყება თქვენს ინვოისზე მუშაობა.</p>
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <button onclick="downloadInvoicePDF()" class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-dark font-semibold px-6 py-3 text-sm transition-colors rounded-lg border border-gray-200">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          ჩამოტვირთე ინვოისი
-        </button>
-        <button onclick="closeOrder();clearCart()" class="bg-orange hover:bg-orange-dark text-white font-semibold px-8 py-3 text-sm transition-colors rounded-lg">კარგი!</button>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 
 
@@ -775,21 +576,6 @@ tailwind.config = {
 <div id="toast" class="fixed bottom-7 left-1/2 -translate-x-1/2 translate-y-20 bg-dark text-white text-sm font-medium px-6 py-3 border-l-4 border-orange z-50 transition-transform duration-300 whitespace-nowrap pointer-events-none"></div>
 
 <script>
-function fmtPrice(price, unit) {
-  unit = unit ? unit.replace(/\.+$/, '') : unit;
-  const s = parseFloat(price).toFixed(2);
-  const dot = s.indexOf('.');
-  const whole = s.slice(0, dot);
-  const dec = s.slice(dot);
-  return `<div class="flex items-baseline leading-none gap-1 whitespace-nowrap">
-    <div class="flex items-start">
-      <span class="font-display text-2xl tracking-wide text-dark">${whole}</span>
-      <span class="text-[10px] font-bold text-dark pt-[2px]">${dec}</span>
-    </div>
-    <span class="font-display text-base tracking-wide text-dark">₾${unit ? `<span style="font-size:0.75em;font-weight:700;color:#1A1714">/${unit}</span>` : ''}</span>
-  </div>`;
-}
-
 const FLAG_CODES = {'გერმანია':'de','საფრანგეთი':'fr','იაპონია':'jp','აშშ':'us','იტალია':'it','სამხრეთ კორეა':'kr','ბრიტანეთი':'gb','ნიდერლანდი':'nl','რუსეთი':'ru','ჩინეთი':'cn','თურქეთი':'tr','ავსტრია':'at','შვედეთი':'se','ჩეხეთი':'cz','პოლონეთი':'pl','ბელგია':'be','ინდოეთი':'in','ბრაზილია':'br','უკრაინა':'ua','საქართველო':'ge'};
 function flagImg(country, size=20) {
   if (!country) return '';
@@ -803,12 +589,8 @@ const CAT_TYPE = { 'საბურავები':'tire', 'ზეთები'
 function catLabel(cat) { return CAT_DISPLAY[cat] || cat || 'სხვა'; }
 function prodCat(p) { return p.product_type || CAT_TYPE[p.category] || p.category || ''; }
 let allProducts = [];
-let cart = JSON.parse(localStorage.getItem('uc_cart') || '[]');
-document.getElementById('cartCount').textContent = cart.length;
 let activeCategory = '';
-let activePrice = null;
 let activeSpecs = {};
-let activeDiscountOnly = false;
 let searchQ = '';
 let filteredProducts = [];
 let currentPage = 1;
@@ -866,12 +648,6 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
         </select>
       </div>
     </div>`;
-    html += `<div class="mb-4">
-      <label class="flex items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" onchange="setDiscountFilter(this.checked)" ${activeDiscountOnly ? 'checked' : ''} class="w-4 h-4 accent-orange cursor-pointer">
-        <span class="text-xs font-bold text-dark">ფასდაკლება</span>
-      </label>
-    </div>`;
   }
 
   // Other spec filters (skip width/profile/rim for tires — handled above)
@@ -895,16 +671,6 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
     ${html}
   </div>`;
 }
-
-window.setDiscountFilter = function(checked) {
-  activeDiscountOnly = checked;
-  applyFilters();
-  const prods = allProducts.filter(p => !activeCategory || prodCat(p) === activeCategory);
-  const d = document.getElementById('sidebarSpecs');
-  if (d) d.innerHTML = buildSpecFilterHTML(prods, activeCategory, false);
-  const m = document.getElementById('mobileFilterSpecs');
-  if (m) m.innerHTML = buildSpecFilterHTML(prods, activeCategory, true);
-};
 
 window.setSpecFilter = function(key, val) {
   if (val) activeSpecs[key] = val; else delete activeSpecs[key];
@@ -1009,7 +775,6 @@ function renderPage() {
   grid.innerHTML = pageItems.map(p => `
     <div class="card-hover bg-white border border-gray-800 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
-      ${p.oldPrice ? `<div class="absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10">ფასდაკლება</div>` : ''}
       <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
         ${p.imageUrl
           ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
@@ -1021,16 +786,6 @@ function renderPage() {
         ${getCardSpecs(p)}
         ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
-        <div class="card-bottom flex items-end justify-between border-t border-gray-100 pt-3 mt-4">
-          <div>
-            ${p.oldPrice ? `<div class="text-xs text-dark line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
-            ${fmtPrice(p.price, p.unit)}
-          </div>
-          <button onclick="event.stopPropagation();addToCart('${p.id}')"
-            class="bg-dark hover:bg-orange text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
-            + კალათა
-          </button>
-        </div>
       </div>
     </div>
   `).join('');
@@ -1070,8 +825,6 @@ function applyFilters() {
   let list = allProducts;
   if (activeCategory) list = list.filter(p => prodCat(p) === activeCategory);
   if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
-  if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
-  if (activeDiscountOnly) list = list.filter(p => p.oldPrice);
   Object.entries(activeSpecs).forEach(([key, val]) => {
     if (val) list = list.filter(p => p.specs?.[key] === val);
   });
@@ -1092,20 +845,7 @@ window.setCategory = function(el, cat) {
 window.setSidebarCat = function(el, cat) {
   activeCategory = cat;
   activeSpecs = {};
-  activeDiscountOnly = false;
   buildSidebar();
-  applyFilters();
-};
-
-window.updatePriceInputs = function() {
-  const sEl = document.getElementById('sidebarPriceMin');
-  const useSidebar = sEl && sEl.offsetParent !== null;
-  const prefix = useSidebar ? 'sidebar' : 'mobile';
-  const minStr = document.getElementById(prefix + 'PriceMin')?.value;
-  const maxStr = document.getElementById(prefix + 'PriceMax')?.value;
-  const minV = minStr !== '' ? parseFloat(minStr) : null;
-  const maxV = maxStr !== '' ? parseFloat(maxStr) : null;
-  activePrice = (minV !== null || maxV !== null) ? [minV ?? 0, maxV ?? Infinity] : null;
   applyFilters();
 };
 
@@ -1132,31 +872,6 @@ window.toggleMobileFilter = function() {
 window.goProduct = function(id) {
   window.location.href = `product.html?id=${id}`;
 };
-
-// ── Cart ──
-window.addToCart = function(id) {
-  const p = allProducts.find(p => p.id === id);
-  if (!p) return;
-  const ex = cart.find(i => i.id === id);
-  const tireSize = (p.product_type === 'tire' && p.specs?.width) ? ' ' + p.specs.width + '/' + p.specs.profile + ' ' + p.specs.rim : '';
-  if (ex) ex.qty++;
-  else cart.push({ id, name: p.name + tireSize, price: p.price, oldPrice: p.oldPrice || null, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '', product_type: p.product_type || '', specs: p.specs || {} });
-  saveCart();
-  showToast('✓ ' + p.name + ' კალათაში დაემატა');
-};
-
-window.changeQty = function(id, d) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty += d;
-  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
-  saveCart(); renderCart();
-};
-
-function saveCart() {
-  localStorage.setItem('uc_cart', JSON.stringify(cart));
-  document.getElementById('cartCount').textContent = cart.length;
-}
 
 function closeAllPanels() {
   const dp = document.getElementById('deliveryPanel');
@@ -1214,183 +929,6 @@ window.toggleCall = function() {
   }
 };
 
-window.toggleCart = function() {
-  document.getElementById('overlay').classList.toggle('overlay-enter');
-  document.getElementById('cartDrawer').classList.toggle('drawer-enter');
-  renderCart();
-};
-
-function renderCart() {
-  const el = document.getElementById('cartItems');
-  const footer = document.getElementById('cartFooter');
-  if (!cart.length) {
-    el.innerHTML = `<div class="text-center py-16 text-gray-400"><p class="font-semibold text-dark mb-1">კალათა ცარიელია</p><p class="text-sm">დაამატე პროდუქტები</p></div>`;
-    footer.classList.add('hidden'); return;
-  }
-  footer.classList.remove('hidden');
-  el.innerHTML = cart.map(i => `
-    <div class="flex items-center gap-3 py-3 border-b border-gray-200">
-      <div class="w-14 h-14 bg-cream flex items-center justify-center flex-shrink-0 overflow-hidden">
-        ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-full h-full object-cover">` : `<span style="font-size:1.5rem">${i.emoji||'📦'}</span>`}
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold truncate">${i.name}</div>
-        ${i.oldPrice ? `<div class="text-xs text-gray-400 line-through">${(i.oldPrice*i.qty).toFixed(2)} ₾</div>` : ''}
-        <div class="text-sm text-orange font-bold mt-0.5">${(i.price*i.qty).toFixed(2)} ₾</div>
-      </div>
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <button onclick="changeQty('${i.id}',-1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 text-base flex items-center justify-center transition-colors">−</button>
-        <span class="text-sm font-bold w-5 text-center">${i.qty}</span>
-        <button onclick="changeQty('${i.id}',1)" class="w-7 h-7 bg-cream border border-gray-200 hover:bg-gray-200 text-base flex items-center justify-center transition-colors">+</button>
-      </div>
-    </div>
-  `).join('');
-  document.getElementById('cartTotal').textContent = cart.reduce((s,i) => s+i.price*i.qty, 0).toFixed(2) + ' ₾';
-}
-
-// ── Invoice helpers ──
-function genInvoiceNo() {
-  const d = new Date();
-  const date = d.getFullYear().toString() +
-    String(d.getMonth()+1).padStart(2,'0') +
-    String(d.getDate()).padStart(2,'0');
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return `INV-${date}-${rand}`;
-}
-
-let currentInvoiceNo = '';
-
-// ── Order ──
-window.openGovLookup = function() {
-  const id = document.getElementById('buyerIdInput').value.trim();
-  if (id) navigator.clipboard?.writeText(id).catch(() => {});
-  window.open('https://www.my.gov.ge/ka-ge/services/6/service/179', '_blank');
-};
-
-window.openOrder = function() {
-  currentInvoiceNo = genInvoiceNo();
-  const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
-  const d = new Date();
-  const _GEO_M = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
-  const dateStr = d.getDate() + ' ' + _GEO_M[d.getMonth()] + ', ' + d.getFullYear();
-
-  document.getElementById('buyerIdInput').value = '';
-  document.getElementById('buyerNameInput').value = '';
-  document.getElementById('buyerPhoneInput').value = '';
-  document.getElementById('invoiceNo').textContent = currentInvoiceNo;
-  document.getElementById('invoiceDate').textContent = dateStr;
-  const vat = total * 18 / 118;
-  document.getElementById('invoiceVat').textContent = vat.toFixed(2) + ' ₾';
-  document.getElementById('invoiceTotal').innerHTML =
-    `<span class="font-display text-2xl tracking-wide text-dark whitespace-nowrap">${total.toFixed(2)}&thinsp;₾</span>`;
-  document.getElementById('invoiceItems').innerHTML = cart.map(i => `
-    <tr class="border-b border-gray-50">
-      <td class="py-2 text-dark">${i.name}</td>
-      <td class="py-2 text-center text-dark">${i.qty}</td>
-      <td class="py-2 text-center text-dark">${(i.unit||'ც').replace(/\.+$/,'')}</td>
-      <td class="py-2 text-right text-dark">${parseFloat(i.price).toFixed(2)} ₾</td>
-      <td class="py-2 text-right font-semibold text-dark">${(i.price*i.qty).toFixed(2)} ₾</td>
-    </tr>`).join('');
-
-  document.getElementById('orderFormWrap').classList.remove('hidden');
-  document.getElementById('orderSuccess').classList.add('hidden');
-  document.getElementById('orderModal').classList.add('modal-enter');
-};
-
-window.closeOrder = function() {
-  document.getElementById('orderModal').classList.remove('modal-enter');
-};
-
-window.clearCart = function() { cart = []; saveCart(); renderCart(); };
-
-window.submitOrder = async function() {
-  // Rate limit: max 3 invoices per hour
-  const now = Date.now();
-  const hour = 60 * 60 * 1000;
-  const timestamps = JSON.parse(localStorage.getItem('uc_inv_ts') || '[]').filter(t => now - t < hour);
-  if (timestamps.length >= 3) {
-    alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო');
-    return;
-  }
-
-  const buyerName  = document.getElementById('buyerNameInput').value.trim();
-  const buyerId    = document.getElementById('buyerIdInput').value.trim();
-  const buyerPhone = document.getElementById('buyerPhoneInput').value.trim();
-  if (!buyerName || !buyerId || !buyerPhone) {
-    document.getElementById('buyerNameInput').style.borderColor  = buyerName  ? '' : '#ef4444';
-    document.getElementById('buyerIdInput').style.borderColor    = buyerId    ? '' : '#ef4444';
-    document.getElementById('buyerPhoneInput').style.borderColor = buyerPhone ? '' : '#ef4444';
-    document.getElementById('buyerValidationMsg').classList.remove('hidden');
-    return;
-  }
-  document.getElementById('buyerValidationMsg').classList.add('hidden');
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'იგზავნება...';
-  try {
-    const { supabase } = await import('./js/supabase-config.js');
-
-    // Get client IP
-    let clientIp = '';
-    try {
-      const ipRes = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipRes.json();
-      clientIp = ipData.ip || '';
-    } catch(e) {}
-
-    // IP-based rate limit check
-    if (clientIp) {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { data: recentOrders } = await supabase.from('orders')
-        .select('id').eq('client_ip', clientIp).gte('created_at', oneHourAgo);
-      if (recentOrders && recentOrders.length >= 3) {
-        btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
-        alert('დროებით შეგეზღუდათ ინვოისის გაგზავნა Spam-ის გამო');
-        return;
-      }
-    }
-
-    const { error: insertError } = await supabase.from('orders').insert({
-      invoice_no: currentInvoiceNo,
-      buyer_id: document.getElementById('buyerIdInput').value.trim(),
-      buyer_name: document.getElementById('buyerNameInput').value.trim(),
-      buyer_phone: document.getElementById('buyerPhoneInput').value.trim(),
-      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit, code:i.code||'', store:i.store||'', product_type:i.product_type||'', specs:i.specs||{} })),
-      total: cart.reduce((s,i) => s+i.price*i.qty, 0),
-      status: 'pending',
-      client_ip: clientIp
-    });
-    if (insertError) {
-      console.error('Order insert error:', insertError);
-      btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
-      alert('შეცდომა: ' + (insertError.message || insertError.code || JSON.stringify(insertError)));
-      return;
-    }
-    fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id: 'service_xvv38pk',
-        template_id: 'template_tcqn5lq',
-        user_id: 'pb_XXv8v1r4bDAPMh',
-        template_params: { type: 'შეკვეთა', message: 'ახალი შეკვეთა შემოვიდა UniCraft-ში.' }
-      })
-    }).catch(() => {});
-  } catch(e) {
-    console.error('Order insert error:', e);
-    btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
-    alert('შეცდომა: ' + (e.message || JSON.stringify(e)));
-    return;
-  }
-  timestamps.push(Date.now());
-  localStorage.setItem('uc_inv_ts', JSON.stringify(timestamps));
-  document.getElementById('successInvNo').textContent = currentInvoiceNo;
-  document.getElementById('orderFormWrap').classList.add('hidden');
-  document.getElementById('orderSuccess').classList.remove('hidden');
-  btn.disabled = false; btn.textContent = 'გააგზავნე მოთხოვნა →';
-};
-
-// downloadInvoicePDF is loaded from js/invoice.js to avoid HTML parser issues with HTML-in-JS strings
-
 window.showToast = function(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1416,15 +954,9 @@ async function loadProducts() {
     const data = await res.json();
     window._productsLoading = false;
     if (Array.isArray(data) && data.length > 0) {
-      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
-      cart = cart.map(item => {
-        const p = allProducts.find(p => p.id === item.id);
-        return p ? { ...item, product_type: p.product_type || '', specs: p.specs || {} } : item;
-      });
-      saveCart();
+      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
       buildSidebar();
       renderProducts(allProducts);
-      buildPromoTicker(allProducts);
     } else {
       renderProducts([]);
     }
@@ -1434,45 +966,7 @@ async function loadProducts() {
   }
 }
 
-saveCart();
 loadProducts();
-
-async function buildPromoTicker(products) {
-  const discounted = products.filter(p => p.oldPrice);
-  const ticker = document.getElementById('promoTicker');
-  const track = document.getElementById('tickerTrack');
-  if (!discounted.length || !ticker || !track) return;
-  ticker.style.display = 'flex';
-  updateWidgetTops();
-
-  const item = p => {
-    const specs = p.specs || {};
-    const size = specs.width ? ` ${specs.width}/${specs.profile} ${specs.rim}` : '';
-    return `<span onclick="goProduct('${p.id}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 60px;color:white;font-size:13px;font-weight:600;border-right:1px solid rgba(255,255,255,0.1)">
-      <span style="color:#E8541A;font-weight:800">${parseFloat(p.price).toFixed(2)} ₾</span>
-      <span style="text-decoration:line-through;color:rgba(255,255,255,0.4);font-size:11px">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>
-      <span style="color:rgba(255,255,255,0.85)">${p.name}${size}</span>
-    </span>`;
-  };
-
-  const content = discounted.map(item).join('');
-  track.innerHTML = content;
-  await new Promise(r => requestAnimationFrame(r));
-  const repeat = Math.max(2, Math.ceil((window.innerWidth * 2) / track.scrollWidth));
-  const block = content.repeat(repeat);
-  track.innerHTML = block + block;
-  await new Promise(r => requestAnimationFrame(r));
-
-  let x = 0;
-  const speed = 1.2;
-  const half = track.scrollWidth / 2;
-  (function tick() {
-    x -= speed;
-    if (Math.abs(x) >= half) x = 0;
-    track.style.transform = `translateX(${x}px)`;
-    requestAnimationFrame(tick);
-  })();
-}
 </script>
 <script type="module">
 import { supabase } from './js/supabase-config.js';
