@@ -761,7 +761,7 @@ function renderPage() {
   if (!filteredProducts.length) {
     grid.innerHTML = window._productsLoading
       ? `<div class="col-span-full text-center py-20 text-gray-400"><div style="font-size:2rem;margin-bottom:12px">⏳</div><p class="text-sm">პროდუქტები იტვირთება...</p></div>`
-      : `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტები ვერ მოიძებნა</p></div>`;
+      : `<div class="col-span-full text-center py-20 text-gray-400"><p class="text-lg font-semibold text-dark mb-1">პროდუქტები ვერ მოიძებნა</p><p style="font-size:14px;color:#6b7280;margin-top:8px;">გთხოვთ მოგვწეროთ ან დაგვიკავშირდეთ მარაგების გადამოწმების მიზნით.</p></div>`;
     document.getElementById('pagination').innerHTML = '';
     return;
   }
