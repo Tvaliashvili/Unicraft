@@ -629,6 +629,8 @@
             </div>
             <div id="adminChatMessages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f9fafb"></div>
             <div id="adminChatInputRow" style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;background:white;flex-shrink:0">
+              <input id="adminFileInput" type="file" accept="image/*,application/pdf" style="display:none" onchange="adminSendFile(this)">
+              <button onclick="document.getElementById('adminFileInput').click()" title="ფაილის მიბმა" style="width:36px;height:36px;background:#f3f4f6;border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">📎</button>
               <input id="adminChatInput" placeholder="პასუხი..." onkeydown="if(event.key==='Enter')sendAdminMsg()"
                 style="flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none">
               <button onclick="sendAdminMsg()" style="width:36px;height:36px;background:#E8541A;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -2310,7 +2312,8 @@ function renderChatSessionsList(sessions) {
       const active = s.id === currentChatSessionId ? 'background:var(--gray-light);' : '';
       const displayName = s.customer_name || s.customerName || s.id.slice(-8);
       const displayPhone = s.customer_phone || s.customerPhone || '';
-      const lastMsg = s.last_message || s.lastMessage || '...';
+      const _lm = s.last_message || s.lastMessage || '';
+      const lastMsg = _lm.startsWith('__FILE__:') ? '📎 ფაილი' : (_lm || '...');
       const isBanned = s.status === 'banned';
       const isClosed = s.status === 'closed';
       const statusIcon = isBanned
@@ -2459,12 +2462,26 @@ window.openAdminChat = async function(sessionId) {
   document.getElementById('adminChatInput').focus();
 };
 
+function _chatMsgContent(text) {
+  if (text && text.startsWith('__FILE__:')) {
+    try {
+      const f = JSON.parse(text.slice(9));
+      if (f.type && f.type.startsWith('image/')) {
+        return `<img src="${f.url}" alt="${f.name}" style="max-width:200px;max-height:200px;border-radius:8px;display:block;cursor:pointer" onclick="window.open('${f.url}','_blank')" title="${f.name}">`;
+      }
+      return `<a href="${f.url}" target="_blank" style="display:flex;align-items:center;gap:8px;color:white;text-decoration:none;background:rgba(255,255,255,0.15);padding:8px 10px;border-radius:8px"><span style="font-size:18px">📄</span><span style="font-size:12px;word-break:break-all">${f.name}</span></a>`;
+    } catch(e) {}
+  }
+  return text;
+}
+
 function renderAdminChatMsgs(msgs) {
   const el = document.getElementById('adminChatMessages');
   el.innerHTML = msgs.map(m => {
     const isAdmin = m.sender === 'admin';
+    const content = _chatMsgContent(m.text);
     return `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
-      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${content}</div>
     </div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
@@ -2565,6 +2582,23 @@ window.sendAdminMsg = async function() {
   } catch(e) {
     showToast('Supabase საჭიროა ჩატისთვის', 'error');
   }
+};
+
+window.adminSendFile = async function(input) {
+  const file = input.files[0];
+  if (!file || !currentChatSessionId) { input.value = ''; return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('ფაილი ძალიან დიდია (მაქს. 10MB)', 'error'); input.value = ''; return; }
+  showToast('იტვირთება...', '');
+  const ext = file.name.split('.').pop();
+  const path = currentChatSessionId + '/' + Date.now() + '.' + ext;
+  const { error: upErr } = await supabase.storage.from('chat-files').upload(path, file, { upsert: true });
+  if (upErr) { showToast('ატვირთვის შეცდომა: ' + upErr.message, 'error'); input.value = ''; return; }
+  const { data: urlData } = supabase.storage.from('chat-files').getPublicUrl(path);
+  const text = '__FILE__:' + JSON.stringify({ url: urlData.publicUrl, type: file.type, name: file.name });
+  await supabase.from('chat_messages').insert({ session_id: currentChatSessionId, text, sender: 'admin' });
+  await supabase.from('chats').update({ last_message: '📎 ფაილი', updated_at: new Date().toISOString() }).eq('id', currentChatSessionId);
+  input.value = '';
+  showToast('ფაილი გაიგზავნა', 'success');
 };
 
 // ─── Toast ───

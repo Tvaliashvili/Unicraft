@@ -560,6 +560,8 @@ tailwind.config = {
         <button onclick="restartChat()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;width:100%">↺ ახლიდან დაწყება</button>
       </div>
       <div id="chatInputRow" style="padding:10px 12px;border-top:1px solid #e5e7eb;display:flex;gap:8px;background:white;flex-shrink:0">
+        <input id="chatFileInput" type="file" accept="image/*,application/pdf" style="display:none" onchange="customerSendFile(this)">
+        <button onclick="document.getElementById('chatFileInput').click()" title="ფაილის მიბმა" style="width:34px;height:34px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center">📎</button>
         <input id="chatInput" placeholder="შეტყობინება..." onkeydown="if(event.key==='Enter')sendChatMsg()"
           style="flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:8px 11px;font-size:13px;font-family:'Noto Sans Georgian',sans-serif;outline:none;color:#1A1714">
         <button onclick="sendChatMsg()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:15px;cursor:pointer;line-height:1">➤</button>
@@ -1155,12 +1157,26 @@ window.restartChat = async function() {
   setTimeout(() => document.getElementById('chatNameInput').focus(), 50);
 };
 
+function _chatFileContent(text) {
+  if (text && text.startsWith('__FILE__:')) {
+    try {
+      const f = JSON.parse(text.slice(9));
+      if (f.type && f.type.startsWith('image/')) {
+        return `<img src="${f.url}" alt="${f.name}" style="max-width:190px;max-height:190px;border-radius:8px;display:block;cursor:pointer" onclick="window.open('${f.url}','_blank')" title="${f.name}">`;
+      }
+      return `<a href="${f.url}" target="_blank" style="display:flex;align-items:center;gap:8px;color:white;text-decoration:none;background:rgba(255,255,255,0.15);padding:8px 10px;border-radius:8px"><span style="font-size:18px">📄</span><span style="font-size:12px;word-break:break-all">${f.name}</span></a>`;
+    } catch(e) {}
+  }
+  return text;
+}
+
 function renderChatMsgs(msgs) {
   const el = document.getElementById('chatMessages');
   el.innerHTML = msgs.map(m => {
     const isAdmin = m.sender === 'admin';
+    const content = _chatFileContent(m.text);
     return `<div style="display:flex;justify-content:${isAdmin ? 'flex-start' : 'flex-end'}">
-      <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? '#141210' : '#E8541A'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${m.text}</div>
+      <div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};background:${isAdmin ? '#141210' : '#E8541A'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${content}</div>
     </div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
@@ -1179,6 +1195,24 @@ function _showSpamWarning(msg) {
   el.scrollTop = el.scrollHeight;
   setTimeout(() => div.remove(), 4000);
 }
+
+window.customerSendFile = async function(input) {
+  const file = input.files[0];
+  if (!file || !chatSessionId) { input.value = ''; return; }
+  if (file.size > 10 * 1024 * 1024) { _showSpamWarning('ფაილი ძალიან დიდია (მაქს. 10MB)'); input.value = ''; return; }
+  const ext = file.name.split('.').pop();
+  const path = chatSessionId + '/' + Date.now() + '.' + ext;
+  const { error: upErr } = await supabase.storage.from('chat-files').upload(path, file, { upsert: true });
+  if (upErr) { _showSpamWarning('ატვირთვის შეცდომა'); input.value = ''; return; }
+  const { data: urlData } = supabase.storage.from('chat-files').getPublicUrl(path);
+  const text = '__FILE__:' + JSON.stringify({ url: urlData.publicUrl, type: file.type, name: file.name });
+  try {
+    await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
+    const { data: cur } = await supabase.from('chats').select('unread').eq('id', chatSessionId).single();
+    await supabase.from('chats').update({ last_message: '📎 ფაილი', unread: (cur?.unread || 0) + 1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
+  } catch(e) {}
+  input.value = '';
+};
 
 window.sendChatMsg = async function() {
   const input = document.getElementById('chatInput');
