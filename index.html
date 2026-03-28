@@ -1112,8 +1112,9 @@ window.addToCart = function(id) {
   const p = allProducts.find(p => p.id === id);
   if (!p) return;
   const ex = cart.find(i => i.id === id);
+  const tireSize = (p.product_type === 'tire' && p.specs?.width) ? ' ' + p.specs.width + '/' + p.specs.profile + ' R' + p.specs.rim : '';
   if (ex) ex.qty++;
-  else cart.push({ id, name: p.name, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '', product_type: p.product_type || '', specs: p.specs || {} });
+  else cart.push({ id, name: p.name + tireSize, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '', product_type: p.product_type || '', specs: p.specs || {} });
   saveCart();
   showToast('✓ ' + p.name + ' კალათაში დაემატა');
 };
