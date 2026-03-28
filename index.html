@@ -137,7 +137,7 @@ tailwind.config = {
 </style>
 
 
-<div id="siteContent" style="display:none">
+<div id="siteContent" style="display:none;flex-direction:column;flex:1">
 <!-- ══ HEADER ══ -->
 <header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 md:px-6">
@@ -391,7 +391,7 @@ tailwind.config = {
 </div>
 
 <!-- ══ TRUST BAR ══ -->
-<div class="bg-dark border-t-2 border-orange mt-8">
+<div class="bg-dark border-t-2 border-orange mt-auto">
   <div class="trust-bar-grid max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
     <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">სწრაფი მიტანა</div></div></div>
     <div class="flex items-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">დაბალი ფასები</div></div></div>
@@ -995,7 +995,7 @@ function renderPage() {
         ${getCardSpecs(p)}
         ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
-        <div class="card-bottom flex items-center justify-between border-t border-gray-100 pt-3 mt-4">
+        <div class="card-bottom flex items-end justify-between border-t border-gray-100 pt-3 mt-4">
           <div>
             ${p.oldPrice ? `<div class="text-xs text-dark line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
             ${fmtPrice(p.price, p.unit)}
@@ -1419,7 +1419,7 @@ import { supabase } from './js/supabase-config.js';
   const isPreview = new URLSearchParams(location.search).has('preview');
   const showMaintenance = data?.value === 'true' && !isPreview;
   ms.style.display = showMaintenance ? 'flex' : 'none';
-  document.getElementById('siteContent').style.display = showMaintenance ? 'none' : 'block';
+  document.getElementById('siteContent').style.display = showMaintenance ? 'none' : 'flex';
   if (showMaintenance) setTimeout(() => { document.getElementById('mProgress').style.width = '68%'; }, 150);
   // Subscribe to live changes
   supabase.channel('settings-changes').on('postgres_changes',
