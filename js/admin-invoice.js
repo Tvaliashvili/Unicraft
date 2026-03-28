@@ -7,12 +7,22 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
   }, 0);
   const vat = total * 18 / 118;
 
+  var hasTire = rows.some(function(r) { return r.product_type === 'tire'; });
+
   const rowsHtml = rows.filter(function(r) {
     return r.name || (parseFloat(r.price) > 0);
   }).map(function(r) {
     const line = (parseFloat(r.qty)||0) * (parseFloat(r.price)||0);
+    var sizeCell = '';
+    if (hasTire) {
+      var s = r.specs || {};
+      sizeCell = (r.product_type === 'tire' && s.width)
+        ? '<td style="text-align:center;font-size:13px">' + s.width + '/' + s.profile + ' R' + s.rim + '</td>'
+        : '<td></td>';
+    }
     return '<tr>'
       + '<td>' + (r.name || '–') + '</td>'
+      + sizeCell
       + '<td style="text-align:center">' + (parseFloat(r.qty)||0) + ' ' + (r.unit||'ც') + '</td>'
       + '<td style="text-align:right">' + parseFloat(r.price||0).toFixed(2) + ' ₾</td>'
       + '<td style="text-align:right;font-weight:600">' + line.toFixed(2) + ' ₾</td>'
@@ -82,6 +92,7 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
     + '  <table>'
     + '    <thead><tr>'
     + '      <th>დასახელება</th>'
+    + (hasTire ? '<th class="c">ზომა</th>' : '')
     + '      <th class="c">რ-ბა</th>'
     + '      <th class="r">ერთ. ფასი</th>'
     + '      <th class="r">სულ</th>'
@@ -89,11 +100,11 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
     + '    <tbody>' + rowsHtml + '</tbody>'
     + '    <tfoot>'
     + '      <tr class="vat-row">'
-    + '        <td colspan="3" style="text-align:right;padding-right:8px">მათ შორის დღგ (18%)</td>'
+    + '        <td colspan="' + (hasTire ? 4 : 3) + '" style="text-align:right;padding-right:8px">მათ შორის დღგ (18%)</td>'
     + '        <td style="text-align:right">' + vat.toFixed(2) + ' ₾</td>'
     + '      </tr>'
     + '      <tr class="total-row">'
-    + '        <td colspan="3" style="text-align:right;padding-right:8px"><span class="total-lbl">სულ გადასახდელი</span></td>'
+    + '        <td colspan="' + (hasTire ? 4 : 3) + '" style="text-align:right;padding-right:8px"><span class="total-lbl">სულ გადასახდელი</span></td>'
     + '        <td style="text-align:right"><span class="total-num">' + total.toFixed(2) + '&thinsp;₾</span></td>'
     + '      </tr>'
     + '    </tfoot>'

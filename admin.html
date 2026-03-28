@@ -3022,7 +3022,9 @@ window.importFromOrder = function(id) {
     name: item.name || '',
     qty: parseFloat(item.qty) || 1,
     unit: item.unit || 'ც',
-    price: parseFloat(item.price) || 0
+    price: parseFloat(item.price) || 0,
+    product_type: item.product_type || '',
+    specs: item.specs || {}
   }));
   if (!invGenRows.length) invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
   renderInvRows();

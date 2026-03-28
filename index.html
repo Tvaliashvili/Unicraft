@@ -1113,7 +1113,7 @@ window.addToCart = function(id) {
   if (!p) return;
   const ex = cart.find(i => i.id === id);
   if (ex) ex.qty++;
-  else cart.push({ id, name: p.name, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '' });
+  else cart.push({ id, name: p.name, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '', product_type: p.product_type || '', specs: p.specs || {} });
   saveCart();
   showToast('✓ ' + p.name + ' კალათაში დაემატა');
 };
@@ -1324,7 +1324,7 @@ window.submitOrder = async function() {
       buyer_id: document.getElementById('buyerIdInput').value.trim(),
       buyer_name: document.getElementById('buyerNameInput').value.trim(),
       buyer_phone: document.getElementById('buyerPhoneInput').value.trim(),
-      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit, code:i.code||'', store:i.store||'' })),
+      items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty, unit:i.unit, code:i.code||'', store:i.store||'', product_type:i.product_type||'', specs:i.specs||{} })),
       total: cart.reduce((s,i) => s+i.price*i.qty, 0),
       status: 'pending',
       client_ip: clientIp
