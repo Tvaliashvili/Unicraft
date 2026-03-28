@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>საბურავები, ზეთები და ფილტრები</title>
+<title>Unicraft</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>
@@ -301,9 +301,9 @@ tailwind.config = {
   </div>
 
   <!-- ══ PROMO TICKER ══ -->
-  <div id="promoTicker" style="display:none;background:#141210;border-top:2px solid #E8541A;overflow:hidden;padding:0;height:48px;align-items:center">
+  <div id="promoTicker" style="display:none;background:#141210;border-top:2px solid #E8541A;overflow:hidden;padding:0;height:40px;align-items:center">
     <div style="display:flex;align-items:center;height:100%">
-      <div style="background:#E8541A;color:white;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;flex-shrink:0;white-space:nowrap">ფასდაკლება</div>
+      <div class="hidden sm:flex" style="background:#E8541A;color:white;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:0 18px;height:100%;align-items:center;flex-shrink:0;white-space:nowrap">ფასდაკლება</div>
       <div style="overflow:hidden;flex:1;position:relative;height:100%">
         <div id="tickerTrack" style="display:flex;align-items:center;height:100%;gap:0;white-space:nowrap;will-change:transform"></div>
       </div>
@@ -325,7 +325,7 @@ tailwind.config = {
   </div>
 
 <!-- Mobile filter drawer -->
-<div id="mobileFilterDrawer" class="lg:hidden hidden bg-white border-b border-gray-200 px-4 py-3 max-h-[45vh] overflow-y-auto">
+<div id="mobileFilterDrawer" class="lg:hidden hidden bg-white border-b border-gray-200 px-4 py-3 max-h-[32vh] overflow-y-auto">
   <div class="mb-4">
     <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-1 border-b-2 border-orange inline-block">კატეგორია</div>
     <div id="mobileFilterCats" class="flex flex-col gap-0 mt-1"></div>
