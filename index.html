@@ -341,6 +341,16 @@ tailwind.config = {
 </div>
 </div>
 
+<!-- ══ PROMO TICKER ══ -->
+<div id="promoTicker" style="display:none;background:#141210;border-top:2px solid #E8541A;border-bottom:2px solid #E8541A;overflow:hidden;padding:0;height:48px;align-items:center">
+  <div style="display:flex;align-items:center;height:100%">
+    <div style="background:#E8541A;color:white;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;flex-shrink:0;white-space:nowrap">ფასდაკლება</div>
+    <div style="overflow:hidden;flex:1;position:relative;height:100%">
+      <div id="tickerTrack" style="display:flex;align-items:center;height:100%;gap:0;white-space:nowrap;will-change:transform"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MAIN CONTENT ══ -->
 <div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 flex gap-6 flex-1 w-full">
 
@@ -1396,6 +1406,7 @@ async function loadProducts() {
       saveCart();
       buildSidebar();
       renderProducts(allProducts);
+      buildPromoTicker(allProducts);
     } else {
       renderProducts([]);
     }
@@ -1407,6 +1418,37 @@ async function loadProducts() {
 
 saveCart();
 loadProducts();
+
+function buildPromoTicker(products) {
+  const discounted = products.filter(p => p.oldPrice);
+  const ticker = document.getElementById('promoTicker');
+  const track = document.getElementById('tickerTrack');
+  if (!discounted.length || !ticker || !track) return;
+  ticker.style.display = 'flex';
+
+  const item = p => {
+    const specs = p.specs || {};
+    const size = specs.width ? ` ${specs.width}/${specs.profile} ${specs.rim}` : '';
+    return `<span onclick="goProduct('${p.id}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 32px;color:white;font-size:13px;font-weight:600;border-right:1px solid rgba(255,255,255,0.1)">
+      <span style="color:#E8541A;font-weight:800">${parseFloat(p.price).toFixed(2)} ₾</span>
+      <span style="text-decoration:line-through;color:rgba(255,255,255,0.4);font-size:11px">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>
+      <span style="color:rgba(255,255,255,0.85)">${p.name}${size}</span>
+    </span>`;
+  };
+
+  const content = discounted.map(item).join('');
+  track.innerHTML = content + content;
+
+  let x = 0;
+  const speed = 0.5;
+  const half = track.scrollWidth / 2;
+  (function tick() {
+    x -= speed;
+    if (Math.abs(x) >= half) x = 0;
+    track.style.transform = `translateX(${x}px)`;
+    requestAnimationFrame(tick);
+  })();
+}
 </script>
 <script type="module">
 import { supabase } from './js/supabase-config.js';
