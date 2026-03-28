@@ -873,6 +873,17 @@ function isWorkingHours() {
   return tbilisiHour >= 9 && tbilisiHour < 20;
 }
 
+function updateWidgetTops() {
+  const h = document.querySelector('header')?.offsetHeight || 62;
+  const top = (h + 6) + 'px';
+  ['deliveryWidget','callWidget','chatWidget'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.top = top;
+  });
+}
+updateWidgetTops();
+window.addEventListener('resize', updateWidgetTops);
+
 function closeAllPanels() {
   const dp = document.getElementById('deliveryPanel');
   if (dp.classList.contains('panel-open')) {
