@@ -2744,10 +2744,14 @@ window.doAdminInvoicePDF = function() {
 };
 
 // init when page is shown
+let _invGenInitialized = false;
 const _origShowPage = window.showPage;
 window.showPage = function(name) {
   _origShowPage(name);
-  if (name === 'invoice-gen') initInvGen();
+  if (name === 'invoice-gen' && !_invGenInitialized) {
+    initInvGen();
+    _invGenInitialized = true;
+  }
 };
 </script>
 
