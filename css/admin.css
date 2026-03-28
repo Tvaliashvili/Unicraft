@@ -674,6 +674,10 @@ body {
   /* Chat page: fix left position on mobile */
   #page-chat.active { left: 0 !important; top: 54px !important; padding: 8px !important; }
 
+  /* Chat panel: hide header buttons, show bottom bar */
+  #chatHeaderBtns { display: none !important; }
+  #chatBottomActions { display: flex !important; }
+
   /* Chat grid: single column on mobile */
   #chatGrid { display: flex !important; flex-direction: column; }
   #chatSessionsCol { flex-direction: column; width: 100%; }

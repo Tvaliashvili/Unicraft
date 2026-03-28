@@ -622,7 +622,7 @@
                 <div id="adminChatStatusDot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0"></div>
                 <span id="adminChatTitle" style="font-weight:700;font-size:14px">მომხმარებელი</span>
               </div>
-              <div style="display:flex;gap:6px;align-items:center">
+              <div id="chatHeaderBtns" style="display:flex;gap:6px;align-items:center">
                 <button id="banIpBtn" onclick="banChatIp()" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🚫 IP ბანი</button>
                 <button id="closeChatBtn" onclick="closeAdminChat()" style="display:none;background:#dcfce7;color:#16a34a;border:1px solid #86efac;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✓ საუბრის დასრულება</button>
               </div>
@@ -636,6 +636,10 @@
               <button onclick="sendAdminMsg()" style="width:36px;height:36px;background:#E8541A;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
             </div>
             <div id="adminChatClosedBar" style="display:none;padding:10px 14px;border-top:1px solid var(--border);background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;text-align:center;flex-shrink:0">🔒 საუბარი დასრულებულია</div>
+            <div id="chatBottomActions" style="display:none;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:white;flex-shrink:0">
+              <button id="banIpBtnM" onclick="banChatIp()" style="display:none;flex:1;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🚫 IP ბანი</button>
+              <button id="closeChatBtnM" onclick="closeAdminChat()" style="display:none;flex:1;background:#dcfce7;color:#16a34a;border:1px solid #86efac;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">✓ საუბრის დასრულება</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2444,8 +2448,8 @@ window.openAdminChat = async function(sessionId) {
     const isClosed = sesData.status === 'closed' || sesData.status === 'banned';
     const isBanned = sesData.status === 'banned';
     currentChatIp = sesData.ip || null;
-    document.getElementById('closeChatBtn').style.display = isClosed ? 'none' : 'inline-flex';
-    document.getElementById('banIpBtn').style.display = (isClosed || !currentChatIp) ? 'none' : 'inline-flex';
+    _setChatBtn('closeChatBtn', isClosed ? 'none' : 'inline-flex');
+    _setChatBtn('banIpBtn', (isClosed || !currentChatIp) ? 'none' : 'inline-flex');
     document.getElementById('adminChatInputRow').style.display = isClosed ? 'none' : 'flex';
     document.getElementById('adminChatClosedBar').style.display = isClosed ? 'block' : 'none';
     document.getElementById('adminChatClosedBar').textContent = isBanned ? '🚫 მომხმარებელი დაბლოკილია' : '🔒 საუბარი დასრულებულია';
@@ -2517,8 +2521,8 @@ window.cancelBanIp = function() {
 window.confirmBanIp = async function() {
   document.getElementById('confirmBanModal').style.display = 'none';
   await supabase.from('chats').update({ status: 'banned' }).eq('id', currentChatSessionId);
-  document.getElementById('banIpBtn').style.display = 'none';
-  document.getElementById('closeChatBtn').style.display = 'none';
+  _setChatBtn('banIpBtn', 'none');
+  _setChatBtn('closeChatBtn', 'none');
   document.getElementById('adminChatInputRow').style.display = 'none';
   document.getElementById('adminChatClosedBar').style.display = 'block';
   document.getElementById('adminChatClosedBar').textContent = '🚫 მომხმარებელი დაბლოკილია';
@@ -2577,7 +2581,7 @@ window.closeAdminChat = function() {
 window.confirmCloseChat = async function() {
   document.getElementById('confirmCloseModal').style.display = 'none';
   await supabase.from('chats').update({ status: 'closed' }).eq('id', currentChatSessionId);
-  document.getElementById('closeChatBtn').style.display = 'none';
+  _setChatBtn('closeChatBtn', 'none');
   document.getElementById('adminChatInputRow').style.display = 'none';
   document.getElementById('adminChatClosedBar').style.display = 'block';
   document.getElementById('adminChatStatusDot').style.background = '#ef4444';
@@ -2617,6 +2621,14 @@ window.adminSendFile = async function(input) {
   input.value = '';
   showToast('ფაილი გაიგზავნა', 'success');
 };
+
+// ─── Chat button helper (syncs desktop header + mobile bottom bar) ───
+function _setChatBtn(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = val;
+  const mEl = document.getElementById(id + 'M');
+  if (mEl) mEl.style.display = val;
+}
 
 // ─── Toast ───
 window.showToast = function(msg, type = '') {
