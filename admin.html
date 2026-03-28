@@ -2690,6 +2690,7 @@ window.submitInvGenOrder = async function() {
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   showToast('✓ შეკვეთა გაფორმდა!', 'success');
   loadOrdersList();
+  initInvGen();
 };
 
 window.doAdminInvoicePDF = function() {
