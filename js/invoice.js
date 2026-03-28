@@ -17,7 +17,7 @@ window.downloadInvoicePDF = function() {
 
   const html = '<!DOCTYPE html><html lang="ka">'
     + '<head><meta charset="UTF-8">'
-    + '<title>ინვოისი ' + currentInvoiceNo + '</title>'
+    + '<title>ინვოისი ' + currentInvoiceNo + ' - Unicraft</title>'
     + '<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">'
     + '<style>'
     // ── reset & base ──
