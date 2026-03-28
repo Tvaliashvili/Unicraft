@@ -2134,11 +2134,9 @@ function renderOrderRow(id, o, dateStr) {
   const status = o.status || 'pending';
   const isConfirmed = status === 'confirmed';
   const isRejected  = status === 'rejected' || status === 'cancelled';
-  const isDecided   = isConfirmed || isRejected;
   const td = `style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"`;
   const vBtn = `<button onclick="event.stopPropagation();confirmOrder('${id}')" title="დადასტურება" style="background:${isConfirmed?'#dcfce7':'none'};color:${isConfirmed?'#15803d':'#9ca3af'};border:1px solid ${isConfirmed?'#86efac':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✓</button>`;
   const xBtn = `<button onclick="event.stopPropagation();rejectOrder('${id}')"  title="უარყოფა"   style="background:${isRejected?'#fee2e2':'none'};color:${isRejected?'#b91c1c':'#9ca3af'};border:1px solid ${isRejected?'#fca5a5':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✕</button>`;
-  const undoBtn = isDecided ? `<button onclick="event.stopPropagation();undoOrderStatus('${id}')" title="დაბრუნება" style="background:none;color:#6b7280;border:1px solid #e5e7eb;width:28px;height:28px;border-radius:6px;font-size:13px;cursor:pointer;padding:0;line-height:1">↩</button>` : '';
   return `<tr id="order-row-${id}" style="cursor:pointer" onclick="viewOrderPDF('${id}')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
@@ -2146,7 +2144,7 @@ function renderOrderRow(id, o, dateStr) {
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
-      <div style="display:flex;align-items:center;justify-content:center;gap:4px">${vBtn}${xBtn}${undoBtn}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:4px">${vBtn}${xBtn}</div>
     </td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
       <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑</button>
@@ -2212,13 +2210,6 @@ window.rejectOrder = async function(id) {
   if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
 };
 
-window.undoOrderStatus = async function(id) {
-  const { error } = await supabase.from('orders').update({ status: 'pending' }).eq('id', id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  if (ordersCache[id]) ordersCache[id].status = 'pending';
-  const row = document.getElementById('order-row-' + id);
-  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
-};
 
 window.viewOrderPDF = function(id) {
   const o = ordersCache[id];
