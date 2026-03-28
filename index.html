@@ -694,6 +694,7 @@ function buildSidebar() {
   const cats = [...new Set(allProducts.map(p => prodCat(p)).filter(Boolean))];
   const counts = {};
   allProducts.forEach(p => { const c = prodCat(p); counts[c] = (counts[c]||0)+1; });
+  if (cats.length === 1 && !activeCategory) activeCategory = cats[0];
 
   // Desktop sidebar
   const el = document.getElementById('sidebarCats');
