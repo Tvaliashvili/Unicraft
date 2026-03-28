@@ -6,23 +6,14 @@ window.downloadInvoicePDF = function() {
   const buyerName = (document.getElementById('buyerNameInput')?.value || '').trim();
   const buyerPhone = (document.getElementById('buyerPhoneInput')?.value || '').trim();
 
-  const hasTire = cart.some(i => i.specs && i.specs.width);
-  const rows = cart.map(i => {
-    const s = i.specs || {};
-    const sizeCell = hasTire
-      ? (s.width
-          ? `<td style="text-align:center;font-size:13px">${s.width}/${s.profile} R${s.rim}</td>`
-          : '<td></td>')
-      : '';
-    return `<tr>
+  const rows = cart.map(i => `
+    <tr>
       <td>${i.name}</td>
-      ${sizeCell}
       <td style="text-align:center">${i.qty}</td>
       <td style="text-align:center">${i.unit||'ც'}</td>
       <td style="text-align:right">${parseFloat(i.price).toFixed(2)} ₾</td>
       <td style="text-align:right;font-weight:600">${(i.price*i.qty).toFixed(2)} ₾</td>
-    </tr>`;
-  }).join('');
+    </tr>`).join('');
 
   const html = '<!DOCTYPE html><html lang="ka">'
     + '<head><meta charset="UTF-8">'
@@ -99,7 +90,6 @@ window.downloadInvoicePDF = function() {
     + '  <table>'
     + '    <thead><tr>'
     + '      <th>დასახელება</th>'
-    + (hasTire ? '<th class="c">ზომა</th>' : '')
     + '      <th class="c">რ-ბა</th>'
     + '      <th class="c">ერთ.</th>'
     + '      <th class="r">ფასი</th>'
@@ -108,11 +98,11 @@ window.downloadInvoicePDF = function() {
     + '    <tbody>' + rows + '</tbody>'
     + '    <tfoot>'
     + '      <tr class="vat-row">'
-    + '        <td colspan="' + (hasTire ? 5 : 4) + '" style="text-align:right;padding-right:8px">მათ შორის დღგ (18%)</td>'
+    + '        <td colspan="4" style="text-align:right;padding-right:8px">მათ შორის დღგ (18%)</td>'
     + '        <td style="text-align:right">' + vat.toFixed(2) + ' ₾</td>'
     + '      </tr>'
     + '      <tr class="total-row">'
-    + '        <td colspan="' + (hasTire ? 5 : 4) + '" style="text-align:right;padding-right:8px"><span class="total-lbl">სულ გადასახდელი</span></td>'
+    + '        <td colspan="4" style="text-align:right;padding-right:8px"><span class="total-lbl">სულ გადასახდელი</span></td>'
     + '        <td style="text-align:right"><span class="total-num">' + total.toFixed(2) + '&thinsp;₾</span></td>'
     + '      </tr>'
     + '    </tfoot>'
