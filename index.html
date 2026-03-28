@@ -953,6 +953,8 @@ async function loadProducts() {
     window._productsLoading = false;
     if (Array.isArray(data) && data.length > 0) {
       allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
+      // Shuffle for random display order on user side
+      allProducts = allProducts.slice().sort(() => Math.random() - 0.5);
       buildSidebar();
       renderProducts(allProducts);
     } else {
