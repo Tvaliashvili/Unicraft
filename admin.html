@@ -542,8 +542,8 @@
         <!-- Products table -->
         <div style="padding:16px 24px 8px">
           <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#E8541A;margin-bottom:10px">პროდუქციის ჩამონათვალი</div>
-          <div style="display:grid;grid-template-columns:1fr 70px 70px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#141210;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
-            <span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
+          <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#141210;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
+            <span>კოდი</span><span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
           </div>
           <div id="invGenRows"></div>
           <button onclick="addInvRow()" style="margin-top:10px;background:none;border:1px dashed #e5e7eb;color:#E8541A;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500">+ სტრიქონის დამატება</button>
@@ -2608,8 +2608,11 @@ function initInvGen() {
 function renderInvRows() {
   const el = document.getElementById('invGenRows');
   el.innerHTML = invGenRows.map((r, i) => `
-    <div style="display:grid;grid-template-columns:1fr 70px 70px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
-      <input value="${r.name}" oninput="invRowSet(${i},'name',this.value)"
+    <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
+      <input id="inv-code-${i}" value="${r._code||''}" oninput="invRowCode(${i},this.value)"
+        placeholder="კოდი..."
+        style="width:100%;border:1px solid ${r._codeMatched?'#86efac':'var(--border)'};border-radius:6px;padding:6px 8px;font-size:12px;font-family:monospace;outline:none;color:var(--dark);background:${r._codeMatched?'#f0fdf4':'white'}">
+      <input id="inv-name-${i}" value="${r.name}" oninput="invRowSet(${i},'name',this.value)"
         placeholder="პროდუქტის სახელი..."
         style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;color:var(--dark)">
       <input type="number" value="${r.qty}" min="0.01" step="0.01" oninput="invRowSet(${i},'qty',this.value)"
@@ -2628,14 +2631,61 @@ function renderInvRows() {
 
 window.invRowSet = function(i, field, val) {
   invGenRows[i][field] = val;
+  if (field === 'name') { invGenRows[i]._codeMatched = false; invGenRows[i]._code = invGenRows[i]._code || ''; }
   calcInvTotals();
   // update only the total cell for this row without full re-render (avoid losing focus)
   const rows = document.getElementById('invGenRows').children;
   if (rows[i]) {
-    const totalCell = rows[i].children[4];
+    const totalCell = rows[i].children[5];
     const line = (parseFloat(invGenRows[i].qty)||0) * (parseFloat(invGenRows[i].price)||0);
     totalCell.textContent = line > 0 ? line.toFixed(2) + ' ₾' : '–';
   }
+};
+
+window.invRowCode = function(i, code) {
+  invGenRows[i]._code = code;
+  const trimmed = code.trim().toUpperCase();
+  if (!trimmed) {
+    invGenRows[i]._codeMatched = false;
+    const codeEl = document.getElementById('inv-code-' + i);
+    if (codeEl) { codeEl.style.borderColor = 'var(--border)'; codeEl.style.background = 'white'; }
+    return;
+  }
+  const match = Object.values(productCache).find(p => (p.code || '').toUpperCase() === trimmed);
+  if (!match) {
+    invGenRows[i]._codeMatched = false;
+    const codeEl = document.getElementById('inv-code-' + i);
+    if (codeEl) { codeEl.style.borderColor = 'var(--border)'; codeEl.style.background = 'white'; }
+    return;
+  }
+  // Build full name with specs
+  const s = match.specs || {};
+  const type = match.product_type;
+  const parts = [];
+  if (s.brand) parts.push(s.brand);
+  if (match.name) parts.push(match.name);
+  if (type === 'tire') {
+    if (s.width && s.profile && s.rim) parts.push(s.width + '/' + s.profile + ' ' + s.rim);
+    if (s.season) parts.push(s.season);
+  } else if (type === 'oil') {
+    if (s.viscosity) parts.push(s.viscosity);
+    if (s.oil_type) parts.push(s.oil_type);
+    if (s.volume) parts.push(s.volume);
+  } else if (type === 'filter') {
+    if (s.filter_type) parts.push(s.filter_type);
+    if (s.oem) parts.push(s.oem);
+  }
+  const fullName = parts.filter(Boolean).join(' ');
+  invGenRows[i].name = fullName;
+  invGenRows[i]._codeMatched = true;
+  if (match.unit) invGenRows[i].unit = match.unit;
+  // Update DOM directly without re-rendering whole list
+  const nameEl = document.getElementById('inv-name-' + i);
+  if (nameEl) nameEl.value = fullName;
+  const codeEl = document.getElementById('inv-code-' + i);
+  if (codeEl) { codeEl.style.borderColor = '#86efac'; codeEl.style.background = '#f0fdf4'; }
+  const unitEl = document.getElementById('invGenRows').children[i]?.children[3];
+  if (unitEl && match.unit) unitEl.value = match.unit;
 };
 
 function calcInvTotals() {
