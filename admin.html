@@ -540,6 +540,9 @@
               style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;background:white;margin-bottom:8px;color:#141210">
             <div style="font-size:12px;color:#141210;margin-bottom:4px">პირ. ნომ. / საიდ. კოდი</div>
             <input id="invGenBuyerId" type="text" maxlength="20" placeholder="მაგ: 01234567890"
+              style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;background:white;margin-bottom:8px;color:#141210">
+            <div style="font-size:12px;color:#141210;margin-bottom:4px">ტელეფონი</div>
+            <input id="invGenBuyerPhone" type="text" maxlength="30" placeholder="მაგ: +995 5XX XX XX XX"
               style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;background:white;color:#141210">
           </div>
         </div>
@@ -613,6 +616,7 @@
         <div>
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);margin-bottom:6px">მყიდველი</div>
           <div id="modalBuyerName" style="font-weight:700;font-size:14px;color:var(--dark)"></div>
+          <div id="modalBuyerPhone" style="font-size:12px;color:var(--gray-mid);margin-top:3px;font-family:monospace"></div>
         </div>
         <div>
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);margin-bottom:6px">თარიღი / სტატუსი</div>
@@ -2404,6 +2408,7 @@ window.openOrderModal = function(id) {
   if (!o) return;
   document.getElementById('modalInvoiceNo').textContent = o.invoice_no || o.invoiceNo || '–';
   document.getElementById('modalBuyerName').textContent = o.buyer_name || o.buyerName || '–';
+  document.getElementById('modalBuyerPhone').textContent = o.buyer_phone || '';
   document.getElementById('modalDate').textContent = o._dateStr || '–';
   const status = o.status || 'pending';
   document.getElementById('modalCurrentStatus').innerHTML = `<span class="order-status status-${status}">${statusLabel(status)}</span>`;
@@ -2813,10 +2818,12 @@ function initInvGen() {
   document.getElementById('invGenNo').textContent = invGenNo;
   const d = new Date();
   document.getElementById('invGenDate').textContent = fmtGeoDate(d);
-  const nameEl = document.getElementById('invGenBuyerName');
-  const idEl   = document.getElementById('invGenBuyerId');
-  if (nameEl) nameEl.value = '';
-  if (idEl)   idEl.value   = '';
+  const nameEl  = document.getElementById('invGenBuyerName');
+  const idEl    = document.getElementById('invGenBuyerId');
+  const phoneEl = document.getElementById('invGenBuyerPhone');
+  if (nameEl)  nameEl.value  = '';
+  if (idEl)    idEl.value    = '';
+  if (phoneEl) phoneEl.value = '';
   invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
   renderInvRows();
 }
@@ -2879,8 +2886,9 @@ window.resetInvGen = function() { initInvGen(); };
 
 // ─── Submit Invoice as Order ───
 window.submitInvGenOrder = async function() {
-  const buyerName = (document.getElementById('invGenBuyerName')?.value || '').trim();
-  const buyerId = (document.getElementById('invGenBuyerId')?.value || '').trim();
+  const buyerName  = (document.getElementById('invGenBuyerName')?.value  || '').trim();
+  const buyerId    = (document.getElementById('invGenBuyerId')?.value    || '').trim();
+  const buyerPhone = (document.getElementById('invGenBuyerPhone')?.value || '').trim();
   const validRows = invGenRows.filter(r => r.name.trim());
   if (!buyerName) { showToast('შეავსე მყიდველის სახელი', 'error'); return; }
   if (!validRows.length) { showToast('დაამატე მინიმუმ ერთი პროდუქტი', 'error'); return; }
@@ -2889,6 +2897,7 @@ window.submitInvGenOrder = async function() {
     invoice_no: invGenNo,
     buyer_name: buyerName,
     buyer_id: buyerId,
+    buyer_phone: buyerPhone,
     items: validRows,
     total,
     status: 'pending',
@@ -2900,9 +2909,10 @@ window.submitInvGenOrder = async function() {
 
 window.doAdminInvoicePDF = function() {
   const dateStr   = document.getElementById('invGenDate').textContent;
-  const buyerName = (document.getElementById('invGenBuyerName')?.value || '').trim();
-  const buyerId   = (document.getElementById('invGenBuyerId')?.value   || '').trim();
-  downloadAdminInvoicePDF(invGenRows, invGenNo, dateStr, buyerName, buyerId);
+  const buyerName  = (document.getElementById('invGenBuyerName')?.value  || '').trim();
+  const buyerId    = (document.getElementById('invGenBuyerId')?.value    || '').trim();
+  const buyerPhone = (document.getElementById('invGenBuyerPhone')?.value || '').trim();
+  downloadAdminInvoicePDF(invGenRows, invGenNo, dateStr, buyerName, buyerId, buyerPhone);
 };
 
 // init when page is shown

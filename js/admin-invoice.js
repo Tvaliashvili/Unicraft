@@ -1,6 +1,7 @@
-window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, buyerId) {
-  buyerName = buyerName || '';
-  buyerId   = buyerId   || '';
+window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, buyerId, buyerPhone) {
+  buyerName  = buyerName  || '';
+  buyerId    = buyerId    || '';
+  buyerPhone = buyerPhone || '';
 
   const total = rows.reduce(function(s, r) {
     return s + (parseFloat(r.qty)||0) * (parseFloat(r.price)||0);
@@ -74,6 +75,7 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
     + '    <div class="party-label">მყიდველი</div>'
     + '    <div class="plabel">დასახელება / სახელი</div><div class="pval">' + (buyerName || '–') + '</div>'
     + '    <div class="plabel">პირ. ნომ. / საიდ. კოდი</div><div class="pval-mono">' + (buyerId || '–') + '</div>'
+    + (buyerPhone ? '    <div class="plabel">ტელეფონი</div><div class="pval-mono">' + buyerPhone + '</div>' : '')
     + '  </div>'
     + '</div>'
 
