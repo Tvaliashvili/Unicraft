@@ -3018,14 +3018,17 @@ window.importFromOrder = function(id) {
     document.getElementById('invGenDate').textContent = fmtGeoDate(new Date(o.created_at));
   }
   const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
-  invGenRows = items.map(item => ({
-    name: item.name || '',
-    qty: parseFloat(item.qty) || 1,
-    unit: item.unit || 'ც',
-    price: parseFloat(item.price) || 0,
-    product_type: item.product_type || '',
-    specs: item.specs || {}
-  }));
+  invGenRows = items.map(item => {
+    const cached = item.id ? productCache[item.id] : null;
+    return {
+      name: item.name || '',
+      qty: parseFloat(item.qty) || 1,
+      unit: item.unit || 'ც',
+      price: parseFloat(item.price) || 0,
+      product_type: item.product_type || cached?.product_type || '',
+      specs: (item.specs && Object.keys(item.specs).length) ? item.specs : (cached?.specs || {})
+    };
+  });
   if (!invGenRows.length) invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
   renderInvRows();
   closeImportModal();
