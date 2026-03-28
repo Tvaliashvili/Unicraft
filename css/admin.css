@@ -350,6 +350,7 @@ body {
   display: grid;
   grid-template-columns: 28px 56px 1fr 90px 130px 100px 350px;
   align-items: center;
+  justify-items: center;
   padding: 12px 20px;
   border-bottom: 1px solid var(--border);
   gap: 12px;

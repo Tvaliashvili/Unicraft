@@ -1826,7 +1826,7 @@ function productRowHTML(p, isActive) {
     <div class="prod-img-thumb">
       ${p.image_url ? `<img src="${p.image_url}" alt="" style="cursor:zoom-in" onclick="openLightbox(this.src)">` : (p.emoji || '📦')}
     </div>
-    <div>
+    <div style="justify-self:start;min-width:0">
       <div class="prod-name">${p.name}</div>
       ${p.added_by ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">👤 ${p.added_by}</div>` : ''}
     </div>
