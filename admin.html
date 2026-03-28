@@ -190,13 +190,11 @@
               <th style="padding:10px 12px;text-align:center;white-space:nowrap">თარიღი</th>
               <th style="padding:10px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
               <th style="padding:10px 12px;text-align:center">მყიდველი</th>
-              <th style="padding:10px 12px;text-align:center">საიდ. კოდი</th>
               <th style="padding:10px 12px;text-align:center">ტელეფონი</th>
-              <th style="padding:10px 12px;text-align:center">მიბმული</th>
               <th style="padding:10px 12px;text-align:center">სულ</th>
               <th style="padding:10px 12px;text-align:center">სტატუსი</th>
             </tr></thead>
-            <tbody id="recentOrders"><tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr></tbody>
+            <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -470,12 +468,7 @@
           <div class="page-title">შეკვეთები</div>
           <div class="page-subtitle" id="orderCountLabel"></div>
         </div>
-        <button onclick="deleteClosedOrders()" class="btn" style="display:flex;align-items:center;gap:6px;background:#b91c1c;color:white;border:none">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          დასრულებული შეკვეთების წაშლა
-        </button>
       </div>
-      <div id="orderStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px"></div>
       <div class="card" style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;min-width:860px">
           <thead><tr style="background:var(--gray-light);font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:0.5px">
@@ -483,7 +476,6 @@
             <th style="padding:11px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
             <th style="padding:11px 12px;text-align:center">მყიდველი</th>
             <th style="padding:11px 12px;text-align:center">ტელეფონი</th>
-            <th style="padding:11px 12px;text-align:center">მიბმული</th>
             <th style="padding:11px 12px;text-align:center">სულ</th>
             <th style="padding:11px 12px;text-align:center">სტატუსი</th>
             <th style="padding:11px 12px;width:36px"></th>
@@ -1125,17 +1117,20 @@ function renderRecentOrders(rows) {
     const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
     const status = o.status || 'pending';
     const td = 'style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"';
+    const isConfirmed = status === 'confirmed';
+    const isRejected  = status === 'rejected' || status === 'cancelled';
+    const statusDot = isConfirmed
+      ? `<span style="font-size:13px;color:#15803d;font-weight:700">✓</span>`
+      : isRejected
+        ? `<span style="font-size:13px;color:#b91c1c;font-weight:700">✕</span>`
+        : `<span style="font-size:11px;color:var(--gray-mid)">–</span>`;
     return `<tr style="cursor:pointer" onclick="showPage('orders')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
       <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid)">${date}</td>
       <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600">${o.invoice_no || '–'}</td>
       <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || '–'}</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || '–'}</td>
       <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
-        ${o.assigned_name ? `<span style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>` : '<span style="color:var(--gray-mid);font-size:11px">–</span>'}
-      </td>
       <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)"><span class="order-status status-${status}">${statusLabel(status)}</span></td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">${statusDot}</td>
     </tr>`;
   }).join('');
 }
@@ -2137,21 +2132,24 @@ const DEMO_ORDERS = [];
 function renderOrderRow(id, o, dateStr) {
   ordersCache[id] = { ...o, _dateStr: dateStr };
   const status = o.status || 'pending';
+  const isConfirmed = status === 'confirmed';
+  const isRejected  = status === 'rejected' || status === 'cancelled';
+  const isDecided   = isConfirmed || isRejected;
   const td = `style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"`;
-  return `<tr style="cursor:pointer" onclick="viewOrderPDF('${id}')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
+  const vBtn = `<button onclick="event.stopPropagation();confirmOrder('${id}')" title="დადასტურება" style="background:${isConfirmed?'#dcfce7':'none'};color:${isConfirmed?'#15803d':'#9ca3af'};border:1px solid ${isConfirmed?'#86efac':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✓</button>`;
+  const xBtn = `<button onclick="event.stopPropagation();rejectOrder('${id}')"  title="უარყოფა"   style="background:${isRejected?'#fee2e2':'none'};color:${isRejected?'#b91c1c':'#9ca3af'};border:1px solid ${isRejected?'#fca5a5':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✕</button>`;
+  const undoBtn = isDecided ? `<button onclick="event.stopPropagation();undoOrderStatus('${id}')" title="დაბრუნება" style="background:none;color:#6b7280;border:1px solid #e5e7eb;width:28px;height:28px;border-radius:6px;font-size:13px;cursor:pointer;padding:0;line-height:1">↩</button>` : '';
+  return `<tr id="order-row-${id}" style="cursor:pointer" onclick="viewOrderPDF('${id}')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || o.buyerName || '–'}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
-      ${o.assigned_name
-        ? `<span id="assigned-badge-${id}" style="font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap">${o.assigned_name}</span>`
-        : `<span id="assigned-badge-${id}" style="display:none;font-size:11px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 9px;font-weight:600"></span>`}
-    </td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)"><span id="status-badge-${id}" class="order-status status-${status}">${statusLabel(status)}</span></td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
-      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">✕</button>
+      <div style="display:flex;align-items:center;justify-content:center;gap:4px">${vBtn}${xBtn}${undoBtn}</div>
+    </td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
+      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑</button>
     </td>
   </tr>`;
 }
@@ -2166,21 +2164,19 @@ async function loadOrdersList() {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (!error && data && data.length) {
       hasRealData = true;
-      const newCount = data.filter(o => !o.status || o.status === 'pending' || o.status === 'new').length;
-      document.getElementById('orderCountLabel').textContent = newCount + ' ახალი შეკვეთა';
-      updateOrderBadge(newCount);
+      const pendingCount = data.filter(o => !o.status || o.status === 'pending' || o.status === 'new').length;
+      document.getElementById('orderCountLabel').textContent = data.length + ' შეკვეთა · ' + pendingCount + ' განუხილველი';
+      updateOrderBadge(pendingCount);
       el.innerHTML = data.map(o => {
         const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
         return renderOrderRow(o.id, o, date);
       }).join('');
-      renderOrderStats();
     }
   } catch(e) {}
 
   if (!hasRealData) {
     document.getElementById('orderCountLabel').textContent = '0 შეკვეთა';
     el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-mid);font-size:13px">🧾 შეკვეთები ჯერ არ არის</td></tr>';
-    renderOrderStats();
   }
 
   // Real-time subscription for new orders
@@ -2193,31 +2189,36 @@ async function loadOrdersList() {
     .subscribe();
 }
 
-function renderOrderStats() {
-  const counts = { new:0, confirmed:0, in_transit:0, cancelled:0, completed:0 };
-  Object.values(ordersCache).forEach(o => {
-    const s = o.status === 'pending' ? 'new' : (o.status || 'new');
-    if (counts[s] !== undefined) counts[s]++;
-  });
-  const items = [
-    { key:'new',       label:'ახალი',         bg:'#EBF3FF', color:'#1855A5' },
-    { key:'confirmed', label:'დადასტ.',        bg:'#DCFCE7', color:'#15803d' },
-    { key:'in_transit',label:'ტრანსპ.',        bg:'#DBEAFE', color:'#1d4ed8' },
-    { key:'cancelled', label:'გაუქმ.',         bg:'#FEE2E2', color:'#b91c1c' },
-    { key:'completed', label:'დასრულ.',        bg:'#e5e7eb', color:'#374151' },
-  ];
-  const el = document.getElementById('orderStats');
-  if (!el) return;
-  el.innerHTML = items.map(i => `
-    <div style="background:${i.bg};border-radius:10px;padding:14px 18px">
-      <div style="font-size:24px;font-weight:800;color:${i.color};line-height:1">${counts[i.key]}</div>
-      <div style="font-size:11px;font-weight:600;color:${i.color};opacity:0.8;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px">${i.label}</div>
-    </div>`).join('');
-}
+window.deleteOrder = async function(id) {
+  if (!confirm('ნამდვილად გსურთ ამ შეკვეთის წაშლა?')) return;
+  await supabase.from('orders').delete().eq('id', id);
+  delete ordersCache[id];
+  loadOrdersList();
+};
 
-function statusLabel(s) {
-  return { pending:'🆕 ახალი', new:'🆕 ახალი', confirmed:'✅ დადასტ.', in_transit:'🚚 ტრანსპ.', delivered:'📦 მიწოდ.', cancelled:'❌ გაუქმ.', completed:'✔ დასრულ.' }[s] || s;
-}
+window.confirmOrder = async function(id) {
+  const { error } = await supabase.from('orders').update({ status: 'confirmed' }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) ordersCache[id].status = 'confirmed';
+  const row = document.getElementById('order-row-' + id);
+  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
+};
+
+window.rejectOrder = async function(id) {
+  const { error } = await supabase.from('orders').update({ status: 'rejected' }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) ordersCache[id].status = 'rejected';
+  const row = document.getElementById('order-row-' + id);
+  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
+};
+
+window.undoOrderStatus = async function(id) {
+  const { error } = await supabase.from('orders').update({ status: 'pending' }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) ordersCache[id].status = 'pending';
+  const row = document.getElementById('order-row-' + id);
+  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
+};
 
 window.viewOrderPDF = function(id) {
   const o = ordersCache[id];
