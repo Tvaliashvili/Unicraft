@@ -69,7 +69,7 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
     + '    <div class="party-label">გამყიდველი</div>'
     + '    <div class="plabel">დასახელება</div><div class="pval">შპს უნიკრაფტი</div>'
     + '    <div class="plabel">ბანკი</div><div class="pval">საქართველოს ბანკი</div>'
-    + '    <div class="plabel">ა/ნ</div><div class="pval-mono">GE95BG0000000609563008</div>'
+    + '    <div class="plabel">ანგარიშის ნომერი</div><div class="pval-mono">GE95BG0000000609563008</div>'
     + '  </div>'
     + '  <div class="party">'
     + '    <div class="party-label">მყიდველი</div>'
