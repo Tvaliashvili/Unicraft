@@ -1578,7 +1578,7 @@ window.deleteTireSpec = async function(key, name, productType) {
   loadProductsList();
 };
 
-window.editSelectType = function(type, selectedBrand) {
+window.editSelectType = function(type, selectedBrand, specs) {
   document.getElementById('editProdType').value = type;
   ['tire','oil','filter'].forEach(t => {
     const btn = document.getElementById('editTypeBtn_' + t);
@@ -1595,7 +1595,12 @@ window.editSelectType = function(type, selectedBrand) {
   document.querySelectorAll('.edit-specs-tire,.edit-specs-oil,.edit-specs-filter').forEach(el => el.style.display = 'none');
   document.querySelectorAll('.edit-specs-' + type).forEach(el => el.style.display = '');
   loadEditBrands(type, selectedBrand);
-  if (type === 'tire') { loadSeasons(); loadTireSpec('width'); loadTireSpec('profile'); loadTireSpec('rim'); }
+  if (type === 'tire') {
+    loadSeasons(specs?.season || '');
+    loadTireSpec('width', specs?.width || '');
+    loadTireSpec('profile', specs?.profile || '');
+    loadTireSpec('rim', specs?.rim || '');
+  }
 };
 
 window.selectProdType = function(type) {
@@ -1915,15 +1920,9 @@ window.editProduct = function(id) {
 
   // type + brand + specs
   const type = p.product_type || 'tire';
-  editSelectType(type, specs.brand || '');
+  editSelectType(type, specs.brand || '', specs);
 
-  // populate spec fields after type switch
-  if (type === 'tire') {
-    loadSeasons(specs.season || '');
-    loadTireSpec('width', specs.width || '');
-    loadTireSpec('profile', specs.profile || '');
-    loadTireSpec('rim', specs.rim || '');
-  } else if (type === 'oil') {
+  if (type === 'oil') {
     document.getElementById('editSpecOilType').value = specs.oil_type || '';
     document.getElementById('editSpecViscosity').value = specs.viscosity || '';
     document.getElementById('editSpecVolume').value = specs.volume || '';
