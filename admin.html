@@ -2361,8 +2361,23 @@ function loadChatSessions() {
 
 }
 
+async function _deleteChatFiles(sessionIds) {
+  for (const sid of sessionIds) {
+    try {
+      const { data: files } = await supabase.storage.from('chat-files').list(sid);
+      if (files && files.length) {
+        const paths = files.map(f => sid + '/' + f.name);
+        await supabase.storage.from('chat-files').remove(paths);
+      }
+    } catch(e) {}
+  }
+}
+
 window.deleteAllChats = async function() {
   if (!confirm('ნამდვილად გსურთ ყველა საუბრის წაშლა? ეს მოქმედება შეუქცევადია.')) return;
+  const { data: allChats } = await supabase.from('chats').select('id');
+  const ids = (allChats || []).map(c => c.id);
+  if (ids.length) await _deleteChatFiles(ids);
   await supabase.from('chats').update({ status: 'closed' }).neq('status', 'closed');
   await supabase.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('chats').delete().neq('id', '');
@@ -2378,6 +2393,7 @@ window.deleteAllChats = async function() {
 
 window.deleteChat = async function(sessionId) {
   if (!confirm('ნამდვილად გსურთ ამ საუბრის წაშლა?')) return;
+  await _deleteChatFiles([sessionId]);
   await supabase.from('chats').update({ status: 'closed' }).eq('id', sessionId).neq('status', 'closed');
   await supabase.from('chat_messages').delete().eq('session_id', sessionId);
   await supabase.from('chats').delete().eq('id', sessionId);
