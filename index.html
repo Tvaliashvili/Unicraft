@@ -919,8 +919,8 @@ function getCardSpecs(p) {
   if (!rows.length) return '';
   return `<div class="mt-1.5 space-y-0.5">${rows.map(([k,v])=>`
     <div class="flex items-center gap-1 text-[11px]">
-      <span class="text-dark">${k}:</span>
-      <span class="text-dark font-medium">${v}</span>
+      <span class="text-gray-400">${k}:</span>
+      <span class="text-gray-300 font-medium">${v}</span>
     </div>`).join('')}</div>`;
 }
 
@@ -991,23 +991,23 @@ function renderPage() {
   const pageItems = filteredProducts.slice(start, start + PAGE_SIZE);
 
   grid.innerHTML = pageItems.map(p => `
-    <div class="card-hover bg-white border border-gray-300 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
+    <div class="card-hover bg-dark-black border border-gray-800 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
       ${p.oldPrice ? `<div class="absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10">ფასდაკლება</div>` : ''}
-      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div class="h-44 bg-dark flex items-center justify-center overflow-hidden flex-shrink-0">
         ${p.imageUrl
           ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
       </div>
       <div class="p-4 flex flex-col flex-1">
         <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${catLabel(p.category)}</div>
-        <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
+        <div class="font-bold text-[13px] text-white mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
-        ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
+        ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-gray-400 text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-gray-300 font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
-        <div class="card-bottom flex items-end justify-between border-t border-gray-100 pt-3 mt-4">
+        <div class="card-bottom flex items-end justify-between border-t border-gray-700 pt-3 mt-4">
           <div>
-            ${p.oldPrice ? `<div class="text-xs text-dark line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
+            ${p.oldPrice ? `<div class="text-xs text-gray-500 line-through mb-0.5">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
             ${fmtPrice(p.price, p.unit)}
           </div>
           <button onclick="event.stopPropagation();addToCart('${p.id}')"
@@ -1419,7 +1419,7 @@ async function loadProducts() {
 saveCart();
 loadProducts();
 
-function buildPromoTicker(products) {
+async function buildPromoTicker(products) {
   const discounted = products.filter(p => p.oldPrice);
   const ticker = document.getElementById('promoTicker');
   const track = document.getElementById('tickerTrack');
@@ -1429,7 +1429,7 @@ function buildPromoTicker(products) {
   const item = p => {
     const specs = p.specs || {};
     const size = specs.width ? ` ${specs.width}/${specs.profile} ${specs.rim}` : '';
-    return `<span onclick="goProduct('${p.id}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 32px;color:white;font-size:13px;font-weight:600;min-width:100vw;border-right:1px solid rgba(255,255,255,0.1)">
+    return `<span onclick="goProduct('${p.id}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 60px;color:white;font-size:13px;font-weight:600;border-right:1px solid rgba(255,255,255,0.1)">
       <span style="color:#E8541A;font-weight:800">${parseFloat(p.price).toFixed(2)} ₾</span>
       <span style="text-decoration:line-through;color:rgba(255,255,255,0.4);font-size:11px">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>
       <span style="color:rgba(255,255,255,0.85)">${p.name}${size}</span>
@@ -1437,7 +1437,11 @@ function buildPromoTicker(products) {
   };
 
   const content = discounted.map(item).join('');
-  track.innerHTML = content + content;
+  track.innerHTML = content;
+  await new Promise(r => requestAnimationFrame(r));
+  const repeat = Math.max(2, Math.ceil((window.innerWidth * 2) / track.scrollWidth));
+  const block = content.repeat(repeat);
+  track.innerHTML = block + block;
 
   let x = 0;
   const speed = 1.2;
