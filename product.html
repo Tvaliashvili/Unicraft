@@ -751,7 +751,8 @@ window.openOrder = function() {
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
   const vat = total * 18 / 118;
   const d = new Date();
-  document.getElementById('invoiceDate').textContent = d.toLocaleDateString('ka-GE', {year:'numeric',month:'long',day:'numeric'});
+  const _GEO_M = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+  document.getElementById('invoiceDate').textContent = d.getDate() + ' ' + _GEO_M[d.getMonth()] + ', ' + d.getFullYear();
   document.getElementById('invoiceNo').textContent = currentInvoiceNo;
   document.getElementById('invoiceItems').innerHTML = cart.map(i => `
     <tr class="border-b border-gray-50">

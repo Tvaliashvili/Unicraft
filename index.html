@@ -1253,8 +1253,8 @@ window.openOrder = function() {
   currentInvoiceNo = genInvoiceNo();
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
   const d = new Date();
-  const dateStr = String(d.getDate()).padStart(2,'0') + '/' +
-    String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  const _GEO_M = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+  const dateStr = d.getDate() + ' ' + _GEO_M[d.getMonth()] + ', ' + d.getFullYear();
 
   document.getElementById('buyerIdInput').value = '';
   document.getElementById('buyerNameInput').value = '';
