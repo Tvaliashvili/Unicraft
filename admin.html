@@ -482,7 +482,6 @@
             <th style="padding:11px 12px;text-align:center;white-space:nowrap">თარიღი</th>
             <th style="padding:11px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
             <th style="padding:11px 12px;text-align:center">მყიდველი</th>
-            <th style="padding:11px 12px;text-align:center">საიდ. კოდი</th>
             <th style="padding:11px 12px;text-align:center">ტელეფონი</th>
             <th style="padding:11px 12px;text-align:center">მიბმული</th>
             <th style="padding:11px 12px;text-align:center">სულ</th>
@@ -490,7 +489,7 @@
             <th style="padding:11px 12px;width:36px"></th>
           </tr></thead>
           <tbody id="ordersList">
-            <tr><td colspan="9" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr>
+            <tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -583,30 +582,15 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             ჩამოტვირთე PDF
           </button>
-          <button onclick="openImportModal()" class="btn btn-secondary" style="display:flex;align-items:center;gap:6px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            შეკვეთის იმპორტი
+          <button onclick="submitInvGenOrder()" class="btn" style="display:flex;align-items:center;gap:6px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:700">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            შეკვეთის გაფორმება
           </button>
           <button onclick="resetInvGen()" class="btn btn-secondary">გასუფთავება</button>
         </div>
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- Import from Order Modal -->
-<div id="importOrderModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeImportModal()">
-  <div style="background:white;border-radius:var(--radius);width:100%;max-width:600px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-      <div style="font-weight:700;font-size:15px;color:var(--dark)">შეკვეთის იმპორტი</div>
-      <button onclick="closeImportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-mid);line-height:1;padding:0">✕</button>
-    </div>
-    <div style="padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0">
-      <input id="importSearch" type="text" placeholder="ინვოისის ნომ. ან მყიდველის სახელი..." oninput="filterImportList()"
-        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;color:var(--dark);box-sizing:border-box">
-    </div>
-    <div id="importOrderList" style="overflow-y:auto;flex:1;min-height:0"></div>
   </div>
 </div>
 
@@ -629,7 +613,6 @@
         <div>
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);margin-bottom:6px">მყიდველი</div>
           <div id="modalBuyerName" style="font-weight:700;font-size:14px;color:var(--dark)"></div>
-          <div id="modalBuyerId" style="font-size:12px;color:var(--dark);margin-top:3px;font-family:monospace"></div>
         </div>
         <div>
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);margin-bottom:6px">თარიღი / სტატუსი</div>
@@ -643,7 +626,6 @@
         <thead>
           <tr style="border-bottom:2px solid var(--dark)">
             <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">დასახელება</th>
-            <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">კოდი</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">რ-ბა</th>
             <th style="text-align:center;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">ერთ.</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:600">ფასი</th>
@@ -2201,7 +2183,6 @@ function renderOrderRow(id, o, dateStr) {
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || o.buyerName || '–'}</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_id || o.buyerId || '–'}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
     <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
       ${o.assigned_name
@@ -2219,7 +2200,7 @@ function renderOrderRow(id, o, dateStr) {
 // ─── Orders ───
 async function loadOrdersList() {
   const el = document.getElementById('ordersList');
-  el.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px"><div class="spinner" style="margin:auto"></div></td></tr>';
+  el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner" style="margin:auto"></div></td></tr>';
 
   let hasRealData = false;
   try {
@@ -2239,7 +2220,7 @@ async function loadOrdersList() {
 
   if (!hasRealData) {
     document.getElementById('orderCountLabel').textContent = '0 შეკვეთა';
-    el.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--gray-mid);font-size:13px">🧾 შეკვეთები ჯერ არ არის</td></tr>';
+    el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-mid);font-size:13px">🧾 შეკვეთები ჯერ არ არის</td></tr>';
     renderOrderStats();
   }
 
@@ -2423,7 +2404,6 @@ window.openOrderModal = function(id) {
   if (!o) return;
   document.getElementById('modalInvoiceNo').textContent = o.invoice_no || o.invoiceNo || '–';
   document.getElementById('modalBuyerName').textContent = o.buyer_name || o.buyerName || '–';
-  document.getElementById('modalBuyerId').textContent = 'ს/კ: ' + (o.buyer_id || o.buyerId || '–');
   document.getElementById('modalDate').textContent = o._dateStr || '–';
   const status = o.status || 'pending';
   document.getElementById('modalCurrentStatus').innerHTML = `<span class="order-status status-${status}">${statusLabel(status)}</span>`;
@@ -2435,7 +2415,6 @@ window.openOrderModal = function(id) {
     total += line;
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:8px 4px">${item.name}</td>
-      <td style="padding:8px 4px;font-family:monospace;font-size:12px;color:var(--gray-mid)">${item.code||'–'}</td>
       <td style="padding:8px 4px;text-align:right">${item.qty}</td>
       <td style="padding:8px 4px;text-align:center">${(item.unit||'ც').replace(/\.+$/,'')}</td>
       <td style="padding:8px 4px;text-align:right">${parseFloat(item.price||0).toFixed(2)} ₾</td>
@@ -2445,10 +2424,10 @@ window.openOrderModal = function(id) {
   const vat = total * 18 / 118;
   const grandTotal = parseFloat(o.total||0) || total;
   document.getElementById('modalItemsFoot').innerHTML = `
-    <tr><td colspan="5" style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">მ.შ. დღგ 18%</td>
+    <tr><td colspan="4" style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">მ.შ. დღგ 18%</td>
       <td style="padding:8px 4px;text-align:right;font-size:12px;color:var(--gray-mid)">${vat.toFixed(2)} ₾</td></tr>
     <tr style="border-top:2px solid var(--dark)">
-      <td colspan="5" style="padding:10px 4px;text-align:right;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px">სულ გადასახდელი</td>
+      <td colspan="4" style="padding:10px 4px;text-align:right;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px">სულ გადასახდელი</td>
       <td style="padding:10px 4px;text-align:right;font-weight:700;font-size:20px;font-family:'Bebas Neue',sans-serif">${grandTotal.toFixed(2)} ₾</td></tr>`;
   document.getElementById('orderModal').style.display = 'flex';
 };
@@ -2898,97 +2877,25 @@ window.removeInvRow = function(i) {
 
 window.resetInvGen = function() { initInvGen(); };
 
-// ─── Import from Order ───
-let _importOrders = [];
-
-window.openImportModal = async function() {
-  const modal = document.getElementById('importOrderModal');
-  modal.style.display = 'flex';
-  const listEl = document.getElementById('importOrderList');
-  listEl.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray-mid)"><div class="spinner" style="margin:0 auto 10px"></div>იტვირთება...</div>';
-  document.getElementById('importSearch').value = '';
-
-  let orders = Object.values(ordersCache);
-  if (!orders.length) {
-    try {
-      const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-      if (data) {
-        data.forEach(o => { ordersCache[o.id] = { ...o, _dateStr: o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–' }; });
-        orders = Object.values(ordersCache);
-      }
-    } catch(e) {}
-  }
-
-  _importOrders = orders.sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0));
-  renderImportList(_importOrders);
-};
-
-function renderImportList(orders) {
-  const el = document.getElementById('importOrderList');
-  if (!orders.length) {
-    el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray-mid)">შეკვეთები ვერ მოიძებნა</div>';
-    return;
-  }
-  el.innerHTML = orders.map(o => {
-    const status = o.status || 'pending';
-    const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
-    const total = parseFloat(o.total || 0) || items.reduce((s,i) => s + (parseFloat(i.qty)||0)*(parseFloat(i.price)||0), 0);
-    return `<div onclick="importFromOrder('${o.id}')" style="padding:13px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--dark);font-family:monospace">${o.invoice_no || o.invoiceNo || '–'}</div>
-          <div style="font-size:13px;color:var(--dark);margin-top:2px">${o.buyer_name || o.buyerName || '–'}</div>
-          <div style="font-size:11px;color:var(--gray-mid);margin-top:3px">${o._dateStr || '–'} · ${items.length} პროდ. · ${total.toFixed(2)} ₾</div>
-        </div>
-        <span class="order-status status-${status}" style="flex-shrink:0">${statusLabel(status)}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-window.filterImportList = function() {
-  const q = document.getElementById('importSearch').value.toLowerCase();
-  const filtered = q ? _importOrders.filter(o =>
-    (o.invoice_no||o.invoiceNo||'').toLowerCase().includes(q) ||
-    (o.buyer_name||o.buyerName||'').toLowerCase().includes(q) ||
-    (o.buyer_id||o.buyerId||'').toLowerCase().includes(q)
-  ) : _importOrders;
-  renderImportList(filtered);
-};
-
-window.importFromOrder = function(id) {
-  const o = ordersCache[id];
-  if (!o) return;
-  document.getElementById('invGenBuyerName').value = o.buyer_name || o.buyerName || '';
-  document.getElementById('invGenBuyerId').value = o.buyer_id || o.buyerId || '';
-  // restore original invoice number and date
-  const origNo = o.invoice_no || o.invoiceNo || '';
-  if (origNo) {
-    invGenNo = origNo;
-    document.getElementById('invGenNo').textContent = invGenNo;
-  }
-  if (o.created_at) {
-    document.getElementById('invGenDate').textContent = fmtGeoDate(new Date(o.created_at));
-  }
-  const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
-  invGenRows = items.map(item => {
-    const cached = item.id ? productCache[item.id] : null;
-    return {
-      name: item.name || '',
-      qty: parseFloat(item.qty) || 1,
-      unit: item.unit || 'ც',
-      price: parseFloat(item.price) || 0,
-      product_type: item.product_type || cached?.product_type || '',
-      specs: (item.specs && Object.keys(item.specs).length) ? item.specs : (cached?.specs || {})
-    };
+// ─── Submit Invoice as Order ───
+window.submitInvGenOrder = async function() {
+  const buyerName = (document.getElementById('invGenBuyerName')?.value || '').trim();
+  const buyerId = (document.getElementById('invGenBuyerId')?.value || '').trim();
+  const validRows = invGenRows.filter(r => r.name.trim());
+  if (!buyerName) { showToast('შეავსე მყიდველის სახელი', 'error'); return; }
+  if (!validRows.length) { showToast('დაამატე მინიმუმ ერთი პროდუქტი', 'error'); return; }
+  const total = validRows.reduce((s, r) => s + (parseFloat(r.qty) || 0) * (parseFloat(r.price) || 0), 0);
+  const { error } = await supabase.from('orders').insert({
+    invoice_no: invGenNo,
+    buyer_name: buyerName,
+    buyer_id: buyerId,
+    items: validRows,
+    total,
+    status: 'pending',
   });
-  if (!invGenRows.length) invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
-  renderInvRows();
-  closeImportModal();
-};
-
-window.closeImportModal = function() {
-  document.getElementById('importOrderModal').style.display = 'none';
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  showToast('✓ შეკვეთა გაფორმდა!', 'success');
+  loadOrdersList();
 };
 
 window.doAdminInvoicePDF = function() {
