@@ -578,13 +578,13 @@
 
         <!-- Actions -->
         <div style="padding:12px 24px 20px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border)">
-          <button onclick="doAdminInvoicePDF()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            ჩამოტვირთე PDF
-          </button>
           <button onclick="submitInvGenOrder()" class="btn" style="display:flex;align-items:center;gap:6px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:700">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             შეკვეთის გაფორმება
+          </button>
+          <button onclick="doAdminInvoicePDF()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;margin-left:auto;margin-right:auto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ჩამოტვირთე PDF
           </button>
           <button onclick="resetInvGen()" class="btn btn-secondary">გასუფთავება</button>
         </div>
