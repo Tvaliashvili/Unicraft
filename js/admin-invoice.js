@@ -7,7 +7,7 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
   }, 0);
   const vat = total * 18 / 118;
 
-  var hasTire = rows.some(function(r) { return r.product_type === 'tire'; });
+  var hasTire = rows.some(function(r) { return r.specs && r.specs.width; });
 
   const rowsHtml = rows.filter(function(r) {
     return r.name || (parseFloat(r.price) > 0);
@@ -16,7 +16,7 @@ window.downloadAdminInvoicePDF = function(rows, invoiceNo, dateStr, buyerName, b
     var sizeCell = '';
     if (hasTire) {
       var s = r.specs || {};
-      sizeCell = (r.product_type === 'tire' && s.width)
+      sizeCell = s.width
         ? '<td style="text-align:center;font-size:13px">' + s.width + '/' + s.profile + ' R' + s.rim + '</td>'
         : '<td></td>';
     }

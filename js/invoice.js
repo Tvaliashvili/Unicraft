@@ -6,11 +6,11 @@ window.downloadInvoicePDF = function() {
   const buyerName = (document.getElementById('buyerNameInput')?.value || '').trim();
   const buyerPhone = (document.getElementById('buyerPhoneInput')?.value || '').trim();
 
-  const hasTire = cart.some(i => i.product_type === 'tire');
+  const hasTire = cart.some(i => i.specs && i.specs.width);
   const rows = cart.map(i => {
     const s = i.specs || {};
     const sizeCell = hasTire
-      ? (i.product_type === 'tire' && s.width
+      ? (s.width
           ? `<td style="text-align:center;font-size:13px">${s.width}/${s.profile} R${s.rim}</td>`
           : '<td></td>')
       : '';
