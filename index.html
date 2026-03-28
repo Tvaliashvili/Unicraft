@@ -1388,11 +1388,8 @@ async function loadProducts() {
     if (Array.isArray(data) && data.length > 0) {
       allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
       cart = cart.map(item => {
-        if (!item.product_type || !item.specs) {
-          const p = allProducts.find(p => p.id === item.id);
-          if (p) return { ...item, product_type: p.product_type || '', specs: p.specs || {} };
-        }
-        return item;
+        const p = allProducts.find(p => p.id === item.id);
+        return p ? { ...item, product_type: p.product_type || '', specs: p.specs || {} } : item;
       });
       saveCart();
       buildSidebar();
