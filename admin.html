@@ -2215,7 +2215,7 @@ window.viewOrderPDF = function(id) {
   const o = ordersCache[id];
   if (!o) return;
   const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
-  const dateStr = o._dateStr || (o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–');
+  const dateStr = o.created_at ? fmtGeoDate(new Date(o.created_at)) : (o._dateStr || '–');
   downloadAdminInvoicePDF(items, o.invoice_no || o.invoiceNo || '–', dateStr, o.buyer_name || o.buyerName || '', o.buyer_id || o.buyerId || '', o.buyer_phone || '');
 };
 
