@@ -1429,7 +1429,7 @@ function buildPromoTicker(products) {
   const item = p => {
     const specs = p.specs || {};
     const size = specs.width ? ` ${specs.width}/${specs.profile} ${specs.rim}` : '';
-    return `<span onclick="goProduct('${p.id}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 32px;color:white;font-size:13px;font-weight:600;border-right:1px solid rgba(255,255,255,0.1)">
+    return `<span onclick="goProduct('${p.id}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:0 32px;color:white;font-size:13px;font-weight:600;min-width:100vw;border-right:1px solid rgba(255,255,255,0.1)">
       <span style="color:#E8541A;font-weight:800">${parseFloat(p.price).toFixed(2)} ₾</span>
       <span style="text-decoration:line-through;color:rgba(255,255,255,0.4);font-size:11px">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>
       <span style="color:rgba(255,255,255,0.85)">${p.name}${size}</span>
@@ -1437,9 +1437,7 @@ function buildPromoTicker(products) {
   };
 
   const content = discounted.map(item).join('');
-  const repeat = Math.max(2, Math.ceil(6 / discounted.length));
-  const block = content.repeat(repeat);
-  track.innerHTML = block + block;
+  track.innerHTML = content + content;
 
   let x = 0;
   const speed = 1.2;
