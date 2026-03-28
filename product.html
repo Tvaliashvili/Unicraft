@@ -81,7 +81,7 @@ tailwind.config = {
 <header class="bg-dark-black border-b-2 border-orange sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 md:px-6">
     <!-- Main row: Logo | Nav+Cart -->
-    <div class="flex items-center justify-between h-14 md:h-16">
+    <div class="flex flex-col items-center py-3 gap-2 md:flex-row md:items-center md:justify-between md:py-0 md:h-16">
 
       <!-- Logo -->
       <a href="index.html" class="flex items-center flex-shrink-0 no-underline">
@@ -694,7 +694,7 @@ window.addProductToCart = function() {
   if (!product) return;
   const ex = cart.find(i => i.id === product.id);
   if (ex) ex.qty += localQty;
-  else cart.push({ id: product.id, name: product.name, price: product.price, qty: localQty, imageUrl: product.imageUrl, emoji: product.emoji, unit: product.unit, code: product.code || '', store: product.store || '' });
+  else cart.push({ id: product.id, name: product.name, price: product.price, qty: localQty, imageUrl: product.imageUrl, emoji: product.emoji, unit: product.unit, code: product.code || '', store: product.store || '', product_type: product.product_type || '', specs: product.specs || null, oldPrice: product.oldPrice || null });
   saveCart();
   showToast('✓ ' + product.name + ' კალათაში დაემატა');
 };
@@ -754,13 +754,16 @@ window.openOrder = function() {
   const _GEO_M = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
   document.getElementById('invoiceDate').textContent = d.getDate() + ' ' + _GEO_M[d.getMonth()] + ', ' + d.getFullYear();
   document.getElementById('invoiceNo').textContent = currentInvoiceNo;
-  document.getElementById('invoiceItems').innerHTML = cart.map(i => `
+  document.getElementById('invoiceItems').innerHTML = cart.map(i => {
+    const tireSz = (i.product_type === 'tire' && i.specs?.width) ? ` ${i.specs.width}/${i.specs.profile} ${i.specs.rim}` : '';
+    return `
     <tr class="border-b border-gray-50">
-      <td class="py-2 pr-2">${i.name}</td>
+      <td class="py-2 pr-2">${i.name}${tireSz}</td>
       <td class="py-2 text-center">${i.qty} ${(i.unit||'ც').replace(/\.+$/,'')}</td>
       <td class="py-2 text-right">${parseFloat(i.price).toFixed(2)} ₾</td>
       <td class="py-2 text-right font-semibold">${(i.price*i.qty).toFixed(2)} ₾</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   document.getElementById('invoiceVat').textContent = vat.toFixed(2) + ' ₾';
   document.getElementById('invoiceTotal').innerHTML = `<span class="font-display text-2xl tracking-wide">${total.toFixed(2)} ₾</span>`;
   document.getElementById('buyerNameInput').value = '';
