@@ -705,7 +705,7 @@ function buildSidebar() {
       <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
     </button>`;
   }).join('');
-  el.innerHTML = allBtn + catBtns;
+  el.innerHTML = (cats.length > 1 ? allBtn : '') + catBtns;
 
   // Spec filters
   const specProds = allProducts.filter(p => !activeCategory || prodCat(p) === activeCategory);
@@ -724,7 +724,7 @@ function buildSidebar() {
         ${catLabel(c)} <span class="text-xs">${counts[c]||0}</span>
       </button>`;
     }).join('');
-    mel.innerHTML = mAllBtn + mCatBtns;
+    mel.innerHTML = (cats.length > 1 ? mAllBtn : '') + mCatBtns;
   }
   const mSpecHtml = buildSpecFilterHTML(specProds, activeCategory, true);
   const md = document.getElementById('mobileFilterSpecs');
