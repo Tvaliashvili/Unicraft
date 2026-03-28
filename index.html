@@ -1114,7 +1114,7 @@ window.addToCart = function(id) {
   const ex = cart.find(i => i.id === id);
   const tireSize = (p.product_type === 'tire' && p.specs?.width) ? ' ' + p.specs.width + '/' + p.specs.profile + ' ' + p.specs.rim : '';
   if (ex) ex.qty++;
-  else cart.push({ id, name: p.name + tireSize, price: p.price, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '', product_type: p.product_type || '', specs: p.specs || {} });
+  else cart.push({ id, name: p.name + tireSize, price: p.price, oldPrice: p.oldPrice || null, qty: 1, imageUrl: p.imageUrl, emoji: p.emoji, unit: p.unit, code: p.code || '', store: p.store || '', product_type: p.product_type || '', specs: p.specs || {} });
   saveCart();
   showToast('✓ ' + p.name + ' კალათაში დაემატა');
 };
@@ -1207,6 +1207,7 @@ function renderCart() {
       </div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-semibold truncate">${i.name}</div>
+        ${i.oldPrice ? `<div class="text-xs text-gray-400 line-through">${(i.oldPrice*i.qty).toFixed(2)} ₾</div>` : ''}
         <div class="text-sm text-orange font-bold mt-0.5">${(i.price*i.qty).toFixed(2)} ₾</div>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">
