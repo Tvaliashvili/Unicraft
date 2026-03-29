@@ -1752,7 +1752,7 @@ function productRowHTML(p, isActive) {
         : `<button class="btn btn-sm" onclick="salesOn('${p.id}')" style="background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1" title="ფასდაკლების გააქტიურება">Sales OFF</button>`)
     : '';
   const activeButtons = `
-    <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:340px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
       ${bgrBtn}
@@ -1761,7 +1761,7 @@ function productRowHTML(p, isActive) {
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none">🗑 წაშლა</button>
     </div>`;
   const inactiveButtons = `
-    <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:340px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
       ${bgrBtn}
