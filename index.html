@@ -357,7 +357,7 @@ tailwind.config = {
       <button id="catDropdownBtn" onclick="toggleCatDropdown()" class="w-full flex items-center justify-between px-3 py-2 border border-dark rounded-lg text-sm font-bold text-dark bg-white hover:border-orange hover:text-orange transition-colors">
         <span class="flex items-center gap-2 min-w-0">
           <span class="flex-shrink-0">📋</span>
-          <span id="catDropdownLabel" class="leading-snug break-words" style="font-size:11px">ყველა</span>
+          <span id="catDropdownLabel" class="leading-snug break-words">ყველა</span>
         </span>
         <span id="catDropdownChevron" class="text-xs text-dark transition-transform flex-shrink-0 ml-1">▼</span>
       </button>
@@ -758,18 +758,13 @@ function buildSidebar() {
   const el = document.getElementById('sidebarCats');
   const labelEl = document.getElementById('catDropdownLabel');
   if (labelEl) {
-    const selLabel = activeCategory ? catLabel(activeCategory) + ' (' + (counts[activeCategory]||0) + ')' : 'ყველა (' + allProducts.length + ')';
-    labelEl.textContent = selLabel;
+    labelEl.textContent = activeCategory ? catLabel(activeCategory) : 'ყველა';
   }
   const allActive = !activeCategory;
-  const allBtn = `<button onclick="setSidebarCat(this,'')" class="flex justify-between items-center px-3 py-2 text-sm font-bold w-full text-left ${allActive ? 'text-orange bg-orange-light' : 'text-dark hover:text-orange hover:bg-orange-light'} transition-all">
-    <span>ყველა</span><span class="text-xs font-normal">${allProducts.length}</span>
-  </button>`;
+  const allBtn = `<button onclick="setSidebarCat(this,'')" class="px-3 py-2 text-sm font-bold w-full text-left ${allActive ? 'text-orange bg-orange-light' : 'text-dark hover:text-orange hover:bg-orange-light'} transition-all">ყველა</button>`;
   const catBtns = cats.map(c => {
     const active = activeCategory === c;
-    return `<button onclick="setSidebarCat(this,'${c}')" class="flex justify-between items-center px-3 py-2 text-sm w-full text-left ${active ? 'text-orange bg-orange-light font-bold' : 'text-dark hover:text-orange hover:bg-orange-light'} transition-all">
-      <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
-    </button>`;
+    return `<button onclick="setSidebarCat(this,'${c}')" class="px-3 py-2 text-sm w-full text-left ${active ? 'text-orange bg-orange-light font-bold' : 'text-dark hover:text-orange hover:bg-orange-light'} transition-all">${catLabel(c)}</button>`;
   }).join('');
   el.innerHTML = (cats.length > 1 ? allBtn : '') + catBtns;
 
@@ -783,12 +778,10 @@ function buildSidebar() {
   const mel = document.getElementById('mobileFilterCats');
   if (mel) {
     const mAllActive = !activeCategory;
-    const mAllBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat text-left px-3 py-1.5 text-sm font-bold w-full border-l-2 ${mAllActive ? 'text-orange bg-orange-light border-orange' : 'text-dark border-transparent'} transition-all">ყველა (${allProducts.length})</button>`;
+    const mAllBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat text-left px-3 py-1.5 text-sm font-bold w-full border-l-2 ${mAllActive ? 'text-orange bg-orange-light border-orange' : 'text-dark border-transparent'} transition-all">ყველა</button>`;
     const mCatBtns = cats.map(c => {
       const active = activeCategory === c;
-      return `<button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm w-full border-l-2 ${active ? 'text-orange bg-orange-light border-orange font-bold' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">
-        ${catLabel(c)} <span class="text-xs">${counts[c]||0}</span>
-      </button>`;
+      return `<button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat text-left px-3 py-1.5 text-sm w-full border-l-2 ${active ? 'text-orange bg-orange-light border-orange font-bold' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">${catLabel(c)}</button>`;
     }).join('');
     mel.innerHTML = (cats.length > 1 ? mAllBtn : '') + mCatBtns;
   }
