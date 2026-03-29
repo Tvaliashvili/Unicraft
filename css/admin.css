@@ -348,7 +348,7 @@ body {
 
 .table-row {
   display: grid;
-  grid-template-columns: 28px 56px 1fr 90px 130px 350px;
+  grid-template-columns: 28px 56px 1fr 90px 130px 110px 350px;
   align-items: center;
   justify-items: center;
   padding: 12px 20px;

@@ -768,6 +768,10 @@ function renderPage() {
         ${getCardSpecs(p)}
         ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div class="flex-1"></div>
+        <div class="mt-2 pt-2 border-t border-gray-100">
+          ${p.oldPrice ? `<div class="text-[11px] text-gray-400 line-through">${parseFloat(p.oldPrice).toFixed(2)} ₾</div>` : ''}
+          ${p.price ? `<div class="text-[14px] font-bold text-orange">${parseFloat(p.price).toFixed(2)} ₾</div>` : `<div class="text-[11px] text-gray-400 italic">ფასი დააზუსტეთ დილერთან</div>`}
+        </div>
       </div>
     </div>
   `).join('');
@@ -936,7 +940,7 @@ async function loadProducts() {
     const data = await res.json();
     window._productsLoading = false;
     if (Array.isArray(data) && data.length > 0) {
-      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
+      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
       // Shuffle for random display order on user side
       allProducts = allProducts.slice().sort(() => Math.random() - 0.5);
       buildSidebar();

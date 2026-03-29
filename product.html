@@ -201,6 +201,8 @@ tailwind.config = {
       <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
       <!-- Specs -->
       <div id="productSpecs" class="hidden border border-gray-800 rounded-xl p-4 mb-4"></div>
+      <!-- Price -->
+      <div id="productPriceBlock" class="mb-4"></div>
       <!-- Meta -->
       <div class="border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
     </div>
@@ -467,6 +469,20 @@ function renderProduct() {
     } else {
       specsEl.classList.add('hidden');
     }
+  }
+
+  const priceBlock = document.getElementById('productPriceBlock');
+  if (product.price) {
+    priceBlock.innerHTML = `
+      <div class="border border-gray-800 rounded-xl p-4">
+        ${product.oldPrice ? `<div class="text-sm text-dark line-through mb-1">${parseFloat(product.oldPrice).toFixed(2)} ₾</div>` : ''}
+        <div class="text-2xl font-bold text-orange">${parseFloat(product.price).toFixed(2)} ₾${product.unit ? `<span class="text-sm font-normal text-gray-400 ml-1">/ ${product.unit}</span>` : ''}</div>
+      </div>`;
+  } else {
+    priceBlock.innerHTML = `
+      <div class="border border-gray-800 rounded-xl p-4">
+        <div class="text-sm text-gray-400 italic">ფასი დააზუსტეთ დილერთან</div>
+      </div>`;
   }
 
   document.getElementById('loadingState').classList.add('hidden');

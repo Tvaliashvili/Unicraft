@@ -373,6 +373,16 @@
                 <label class="form-label">ავტომობილის მარკა</label>
                 <input class="form-input" id="specCarMake" placeholder="მაგ: Toyota, BMW">
               </div>
+              <!-- Price -->
+              <div class="form-group">
+                <label class="form-label">ფასი (₾)</label>
+                <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
+              </div>
+              <!-- Discount -->
+              <div class="form-group">
+                <label class="form-label">ფასდაკლება (₾)</label>
+                <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+              </div>
               <!-- Unit -->
               <div class="form-group">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
@@ -453,6 +463,7 @@
           <span>პროდუქტი</span>
           <span>კოდი</span>
           <span>კატეგორია</span>
+          <span>ფასი</span>
           <span>მოქმედება</span>
         </div>
         <div id="productsList">
@@ -784,6 +795,16 @@
         <div class="form-group edit-specs-filter" style="display:none">
           <label class="form-label">ავტომობილის მარკა</label>
           <input class="form-input" id="editSpecCarMake" placeholder="მაგ: Toyota, BMW">
+        </div>
+        <!-- Price -->
+        <div class="form-group">
+          <label class="form-label">ფასი (₾)</label>
+          <input class="form-input" id="editPrice" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <!-- Discount -->
+        <div class="form-group">
+          <label class="form-label">ფასდაკლება (₾)</label>
+          <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
         <!-- Unit -->
         <div class="form-group">
@@ -1644,13 +1665,19 @@ window.addProduct = async function() {
       code = await genProductCode();
     }
     const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
+    const priceRaw = parseFloat(document.getElementById('prodPrice').value) || 0;
+    const discountPrice = parseFloat(document.getElementById('prodDiscount').value) || 0;
+    const finalPrice = discountPrice > 0 ? discountPrice : priceRaw;
+    const oldPriceVal = discountPrice > 0 ? priceRaw : null;
+    if (discountPrice > 0) specs.discount_price = discountPrice;
     const { error } = await supabase.from('products').insert({
       name,
       category: TYPE_LABELS[_currentProdType] || _currentProdType,
       product_type: _currentProdType,
       specs,
       country: getCountryForBrand(specs.brand) || null,
-      price: 0,
+      price: finalPrice,
+      old_price: oldPriceVal,
       unit: document.getElementById('prodUnit').value,
       description: getDescValue('prodDescRows'),
       image_url: imageUrl,
@@ -1671,7 +1698,7 @@ window.addProduct = async function() {
 window.clearForm = function() {
   _currentProdType = '';
   // reset all select/input fields
-  ['prodName','prodBrand','prodUnit',
+  ['prodName','prodPrice','prodDiscount','prodBrand','prodUnit',
    'specCustomCode','specWidth','specProfile','specRim','specSeason',
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
@@ -1716,17 +1743,29 @@ async function loadProductsList() {
 }
 
 function productRowHTML(p, isActive) {
+  const bgrBtn = p.image_url ? `<button class="btn btn-sm" id="bgr-${p.id}" onclick="removeBgForProduct('${p.id}')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe" title="ფონის მოცილება">BGR</button>` : '';
+  const hasDiscount = p.specs?.discount_price > 0;
+  const isSalesOn = !!p.old_price;
+  const salesBtn = hasDiscount
+    ? (isSalesOn
+        ? `<button class="btn btn-sm" onclick="salesOff('${p.id}')" style="background:#dcfce7;color:#166534;border:1px solid #86efac;font-weight:700" title="ფასდაკლება გააქტიურებულია — გამორთვა">Sales ON</button>`
+        : `<button class="btn btn-sm" onclick="salesOn('${p.id}')" style="background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1" title="ფასდაკლების გააქტიურება">Sales OFF</button>`)
+    : '';
   const activeButtons = `
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;width:100%">
+    <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:340px">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
+      ${bgrBtn}
+      ${salesBtn}
       <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa" title="არააქტიურში გადატანა">OFF</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none">🗑 წაშლა</button>
     </div>`;
   const inactiveButtons = `
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;width:100%">
+    <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:340px">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
+      ${bgrBtn}
+      ${salesBtn}
       <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0" title="აქტიურში გადატანა">ON</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none" title="წაშლა">🗑 წაშლა</button>
     </div>`;
@@ -1742,6 +1781,7 @@ function productRowHTML(p, isActive) {
     </div>
     <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
+    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.old_price ? `<span style="font-size:11px;color:var(--gray-mid);text-decoration:line-through;display:block">${parseFloat(p.old_price).toFixed(2)} ₾</span>` : ''}${p.price ? parseFloat(p.price).toFixed(2) + ' ₾' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
     ${isActive ? activeButtons : inactiveButtons}
   </div>`;
 }
@@ -1814,6 +1854,8 @@ window.editProduct = function(id) {
   const specs = p.specs || {};
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
+  document.getElementById('editPrice').value = p.old_price || p.price || '';
+  document.getElementById('editDiscount').value = p.old_price ? p.price : (p.specs?.discount_price || '');
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
@@ -1851,6 +1893,11 @@ window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
   const name = document.getElementById('editName').value.trim();
   const type = document.getElementById('editProdType').value;
+  const priceRaw = parseFloat(document.getElementById('editPrice').value) || 0;
+  const discountVal = parseFloat(document.getElementById('editDiscount').value) || 0;
+  const isSalesOn = !!productCache[id]?.old_price;
+  const price = (isSalesOn && discountVal > 0) ? discountVal : priceRaw;
+  const oldPrice = (isSalesOn && discountVal > 0) ? priceRaw : null;
   if (!name || !type) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
@@ -1871,6 +1918,7 @@ window.saveProductEdit = async function() {
     specs.oem         = document.getElementById('editSpecOEM').value.trim();
     specs.car_make    = document.getElementById('editSpecCarMake').value.trim();
   }
+  if (discountVal > 0) specs.discount_price = discountVal;
   const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
@@ -1895,6 +1943,8 @@ window.saveProductEdit = async function() {
       product_type: type,
       specs,
       country: getCountryForBrand(specs.brand) || productCache[id]?.country || null,
+      price,
+      old_price: oldPrice,
       unit: document.getElementById('editUnit').value,
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
@@ -2043,6 +2093,27 @@ window.toggleSection = function(id) {
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
   chevron.textContent = open ? '▲' : '▼';
+};
+
+window.salesOn = async function(id) {
+  const p = productCache[id];
+  const discountPrice = p.specs?.discount_price;
+  if (!discountPrice) return;
+  const { error } = await supabase.from('products').update({ price: discountPrice, old_price: p.price }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  productCache[id] = { ...p, price: discountPrice, old_price: p.price };
+  renderProductRows(Object.values(productCache));
+  showToast('✓ Sales ON — ფასდაკლება გააქტიურდა', 'success');
+};
+
+window.salesOff = async function(id) {
+  const p = productCache[id];
+  if (!p.old_price) return;
+  const { error } = await supabase.from('products').update({ price: p.old_price, old_price: null }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  productCache[id] = { ...p, price: p.old_price, old_price: null };
+  renderProductRows(Object.values(productCache));
+  showToast('Sales OFF — ფასდაკლება გაუქმდა', '');
 };
 
 window.activateProduct = async function(id) {
