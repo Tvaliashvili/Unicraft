@@ -320,6 +320,12 @@ tailwind.config = {
   <div id="mobileFilterSpecs"></div>
   <div class="mt-3">
     <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">ფასი</div>
+    <div class="mb-3">
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" id="mobileDiscountCheck" onchange="setDiscountFilter(this.checked)" class="w-4 h-4 accent-orange cursor-pointer">
+        <span class="text-xs font-bold text-dark">ფასდაკლება</span>
+      </label>
+    </div>
     <div class="flex items-end gap-2 mt-1">
       <div class="flex-1">
         <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
@@ -357,6 +363,12 @@ tailwind.config = {
     <!-- Price -->
     <div class="pb-6">
       <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">ფასი</div>
+      <div class="mb-3">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="sidebarDiscountCheck" onchange="setDiscountFilter(this.checked)" class="w-4 h-4 accent-orange cursor-pointer">
+          <span class="text-xs font-bold text-dark">ფასდაკლება</span>
+        </label>
+      </div>
       <div class="flex items-end gap-2 mt-1">
         <div class="flex-1">
           <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
@@ -608,6 +620,7 @@ let allProducts = [];
 let activeCategory = '';
 let activeSpecs = {};
 let activePrice = null;
+let activeDiscountOnly = false;
 let searchQ = '';
 let filteredProducts = [];
 let currentPage = 1;
@@ -856,8 +869,18 @@ function applyFilters() {
     if (val) list = list.filter(p => p.specs?.[key] === val);
   });
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
+  if (activeDiscountOnly) list = list.filter(p => p.oldPrice);
   renderProducts(list);
 }
+
+window.setDiscountFilter = function(checked) {
+  activeDiscountOnly = checked;
+  const other = document.getElementById('sidebarDiscountCheck') === document.activeElement
+    ? document.getElementById('mobileDiscountCheck')
+    : document.getElementById('sidebarDiscountCheck');
+  if (other) other.checked = checked;
+  applyFilters();
+};
 
 window.updatePriceInputs = function(src) {
   const sMin = document.getElementById('sidebarPriceMin');
