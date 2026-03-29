@@ -479,12 +479,12 @@ function renderProduct() {
     priceBlock.innerHTML = `
       <div class="border border-gray-800 rounded-xl p-4">
         ${product.oldPrice ? `<div class="text-sm text-dark line-through mb-1">${parseFloat(product.oldPrice).toFixed(2)} ₾</div>` : ''}
-        <div class="text-2xl font-bold text-orange">${parseFloat(product.price).toFixed(2)} ₾${product.unit ? `<span class="text-sm font-normal text-gray-400 ml-1">/ ${product.unit}</span>` : ''}</div>
+        <div class="text-2xl font-bold text-orange">${parseFloat(product.price).toFixed(2)} ₾${product.unit ? `<span class="text-sm font-normal text-dark ml-1">/ ${product.unit}</span>` : ''}</div>
       </div>`;
   } else {
     priceBlock.innerHTML = `
       <div class="border border-gray-800 rounded-xl p-4">
-        <div class="text-sm text-gray-400 italic">ფასი დააზუსტეთ დილერთან</div>
+        <div class="text-sm text-dark italic">ფასი დააზუსტეთ დილერთან</div>
       </div>`;
   }
 
