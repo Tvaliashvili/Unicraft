@@ -2381,7 +2381,6 @@ function initOrdersBadgeListener() {
         if (data) renderRecentOrders(data);
       });
       playNotifSound();
-      sendEmailNotif('შეკვეთა', 'ახალი შეკვეთა შემოვიდა UniCraft-ში.');
       if (document.visibilityState !== 'visible' && Notification.permission === 'granted') {
         new Notification('🧾 UniCraft — ახალი შეკვეთა', { icon: 'favicon.ico' });
       }
