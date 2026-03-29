@@ -352,9 +352,18 @@ tailwind.config = {
   <aside class="w-48 flex-shrink-0 hidden lg:block sticky top-20 self-start">
 
     <!-- Categories -->
-    <div class="mb-6">
+    <div class="mb-6 relative" id="catDropdownWrap">
       <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">კატეგორია</div>
-      <div id="sidebarCats" class="flex flex-col gap-0"></div>
+      <button id="catDropdownBtn" onclick="toggleCatDropdown()" class="w-full flex items-center justify-between px-3 py-2 border border-gray-200 rounded-lg text-sm font-bold text-dark bg-white hover:border-orange transition-colors">
+        <span class="flex items-center gap-2">
+          <span>📋</span>
+          <span id="catDropdownLabel">ყველა</span>
+        </span>
+        <span id="catDropdownChevron" class="text-xs text-gray-400 transition-transform">▼</span>
+      </button>
+      <div id="catDropdownMenu" class="hidden absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden mt-1">
+        <div id="sidebarCats" class="flex flex-col"></div>
+      </div>
     </div>
 
     <!-- Spec filters -->
@@ -745,13 +754,20 @@ function buildSidebar() {
   allProducts.forEach(p => { const c = prodCat(p); counts[c] = (counts[c]||0)+1; });
   if (cats.length === 1 && !activeCategory) activeCategory = cats[0];
 
-  // Desktop sidebar
+  // Desktop sidebar dropdown
   const el = document.getElementById('sidebarCats');
+  const labelEl = document.getElementById('catDropdownLabel');
+  if (labelEl) {
+    const selLabel = activeCategory ? catLabel(activeCategory) + ' (' + (counts[activeCategory]||0) + ')' : 'ყველა (' + allProducts.length + ')';
+    labelEl.textContent = selLabel;
+  }
   const allActive = !activeCategory;
-  const allBtn = `<button onclick="setSidebarCat(this,'')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm font-bold w-full text-left border-l-2 ${allActive ? 'text-orange bg-orange-light border-orange' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">ყველა <span class="text-xs font-normal">${allProducts.length}</span></button>`;
+  const allBtn = `<button onclick="setSidebarCat(this,'')" class="flex justify-between items-center px-3 py-2 text-sm font-bold w-full text-left ${allActive ? 'text-orange bg-orange-light' : 'text-dark hover:text-orange hover:bg-orange-light'} transition-all">
+    <span>ყველა</span><span class="text-xs font-normal">${allProducts.length}</span>
+  </button>`;
   const catBtns = cats.map(c => {
     const active = activeCategory === c;
-    return `<button onclick="setSidebarCat(this,'${c}')" class="sidebar-cat flex justify-between items-center px-3 py-2 text-sm w-full text-left border-l-2 ${active ? 'text-orange bg-orange-light border-orange font-bold' : 'text-dark border-transparent hover:text-orange hover:bg-orange-light hover:border-orange'} transition-all">
+    return `<button onclick="setSidebarCat(this,'${c}')" class="flex justify-between items-center px-3 py-2 text-sm w-full text-left ${active ? 'text-orange bg-orange-light font-bold' : 'text-dark hover:text-orange hover:bg-orange-light'} transition-all">
       <span class="min-w-0 break-words text-left">${catLabel(c)}</span><span class="text-xs font-normal flex-shrink-0 ml-1">${counts[c]||0}</span>
     </button>`;
   }).join('');
@@ -912,9 +928,35 @@ window.setCategory = function(el, cat) {
 window.setSidebarCat = function(el, cat) {
   activeCategory = cat;
   activeSpecs = {};
+  closeCatDropdown();
   buildSidebar();
   applyFilters();
 };
+
+window.toggleCatDropdown = function() {
+  const menu = document.getElementById('catDropdownMenu');
+  const chevron = document.getElementById('catDropdownChevron');
+  const open = !menu.classList.contains('hidden');
+  if (open) {
+    menu.classList.add('hidden');
+    chevron.style.transform = '';
+  } else {
+    menu.classList.remove('hidden');
+    chevron.style.transform = 'rotate(180deg)';
+  }
+};
+
+function closeCatDropdown() {
+  const menu = document.getElementById('catDropdownMenu');
+  const chevron = document.getElementById('catDropdownChevron');
+  if (menu) menu.classList.add('hidden');
+  if (chevron) chevron.style.transform = '';
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('catDropdownWrap');
+  if (wrap && !wrap.contains(e.target)) closeCatDropdown();
+});
 
 window.filterProducts = function() {
   searchQ = document.getElementById('searchInput').value.toLowerCase();
