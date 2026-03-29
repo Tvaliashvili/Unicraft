@@ -355,11 +355,11 @@ tailwind.config = {
     <div class="mb-6 relative" id="catDropdownWrap">
       <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">კატეგორია</div>
       <button id="catDropdownBtn" onclick="toggleCatDropdown()" class="w-full flex items-center justify-between px-3 py-2 border border-gray-200 rounded-lg text-sm font-bold text-dark bg-white hover:border-orange transition-colors">
-        <span class="flex items-center gap-2">
-          <span>📋</span>
-          <span id="catDropdownLabel">ყველა</span>
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="flex-shrink-0">📋</span>
+          <span id="catDropdownLabel" class="truncate">ყველა</span>
         </span>
-        <span id="catDropdownChevron" class="text-xs text-gray-400 transition-transform">▼</span>
+        <span id="catDropdownChevron" class="text-xs text-gray-400 transition-transform flex-shrink-0 ml-1">▼</span>
       </button>
       <div id="catDropdownMenu" class="hidden absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden mt-1">
         <div id="sidebarCats" class="flex flex-col"></div>
