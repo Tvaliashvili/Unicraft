@@ -318,6 +318,23 @@ tailwind.config = {
     <div id="mobileFilterCats" class="flex flex-col gap-0 mt-1"></div>
   </div>
   <div id="mobileFilterSpecs"></div>
+  <div class="mt-3">
+    <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">ფასი</div>
+    <div class="flex items-end gap-2 mt-1">
+      <div class="flex-1">
+        <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
+        <input type="number" id="mobilePriceMin" min="0" oninput="updatePriceInputs('mobile')"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+      </div>
+      <span class="text-dark flex-shrink-0 pb-2">—</span>
+      <div class="flex-1">
+        <div class="text-[10px] font-semibold text-dark mb-1 text-center">ბოლო</div>
+        <input type="number" id="mobilePriceMax" min="0" oninput="updatePriceInputs('mobile')"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+      </div>
+      <span class="text-dark flex-shrink-0 text-sm pb-2">₾</span>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -337,6 +354,24 @@ tailwind.config = {
     <!-- Spec filters -->
     <div id="sidebarSpecs"></div>
 
+    <!-- Price -->
+    <div class="pb-6">
+      <div class="text-sm font-bold tracking-[2px] text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">ფასი</div>
+      <div class="flex items-end gap-2 mt-1">
+        <div class="flex-1">
+          <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
+          <input type="number" id="sidebarPriceMin" min="0" oninput="updatePriceInputs('sidebar')"
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+        </div>
+        <span class="text-dark flex-shrink-0 pb-2">—</span>
+        <div class="flex-1">
+          <div class="text-[10px] font-semibold text-dark mb-1 text-center">ბოლო</div>
+          <input type="number" id="sidebarPriceMax" min="0" oninput="updatePriceInputs('sidebar')"
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 outline-none focus:border-orange">
+        </div>
+        <span class="text-dark flex-shrink-0 text-sm pb-2">₾</span>
+      </div>
+    </div>
 
   </aside>
 
@@ -572,6 +607,7 @@ function prodCat(p) { return p.product_type || CAT_TYPE[p.category] || p.categor
 let allProducts = [];
 let activeCategory = '';
 let activeSpecs = {};
+let activePrice = null;
 let searchQ = '';
 let filteredProducts = [];
 let currentPage = 1;
@@ -819,8 +855,25 @@ function applyFilters() {
   Object.entries(activeSpecs).forEach(([key, val]) => {
     if (val) list = list.filter(p => p.specs?.[key] === val);
   });
+  if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
   renderProducts(list);
 }
+
+window.updatePriceInputs = function(src) {
+  const sMin = document.getElementById('sidebarPriceMin');
+  const sMax = document.getElementById('sidebarPriceMax');
+  const mMin = document.getElementById('mobilePriceMin');
+  const mMax = document.getElementById('mobilePriceMax');
+  // sync sidebar <-> mobile
+  if (src === 'sidebar' && mMin) { mMin.value = sMin.value; mMax.value = sMax.value; }
+  if (src === 'mobile' && sMin)  { sMin.value = mMin.value; sMax.value = mMax.value; }
+  const minStr = sMin?.value || mMin?.value || '';
+  const maxStr = sMax?.value || mMax?.value || '';
+  const minV = minStr !== '' ? parseFloat(minStr) : null;
+  const maxV = maxStr !== '' ? parseFloat(maxStr) : null;
+  activePrice = (minV !== null || maxV !== null) ? [minV ?? 0, maxV ?? Infinity] : null;
+  applyFilters();
+};
 
 window.setCategory = function(el, cat) {
   activeCategory = cat;
