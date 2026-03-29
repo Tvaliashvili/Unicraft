@@ -1743,7 +1743,6 @@ async function loadProductsList() {
 }
 
 function productRowHTML(p, isActive) {
-  const bgrBtn = p.image_url ? `<button class="btn btn-sm" id="bgr-${p.id}" onclick="removeBgForProduct('${p.id}')" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe" title="ფონის მოცილება">BGR</button>` : '';
   const hasDiscount = p.specs?.discount_price > 0;
   const isSalesOn = !!p.old_price;
   const salesBtn = hasDiscount
@@ -1755,7 +1754,6 @@ function productRowHTML(p, isActive) {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
-      ${bgrBtn}
       ${salesBtn}
       <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa" title="არააქტიურში გადატანა">OFF</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none">🗑 წაშლა</button>
@@ -1764,7 +1762,6 @@ function productRowHTML(p, isActive) {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
-      ${bgrBtn}
       ${salesBtn}
       <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0" title="აქტიურში გადატანა">ON</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none" title="წაშლა">🗑 წაშლა</button>
