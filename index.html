@@ -757,6 +757,7 @@ function renderPage() {
   grid.innerHTML = pageItems.map(p => `
     <div class="card-hover bg-white border border-gray-800 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
+      ${p.oldPrice ? `<div class="absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10">ფასდაკლება</div>` : ''}
       <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
         ${p.imageUrl
           ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
