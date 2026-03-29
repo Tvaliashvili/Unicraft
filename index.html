@@ -768,7 +768,8 @@ function renderPage() {
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
         ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
-        <div class="mt-auto pt-2 border-t border-dark" style="margin-top:auto">
+        <div style="flex:1;min-height:10px"></div>
+        <div class="pt-2 border-t border-dark">
           ${p.price
             ? `<div class="flex items-baseline gap-2 flex-wrap">
                 ${p.oldPrice ? `<span class="text-[11px] text-gray-400 line-through">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>` : ''}
