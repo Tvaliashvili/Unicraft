@@ -2380,10 +2380,6 @@ function initOrdersBadgeListener() {
       supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
         if (data) renderRecentOrders(data);
       });
-      playNotifSound();
-      if (document.visibilityState !== 'visible' && Notification.permission === 'granted') {
-        new Notification('🧾 UniCraft — ახალი შეკვეთა', { icon: 'favicon.ico' });
-      }
     })
     .subscribe();
 }
@@ -2394,6 +2390,13 @@ function initChatBadgeListener() {
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
       const name = payload.new?.customer_name || 'უცნობი';
       sendEmailNotif('ჩატი', `ახალი მომხმარებელი შემოვიდა ჩატში: ${name}`);
+      const isChatOpen = document.getElementById('page-chat')?.classList.contains('active') && document.visibilityState === 'visible';
+      if (!isChatOpen) {
+        playNotifSound();
+        if (Notification.permission === 'granted') {
+          new Notification('💬 UniCraft — ახალი ჩატი', { icon: 'favicon.ico' });
+        }
+      }
     })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chats' }, payload => {
       const unread = payload.new?.unread || 0;
