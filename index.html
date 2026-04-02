@@ -24,7 +24,8 @@ tailwind.config = {
 }
 </script>
 <link rel="stylesheet" href="css/index.css">
-
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('pb_XXv8v1r4bDAPMh');</script>
 </head>
 <body class="bg-cream text-dark min-h-screen flex flex-col">
 
@@ -1195,11 +1196,7 @@ async function initChatSession(name, phone) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
       await supabase.from('chat_messages').insert({ session_id: chatSessionId, text: welcomeText, sender: 'admin' });
       await supabase.from('chats').update({ last_message: welcomeText, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
-      fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ service_id: 'service_xvv38pk', template_id: 'template_tcqn5lq', user_id: 'pb_XXv8v1r4bDAPMh',
-          template_params: { type: 'ჩატი', message: `ახალი მომხმარებელი შემოვიდა ჩატში: ${n}`, name: 'UniCraft', email: '' } })
-      }).catch(() => {});
+      emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `ახალი მომხმარებელი შემოვიდა ჩატში: ${n}`, name: 'UniCraft', email: '' }).catch(() => {});
       renderChatMsgs([{ text: welcomeText, sender: 'admin' }]);
     } else {
       renderChatMsgs(existing);
@@ -1326,11 +1323,7 @@ window.customerSendFile = async function(input) {
     await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
     const { data: cur } = await supabase.from('chats').select('unread,customer_name').eq('id', chatSessionId).single();
     await supabase.from('chats').update({ last_message: '📎 ფაილი', unread: (cur?.unread || 0) + 1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
-    fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ service_id: 'service_xvv38pk', template_id: 'template_tcqn5lq', user_id: 'pb_XXv8v1r4bDAPMh',
-        template_params: { type: 'ჩატი', message: `ახალი შეტყობინება ჩატში: ${cur?.customer_name || 'უცნობი'}`, name: 'UniCraft', email: '' } })
-    }).catch(() => {});
+    emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `ახალი შეტყობინება ჩატში: ${cur?.customer_name || 'უცნობი'}`, name: 'UniCraft', email: '' }).catch(() => {});
   } catch(e) {}
   input.value = '';
 };
@@ -1353,11 +1346,7 @@ window.sendChatMsg = async function() {
     }
     const { data: cur } = await supabase.from('chats').select('unread,customer_name').eq('id', chatSessionId).single();
     await supabase.from('chats').update({ last_message: text, unread: (cur?.unread || 0) + 1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
-    fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ service_id: 'service_xvv38pk', template_id: 'template_tcqn5lq', user_id: 'pb_XXv8v1r4bDAPMh',
-        template_params: { type: 'ჩატი', message: `ახალი შეტყობინება ჩატში: ${cur?.customer_name || 'უცნობი'}`, name: 'UniCraft', email: '' } })
-    }).catch(() => {});
+    emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `ახალი შეტყობინება ჩატში: ${cur?.customer_name || 'უცნობი'}`, name: 'UniCraft', email: '' }).catch(() => {});
   } catch(e) {}
 };
 
