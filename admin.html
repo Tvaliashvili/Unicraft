@@ -1118,6 +1118,12 @@ async function initApp() {
   renderDescRows('prodDescRows');
   initChatBadgeListener();
   initOrdersBadgeListener();
+  // Load initial chat badge count
+  supabase.from('chats').select('unread').then(({ data }) => {
+    const total = (data || []).reduce((s, c) => s + (c.unread || 0), 0);
+    const badge = document.getElementById('chatAdminBadge');
+    if (badge && total > 0) { badge.textContent = total; badge.style.display = 'inline'; }
+  });
 
   // Stats
   try {
