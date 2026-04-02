@@ -632,6 +632,9 @@
             <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#c2410c">
               ❌ <span id="excelCountMissing">0</span> არ არის საიტზე
             </div>
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#1d4ed8">
+              🔵 <span id="excelCountSiteOnly">0</span> საიტზეა, ექსელში არ არის
+            </div>
             <div style="background:var(--gray-light);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:var(--gray-dark)">
               📋 <span id="excelCountTotal">0</span> სულ
             </div>
@@ -647,6 +650,10 @@
           <button id="excelTabMissing" onclick="filterExcelTable('missing')"
             style="background:none;border:none;border-bottom:2px solid var(--orange);margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--orange);cursor:pointer;font-family:inherit">
             არ არის საიტზე
+          </button>
+          <button id="excelTabSiteOnly" onclick="filterExcelTable('site_only')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            საიტზეა, ექსელში არ არის
           </button>
           <button id="excelTabAll" onclick="filterExcelTable('all')"
             style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
@@ -3081,19 +3088,29 @@ async function handleExcelFile(file) {
     }
 
     // 3. Compare
+    const excelCodeSet = new Set(excelCodes);
     _excelAllRows = excelCodes.map((code, i) => ({
       rowNum: i + 2, // Excel row number (1-indexed + header)
       code,
       status: siteCodes.has(code) ? 'uploaded' : 'missing'
     }));
 
-    const uploadedCount = _excelAllRows.filter(r => r.status === 'uploaded').length;
-    const missingCount  = _excelAllRows.filter(r => r.status === 'missing').length;
+    // Add site-only rows (on site but not in Excel)
+    siteCodes.forEach(code => {
+      if (!excelCodeSet.has(code)) {
+        _excelAllRows.push({ rowNum: '—', code, status: 'site_only' });
+      }
+    });
+
+    const uploadedCount  = _excelAllRows.filter(r => r.status === 'uploaded').length;
+    const missingCount   = _excelAllRows.filter(r => r.status === 'missing').length;
+    const siteOnlyCount  = _excelAllRows.filter(r => r.status === 'site_only').length;
 
     // 4. Show summary
-    document.getElementById('excelCountUploaded').textContent = uploadedCount;
-    document.getElementById('excelCountMissing').textContent  = missingCount;
-    document.getElementById('excelCountTotal').textContent    = _excelAllRows.length;
+    document.getElementById('excelCountUploaded').textContent  = uploadedCount;
+    document.getElementById('excelCountMissing').textContent   = missingCount;
+    document.getElementById('excelCountSiteOnly').textContent  = siteOnlyCount;
+    document.getElementById('excelCountTotal').textContent     = _excelAllRows.length;
     document.getElementById('excelSummary').style.display = 'flex';
     document.getElementById('excelTabs').style.display = 'block';
     document.getElementById('excelResults').style.display = 'block';
@@ -3113,28 +3130,37 @@ async function handleExcelFile(file) {
 
 function filterExcelTable(filter) {
   _excelCurrentFilter = filter;
-  document.getElementById('excelTabMissing').style.borderBottomColor = filter === 'missing' ? 'var(--orange)' : 'transparent';
-  document.getElementById('excelTabMissing').style.color = filter === 'missing' ? 'var(--orange)' : 'var(--gray-mid)';
-  document.getElementById('excelTabAll').style.borderBottomColor = filter === 'all' ? 'var(--orange)' : 'transparent';
-  document.getElementById('excelTabAll').style.color = filter === 'all' ? 'var(--orange)' : 'var(--gray-mid)';
+  const tabs = { missing: 'excelTabMissing', site_only: 'excelTabSiteOnly', all: 'excelTabAll' };
+  Object.entries(tabs).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    const active = key === filter;
+    el.style.borderBottomColor = active ? 'var(--orange)' : 'transparent';
+    el.style.color = active ? 'var(--orange)' : 'var(--gray-mid)';
+  });
   renderExcelTable();
 }
 
 function renderExcelTable() {
-  const rows = _excelCurrentFilter === 'missing'
-    ? _excelAllRows.filter(r => r.status === 'missing')
-    : _excelAllRows;
+  let rows;
+  if (_excelCurrentFilter === 'missing') rows = _excelAllRows.filter(r => r.status === 'missing');
+  else if (_excelCurrentFilter === 'site_only') rows = _excelAllRows.filter(r => r.status === 'site_only');
+  else rows = _excelAllRows;
 
   const tbody = document.getElementById('excelTableBody');
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">${_excelCurrentFilter === 'missing' ? '🎉 ყველა კოდი ატვირთულია!' : 'შედეგი ცარიელია'}</td></tr>`;
+    const msg = _excelCurrentFilter === 'missing' ? '🎉 ყველა Excel-ის კოდი ატვირთულია!'
+              : _excelCurrentFilter === 'site_only' ? '🎉 საიტის ყველა პროდუქტი ექსელშიც არის!'
+              : 'შედეგი ცარიელია';
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">${msg}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = rows.map((r, i) => {
     const badge = r.status === 'uploaded'
       ? `<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">✅ ატვირთულია</span>`
-      : `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ არ არის</span>`;
+      : r.status === 'missing'
+      ? `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ არ არის საიტზე</span>`
+      : `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">🔵 ექსელში არ არის</span>`;
     const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
     return `<tr style="${bg}">
       <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
@@ -3148,7 +3174,7 @@ function exportExcelResults() {
   if (!_excelAllRows.length) return;
   const exportData = _excelAllRows.map(r => ({
     'კოდი': r.code,
-    'სტატუსი': r.status === 'uploaded' ? 'ატვირთულია' : 'არ არის საიტზე'
+    'სტატუსი': r.status === 'uploaded' ? 'ატვირთულია' : r.status === 'missing' ? 'არ არის საიტზე' : 'საიტზეა, ექსელში არ არის'
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
