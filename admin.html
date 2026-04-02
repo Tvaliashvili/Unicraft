@@ -2558,6 +2558,9 @@ window.openAdminChat = async function(sessionId) {
   document.getElementById('adminChatEmpty').style.display = 'none';
   const panel = document.getElementById('adminChatPanel');
   panel.style.display = 'flex';
+  // Reset to open state by default
+  document.getElementById('adminChatInputRow').style.display = 'flex';
+  document.getElementById('adminChatClosedBar').style.display = 'none';
 
   // Load session metadata
   const { data: sesData } = await supabase.from('chats').select('*').eq('id', sessionId).maybeSingle();
