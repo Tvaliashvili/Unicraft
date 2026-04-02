@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/admin.css">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>emailjs.init('pb_XXv8v1r4bDAPMh');</script>
 </head>
 <body>
@@ -128,6 +129,9 @@
       <div class="nav-item" onclick="showPage('chat')">
         <span class="nav-icon">💬</span> ჩატი
         <span id="chatAdminBadge" style="display:none;margin-left:auto;background:#ef4444;color:white;border-radius:20px;padding:1px 8px;font-size:12px">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('excel-check')">
+        <span class="nav-icon">📊</span> Excel შედარება
       </div>
     </nav>
     <div class="sidebar-bottom">
@@ -593,6 +597,81 @@
             ჩამოტვირთე PDF
           </button>
           <button onclick="resetInvGen()" class="btn btn-secondary">გასუფთავება</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Excel Check Page -->
+    <div class="page" id="page-excel-check">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Excel შედარება</div>
+          <div class="page-subtitle">ატვირთე Excel ფაილი და შეადარე B სვეტის კოდები საიტის პროდუქტებს</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:860px">
+        <!-- Upload area -->
+        <div id="excelDropZone" onclick="document.getElementById('excelFileInput').click()"
+          style="border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:0"
+          ondragover="event.preventDefault();this.style.borderColor='var(--orange)';this.style.background='#fff8f5'"
+          ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+          ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handleExcelFile(event.dataTransfer.files[0])">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(this.files[0])">
+          <div style="font-size:36px;margin-bottom:8px">📂</div>
+          <div style="font-weight:600;color:var(--dark);margin-bottom:4px">Excel ფაილის ატვირთვა</div>
+          <div style="font-size:13px;color:var(--gray-mid)">.xlsx ან .xls · B სვეტი = პროდუქტის კოდი</div>
+        </div>
+
+        <!-- Summary bar (hidden until results) -->
+        <div id="excelSummary" style="display:none;margin-top:20px;display:none;gap:12px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;flex:1">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#166534">
+              ✅ <span id="excelCountUploaded">0</span> ატვირთული
+            </div>
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#c2410c">
+              ❌ <span id="excelCountMissing">0</span> არ არის საიტზე
+            </div>
+            <div style="background:var(--gray-light);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:var(--gray-dark)">
+              📋 <span id="excelCountTotal">0</span> სულ
+            </div>
+          </div>
+          <button onclick="exportExcelResults()" class="btn btn-primary" style="flex-shrink:0;display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel-ში გამოტანა
+          </button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div id="excelTabs" style="display:none;margin-top:16px;border-bottom:2px solid var(--border);display:none">
+          <button id="excelTabMissing" onclick="filterExcelTable('missing')"
+            style="background:none;border:none;border-bottom:2px solid var(--orange);margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--orange);cursor:pointer;font-family:inherit">
+            არ არის საიტზე
+          </button>
+          <button id="excelTabAll" onclick="filterExcelTable('all')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            ყველა
+          </button>
+        </div>
+
+        <!-- Results table -->
+        <div id="excelResults" style="display:none;margin-top:0;overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--gray-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid)">
+                <th style="padding:10px 14px;text-align:left">#</th>
+                <th style="padding:10px 14px;text-align:left">კოდი (B სვეტი)</th>
+                <th style="padding:10px 14px;text-align:left">სტატუსი</th>
+              </tr>
+            </thead>
+            <tbody id="excelTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Loading state -->
+        <div id="excelLoading" style="display:none;text-align:center;padding:30px">
+          <div class="spinner"></div>
+          <div style="margin-top:10px;font-size:13px;color:var(--gray-mid)">მიმდინარეობს შედარება...</div>
         </div>
       </div>
     </div>
@@ -2951,6 +3030,132 @@ window.showPage = function(name) {
 </script>
 
 <script src="js/admin-invoice.js"></script>
+
+<script>
+// ─── Excel Comparison Tool ───
+let _excelAllRows = []; // { code, status }
+let _excelCurrentFilter = 'missing';
+
+async function handleExcelFile(file) {
+  if (!file) return;
+  _excelAllRows = [];
+
+  // Show loading, hide everything else
+  document.getElementById('excelLoading').style.display = 'block';
+  document.getElementById('excelSummary').style.display = 'none';
+  document.getElementById('excelTabs').style.display = 'none';
+  document.getElementById('excelResults').style.display = 'none';
+
+  try {
+    // 1. Parse Excel in browser (never leaves device)
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+    // Extract column B (index 1), skip header row, ignore empty cells
+    const excelCodes = rows
+      .slice(1)
+      .map(r => String(r[1] ?? '').trim())
+      .filter(c => c.length > 0);
+
+    if (excelCodes.length === 0) {
+      alert('B სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.');
+      document.getElementById('excelLoading').style.display = 'none';
+      return;
+    }
+
+    // 2. Fetch all product codes from Supabase (paginated, handles 2k+ rows)
+    let siteCodes = new Set();
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('code')
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      data.forEach(p => siteCodes.add(String(p.code).trim()));
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+
+    // 3. Compare
+    _excelAllRows = excelCodes.map((code, i) => ({
+      rowNum: i + 2, // Excel row number (1-indexed + header)
+      code,
+      status: siteCodes.has(code) ? 'uploaded' : 'missing'
+    }));
+
+    const uploadedCount = _excelAllRows.filter(r => r.status === 'uploaded').length;
+    const missingCount  = _excelAllRows.filter(r => r.status === 'missing').length;
+
+    // 4. Show summary
+    document.getElementById('excelCountUploaded').textContent = uploadedCount;
+    document.getElementById('excelCountMissing').textContent  = missingCount;
+    document.getElementById('excelCountTotal').textContent    = _excelAllRows.length;
+    document.getElementById('excelSummary').style.display = 'flex';
+    document.getElementById('excelTabs').style.display = 'block';
+    document.getElementById('excelResults').style.display = 'block';
+
+    // Default: show missing
+    _excelCurrentFilter = 'missing';
+    renderExcelTable();
+
+  } catch (err) {
+    alert('შეცდომა: ' + err.message);
+  } finally {
+    document.getElementById('excelLoading').style.display = 'none';
+    // Reset file input so same file can be re-uploaded
+    document.getElementById('excelFileInput').value = '';
+  }
+}
+
+function filterExcelTable(filter) {
+  _excelCurrentFilter = filter;
+  document.getElementById('excelTabMissing').style.borderBottomColor = filter === 'missing' ? 'var(--orange)' : 'transparent';
+  document.getElementById('excelTabMissing').style.color = filter === 'missing' ? 'var(--orange)' : 'var(--gray-mid)';
+  document.getElementById('excelTabAll').style.borderBottomColor = filter === 'all' ? 'var(--orange)' : 'transparent';
+  document.getElementById('excelTabAll').style.color = filter === 'all' ? 'var(--orange)' : 'var(--gray-mid)';
+  renderExcelTable();
+}
+
+function renderExcelTable() {
+  const rows = _excelCurrentFilter === 'missing'
+    ? _excelAllRows.filter(r => r.status === 'missing')
+    : _excelAllRows;
+
+  const tbody = document.getElementById('excelTableBody');
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">${_excelCurrentFilter === 'missing' ? '🎉 ყველა კოდი ატვირთულია!' : 'შედეგი ცარიელია'}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const badge = r.status === 'uploaded'
+      ? `<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">✅ ატვირთულია</span>`
+      : `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ არ არის</span>`;
+    const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
+    return `<tr style="${bg}">
+      <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
+      <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}</td>
+      <td style="padding:9px 14px">${badge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportExcelResults() {
+  if (!_excelAllRows.length) return;
+  const exportData = _excelAllRows.map(r => ({
+    'კოდი': r.code,
+    'სტატუსი': r.status === 'uploaded' ? 'ატვირთულია' : 'არ არის საიტზე'
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'შედარება');
+  XLSX.writeFile(wb, 'product_check.xlsx');
+}
+</script>
 
 
 </body>
