@@ -1323,7 +1323,6 @@ window.customerSendFile = async function(input) {
     await supabase.from('chat_messages').insert({ session_id: chatSessionId, text, sender: 'customer' });
     const { data: cur } = await supabase.from('chats').select('unread,customer_name').eq('id', chatSessionId).single();
     await supabase.from('chats').update({ last_message: '📎 ფაილი', unread: (cur?.unread || 0) + 1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
-    emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `ახალი შეტყობინება ჩატში: ${cur?.customer_name || 'უცნობი'}`, name: 'UniCraft', email: '' }).catch(() => {});
   } catch(e) {}
   input.value = '';
 };
@@ -1346,7 +1345,6 @@ window.sendChatMsg = async function() {
     }
     const { data: cur } = await supabase.from('chats').select('unread,customer_name').eq('id', chatSessionId).single();
     await supabase.from('chats').update({ last_message: text, unread: (cur?.unread || 0) + 1, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
-    emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `ახალი შეტყობინება ჩატში: ${cur?.customer_name || 'უცნობი'}`, name: 'UniCraft', email: '' }).catch(() => {});
   } catch(e) {}
 };
 
