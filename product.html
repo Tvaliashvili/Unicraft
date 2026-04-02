@@ -642,6 +642,7 @@ async function initChatSession(name, phone) {
     const { data: chatData } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
     if (chatData?.status === 'banned') { showChatBanned(); return; }
     if (chatData?.status === 'closed') { showChatClosed(); return; }
+    document.getElementById('chatClosedBanner').style.display = 'none';
     document.getElementById('chatInputRow').style.display = 'flex';
     document.getElementById('chatInput').focus();
     const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
@@ -673,7 +674,6 @@ async function initChatSession(name, phone) {
 }
 
 function showChatClosed() {
-  if (document.getElementById('chatClosedBanner').style.display === 'flex') return;
   document.getElementById('chatInputRow').style.display = 'none';
   const banner = document.getElementById('chatClosedBanner');
   banner.style.background = '#fef2f2'; banner.style.borderTopColor = '#fca5a5';
@@ -681,8 +681,10 @@ function showChatClosed() {
     <button onclick="restartChat()" style="background:#E8541A;color:white;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;width:100%">↺ ახლიდან დაწყება</button>`;
   banner.style.display = 'flex'; banner.style.flexDirection = 'column';
   const el = document.getElementById('chatMessages');
-  el.innerHTML += `<div style="text-align:center;padding:8px 0"><span style="font-size:11px;color:#9ca3af;background:#f3f4f6;padding:4px 12px;border-radius:20px">საუბარი დასრულდა</span></div>`;
-  el.scrollTop = el.scrollHeight;
+  if (!el.querySelector('.chat-ended-marker')) {
+    el.innerHTML += `<div class="chat-ended-marker" style="text-align:center;padding:8px 0"><span style="font-size:11px;color:#9ca3af;background:#f3f4f6;padding:4px 12px;border-radius:20px">საუბარი დასრულდა</span></div>`;
+    el.scrollTop = el.scrollHeight;
+  }
   if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
 }
 
