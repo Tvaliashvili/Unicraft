@@ -1169,11 +1169,7 @@ window.startChat = function() {
   document.getElementById('chatClosedBanner').style.display = 'none';
   document.getElementById('chatInputRow').style.display = 'flex';
   document.getElementById('chatInput').focus();
-  const _lastNotif = parseInt(sessionStorage.getItem('uc_chat_notif') || '0');
-  if (Date.now() - _lastNotif > 60000) {
-    sessionStorage.setItem('uc_chat_notif', Date.now());
-    emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `მომხმარებელი შემოვიდა ჩატში: ${name}`, name: 'UniCraft', email: '' }).catch(() => {});
-  }
+  emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `მომხმარებელი შემოვიდა ჩატში: ${name}`, name: 'UniCraft', email: '' }).catch(() => {});
   initChatSession(name, phone);
 };
 
