@@ -2400,8 +2400,6 @@ function initChatBadgeListener() {
         const badge = document.getElementById('chatAdminBadge');
         if (badge) { badge.textContent = total; badge.style.display = total > 0 ? 'inline' : 'none'; }
       });
-      const name = payload.new?.customer_name || 'უცნობი';
-      sendEmailNotif('ჩატი', `ახალი მომხმარებელი შემოვიდა ჩატში: ${name}`);
       const isChatOpen = document.getElementById('page-chat')?.classList.contains('active') && document.visibilityState === 'visible';
       if (!isChatOpen) {
         playNotifSound();
@@ -2420,8 +2418,6 @@ function initChatBadgeListener() {
           const badge = document.getElementById('chatAdminBadge');
           if (badge) { badge.textContent = total; badge.style.display = total > 0 ? 'inline' : 'none'; }
         });
-        const name = payload.new?.customer_name || 'უცნობი';
-        sendEmailNotif('ჩატი', `ახალი შეტყობინება ჩატში: ${name}`);
         const isChatOpen = document.getElementById('page-chat')?.classList.contains('active') && document.visibilityState === 'visible';
         if (!isChatOpen) {
           playNotifSound();
