@@ -1141,9 +1141,7 @@ window.toggleChat = function() {
       document.getElementById('chatIntro').style.display = 'none';
       document.getElementById('chatBody').style.display = 'flex';
       document.getElementById('chatBody').style.flexDirection = 'column';
-      document.getElementById('chatInputRow').style.display = 'none';
-      document.getElementById('chatClosedBanner').style.display = 'none';
-      initChatSession();
+      if (!chatChannel) initChatSession();
     } else {
       document.getElementById('chatOffHours').style.display = 'none';
       document.getElementById('chatIntro').style.display = 'flex';
@@ -1152,7 +1150,6 @@ window.toggleChat = function() {
       setTimeout(() => document.getElementById('chatNameInput').focus(), 50);
     }
   } else {
-    if (chatChannel) { supabase.removeChannel(chatChannel); chatChannel = null; }
   }
 };
 
@@ -1230,6 +1227,7 @@ async function initChatSession(name, phone) {
 }
 
 function showChatClosed() {
+  if (document.getElementById('chatClosedBanner').style.display === 'flex') return;
   document.getElementById('chatInputRow').style.display = 'none';
   const banner = document.getElementById('chatClosedBanner');
   banner.style.background = '#fef2f2'; banner.style.borderTopColor = '#fca5a5';
