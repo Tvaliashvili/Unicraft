@@ -1107,7 +1107,6 @@ if (!chatSessionId) {
   localStorage.setItem('uc_chat_session', chatSessionId);
 }
 let chatChannel = null;
-let _chatNotifSent = false;
 window.chatOpen = false;
 let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '';
@@ -1170,6 +1169,7 @@ window.startChat = function() {
   document.getElementById('chatClosedBanner').style.display = 'none';
   document.getElementById('chatInputRow').style.display = 'flex';
   document.getElementById('chatInput').focus();
+  emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `მომხმარებელი შემოვიდა ჩატში: ${name}`, name: 'UniCraft', email: '' }).catch(() => {});
   initChatSession(name, phone);
 };
 
@@ -1200,10 +1200,6 @@ async function initChatSession(name, phone) {
       renderChatMsgs([{ text: welcomeText, sender: 'admin' }]);
     } else {
       renderChatMsgs(existing);
-    }
-    if (!_chatNotifSent) {
-      _chatNotifSent = true;
-      emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `მომხმარებელი შემოვიდა ჩატში: ${n}`, name: 'UniCraft', email: '' }).catch(() => {});
     }
     if (chatChannel) supabase.removeChannel(chatChannel);
     chatChannel = supabase
@@ -1264,7 +1260,6 @@ window.restartChat = async function() {
   localStorage.setItem('uc_chat_session', chatSessionId);
   chatUserInfo = null; localStorage.removeItem('uc_chat_user');
   _chatUserName = ''; _chatUserPhone = '';
-  _chatNotifSent = false;
   document.getElementById('chatClosedBanner').style.display = 'none';
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('chatBody').style.display = 'none';
