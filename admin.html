@@ -2388,6 +2388,12 @@ function initChatBadgeListener() {
   if (_chatBadgeChannel) supabase.removeChannel(_chatBadgeChannel);
   _chatBadgeChannel = supabase.channel('global-chat-badge')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+      // Update badge
+      supabase.from('chats').select('unread').then(({ data }) => {
+        const total = (data || []).reduce((s, c) => s + (c.unread || 0), 0);
+        const badge = document.getElementById('chatAdminBadge');
+        if (badge) { badge.textContent = total; badge.style.display = total > 0 ? 'inline' : 'none'; }
+      });
       const name = payload.new?.customer_name || 'უცნობი';
       sendEmailNotif('ჩატი', `ახალი მომხმარებელი შემოვიდა ჩატში: ${name}`);
       const isChatOpen = document.getElementById('page-chat')?.classList.contains('active') && document.visibilityState === 'visible';

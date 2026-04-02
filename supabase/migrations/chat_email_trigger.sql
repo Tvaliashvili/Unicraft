@@ -18,21 +18,26 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  PERFORM net.http_post(
-    url     := 'https://api.emailjs.com/api/v1.0/email/send',
-    headers := '{"Content-Type": "application/json"}'::jsonb,
-    body    := json_build_object(
-      'service_id',   'service_xvv38pk',
-      'template_id',  'template_tcqn5lq',
-      'user_id',      'pb_XXv8v1r4bDAPMh',
-      'template_params', json_build_object(
-        'type',    'ჩატი',
-        'message', _message,
-        'name',    'UniCraft',
-        'email',   ''
-      )
-    )::jsonb
-  );
+  BEGIN
+    PERFORM net.http_post(
+      url     := 'https://api.emailjs.com/api/v1.0/email/send',
+      headers := '{"Content-Type": "application/json"}'::jsonb,
+      body    := json_build_object(
+        'service_id',   'service_xvv38pk',
+        'template_id',  'template_tcqn5lq',
+        'user_id',      'pb_XXv8v1r4bDAPMh',
+        'template_params', json_build_object(
+          'type',    'ჩატი',
+          'message', _message,
+          'name',    'UniCraft',
+          'email',   ''
+        )
+      )::jsonb
+    );
+  EXCEPTION WHEN OTHERS THEN
+    -- ignore email errors, never block the transaction
+    NULL;
+  END;
 
   RETURN NEW;
 END;
