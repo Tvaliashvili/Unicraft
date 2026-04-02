@@ -1182,14 +1182,13 @@ async function initChatSession(name, phone) {
       const { data: banCheck } = await supabase.from('chats').select('id').eq('ip', _customerIp).eq('status', 'banned').maybeSingle();
       if (banCheck) { showChatBanned(); return; }
     }
-    await supabase.from('chats').upsert({
-      id: chatSessionId, customer_name: n, customer_phone: p,
-      last_message: '', unread: 0, status: 'open'
-    }, { onConflict: 'id', ignoreDuplicates: true });
-    if (_customerIp) supabase.from('chats').update({ ip: _customerIp }).eq('id', chatSessionId).then(() => {}).catch(() => {});
     const { data: chatData } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
     if (chatData?.status === 'banned') { showChatBanned(); return; }
     if (chatData?.status === 'closed') { showChatClosed(); return; }
+    if (!chatData) {
+      await supabase.from('chats').insert({ id: chatSessionId, customer_name: n, customer_phone: p, last_message: '', unread: 0, status: 'open' });
+      if (_customerIp) supabase.from('chats').update({ ip: _customerIp }).eq('id', chatSessionId).then(() => {}).catch(() => {});
+    }
     document.getElementById('chatClosedBanner').style.display = 'none';
     document.getElementById('chatInputRow').style.display = 'flex';
     document.getElementById('chatInput').focus();
