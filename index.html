@@ -1174,6 +1174,7 @@ window.startChat = function() {
 async function initChatSession(name, phone) {
   const n = name || _chatUserName;
   const p = phone || _chatUserPhone;
+  if (sessionStorage.getItem('uc_chat_closed_' + chatSessionId)) { showChatClosed(); return; }
   try {
     if (!_customerIp) {
       try { const r = await fetch('https://api.ipify.org?format=json'); _customerIp = (await r.json()).ip; } catch(e) {}
@@ -1227,6 +1228,7 @@ async function initChatSession(name, phone) {
 }
 
 function showChatClosed() {
+  sessionStorage.setItem('uc_chat_closed_' + chatSessionId, '1');
   document.getElementById('chatInputRow').style.display = 'none';
   const banner = document.getElementById('chatClosedBanner');
   banner.style.background = '#fef2f2'; banner.style.borderTopColor = '#fca5a5';
