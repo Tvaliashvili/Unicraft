@@ -1107,6 +1107,7 @@ if (!chatSessionId) {
   localStorage.setItem('uc_chat_session', chatSessionId);
 }
 let chatChannel = null;
+let _chatNotifSent = false;
 window.chatOpen = false;
 let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '';
@@ -1196,10 +1197,13 @@ async function initChatSession(name, phone) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
       await supabase.from('chat_messages').insert({ session_id: chatSessionId, text: welcomeText, sender: 'admin' });
       await supabase.from('chats').update({ last_message: welcomeText, updated_at: new Date().toISOString() }).eq('id', chatSessionId);
-      emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `ახალი მომხმარებელი შემოვიდა ჩატში: ${n}`, name: 'UniCraft', email: '' }).catch(() => {});
       renderChatMsgs([{ text: welcomeText, sender: 'admin' }]);
     } else {
       renderChatMsgs(existing);
+    }
+    if (!_chatNotifSent) {
+      _chatNotifSent = true;
+      emailjs.send('service_xvv38pk', 'template_tcqn5lq', { type: 'ჩატი', message: `მომხმარებელი შემოვიდა ჩატში: ${n}`, name: 'UniCraft', email: '' }).catch(() => {});
     }
     if (chatChannel) supabase.removeChannel(chatChannel);
     chatChannel = supabase
@@ -1260,6 +1264,7 @@ window.restartChat = async function() {
   localStorage.setItem('uc_chat_session', chatSessionId);
   chatUserInfo = null; localStorage.removeItem('uc_chat_user');
   _chatUserName = ''; _chatUserPhone = '';
+  _chatNotifSent = false;
   document.getElementById('chatClosedBanner').style.display = 'none';
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('chatBody').style.display = 'none';
