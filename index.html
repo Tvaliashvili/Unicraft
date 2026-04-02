@@ -1141,7 +1141,8 @@ window.toggleChat = function() {
       document.getElementById('chatIntro').style.display = 'none';
       document.getElementById('chatBody').style.display = 'flex';
       document.getElementById('chatBody').style.flexDirection = 'column';
-      document.getElementById('chatInput').focus();
+      document.getElementById('chatInputRow').style.display = 'none';
+      document.getElementById('chatClosedBanner').style.display = 'none';
       initChatSession();
     } else {
       document.getElementById('chatOffHours').style.display = 'none';
@@ -1192,6 +1193,8 @@ async function initChatSession(name, phone) {
     const { data: chatData } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
     if (chatData?.status === 'banned') { showChatBanned(); return; }
     if (chatData?.status === 'closed') { showChatClosed(); return; }
+    document.getElementById('chatInputRow').style.display = 'flex';
+    document.getElementById('chatInput').focus();
     const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
     if (!existing || existing.length === 0) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
