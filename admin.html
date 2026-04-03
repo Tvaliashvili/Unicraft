@@ -267,7 +267,7 @@
               <!-- Brand with manager -->
               <div class="form-group">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                  ბრენდი
+                  ბრენდი <span class="required">*</span>
                   <span onclick="toggleBrandMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
                 </label>
                 <select class="form-select" id="prodBrand"><option value="">ბრენდი...</option></select>
@@ -285,7 +285,7 @@
               </div>
               <!-- TIRE specs -->
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">სიგანე<span onclick="toggleTireSpecMgr('width')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">სიგანე <span class="required">*</span><span onclick="toggleTireSpecMgr('width')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
                 <select class="form-select" id="specWidth"><option value="">სიგანე...</option></select>
                 <div id="widthMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
                   <div style="display:flex;gap:6px;margin-bottom:10px">
@@ -296,7 +296,7 @@
                 </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">პროფილი<span onclick="toggleTireSpecMgr('profile')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">პროფილი <span class="required">*</span><span onclick="toggleTireSpecMgr('profile')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
                 <select class="form-select" id="specProfile"><option value="">პროფილი...</option></select>
                 <div id="profileMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
                   <div style="display:flex;gap:6px;margin-bottom:10px">
@@ -307,7 +307,7 @@
                 </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">დიამეტრი (R)<span onclick="toggleTireSpecMgr('rim')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">დიამეტრი (R) <span class="required">*</span><span onclick="toggleTireSpecMgr('rim')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
                 <select class="form-select" id="specRim"><option value="">დიამეტრი...</option></select>
                 <div id="rimMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
                   <div style="display:flex;gap:6px;margin-bottom:10px">
@@ -319,7 +319,7 @@
               </div>
               <div class="form-group specs-tire" style="display:none">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                  კოდი <span style="color:#dc2626;margin-left:2px" id="codeRequiredMark" style="display:none">*</span>
+                  კოდი <span class="required">*</span>
                   <label style="font-size:12px;color:var(--orange);font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;margin:0">
                     <input type="checkbox" id="autoCodeCheck" onchange="toggleAutoCode()" style="cursor:pointer"> ავტო გენერაცია
                   </label>
@@ -328,7 +328,7 @@
               </div>
               <div class="form-group specs-tire" style="display:none">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                  სეზონი
+                  სეზონი <span class="required">*</span>
                   <span onclick="toggleSeasonMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
                 </label>
                 <select class="form-select" id="specSeason"><option value="">სეზონი...</option></select>
