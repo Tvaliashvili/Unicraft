@@ -318,8 +318,13 @@
                 </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">კოდი <span style="font-size:11px;color:var(--gray-mid);font-weight:400">(სურვილისამებრ)</span></label>
-                <input class="form-input" id="specCustomCode" placeholder="ცარიელია = ავტომატური">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  კოდი <span style="color:#dc2626;margin-left:2px" id="codeRequiredMark" style="display:none">*</span>
+                  <label style="font-size:12px;color:var(--orange);font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;margin:0">
+                    <input type="checkbox" id="autoCodeCheck" checked onchange="toggleAutoCode()" style="cursor:pointer"> ავტო გენერაცია
+                  </label>
+                </label>
+                <input class="form-input" id="specCustomCode" placeholder="შეიყვანეთ კოდი" style="display:none">
               </div>
               <div class="form-group specs-tire" style="display:none">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
@@ -1538,6 +1543,12 @@ function renderBrandList() {
   `).join('');
 }
 
+window.toggleAutoCode = function() {
+  const checked = document.getElementById('autoCodeCheck').checked;
+  const input = document.getElementById('specCustomCode');
+  input.style.display = checked ? 'none' : '';
+};
+
 window.toggleBrandMgr = function() {
   const p = document.getElementById('brandMgrPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
@@ -1820,6 +1831,11 @@ window.addProduct = async function() {
     specs.profile     = document.getElementById('specProfile').value;
     specs.rim         = document.getElementById('specRim').value;
     specs.season      = document.getElementById('specSeason').value;
+    if (!specs.brand)   { showToast('ბრენდი სავალდებულოა', 'error'); return; }
+    if (!specs.width)   { showToast('სიგანე სავალდებულოა', 'error'); return; }
+    if (!specs.profile) { showToast('პროფილი სავალდებულოა', 'error'); return; }
+    if (!specs.rim)     { showToast('დიამეტრი სავალდებულოა', 'error'); return; }
+    if (!specs.season)  { showToast('სეზონი სავალდებულოა', 'error'); return; }
   } else if (_currentProdType === 'oil') {
     specs.oil_type    = document.getElementById('specOilType').value;
     specs.viscosity   = document.getElementById('specViscosity').value;
@@ -1839,15 +1855,19 @@ window.addProduct = async function() {
       try { imageUrl = await uploadProductImage(prodFileData); }
       catch(imgErr) { showToast('ფოტო ვერ აიტვირთა — ემატება ფოტოს გარეშე', 'error'); }
     }
+    const autoCodeCheck = document.getElementById('autoCodeCheck');
+    const useAutoCode = !autoCodeCheck || autoCodeCheck.checked;
     const customCodeInput = document.getElementById('specCustomCode');
     const customCode = customCodeInput ? customCodeInput.value.trim() : '';
     let code;
-    if (customCode) {
+    if (useAutoCode) {
+      code = await genProductCode();
+    } else if (customCode) {
       const { data: existing } = await supabase.from('products').select('id').eq('code', customCode).maybeSingle();
       if (existing) { showToast('ეს კოდი უკვე გამოყენებულია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return; }
       code = customCode;
     } else {
-      code = await genProductCode();
+      showToast('კოდი სავალდებულოა ან ჩართე ავტო გენერაცია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return;
     }
     const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
     const priceRaw = parseFloat(document.getElementById('prodPrice').value) || 0;
@@ -1888,6 +1908,10 @@ window.clearForm = function() {
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const autoCodeCheck = document.getElementById('autoCodeCheck');
+  if (autoCodeCheck) { autoCodeCheck.checked = true; }
+  const specCustomCode = document.getElementById('specCustomCode');
+  if (specCustomCode) { specCustomCode.style.display = 'none'; }
   document.getElementById('prodUnit').value = 'ც';
   // clear textarea
   const descEl = document.getElementById('prodDescRows');
