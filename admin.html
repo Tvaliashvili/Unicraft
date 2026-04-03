@@ -696,7 +696,7 @@
       <div class="page-header">
         <div>
           <div class="page-title">ფასების განახლება</div>
-          <div class="page-subtitle">ატვირთე Excel ფაილი · B სვეტი = კოდი · AK = ფასდაკლება · AM = ფასი</div>
+          <div class="page-subtitle">ატვირთე Excel ფაილი · B სვეტი = კოდი · AI = ფასდაკლება · AJ = ფასი</div>
         </div>
       </div>
 
@@ -764,8 +764,8 @@
                 <th style="padding:10px 14px;text-align:left">კოდი</th>
                 <th style="padding:10px 14px;text-align:left">დასახელება</th>
                 <th style="padding:10px 14px;text-align:right">მიმდინარე ფასი</th>
-                <th style="padding:10px 14px;text-align:right">ახალი ფასი (AM)</th>
-                <th style="padding:10px 14px;text-align:right">ფასდაკლება (AK)</th>
+                <th style="padding:10px 14px;text-align:right">ახალი ფასი (AJ)</th>
+                <th style="padding:10px 14px;text-align:right">ფასდაკლება (AI)</th>
                 <th style="padding:10px 14px;text-align:left">სტატუსი</th>
               </tr>
             </thead>
@@ -3313,7 +3313,7 @@ async function handlePriceFile(file) {
   document.getElementById('priceResults').style.display = 'none';
 
   try {
-    // 1. Parse Excel (B=col1, AK=col36, AM=col38)
+    // 1. Parse Excel (B=col1, AI=col34, AJ=col35)
     const buffer = await file.arrayBuffer();
     const wb = XLSX.read(buffer, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
@@ -3323,8 +3323,8 @@ async function handlePriceFile(file) {
       .map((r, i) => ({
         rowNum: i + 2,
         code: String(r[1] ?? '').trim(),
-        newPrice:    parseFloat(String(r[38] ?? '').replace(/,/g, '.')) || 0,
-        newDiscount: parseFloat(String(r[36] ?? '').replace(/,/g, '.')) || 0,
+        newPrice:    parseFloat(String(r[35] ?? '').replace(/,/g, '.')) || 0,
+        newDiscount: parseFloat(String(r[34] ?? '').replace(/,/g, '.')) || 0,
       }))
       .filter(r => r.code.length > 0);
 
