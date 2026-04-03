@@ -133,6 +133,9 @@
       <div class="nav-item" onclick="showPage('excel-check')">
         <span class="nav-icon">📊</span> Excel შედარება
       </div>
+      <div class="nav-item" onclick="showPage('price-update')">
+        <span class="nav-icon">💰</span> ფასების განახლება
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px" id="adminEmail"></div>
@@ -679,6 +682,96 @@
         <div id="excelLoading" style="display:none;text-align:center;padding:30px">
           <div class="spinner"></div>
           <div style="margin-top:10px;font-size:13px;color:var(--gray-mid)">მიმდინარეობს შედარება...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Update Page -->
+    <div class="page" id="page-price-update">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ფასების განახლება</div>
+          <div class="page-subtitle">ატვირთე Excel ფაილი · B სვეტი = კოდი · AK = ფასდაკლება · AM = ფასი</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:960px">
+        <!-- Upload area -->
+        <div id="priceDropZone" onclick="document.getElementById('priceFileInput').click()"
+          style="border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:0"
+          ondragover="event.preventDefault();this.style.borderColor='var(--orange)';this.style.background='#fff8f5'"
+          ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+          ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handlePriceFile(event.dataTransfer.files[0])">
+          <input type="file" id="priceFileInput" accept=".xlsx,.xls" style="display:none" onchange="handlePriceFile(this.files[0])">
+          <div style="font-size:36px;margin-bottom:8px">💰</div>
+          <div style="font-weight:600;color:var(--dark);margin-bottom:4px">Excel ფაილის ატვირთვა</div>
+          <div style="font-size:13px;color:var(--gray-mid)">.xlsx ან .xls · B = კოდი · AK = ფასდაკლება · AM = ფასი</div>
+        </div>
+
+        <!-- Summary bar -->
+        <div id="priceSummary" style="display:none;margin-top:20px;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#c2410c">
+              🔄 <span id="priceCountChanged">0</span> შეიცვლება
+            </div>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#166534">
+              ✅ <span id="priceCountSame">0</span> იგივეა
+            </div>
+            <div style="background:#fefce8;border:1px solid #fef08a;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#854d0e">
+              ⚠️ <span id="priceCountNoPrice">0</span> ფასი არ არის
+            </div>
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#991b1b">
+              ❌ <span id="priceCountNotFound">0</span> საიტზე არ არის
+            </div>
+          </div>
+          <button id="priceApplyBtn" onclick="applyPriceUpdates()" class="btn btn-primary" style="flex-shrink:0;display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            ფასების განახლება
+          </button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div id="priceTabs" style="display:none;margin-top:16px;border-bottom:2px solid var(--border)">
+          <button id="priceTabChanged" onclick="filterPriceTable('changed')"
+            style="background:none;border:none;border-bottom:2px solid var(--orange);margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--orange);cursor:pointer;font-family:inherit">
+            შეიცვლება
+          </button>
+          <button id="priceTabNoPrice" onclick="filterPriceTable('no_price')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            ფასი არ არის
+          </button>
+          <button id="priceTabNotFound" onclick="filterPriceTable('not_found')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            საიტზე არ არის
+          </button>
+          <button id="priceTabAll" onclick="filterPriceTable('all')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            ყველა
+          </button>
+        </div>
+
+        <!-- Results table -->
+        <div id="priceResults" style="display:none;margin-top:0;overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--gray-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid)">
+                <th style="padding:10px 14px;text-align:left">#</th>
+                <th style="padding:10px 14px;text-align:left">კოდი</th>
+                <th style="padding:10px 14px;text-align:left">დასახელება</th>
+                <th style="padding:10px 14px;text-align:right">მიმდინარე ფასი</th>
+                <th style="padding:10px 14px;text-align:right">ახალი ფასი (AM)</th>
+                <th style="padding:10px 14px;text-align:right">ფასდაკლება (AK)</th>
+                <th style="padding:10px 14px;text-align:left">სტატუსი</th>
+              </tr>
+            </thead>
+            <tbody id="priceTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Loading state -->
+        <div id="priceLoading" style="display:none;text-align:center;padding:30px">
+          <div class="spinner"></div>
+          <div style="margin-top:10px;font-size:13px;color:var(--gray-mid)">მიმდინარეობს ანალიზი...</div>
         </div>
       </div>
     </div>
@@ -3180,6 +3273,209 @@ function exportExcelResults() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'შედარება');
   XLSX.writeFile(wb, 'product_check.xlsx');
+}
+
+// ─── Price Update Tool ───
+let _priceAllRows = [];
+let _priceCurrentFilter = 'changed';
+
+async function handlePriceFile(file) {
+  if (!file) return;
+  _priceAllRows = [];
+
+  document.getElementById('priceLoading').style.display = 'block';
+  document.getElementById('priceSummary').style.display = 'none';
+  document.getElementById('priceTabs').style.display = 'none';
+  document.getElementById('priceResults').style.display = 'none';
+
+  try {
+    // 1. Parse Excel (B=col1, AK=col36, AM=col38)
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+
+    const excelRows = rows.slice(1)
+      .map((r, i) => ({
+        rowNum: i + 2,
+        code: String(r[1] ?? '').trim(),
+        newPrice:    parseFloat(String(r[38] ?? '').replace(/,/g, '.')) || 0,
+        newDiscount: parseFloat(String(r[36] ?? '').replace(/,/g, '.')) || 0,
+      }))
+      .filter(r => r.code.length > 0);
+
+    if (excelRows.length === 0) {
+      alert('B სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.');
+      document.getElementById('priceLoading').style.display = 'none';
+      return;
+    }
+
+    // 2. Fetch all products from Supabase
+    let products = [];
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, code, name, price, old_price, specs')
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      products = products.concat(data);
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+    const productMap = {};
+    products.forEach(p => { productMap[String(p.code).trim()] = p; });
+
+    // 3. Compare prices
+    _priceAllRows = excelRows.map(row => {
+      const product = productMap[row.code];
+      if (!product) return { ...row, status: 'not_found', product: null };
+      if (row.newPrice === 0) return { ...row, status: 'no_price', product };
+
+      const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
+      const currentDiscount = product.old_price ? parseFloat(product.price || 0) : 0;
+      const changed = Math.abs(currentRegular - row.newPrice) > 0.001 ||
+                      Math.abs(currentDiscount - row.newDiscount) > 0.001;
+      return { ...row, status: changed ? 'changed' : 'same', product, currentRegular, currentDiscount };
+    });
+
+    const changedCount  = _priceAllRows.filter(r => r.status === 'changed').length;
+    const sameCount     = _priceAllRows.filter(r => r.status === 'same').length;
+    const noPriceCount  = _priceAllRows.filter(r => r.status === 'no_price').length;
+    const notFoundCount = _priceAllRows.filter(r => r.status === 'not_found').length;
+
+    document.getElementById('priceCountChanged').textContent  = changedCount;
+    document.getElementById('priceCountSame').textContent     = sameCount;
+    document.getElementById('priceCountNoPrice').textContent  = noPriceCount;
+    document.getElementById('priceCountNotFound').textContent = notFoundCount;
+    document.getElementById('priceApplyBtn').style.display    = changedCount > 0 ? 'flex' : 'none';
+    document.getElementById('priceSummary').style.display = 'flex';
+    document.getElementById('priceTabs').style.display = 'block';
+    document.getElementById('priceResults').style.display = 'block';
+
+    _priceCurrentFilter = 'changed';
+    renderPriceTable();
+
+  } catch (err) {
+    alert('შეცდომა: ' + err.message);
+  } finally {
+    document.getElementById('priceLoading').style.display = 'none';
+    document.getElementById('priceFileInput').value = '';
+  }
+}
+
+function filterPriceTable(filter) {
+  _priceCurrentFilter = filter;
+  const tabs = { changed: 'priceTabChanged', no_price: 'priceTabNoPrice', not_found: 'priceTabNotFound', all: 'priceTabAll' };
+  Object.entries(tabs).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    const active = key === filter;
+    el.style.borderBottomColor = active ? 'var(--orange)' : 'transparent';
+    el.style.color = active ? 'var(--orange)' : 'var(--gray-mid)';
+  });
+  renderPriceTable();
+}
+
+function renderPriceTable() {
+  const rows = _priceCurrentFilter === 'all'
+    ? _priceAllRows
+    : _priceAllRows.filter(r => r.status === _priceCurrentFilter);
+
+  const tbody = document.getElementById('priceTableBody');
+  if (rows.length === 0) {
+    const msgs = {
+      changed: '🎉 ყველა ფასი განახლებულია!',
+      no_price: '✅ ყველა პროდუქტს ფასი აქვს!',
+      not_found: '✅ ყველა პროდუქტი საიტზეა!',
+      all: 'შედეგი ცარიელია'
+    };
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">${msgs[_priceCurrentFilter] || 'შედეგი ცარიელია'}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
+    const name = r.product?.name || '—';
+
+    let currentDisplay = '—';
+    if (r.product) {
+      const reg  = r.currentRegular  ?? (r.product.old_price ? parseFloat(r.product.old_price) : parseFloat(r.product.price || 0));
+      const disc = r.currentDiscount ?? (r.product.old_price ? parseFloat(r.product.price || 0) : 0);
+      currentDisplay = disc > 0
+        ? `<span style="text-decoration:line-through;color:var(--gray-mid);font-size:11px">${reg.toFixed(2)} ₾</span><br><strong>${disc.toFixed(2)} ₾</strong>`
+        : `${reg.toFixed(2)} ₾`;
+    }
+
+    const newPriceDisplay = r.newPrice    > 0 ? `${r.newPrice.toFixed(2)} ₾`    : '<span style="color:var(--gray-mid)">—</span>';
+    const newDiscDisplay  = r.newDiscount > 0 ? `${r.newDiscount.toFixed(2)} ₾` : '<span style="color:var(--gray-mid)">—</span>';
+
+    const badges = {
+      changed:   `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">🔄 შეიცვლება</span>`,
+      same:      `<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">✅ იგივეა</span>`,
+      no_price:  `<span style="background:#fefce8;color:#854d0e;border:1px solid #fef08a;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">⚠️ ფასი არ არის</span>`,
+      not_found: `<span style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ საიტზე არ არის</span>`,
+    };
+
+    return `<tr style="${bg}">
+      <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
+      <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}</td>
+      <td style="padding:9px 14px;font-size:13px;color:var(--dark)">${name}</td>
+      <td style="padding:9px 14px;font-size:13px;text-align:right">${currentDisplay}</td>
+      <td style="padding:9px 14px;font-size:13px;text-align:right;font-weight:600">${newPriceDisplay}</td>
+      <td style="padding:9px 14px;font-size:13px;text-align:right">${newDiscDisplay}</td>
+      <td style="padding:9px 14px">${badges[r.status]}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function applyPriceUpdates() {
+  const toUpdate = _priceAllRows.filter(r => r.status === 'changed');
+  if (toUpdate.length === 0) return;
+  if (!confirm(`${toUpdate.length} პროდუქტის ფასი განახლდება. გააგრძელოთ?`)) return;
+
+  const btn = document.getElementById('priceApplyBtn');
+  btn.disabled = true;
+  btn.textContent = 'მიმდინარეობს...';
+
+  let successCount = 0, errorCount = 0;
+
+  for (const row of toUpdate) {
+    const newFinalPrice = row.newDiscount > 0 ? row.newDiscount : row.newPrice;
+    const newOldPrice   = row.newDiscount > 0 ? row.newPrice    : null;
+    const newSpecs = { ...(row.product.specs || {}) };
+    if (row.newDiscount > 0) newSpecs.discount_price = row.newDiscount;
+    else delete newSpecs.discount_price;
+
+    const { error } = await supabase.from('products').update({
+      price: newFinalPrice,
+      old_price: newOldPrice,
+      specs: newSpecs
+    }).eq('id', row.product.id);
+
+    if (error) errorCount++;
+    else {
+      successCount++;
+      const r = _priceAllRows.find(x => x.code === row.code);
+      if (r) {
+        r.status = 'same';
+        r.currentRegular  = row.newPrice;
+        r.currentDiscount = row.newDiscount;
+        r.product.price     = newFinalPrice;
+        r.product.old_price = newOldPrice;
+      }
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ფასების განახლება`;
+
+  if (errorCount === 0) showToast(`✅ ${successCount} პროდუქტის ფასი განახლდა!`, 'success');
+  else showToast(`განახლდა ${successCount}, შეცდომა ${errorCount}`, 'error');
+
+  document.getElementById('priceCountChanged').textContent = '0';
+  document.getElementById('priceApplyBtn').style.display = 'none';
+  renderPriceTable();
 }
 </script>
 
