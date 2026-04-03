@@ -1909,9 +1909,9 @@ window.clearForm = function() {
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const autoCodeCheck = document.getElementById('autoCodeCheck');
-  if (autoCodeCheck) { autoCodeCheck.checked = true; }
+  if (autoCodeCheck) { autoCodeCheck.checked = false; }
   const specCustomCode = document.getElementById('specCustomCode');
-  if (specCustomCode) { specCustomCode.style.display = 'none'; }
+  if (specCustomCode) { specCustomCode.style.display = ''; }
   document.getElementById('prodUnit').value = 'ც';
   // clear textarea
   const descEl = document.getElementById('prodDescRows');
