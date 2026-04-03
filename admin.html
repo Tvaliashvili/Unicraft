@@ -3441,11 +3441,26 @@ async function applyPriceUpdates() {
   let successCount = 0, errorCount = 0;
 
   for (const row of toUpdate) {
-    const newFinalPrice = row.newDiscount > 0 ? row.newDiscount : row.newPrice;
-    const newOldPrice   = row.newDiscount > 0 ? row.newPrice    : null;
+    const salesIsOn = !!row.product.old_price; // preserve current Sales ON/OFF state
     const newSpecs = { ...(row.product.specs || {}) };
-    if (row.newDiscount > 0) newSpecs.discount_price = row.newDiscount;
-    else delete newSpecs.discount_price;
+    let newFinalPrice, newOldPrice;
+
+    if (row.newDiscount > 0) {
+      newSpecs.discount_price = row.newDiscount;
+      if (salesIsOn) {
+        // Sales already ON — keep it ON with updated prices
+        newFinalPrice = row.newDiscount;
+        newOldPrice   = row.newPrice;
+      } else {
+        // Sales OFF — store discount in specs only, don't activate
+        newFinalPrice = row.newPrice;
+        newOldPrice   = null;
+      }
+    } else {
+      delete newSpecs.discount_price;
+      newFinalPrice = row.newPrice;
+      newOldPrice   = null;
+    }
 
     const { error } = await supabase.from('products').update({
       price: newFinalPrice,
