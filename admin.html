@@ -701,6 +701,22 @@
       </div>
 
       <div class="card" style="max-width:960px">
+        <!-- Column settings -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--gray-mid);display:block;margin-bottom:4px">კოდის სვეტი</label>
+            <input id="colCode" value="B" style="width:64px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--gray-mid);display:block;margin-bottom:4px">ფასის სვეტი</label>
+            <input id="colPrice" value="AJ" style="width:64px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--gray-mid);display:block;margin-bottom:4px">ფასდაკლების სვეტი</label>
+            <input id="colDiscount" value="AI" style="width:64px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+          </div>
+        </div>
+
         <!-- Upload area -->
         <div id="priceDropZone" onclick="document.getElementById('priceFileInput').click()"
           style="border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:0"
@@ -3313,7 +3329,17 @@ async function handlePriceFile(file) {
   document.getElementById('priceResults').style.display = 'none';
 
   try {
-    // 1. Parse Excel (B=col1, AI=col34, AJ=col35)
+    // 1. Parse Excel — column letters from UI inputs
+    const colLetterToIndex = s => {
+      s = s.trim().toUpperCase();
+      let n = 0;
+      for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+      return n - 1;
+    };
+    const colCode     = colLetterToIndex((document.getElementById('colCode')?.value     || 'B'));
+    const colPrice    = colLetterToIndex((document.getElementById('colPrice')?.value    || 'AJ'));
+    const colDiscount = colLetterToIndex((document.getElementById('colDiscount')?.value || 'AI'));
+
     const buffer = await file.arrayBuffer();
     const wb = XLSX.read(buffer, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
@@ -3322,9 +3348,9 @@ async function handlePriceFile(file) {
     const excelRows = rows.slice(1)
       .map((r, i) => ({
         rowNum: i + 2,
-        code: String(r[1] ?? '').trim(),
-        newPrice:    parseFloat(String(r[35] ?? '').replace(/,/g, '.')) || 0,
-        newDiscount: parseFloat(String(r[34] ?? '').replace(/,/g, '.')) || 0,
+        code: String(r[colCode] ?? '').trim(),
+        newPrice:    parseFloat(String(r[colPrice]    ?? '').replace(/,/g, '.')) || 0,
+        newDiscount: parseFloat(String(r[colDiscount] ?? '').replace(/,/g, '.')) || 0,
       }))
       .filter(r => r.code.length > 0);
 
