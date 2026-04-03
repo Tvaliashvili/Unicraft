@@ -3333,8 +3333,10 @@ async function handlePriceFile(file) {
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product };
 
-      const currentRegular = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
-      const changed = Math.abs(currentRegular - row.newPrice) > 0.001;
+      const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
+      const currentDiscount = parseFloat(product.specs?.discount_price || 0);
+      const changed = Math.abs(currentRegular - row.newPrice) > 0.001 ||
+                      Math.abs(currentDiscount - row.newDiscount) > 0.001;
       return { ...row, status: changed ? 'changed' : 'same', product, currentRegular, currentDiscount };
     });
 
