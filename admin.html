@@ -3334,7 +3334,9 @@ async function handlePriceFile(file) {
       if (row.newPrice === 0) return { ...row, status: 'no_price', product };
 
       const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
-      const currentDiscount = product.old_price ? parseFloat(product.price || 0) : 0;
+      const currentDiscount = product.old_price
+        ? parseFloat(product.price || 0)
+        : parseFloat(product.specs?.discount_price || 0);
       const changed = Math.abs(currentRegular - row.newPrice) > 0.001 ||
                       Math.abs(currentDiscount - row.newDiscount) > 0.001;
       return { ...row, status: changed ? 'changed' : 'same', product, currentRegular, currentDiscount };
