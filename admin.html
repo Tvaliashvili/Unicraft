@@ -2146,6 +2146,11 @@ window.saveProductEdit = async function() {
   if (!name || !type || !newCode) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
+  // Check for duplicate code (excluding current product)
+  const { data: dupCheck } = await supabase.from('products').select('id').eq('code', newCode).neq('id', id).maybeSingle();
+  if (dupCheck) {
+    showToast(`კოდი "${newCode}" უკვე გამოყენებულია სხვა პროდუქტზე`, 'error'); return;
+  }
   // collect specs
   const specs = { brand: document.getElementById('editBrand').value || '' };
   if (type === 'tire') {
