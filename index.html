@@ -630,6 +630,12 @@ const CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთე�
 const CAT_TYPE = { 'საბურავები':'tire', 'ზეთები':'oil', 'ფილტრები':'filter' };
 function catLabel(cat) { return CAT_DISPLAY[cat] || cat || 'სხვა'; }
 function prodCat(p) { return p.product_type || CAT_TYPE[p.category] || p.category || ''; }
+function seasonBadge(p) {
+  const s = (p.specs?.season || '').toLowerCase();
+  if (s.includes('ზაფხული')) return `<div style="position:absolute;bottom:8px;right:8px;font-size:1.4rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">☀️</div>`;
+  if (s.includes('ზამთარი')) return `<div style="position:absolute;bottom:8px;right:8px;font-size:1.4rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">❄️</div>`;
+  return '';
+}
 let allProducts = [];
 let activeCategory = '';
 let activeSpecs = {};
@@ -822,10 +828,11 @@ function renderPage() {
     <div class="card-hover bg-white border border-gray-800 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
       ${p.oldPrice ? `<div class="absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10">ფასდაკლება</div>` : ''}
-      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0 relative">
         ${p.imageUrl
           ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
           : `<span style="font-size:3.5rem;opacity:0.35">${p.emoji||'📦'}</span>`}
+        ${seasonBadge(p)}
       </div>
       <div class="p-4 flex flex-col flex-1">
         <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${catLabel(p.category)}</div>

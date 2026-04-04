@@ -412,6 +412,17 @@ function renderProduct() {
   } else {
     imgEl.innerHTML = `<span style="font-size:5rem;opacity:0.3">${product.emoji||'📦'}</span>`;
   }
+  const _season = (product.specs?.season || '').toLowerCase();
+  const _seasonIcon = _season.includes('ზაფხული') ? '☀️' : _season.includes('ზამთარი') ? '❄️' : '';
+  const _existingSeasonBadge = document.getElementById('productSeasonBadge');
+  if (_existingSeasonBadge) _existingSeasonBadge.remove();
+  if (_seasonIcon) {
+    const _sb = document.createElement('div');
+    _sb.id = 'productSeasonBadge';
+    _sb.style.cssText = 'position:absolute;bottom:12px;right:12px;font-size:1.8rem;line-height:1;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.2))';
+    _sb.textContent = _seasonIcon;
+    imgEl.parentElement.appendChild(_sb);
+  }
 
   const codeEl = document.getElementById('productCode');
   if (product.code) {
