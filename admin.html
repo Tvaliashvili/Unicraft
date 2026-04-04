@@ -340,6 +340,10 @@
                   <div id="seasonList"></div>
                 </div>
               </div>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
+                <input class="form-input" id="specAltSize" placeholder="მაგ: 37x13.50R17LT">
+              </div>
               <!-- OIL specs -->
               <div class="form-group specs-oil" style="display:none">
                 <label class="form-label">ტიპი</label>
@@ -947,6 +951,10 @@
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">სეზონი</label>
           <select class="form-select" id="editSpecSeason"><option value="">სეზონი...</option></select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
+          <input class="form-input" id="editAltSize" placeholder="მაგ: 37x13.50R17LT">
         </div>
         <!-- OIL specs -->
         <div class="form-group edit-specs-oil" style="display:none">
@@ -1844,6 +1852,8 @@ window.addProduct = async function() {
     specs.profile     = document.getElementById('specProfile').value;
     specs.rim         = document.getElementById('specRim').value;
     specs.season      = document.getElementById('specSeason').value;
+    const _altSize = document.getElementById('specAltSize').value.trim();
+    if (_altSize) specs.alt_size = _altSize;
     if (!specs.brand)   { showToast('ბრენდი სავალდებულოა', 'error'); return; }
     if (!specs.width)   { showToast('სიგანე სავალდებულოა', 'error'); return; }
     if (!specs.profile) { showToast('პროფილი სავალდებულოა', 'error'); return; }
@@ -1917,7 +1927,7 @@ window.clearForm = function() {
   _currentProdType = '';
   // reset all select/input fields
   ['prodName','prodPrice','prodDiscount','prodBrand','prodUnit',
-   'specCustomCode','specWidth','specProfile','specRim','specSeason',
+   'specCustomCode','specWidth','specProfile','specRim','specSeason','specAltSize',
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -2085,7 +2095,9 @@ window.editProduct = function(id) {
   const type = p.product_type || 'tire';
   editSelectType(type, specs.brand || '', specs);
 
-  if (type === 'oil') {
+  if (type === 'tire') {
+    document.getElementById('editAltSize').value = specs.alt_size || '';
+  } else if (type === 'oil') {
     document.getElementById('editSpecOilType').value = specs.oil_type || '';
     document.getElementById('editSpecViscosity').value = specs.viscosity || '';
     document.getElementById('editSpecVolume').value = specs.volume || '';
@@ -2127,6 +2139,8 @@ window.saveProductEdit = async function() {
     specs.profile      = document.getElementById('editSpecProfile').value;
     specs.rim          = document.getElementById('editSpecRim').value;
     specs.season       = document.getElementById('editSpecSeason').value;
+    const _editAltSize = document.getElementById('editAltSize').value.trim();
+    if (_editAltSize) specs.alt_size = _editAltSize;
   } else if (type === 'oil') {
     specs.oil_type    = document.getElementById('editSpecOilType').value;
     specs.viscosity   = document.getElementById('editSpecViscosity').value;
@@ -2428,7 +2442,7 @@ window.showProductInfo = function(id) {
   let rows = '';
   if (s.brand) rows += row('ბრენდი', s.brand);
   if (type === 'tire') {
-    if (s.width && s.profile && s.rim) rows += row('ზომა', `${s.width}/${s.profile} ${s.rim}`);
+    if (s.width && s.profile && s.rim) rows += row('ზომა', `${s.width}/${s.profile} ${s.rim}${s.alt_size ? ' (' + s.alt_size + ')' : ''}`);
     if (s.season) rows += row('სეზონი', s.season);
   } else if (type === 'oil') {
     if (s.oil_type)    rows += row('ტიპი', s.oil_type);
@@ -3077,6 +3091,7 @@ window.invRowCode = function(i, code) {
   if (match.name) parts.push(match.name);
   if (type === 'tire') {
     if (s.width && s.profile && s.rim) parts.push(s.width + '/' + s.profile + ' ' + s.rim);
+    if (s.alt_size) parts.push(s.alt_size);
     if (s.season) parts.push(s.season);
   } else if (type === 'oil') {
     if (s.viscosity) parts.push(s.viscosity);

@@ -735,6 +735,7 @@ function getCardSpecs(p) {
   if (s.brand) rows.push(['ბრენდი', s.brand]);
   if (type === 'tire') {
     if (s.width && s.profile && s.rim) rows.push(['ზომა', `${s.width}/${s.profile} ${s.rim}`]);
+    if (s.alt_size) rows.push(['ალტ. ზომა', s.alt_size]);
     if (s.season) rows.push(['სეზონი', s.season]);
   } else if (type === 'oil') {
     if (s.viscosity) rows.push(['სიბლანტე', s.viscosity]);
