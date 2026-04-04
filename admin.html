@@ -3266,22 +3266,34 @@ async function handleExcelFile(file) {
     // Strip duplicate suffix like (2),(3),... → base code
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
 
-    // Build a set of base codes from the site (so ABC123(2) → ABC123)
-    const siteBaseCodes = new Set();
-    siteCodes.forEach(c => siteBaseCodes.add(stripSuffix(c)));
+    // Count how many site products share each base code
+    const siteBaseCount = {};
+    siteCodes.forEach(c => {
+      const base = stripSuffix(c);
+      siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
+    });
+
+    // Count how many times each code appears in Excel
+    const excelBaseCount = {};
+    excelCodes.forEach(c => {
+      excelBaseCount[c] = (excelBaseCount[c] || 0) + 1;
+    });
 
     // 3. Compare
     const excelCodeSet = new Set(excelCodes);
     _excelAllRows = excelCodes.map((code, i) => ({
-      rowNum: i + 2, // Excel row number (1-indexed + header)
+      rowNum: i + 2,
       code,
-      status: (siteCodes.has(code) || siteBaseCodes.has(code)) ? 'uploaded' : 'missing'
+      status: (siteBaseCount[code] || 0) > 0 ? 'uploaded' : 'missing'
     }));
 
-    // Add site-only rows (on site but not in Excel) — ignore duplicate-suffix variants if base exists in Excel
+    // Add site-only rows — if site has MORE copies than Excel, show the extras
+    const siteBaseCount2 = {};
     siteCodes.forEach(code => {
       const base = stripSuffix(code);
-      if (!excelCodeSet.has(code) && !excelCodeSet.has(base)) {
+      siteBaseCount2[base] = (siteBaseCount2[base] || 0) + 1;
+      const excelCount = excelBaseCount[base] || 0;
+      if (siteBaseCount2[base] > excelCount) {
         _excelAllRows.push({ rowNum: '—', code, status: 'site_only' });
       }
     });
