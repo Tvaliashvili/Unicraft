@@ -907,7 +907,7 @@
       <input type="hidden" id="editProdType">
       <div style="padding:10px 20px 0;display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--gray-mid)">პროდუქტის კოდი:</span>
-        <span id="editCodeDisplay" style="font-family:monospace;font-size:14px;font-weight:700;color:var(--gray-dark);background:var(--gray-light);padding:2px 10px;border-radius:6px;letter-spacing:1px"></span>
+        <input id="editCodeDisplay" style="font-family:monospace;font-size:14px;font-weight:700;color:var(--gray-dark);background:var(--gray-light);padding:2px 10px;border-radius:6px;letter-spacing:1px;border:1.5px solid var(--border);outline:none;width:140px" />
       </div>
       <!-- Type selector -->
       <div style="padding:16px 20px 0">
@@ -2101,7 +2101,7 @@ window.editProduct = function(id) {
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
-  document.getElementById('editCodeDisplay').textContent = p.code || '—';
+  document.getElementById('editCodeDisplay').value = p.code || '';
   document.getElementById('editFile').value = '';
 
   // type + brand + specs
@@ -2135,6 +2135,7 @@ window.closeEditModal = function() {
 
 window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
+  const newCode = document.getElementById('editCodeDisplay').value.trim();
   const name = document.getElementById('editName').value.trim();
   const type = document.getElementById('editProdType').value;
   const priceRaw = parseFloat(document.getElementById('editPrice').value) || 0;
@@ -2142,7 +2143,7 @@ window.saveProductEdit = async function() {
   const isSalesOn = !!productCache[id]?.old_price;
   const price = (isSalesOn && discountVal > 0) ? discountVal : priceRaw;
   const oldPrice = (isSalesOn && discountVal > 0) ? priceRaw : null;
-  if (!name || !type) {
+  if (!name || !type || !newCode) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
   // collect specs
@@ -2184,6 +2185,7 @@ window.saveProductEdit = async function() {
       }
     }
     const { error: updateError } = await supabase.from('products').update({
+      code: newCode,
       name,
       category: TYPE_LABELS[type] || type,
       product_type: type,
