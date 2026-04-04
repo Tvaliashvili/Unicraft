@@ -1887,8 +1887,21 @@ window.addProduct = async function() {
       code = await genProductCode();
     } else if (customCode) {
       const { data: existing } = await supabase.from('products').select('id').eq('code', customCode).maybeSingle();
-      if (existing) { showToast('ეს კოდი უკვე გამოყენებულია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return; }
-      code = customCode;
+      if (existing) {
+        const proceed = confirm(`კოდი "${customCode}" უკვე გამოყენებულია.\n\nგინდათ შექმნათ დუბლიკატი? კოდს დაემატება სუფიქსი (2), (3) და ა.შ.`);
+        if (!proceed) { btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return; }
+        let suffix = 2;
+        let candidateCode = `${customCode}(${suffix})`;
+        while (true) {
+          const { data: dup } = await supabase.from('products').select('id').eq('code', candidateCode).maybeSingle();
+          if (!dup) break;
+          suffix++;
+          candidateCode = `${customCode}(${suffix})`;
+        }
+        code = candidateCode;
+      } else {
+        code = customCode;
+      }
     } else {
       showToast('კოდი სავალდებულოა ან ჩართე ავტო გენერაცია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return;
     }
