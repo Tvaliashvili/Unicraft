@@ -3263,17 +3263,25 @@ async function handleExcelFile(file) {
       from += PAGE;
     }
 
+    // Strip duplicate suffix like (2),(3),... → base code
+    const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
+
+    // Build a set of base codes from the site (so ABC123(2) → ABC123)
+    const siteBaseCodes = new Set();
+    siteCodes.forEach(c => siteBaseCodes.add(stripSuffix(c)));
+
     // 3. Compare
     const excelCodeSet = new Set(excelCodes);
     _excelAllRows = excelCodes.map((code, i) => ({
       rowNum: i + 2, // Excel row number (1-indexed + header)
       code,
-      status: siteCodes.has(code) ? 'uploaded' : 'missing'
+      status: (siteCodes.has(code) || siteBaseCodes.has(code)) ? 'uploaded' : 'missing'
     }));
 
-    // Add site-only rows (on site but not in Excel)
+    // Add site-only rows (on site but not in Excel) — ignore duplicate-suffix variants if base exists in Excel
     siteCodes.forEach(code => {
-      if (!excelCodeSet.has(code)) {
+      const base = stripSuffix(code);
+      if (!excelCodeSet.has(code) && !excelCodeSet.has(base)) {
         _excelAllRows.push({ rowNum: '—', code, status: 'site_only' });
       }
     });
