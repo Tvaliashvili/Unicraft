@@ -3425,8 +3425,15 @@ async function handlePriceFile(file) {
       if (data.length < PAGE) break;
       from += PAGE;
     }
+    const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
     const productMap = {};
+    // First pass: exact codes
     products.forEach(p => { productMap[String(p.code).trim()] = p; });
+    // Second pass: base codes (without suffix) — only if not already mapped
+    products.forEach(p => {
+      const base = stripSuffix(String(p.code).trim());
+      if (!productMap[base]) productMap[base] = p;
+    });
 
     // 3. Compare prices
     _priceAllRows = excelRows.map(row => {
