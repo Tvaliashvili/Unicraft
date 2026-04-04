@@ -409,7 +409,7 @@ function renderProduct() {
 
   const imgEl = document.getElementById('productImage');
   if (product.imageUrl) {
-    imgEl.innerHTML = `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-full object-contain p-3" style="cursor:zoom-in" onclick="openImgZoom(this.src)">`;
+    imgEl.innerHTML = `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-full object-contain p-3" style="cursor:zoom-in" onclick="openImgZoom(this.src)" oncontextmenu="return false">`;
   } else {
     imgEl.innerHTML = `<span style="font-size:5rem;opacity:0.3">${product.emoji||'📦'}</span>`;
   }
@@ -799,7 +799,7 @@ window.sendChatMsg = async function() {
 
 <!-- Image Zoom Lightbox -->
 <div id="imgZoomOverlay" onclick="closeImgZoom()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out">
-  <img id="imgZoomSrc" src="" style="max-width:92vw;max-height:90vh;object-fit:contain;border-radius:10px;box-shadow:0 8px 60px rgba(0,0,0,0.5);pointer-events:none">
+  <img id="imgZoomSrc" src="" style="max-width:92vw;max-height:90vh;object-fit:contain;border-radius:10px;box-shadow:0 8px 60px rgba(0,0,0,0.5);pointer-events:none" oncontextmenu="return false">
 </div>
 <script>
 function openImgZoom(src){document.getElementById('imgZoomSrc').src=src;document.getElementById('imgZoomOverlay').style.display='flex';}
