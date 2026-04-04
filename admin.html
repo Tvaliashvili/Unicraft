@@ -2135,7 +2135,7 @@ window.closeEditModal = function() {
 
 window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
-  const newCode = document.getElementById('editCodeDisplay').value.trim();
+  let newCode = document.getElementById('editCodeDisplay').value.trim();
   const name = document.getElementById('editName').value.trim();
   const type = document.getElementById('editProdType').value;
   const priceRaw = parseFloat(document.getElementById('editPrice').value) || 0;
@@ -2149,7 +2149,18 @@ window.saveProductEdit = async function() {
   // Check for duplicate code (excluding current product)
   const { data: dupCheck } = await supabase.from('products').select('id').eq('code', newCode).neq('id', id).maybeSingle();
   if (dupCheck) {
-    showToast(`კოდი "${newCode}" უკვე გამოყენებულია სხვა პროდუქტზე`, 'error'); return;
+    const proceed = confirm(`კოდი "${newCode}" უკვე გამოყენებულია.\n\nგინდათ დუბლიკატი? კოდს დაემატება სუფიქსი (2), (3) და ა.შ.`);
+    if (!proceed) { btn.disabled = false; btn.textContent = '✓ შენახვა'; return; }
+    let suffix = 2;
+    let candidateCode = `${newCode}(${suffix})`;
+    while (true) {
+      const { data: dup } = await supabase.from('products').select('id').eq('code', candidateCode).neq('id', id).maybeSingle();
+      if (!dup) break;
+      suffix++;
+      candidateCode = `${newCode}(${suffix})`;
+    }
+    newCode = candidateCode;
+    document.getElementById('editCodeDisplay').value = candidateCode;
   }
   // collect specs
   const specs = { brand: document.getElementById('editBrand').value || '' };
