@@ -852,7 +852,7 @@ function renderPage() {
         ${seasonBadge(p)}
       </div>
       <div class="p-4 flex flex-col flex-1">
-        <div class="text-[11px] font-bold tracking-[2px] text-orange uppercase mb-1">${catLabel(prodCat(p))}</div>
+        <div class="text-[11px] font-bold text-orange uppercase mb-1">${catLabel(prodCat(p))}</div>
         <div class="font-bold text-[13px] text-dark mb-1 leading-snug">${p.name}</div>
         ${getCardSpecs(p)}
         ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
