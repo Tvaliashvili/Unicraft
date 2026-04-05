@@ -710,6 +710,7 @@
           <div class="page-title">ფასების განახლება</div>
           <div class="page-subtitle">ატვირთე Excel ფაილი · B სვეტი = კოდი · AI = ფასდაკლება · AJ = ფასი</div>
         </div>
+        <button onclick="resetAllPrices()" class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:13px">🗑 ფასების განულება</button>
       </div>
 
       <div class="card" style="max-width:960px">
@@ -3640,6 +3641,16 @@ async function applyPriceUpdates() {
   document.getElementById('priceApplyBtn').style.display = 'none';
   renderPriceTable();
 }
+
+window.resetAllPrices = async function() {
+  if (!confirm('ნამდვილად გსურს ყველა პროდუქტის ფასი და ფასდაკლება განულდეს?')) return;
+  const { data: products, error: fetchErr } = await supabase.from('products').select('id');
+  if (fetchErr) { showToast('შეცდომა: ' + fetchErr.message, 'error'); return; }
+  showToast('მიმდინარეობს განულება...', 'success');
+  const { error } = await supabase.from('products').update({ price: null, old_price: null }).in('id', products.map(p => p.id));
+  if (error) showToast('შეცდომა: ' + error.message, 'error');
+  else { showToast('ყველა ფასი განულდა ✓', 'success'); _priceRows = []; renderPriceTable(); }
+};
 
 </script>
 
