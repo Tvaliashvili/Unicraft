@@ -494,7 +494,7 @@ function renderProduct() {
   if (specsEl) {
     if (specsRows.length) {
       specsEl.classList.remove('hidden');
-      specsEl.innerHTML = `<div class="text-xs font-bold tracking-[2px] text-dark uppercase mb-3">სპეციფიკაცია</div>` +
+      specsEl.innerHTML = `<div class="text-xs font-bold text-dark mb-3">სპეციფიკაცია</div>` +
         specsRows.map(([k,v]) => `
           <div class="flex justify-between items-center text-base py-2 border-b border-gray-800">
             <span class="text-dark">${k}</span>
