@@ -630,11 +630,20 @@ const CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთე�
 const CAT_TYPE = { 'საბურავები':'tire', 'ზეთები':'oil', 'ფილტრები':'filter' };
 function catLabel(cat) { return CAT_DISPLAY[cat] || cat || 'სხვა'; }
 function prodCat(p) { return p.product_type || CAT_TYPE[p.category] || p.category || ''; }
+function vehicleIcon(p) {
+  if ((p.product_type || p.category) !== 'tire') return '';
+  const vt = p.specs?.vehicle_type || 'მსუბუქი ავტომობილი';
+  if (vt === 'სატვირთო') return '🚛';
+  if (vt === 'ჯიპი/პიკაპი') return '🚙';
+  return '🚗';
+}
 function seasonBadge(p) {
   const s = (p.specs?.season || '').toLowerCase();
   const seasonIcon = s.includes('ზაფხული') ? '☀️' : s.includes('ზამთარი') ? '❄️' : '';
-  if (!seasonIcon) return '';
-  return `<div style="position:absolute;bottom:8px;right:8px;display:flex;gap:3px;align-items:center"><span style="font-size:1.2rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">${seasonIcon}</span></div>`;
+  const vIcon = vehicleIcon(p);
+  const icons = [vIcon, seasonIcon].filter(Boolean);
+  if (!icons.length) return '';
+  return `<div style="position:absolute;bottom:8px;right:8px;display:flex;gap:3px;align-items:center">${icons.map(i=>`<span style="font-size:1.2rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">${i}</span>`).join('')}</div>`;
 }
 let allProducts = [];
 let activeCategory = '';
@@ -743,6 +752,7 @@ function getCardSpecs(p) {
     if (s.width && s.profile && s.rim) rows.push(['ზომა', `${s.width}/${s.profile} ${s.rim}`]);
     if (s.alt_size) rows.push(['ალტ. ზომა', s.alt_size]);
     if (s.season) rows.push(['სეზონი', s.season]);
+    rows.push(['ავტომობ. ტიპი', s.vehicle_type || 'მსუბუქი ავტომობილი']);
   } else if (type === 'oil') {
     if (s.viscosity) rows.push(['სიბლანტე', s.viscosity]);
     if (s.oil_type)  rows.push(['ტიპი', s.oil_type]);
