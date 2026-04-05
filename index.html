@@ -350,7 +350,7 @@ tailwind.config = {
 <div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 flex gap-6 flex-1 w-full">
 
   <!-- Sidebar -->
-  <aside class="w-48 flex-shrink-0 hidden lg:block sticky top-20 self-start">
+  <aside class="w-48 flex-shrink-0 hidden lg:block sticky top-20 self-start max-h-[calc(100vh-5rem)] overflow-y-auto pr-1">
 
     <!-- Categories -->
     <div class="mb-6 relative" id="catDropdownWrap">
@@ -656,11 +656,11 @@ let currentPage = 1;
 const PAGE_SIZE = 40;
 
 const SPEC_LABELS = {
-  brand:'ბრენდი', season:'სეზონი', width:'სიგანე', profile:'პროფილი', rim:'დიამეტრი',
-oil_type:'ტიპი', viscosity:'სიბლანტე', volume:'მოცულობა',
+  brand:'ბრენდი', vehicle_type:'ავტომ. ტიპი', season:'სეზონი', width:'სიგანე', profile:'პროფილი', rim:'დიამეტრი',
+  oil_type:'ტიპი', viscosity:'სიბლანტე', volume:'მოცულობა',
   application:'დანიშნულება', filter_type:'ფილტრის ტიპი', car_make:'ავტომ. მარკა'
 };
-const TIRE_SPECS   = ['brand','season','width','profile','rim'];
+const TIRE_SPECS   = ['brand','vehicle_type','season','width','profile','rim'];
 const OIL_SPECS    = ['brand','oil_type','viscosity','volume','application'];
 const FILTER_SPECS = ['brand','filter_type','car_make'];
 
@@ -683,24 +683,6 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
   const idSuffix = isMobile ? '_m' : '';
   const isTire = resolvedType === 'tire';
   let html = '';
-
-  // Tire vehicle type filter
-  if (isTire) {
-    const svt = activeSpecs['vehicle_type'] || '';
-    const vtOptions = [
-      { val: 'მსუბუქი ავტომობილი', icon: '🚗' },
-      { val: 'ჯიპი/პიკაპი',        icon: '🚙' },
-      { val: 'სატვირთო',           icon: '🚛' },
-    ];
-    html += `<div class="mb-4">
-      <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">ავტომობ. ტიპი</div>
-      <div class="flex flex-col gap-1">
-        ${vtOptions.map(o => `<button onclick="setSpecFilter('vehicle_type','${svt===o.val?'':o.val}')"
-          class="flex items-center gap-2 px-2 py-1.5 rounded-lg border text-xs font-medium transition-colors ${svt===o.val?'bg-orange border-orange text-white':'bg-white border-gray-200 text-dark hover:border-orange'}"
-          >${o.icon} ${o.val}</button>`).join('')}
-      </div>
-    </div>`;
-  }
 
   // Tire size: dedicated 3-column block
   if (isTire) {
@@ -731,9 +713,14 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
   const skipKeys = isTire ? new Set(['width','profile','rim']) : new Set();
   keys.forEach(key => {
     if (skipKeys.has(key)) return;
-    const vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
-    if (vals.length < 1) return;
     const sel = activeSpecs[key] || '';
+    let vals;
+    if (key === 'vehicle_type') {
+      vals = ['მსუბუქი ავტომობილი', 'ჯიპი/პიკაპი', 'სატვირთო'];
+    } else {
+      vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
+      if (vals.length < 1) return;
+    }
     html += `<div class="mb-4">
       <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
       <select onchange="setSpecFilter('${key}',this.value)" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
