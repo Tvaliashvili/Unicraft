@@ -341,13 +341,6 @@
                 </div>
               </div>
               <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">ავტომობილის ტიპი</label>
-                <select class="form-select" id="specVehicleType">
-                  <option value="მსუბუქი">🚗 მსუბუქი</option>
-                  <option value="სატვირთო">🚛 სატვირთო</option>
-                </select>
-              </div>
-              <div class="form-group specs-tire" style="display:none">
                 <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
                 <input class="form-input" id="specAltSize" placeholder="მაგ: 37x13.50R17LT">
               </div>
@@ -958,13 +951,6 @@
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">სეზონი</label>
           <select class="form-select" id="editSpecSeason"><option value="">სეზონი...</option></select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">ავტომობილის ტიპი</label>
-          <select class="form-select" id="editSpecVehicleType">
-            <option value="მსუბუქი">🚗 მსუბუქი</option>
-            <option value="სატვირთო">🚛 სატვირთო</option>
-          </select>
         </div>
         <div class="form-group edit-specs-tire" style="display:none">
           <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
@@ -1763,8 +1749,6 @@ window.editSelectType = function(type, selectedBrand, specs) {
     loadTireSpec('width', specs?.width || '');
     loadTireSpec('profile', specs?.profile || '');
     loadTireSpec('rim', specs?.rim || '');
-    const vt = document.getElementById('editSpecVehicleType');
-    if (vt) vt.value = specs?.vehicle_type || 'მსუბუქი';
   }
 };
 
@@ -1868,7 +1852,6 @@ window.addProduct = async function() {
     specs.profile     = document.getElementById('specProfile').value;
     specs.rim         = document.getElementById('specRim').value;
     specs.season        = document.getElementById('specSeason').value;
-    specs.vehicle_type  = document.getElementById('specVehicleType').value || 'მსუბუქი';
     const _altSize = document.getElementById('specAltSize').value.trim();
     if (_altSize) specs.alt_size = _altSize;
     if (!specs.brand)   { showToast('ბრენდი სავალდებულოა', 'error'); return; }
@@ -1961,8 +1944,6 @@ window.clearForm = function() {
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  const vt = document.getElementById('specVehicleType');
-  if (vt) vt.value = 'მსუბუქი';
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
   const specCustomCode = document.getElementById('specCustomCode');
@@ -2188,7 +2169,6 @@ window.saveProductEdit = async function() {
     specs.profile      = document.getElementById('editSpecProfile').value;
     specs.rim          = document.getElementById('editSpecRim').value;
     specs.season        = document.getElementById('editSpecSeason').value;
-    specs.vehicle_type  = document.getElementById('editSpecVehicleType').value || 'მსუბუქი';
     const _editAltSize = document.getElementById('editAltSize').value.trim();
     if (_editAltSize) specs.alt_size = _editAltSize;
   } else if (type === 'oil') {
