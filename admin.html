@@ -136,6 +136,9 @@
       <div class="nav-item" onclick="showPage('price-update')">
         <span class="nav-icon">💰</span> ფასების განახლება
       </div>
+      <div class="nav-item" onclick="showPage('delivery-settings')">
+        <span class="nav-icon">🚚</span> მიწოდების ტარიფი
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px" id="adminEmail"></div>
@@ -876,6 +879,66 @@
       </div>
     </div>
 
+    <!-- Delivery Settings Page -->
+    <div class="page" id="page-delivery-settings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">მიწოდების ტარიფი</div>
+          <div class="page-subtitle">ზუსტი ღირებულება და ვადები ზონების მიხედვით</div>
+        </div>
+        <button class="btn btn-primary" onclick="saveDeliverySettings()">✓ შენახვა</button>
+      </div>
+
+      <div class="card" style="max-width:640px">
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <div style="padding:14px;background:#f9fafb;border-radius:10px;border:1px solid var(--border)">
+            <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:12px">🏙️ თბილისი</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <label class="form-label">ღირებულება</label>
+                <input id="ds_tbilisi_price" class="form-input" placeholder="მაგ. 10 ლარი">
+              </div>
+              <div>
+                <label class="form-label">ვადა</label>
+                <input id="ds_tbilisi_deadline" class="form-input" placeholder="მაგ. 24-48 საათი">
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:14px;background:#f9fafb;border-radius:10px;border:1px solid var(--border)">
+            <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:12px">🏘️ რეგიონული ცენტრები</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <label class="form-label">ღირებულება</label>
+                <input id="ds_regional_price" class="form-input" placeholder="მაგ. 15-20 ლარი">
+              </div>
+              <div>
+                <label class="form-label">ვადა</label>
+                <input id="ds_regional_deadline" class="form-input" placeholder="მაგ. 2-3 სამუშაო დღე">
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:14px;background:#f9fafb;border-radius:10px;border:1px solid var(--border)">
+            <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:12px">⛰️ მაღალმთიანი რეგიონები</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <label class="form-label">ღირებულება</label>
+                <input id="ds_mountain_price" class="form-input" placeholder="მაგ. 25-30 ლარი">
+              </div>
+              <div>
+                <label class="form-label">ვადა</label>
+                <input id="ds_mountain_deadline" class="form-input" placeholder="მაგ. 3-5 სამუშაო დღე">
+              </div>
+            </div>
+          </div>
+
+          <p style="font-size:12px;color:var(--gray-mid);margin:0">ცარიელი ველები საიტზე ნაგულისხმევ ტექსტს აჩვენებს. ღირებულების ველი შევსებისას ნახვადება მიწოდების პანელში.</p>
+        </div>
+      </div>
+    </div>
+
 <!-- File Picker Menu (mobile: gallery or camera) -->
 <div id="filePickerMenu" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:800;align-items:flex-end;justify-content:center" onclick="if(event.target===this)document.getElementById('filePickerMenu').style.display='none'">
   <div style="background:white;width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:20px;display:flex;flex-direction:column;gap:10px">
@@ -1334,6 +1397,7 @@ async function initApp() {
   loadCategories();
   loadUnits();
   loadMaintenanceStatus();
+  loadDeliverySettings();
   renderDescRows('prodDescRows');
   initChatBadgeListener();
   initOrdersBadgeListener();
@@ -3640,6 +3704,34 @@ async function applyPriceUpdates() {
   document.getElementById('priceApplyBtn').style.display = 'none';
   renderPriceTable();
 }
+
+// ─── Delivery Settings ───
+async function loadDeliverySettings() {
+  const { data } = await supabase.from('settings').select('value').eq('key', 'delivery_settings').maybeSingle();
+  if (!data?.value) return;
+  try {
+    const s = JSON.parse(data.value);
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('ds_tbilisi_price',    s.tbilisi?.price    || '');
+    set('ds_tbilisi_deadline', s.tbilisi?.deadline || '');
+    set('ds_regional_price',   s.regional?.price   || '');
+    set('ds_regional_deadline',s.regional?.deadline|| '');
+    set('ds_mountain_price',   s.mountain?.price   || '');
+    set('ds_mountain_deadline',s.mountain?.deadline|| '');
+  } catch {}
+}
+
+window.saveDeliverySettings = async function() {
+  const g = id => document.getElementById(id)?.value.trim() || '';
+  const val = JSON.stringify({
+    tbilisi:  { price: g('ds_tbilisi_price'),    deadline: g('ds_tbilisi_deadline') },
+    regional: { price: g('ds_regional_price'),   deadline: g('ds_regional_deadline') },
+    mountain: { price: g('ds_mountain_price'),   deadline: g('ds_mountain_deadline') },
+  });
+  const { error } = await supabase.from('settings').upsert({ key: 'delivery_settings', value: val }, { onConflict: 'key' });
+  if (error) showToast('შეცდომა: ' + error.message, 'error');
+  else showToast('მიწოდების ტარიფი შენახულია ✓', 'success');
+};
 </script>
 
 

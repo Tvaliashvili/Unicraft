@@ -239,8 +239,8 @@ tailwind.config = {
         <p style="margin-top:8px;padding:10px;background:#FDF0EB;border-left:3px solid #E8541A;border-radius:4px"><strong>მნიშვნელოვანია:</strong> რეგიონებში მიწოდების ზუსტი ღირებულება დადგინდება შეკვეთის გაფორმებისას.</p>
       </div>
       <div>
-        <p style="font-weight:700;margin-bottom:8px">🕒 მიწოდების ვადები</p>
-        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px">
+        <p style="font-weight:700;margin-bottom:8px">🕒 მიწოდების ვადები და ღირებულება</p>
+        <ul id="deliveryZonesList" style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px">
           <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>თბილისი:</strong> 24-48 საათი.</span></li>
           <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>რეგიონული ცენტრები:</strong> 2-3 სამუშაო დღე.</span></li>
           <li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>მაღალმთიანი რეგიონები:</strong> 3-5 სამუშაო დღე.</span></li>
@@ -348,6 +348,24 @@ tailwind.config = {
 
 <script type="module">
 import { supabase } from './js/supabase-config.js';
+
+// ── Delivery settings ──
+(async () => {
+  const { data } = await supabase.from('settings').select('value').eq('key', 'delivery_settings').maybeSingle();
+  if (!data?.value) return;
+  try {
+    const s = JSON.parse(data.value);
+    const li = (label, zone) => {
+      const parts = [];
+      if (zone?.price) parts.push(zone.price);
+      if (zone?.deadline) parts.push(zone.deadline);
+      const detail = parts.join(' · ');
+      return `<li style="display:flex;gap:6px"><span style="color:#E8541A;font-weight:700">•</span><span><strong>${label}:</strong> ${detail || '–'}.</span></li>`;
+    };
+    const ul = document.getElementById('deliveryZonesList');
+    if (ul) ul.innerHTML = li('თბილისი', s.tbilisi) + li('რეგიონული ცენტრები', s.regional) + li('მაღალმთიანი რეგიონები', s.mountain);
+  } catch {}
+})();
 
 let product = null;
 let allProducts = [];
