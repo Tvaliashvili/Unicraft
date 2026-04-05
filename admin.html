@@ -641,6 +641,14 @@
           <div style="font-weight:600;color:var(--dark);margin-bottom:8px">Excel ფაილის ატვირთვა</div>
           <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap" onclick="event.stopPropagation()">
             <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კატეგორია</div>
+              <select id="excelCategory" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff">
+                <option value="tire">🛞 საბურავები</option>
+                <option value="oil">🛢️ ზეთები</option>
+                <option value="filter">🔧 ფილტრები</option>
+              </select>
+            </div>
+            <div>
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
               <input id="excelColCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
             </div>
@@ -728,6 +736,14 @@
           <div style="font-size:36px;margin-bottom:8px">💰</div>
           <div style="font-weight:600;color:var(--dark);margin-bottom:12px">Excel ფაილის ატვირთვა</div>
           <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap" onclick="event.stopPropagation()">
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კატეგორია</div>
+              <select id="priceCategory" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff">
+                <option value="tire">🛞 საბურავები</option>
+                <option value="oil">🛢️ ზეთები</option>
+                <option value="filter">🔧 ფილტრები</option>
+              </select>
+            </div>
             <div>
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
               <input id="colCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
@@ -3282,7 +3298,8 @@ async function handleExcelFile(file) {
       return;
     }
 
-    // 2. Fetch all product codes from Supabase (paginated, handles 2k+ rows)
+    // 2. Fetch product codes from Supabase filtered by selected category
+    const _excelCat = document.getElementById('excelCategory')?.value || 'tire';
     let siteCodes = new Set();
     let from = 0;
     const PAGE = 1000;
@@ -3290,6 +3307,7 @@ async function handleExcelFile(file) {
       const { data, error } = await supabase
         .from('products')
         .select('code')
+        .eq('product_type', _excelCat)
         .range(from, from + PAGE - 1);
       if (error) throw error;
       data.forEach(p => siteCodes.add(String(p.code).trim()));
@@ -3457,7 +3475,8 @@ async function handlePriceFile(file) {
       return;
     }
 
-    // 2. Fetch all products from Supabase
+    // 2. Fetch products from Supabase filtered by selected category
+    const _priceCat = document.getElementById('priceCategory')?.value || 'tire';
     let products = [];
     let from = 0;
     const PAGE = 1000;
@@ -3465,6 +3484,7 @@ async function handlePriceFile(file) {
       const { data, error } = await supabase
         .from('products')
         .select('id, code, name, price, old_price, specs')
+        .eq('product_type', _priceCat)
         .range(from, from + PAGE - 1);
       if (error) throw error;
       products = products.concat(data);
