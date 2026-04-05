@@ -684,6 +684,24 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
   const isTire = resolvedType === 'tire';
   let html = '';
 
+  // Tire vehicle type filter
+  if (isTire) {
+    const svt = activeSpecs['vehicle_type'] || '';
+    const vtOptions = [
+      { val: 'მსუბუქი ავტომობილი', icon: '🚗' },
+      { val: 'ჯიპი/პიკაპი',        icon: '🚙' },
+      { val: 'სატვირთო',           icon: '🚛' },
+    ];
+    html += `<div class="mb-4">
+      <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">ავტომობ. ტიპი</div>
+      <div class="flex flex-col gap-1">
+        ${vtOptions.map(o => `<button onclick="setSpecFilter('vehicle_type','${svt===o.val?'':o.val}')"
+          class="flex items-center gap-2 px-2 py-1.5 rounded-lg border text-xs font-medium transition-colors ${svt===o.val?'bg-orange border-orange text-white':'bg-white border-gray-200 text-dark hover:border-orange'}"
+          >${o.icon} ${o.val}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
   // Tire size: dedicated 3-column block
   if (isTire) {
     const sw = activeSpecs['width'] || '', sp = activeSpecs['profile'] || '', sr = activeSpecs['rim'] || '';
@@ -898,7 +916,12 @@ function applyFilters() {
   if (activeCategory) list = list.filter(p => prodCat(p) === activeCategory);
   if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
   Object.entries(activeSpecs).forEach(([key, val]) => {
-    if (val) list = list.filter(p => p.specs?.[key] === val);
+    if (!val) return;
+    if (key === 'vehicle_type') {
+      list = list.filter(p => (p.specs?.vehicle_type || 'მსუბუქი ავტომობილი') === val);
+    } else {
+      list = list.filter(p => p.specs?.[key] === val);
+    }
   });
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
   if (activeDiscountOnly) list = list.filter(p => p.oldPrice);
