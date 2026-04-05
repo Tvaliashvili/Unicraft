@@ -639,11 +639,11 @@ function vehicleIcon(p) {
 }
 function seasonBadge(p) {
   const s = (p.specs?.season || '').toLowerCase();
-  const seasonIcon = s.includes('ზაფხული') ? '☀️' : s.includes('ზამთარი') ? '❄️' : '';
+  const seasonSrc = s.includes('ზაფხული') ? './icons/sun.svg' : s.includes('ზამთარი') ? './icons/winter.svg' : '';
   const vSrc = vehicleIcon(p);
   const parts = [];
-  if (vSrc) parts.push(`<img src="${vSrc}" style="width:1.4rem;height:1.4rem;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">`);
-  if (seasonIcon) parts.push(`<span style="font-size:1.2rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">${seasonIcon}</span>`);
+  if (vSrc) parts.push(`<img src="${vSrc}" style="width:2rem;height:2rem;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">`);
+  if (seasonSrc) parts.push(`<img src="${seasonSrc}" style="width:1.6rem;height:1.6rem;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">`);
   if (!parts.length) return '';
   return `<div style="position:absolute;bottom:8px;right:8px;display:flex;gap:3px;align-items:center">${parts.join('')}</div>`;
 }
