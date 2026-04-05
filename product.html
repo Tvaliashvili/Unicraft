@@ -385,7 +385,8 @@ function flagImg(country, size=20) {
 function renderProduct() {
   document.title = product.name + ' — UniCraft';
   document.getElementById('breadcrumbName').textContent = product.name;
-  document.getElementById('productCategory').textContent = product.category || 'სხვა';
+  const _CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები' };
+  document.getElementById('productCategory').textContent = _CAT_DISPLAY[product.product_type] || product.category || 'სხვა';
   document.getElementById('productName').textContent = product.name;
   const descText = (product.description || '').trim();
   const descContainer = document.getElementById('productDescContainer');
