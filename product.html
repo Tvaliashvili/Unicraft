@@ -432,7 +432,8 @@ function renderProduct() {
     if (_seasonSrc) {
       const img = document.createElement('img');
       img.src = _seasonSrc;
-      img.style.cssText = 'width:1.6rem;height:1.6rem;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.2))';
+      const _sz = _seasonSrc.includes('winter') ? '1.4rem' : '1.6rem';
+      img.style.cssText = `width:${_sz};height:${_sz};object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.2))`;
       _sb.appendChild(img);
     }
     imgEl.parentElement.appendChild(_sb);
