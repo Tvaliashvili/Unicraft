@@ -625,7 +625,7 @@
       <div class="page-header">
         <div>
           <div class="page-title">Excel შედარება</div>
-          <div class="page-subtitle">ატვირთე Excel ფაილი და შეადარე B სვეტის კოდები საიტის პროდუქტებს</div>
+          <div class="page-subtitle">ატვირთე Excel ფაილი და შეადარე კოდები საიტის პროდუქტებს</div>
         </div>
       </div>
 
@@ -638,8 +638,13 @@
           ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handleExcelFile(event.dataTransfer.files[0])">
           <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(this.files[0])">
           <div style="font-size:36px;margin-bottom:8px">📂</div>
-          <div style="font-weight:600;color:var(--dark);margin-bottom:4px">Excel ფაილის ატვირთვა</div>
-          <div style="font-size:13px;color:var(--gray-mid)">.xlsx ან .xls · B სვეტი = პროდუქტის კოდი</div>
+          <div style="font-weight:600;color:var(--dark);margin-bottom:8px">Excel ფაილის ატვირთვა</div>
+          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap" onclick="event.stopPropagation()">
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
+              <input id="excelColCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+          </div>
         </div>
 
         <!-- Summary bar (hidden until results) -->
@@ -686,7 +691,7 @@
             <thead>
               <tr style="background:var(--gray-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid)">
                 <th style="padding:10px 14px;text-align:left">#</th>
-                <th style="padding:10px 14px;text-align:left">კოდი (B სვეტი)</th>
+                <th style="padding:10px 14px;text-align:left">კოდი (<span id="excelColCodeLabel">B</span> სვეტი)</th>
                 <th style="padding:10px 14px;text-align:left">სტატუსი</th>
               </tr>
             </thead>
@@ -3258,14 +3263,21 @@ async function handleExcelFile(file) {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
 
-    // Extract column B (index 1), skip header row, ignore empty cells
+    // Resolve column index from UI input (default B)
+    const _excelColLetter = (document.getElementById('excelColCode')?.value || 'B').trim().toUpperCase();
+    const _excelColToIdx = s => { let n = 0; for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64); return n - 1; };
+    const _excelColIdx = _excelColToIdx(_excelColLetter);
+    const colLabel = document.getElementById('excelColCodeLabel');
+    if (colLabel) colLabel.textContent = _excelColLetter;
+
+    // Extract selected column, skip header row, ignore empty cells
     const excelCodes = rows
       .slice(1)
-      .map(r => String(r[1] ?? '').trim())
+      .map(r => String(r[_excelColIdx] ?? '').trim())
       .filter(c => c.length > 0);
 
     if (excelCodes.length === 0) {
-      alert('B სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.');
+      alert(`${_excelColLetter} სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.`);
       document.getElementById('excelLoading').style.display = 'none';
       return;
     }
