@@ -1964,6 +1964,8 @@ window.clearForm = function() {
    'specOilType','specViscosity','specVolume','specOilApp',
    'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const vt = document.getElementById('specVehicleType');
+  if (vt) vt.value = 'მსუბუქი ავტომობილი';
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
   const specCustomCode = document.getElementById('specCustomCode');
