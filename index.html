@@ -693,7 +693,7 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
     const profiles = [...new Set(prods.map(p => p.specs?.profile).filter(Boolean))].sort((a,b)=>+a-+b);
     const rims     = [...new Set(prods.map(p => p.specs?.rim).filter(Boolean))].sort((a,b)=>+a.replace(/\D/g,'')-+b.replace(/\D/g,''));
     html += `<div class="mb-4">
-      <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">ზომა</div>
+      <div class="text-[11px] font-bold text-dark mb-1.5">ზომა</div>
       <div class="grid grid-cols-3 gap-1">
         <select onchange="setSpecFilter('width',this.value)" class="border border-gray-200 rounded-lg px-1 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
           <option value="">სიგ.</option>
@@ -724,7 +724,7 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
       if (vals.length < 1) return;
     }
     html += `<div class="mb-4">
-      <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-1.5">${SPEC_LABELS[key]||key}</div>
+      <div class="text-[11px] font-bold text-dark mb-1.5">${SPEC_LABELS[key]||key}</div>
       <select onchange="setSpecFilter('${key}',this.value)" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-dark outline-none focus:border-orange bg-white">
         <option value="">ყველა</option>
         ${vals.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
