@@ -633,11 +633,8 @@ function prodCat(p) { return p.product_type || CAT_TYPE[p.category] || p.categor
 function seasonBadge(p) {
   const s = (p.specs?.season || '').toLowerCase();
   const seasonIcon = s.includes('ზაფხული') ? '☀️' : s.includes('ზამთარი') ? '❄️' : '';
-  const isTire = (p.product_type || p.category) === 'tire';
-  const vehicleIcon = isTire ? (p.specs?.vehicle_type === 'სატვირთო' ? '🚛' : '🚗') : '';
-  if (!seasonIcon && !vehicleIcon) return '';
-  const icons = [vehicleIcon, seasonIcon].filter(Boolean);
-  return `<div style="position:absolute;bottom:8px;right:8px;display:flex;gap:3px;align-items:center">${icons.map(i => `<span style="font-size:1.2rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">${i}</span>`).join('')}</div>`;
+  if (!seasonIcon) return '';
+  return `<div style="position:absolute;bottom:8px;right:8px;display:flex;gap:3px;align-items:center"><span style="font-size:1.2rem;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">${seasonIcon}</span></div>`;
 }
 let allProducts = [];
 let activeCategory = '';
