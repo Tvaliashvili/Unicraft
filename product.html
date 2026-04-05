@@ -416,20 +416,25 @@ function renderProduct() {
   const _seasonIcon = _season.includes('ზაფხული') ? '☀️' : _season.includes('ზამთარი') ? '❄️' : '';
   const _isTire = (product.product_type || product.category) === 'tire';
   const _vt = product.specs?.vehicle_type || 'მსუბუქი ავტომობილი';
-  const _vehicleIcon = _isTire ? (_vt === 'სატვირთო' ? '🚛' : _vt === 'ჯიპი/პიკაპი' ? '🚙' : '🚗') : '';
+  const _vehicleSrc = _isTire ? (_vt === 'სატვირთო' ? './icons/truck.svg' : _vt === 'ჯიპი/პიკაპი' ? './icons/jeep.svg' : './icons/car.svg') : '';
   const _existingSeasonBadge = document.getElementById('productSeasonBadge');
   if (_existingSeasonBadge) _existingSeasonBadge.remove();
-  const _icons = [_vehicleIcon, _seasonIcon].filter(Boolean);
-  if (_icons.length) {
+  if (_vehicleSrc || _seasonIcon) {
     const _sb = document.createElement('div');
     _sb.id = 'productSeasonBadge';
     _sb.style.cssText = 'position:absolute;bottom:12px;right:12px;display:flex;gap:4px;align-items:center';
-    _icons.forEach(icon => {
+    if (_vehicleSrc) {
+      const img = document.createElement('img');
+      img.src = _vehicleSrc;
+      img.style.cssText = 'width:2rem;height:2rem;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.2))';
+      _sb.appendChild(img);
+    }
+    if (_seasonIcon) {
       const sp = document.createElement('span');
-      sp.textContent = icon;
+      sp.textContent = _seasonIcon;
       sp.style.cssText = 'font-size:1.8rem;line-height:1;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.2))';
       _sb.appendChild(sp);
-    });
+    }
     imgEl.parentElement.appendChild(_sb);
   }
 
