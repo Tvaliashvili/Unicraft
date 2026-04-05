@@ -643,7 +643,7 @@ function seasonBadge(p) {
   const vSrc = vehicleIcon(p);
   const parts = [];
   if (vSrc) parts.push(`<img src="${vSrc}" style="width:2rem;height:2rem;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">`);
-  if (seasonSrc) parts.push(`<img src="${seasonSrc}" style="width:2rem;height:2rem;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">`);
+  if (seasonSrc) parts.push(`<img src="${seasonSrc}" style="width:1.6rem;height:1.6rem;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2))">`);
   if (!parts.length) return '';
   return `<div style="position:absolute;bottom:8px;right:8px;display:flex;gap:3px;align-items:center">${parts.join('')}</div>`;
 }
