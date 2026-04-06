@@ -886,12 +886,21 @@ function renderPage() {
 
   let html = `<button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} class="${btnClass} ${currentPage===1?disabledClass:inactiveClass}">‹</button>`;
 
-  for (let i = 1; i <= totalPages; i++) {
-    if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
-      if (i === 3 || i === totalPages - 2) html += `<span class="w-9 h-9 flex items-center justify-center text-gray-400">…</span>`;
-      continue;
+  const dotSpan = `<span class="w-9 h-9 flex items-center justify-center text-gray-400">…</span>`;
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
     }
-    html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+  } else {
+    const first3 = [1, 2, 3];
+    const last3 = [totalPages - 2, totalPages - 1, totalPages];
+    for (const i of first3) {
+      html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+    }
+    html += dotSpan;
+    for (const i of last3) {
+      html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+    }
   }
 
   html += `<button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} class="${btnClass} ${currentPage===totalPages?disabledClass:inactiveClass}">›</button>`;
