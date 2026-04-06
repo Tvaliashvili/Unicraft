@@ -892,14 +892,17 @@ function renderPage() {
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) html += pageBtn(i);
   } else {
-    // always show first 3 and last 3; if current is 4 or (last-3), show it too
-    const left = [1, 2, 3];
-    const right = [totalPages - 2, totalPages - 1, totalPages];
-    if (currentPage === 4) left.push(4);
-    if (currentPage === totalPages - 3) right.unshift(totalPages - 3);
-    for (const i of left) html += pageBtn(i);
-    html += dotSpan;
-    for (const i of right) html += pageBtn(i);
+    // fixed: first 3, last 3, plus always show currentPage and currentPage+1
+    const visible = new Set([1, 2, 3, totalPages - 2, totalPages - 1, totalPages]);
+    visible.add(currentPage);
+    if (currentPage + 1 <= totalPages) visible.add(currentPage + 1);
+    const pages = [...visible].sort((a, b) => a - b);
+    let prev = 0;
+    for (const p of pages) {
+      if (p - prev > 1) html += dotSpan;
+      html += pageBtn(p);
+      prev = p;
+    }
   }
 
   html += `<button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} class="${btnClass} ${currentPage===totalPages?disabledClass:inactiveClass}">›</button>`;
