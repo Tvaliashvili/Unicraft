@@ -695,9 +695,10 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
   // Tire size: dedicated 3-column block
   if (isTire) {
     const sw = activeSpecs['width'] || '', sp = activeSpecs['profile'] || '', sr = activeSpecs['rim'] || '';
-    const widths   = [...new Set(prods.map(p => p.specs?.width).filter(Boolean))].sort((a,b)=>+a-+b);
-    const profiles = [...new Set(prods.map(p => p.specs?.profile).filter(Boolean))].sort((a,b)=>+a-+b);
-    const rims     = [...new Set(prods.map(p => p.specs?.rim).filter(Boolean))].sort((a,b)=>+a.replace(/\D/g,'')-+b.replace(/\D/g,''));
+    const numSort = (a,b) => { const na=parseFloat(a), nb=parseFloat(b); return (!isNaN(na)&&!isNaN(nb)) ? na-nb : a.localeCompare(b); };
+    const widths   = [...new Set(prods.map(p => p.specs?.width).filter(Boolean))].sort(numSort);
+    const profiles = [...new Set(prods.map(p => p.specs?.profile).filter(Boolean))].sort(numSort);
+    const rims     = [...new Set(prods.map(p => p.specs?.rim).filter(Boolean))].sort(numSort);
     html += `<div class="mb-4">
       <div class="text-[11px] font-bold text-dark mb-1.5">ზომა</div>
       <div class="grid grid-cols-3 gap-1">
