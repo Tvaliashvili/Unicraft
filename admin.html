@@ -2495,7 +2495,7 @@ window.showProductInfo = function(id) {
     : `${p.price} ₾`;
   rows += row('ფასი', priceVal);
   let html = '';
-  if (rows) html += `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dark);margin-bottom:4px">სპეციფიკაცია</div>${rows}</div>`;
+  if (rows) html += `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--dark);margin-bottom:4px">სპეციფიკაცია</div>${rows}</div>`;
   if (p.description) {
     html += `<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dark);margin-bottom:6px">აღწერა</div>`;
     html += `<div style="font-size:13px;line-height:1.7;color:#444;white-space:pre-wrap">${p.description}</div>`;
