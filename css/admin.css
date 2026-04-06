@@ -124,7 +124,7 @@ body {
 }
 
 .sidebar-logo span { color: var(--orange); }
-.sidebar-subtitle { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 4px; }
+.sidebar-subtitle { font-size: 13px; color: white; font-weight: 400; margin-top: 4px; }
 
 .nav { padding: 12px 0; flex: 1; }
 
@@ -155,8 +155,8 @@ body {
 
 .logout-btn {
   background: none;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.6);
+  border: 1px solid white;
+  color: white;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
