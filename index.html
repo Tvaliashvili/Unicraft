@@ -887,19 +887,22 @@ function renderPage() {
   let html = `<button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} class="${btnClass} ${currentPage===1?disabledClass:inactiveClass}">‹</button>`;
 
   const dotSpan = `<span class="w-9 h-9 flex items-center justify-center text-gray-400">…</span>`;
+  const pageBtn = i => `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+
   if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) {
-      html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
-    }
+    for (let i = 1; i <= totalPages; i++) html += pageBtn(i);
   } else {
-    const first3 = [1, 2, 3];
-    const last3 = [totalPages - 2, totalPages - 1, totalPages];
-    for (const i of first3) {
-      html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+    // visible: 1, ..., [cur-1, cur, cur+1], ..., last
+    const visible = new Set([1, totalPages]);
+    for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+      if (i >= 1 && i <= totalPages) visible.add(i);
     }
-    html += dotSpan;
-    for (const i of last3) {
-      html += `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
+    const pages = [...visible].sort((a, b) => a - b);
+    let prev = 0;
+    for (const p of pages) {
+      if (p - prev > 1) html += dotSpan;
+      html += pageBtn(p);
+      prev = p;
     }
   }
 
