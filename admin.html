@@ -1728,6 +1728,7 @@ window.editSelectType = function(type, selectedBrand, specs) {
   document.getElementById('editProdType').value = type;
   ['tire','oil','filter'].forEach(t => {
     const btn = document.getElementById('editTypeBtn_' + t);
+    if (!btn) return;
     if (t === type) {
       btn.style.borderColor = 'var(--orange)';
       btn.style.background = '#fff5f0';
