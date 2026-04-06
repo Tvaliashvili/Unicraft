@@ -890,20 +890,21 @@ function renderPage() {
   const dotSpan = `<span class="w-9 h-9 flex items-center justify-center text-gray-400">…</span>`;
   const pageBtn = i => `<button onclick="goPage(${i})" class="${btnClass} ${i===currentPage?activeClass:inactiveClass}">${i}</button>`;
 
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) html += pageBtn(i);
-  } else {
-    // fixed: first 3, last 3, plus always show currentPage and currentPage+1
-    const visible = new Set([1, 2, 3, totalPages - 2, totalPages - 1, totalPages]);
-    visible.add(currentPage);
-    if (currentPage + 1 <= totalPages) visible.add(currentPage + 1);
-    const pages = [...visible].sort((a, b) => a - b);
+  function getPaginationItems(cur, total) {
+    const visible = new Set([1, 2, total - 1, total, cur - 1, cur, cur + 1]);
+    const pages = [...visible].filter(p => p >= 1 && p <= total).sort((a, b) => a - b);
+    const result = [];
     let prev = 0;
     for (const p of pages) {
-      if (p - prev > 1) html += dotSpan;
-      html += pageBtn(p);
+      if (p - prev > 1) result.push('...');
+      result.push(p);
       prev = p;
     }
+    return result;
+  }
+
+  for (const item of getPaginationItems(currentPage, totalPages)) {
+    html += item === '...' ? dotSpan : pageBtn(item);
   }
 
   html += `<button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} class="${btnClass} ${currentPage===totalPages?disabledClass:inactiveClass}">›</button>`;
