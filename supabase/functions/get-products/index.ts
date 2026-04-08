@@ -25,7 +25,7 @@ serve(async (req) => {
   if (id) {
     query = query.eq("id", id).single();
   } else {
-    query = query.eq("active", true).order("created_at", { ascending: false });
+    query = query.eq("active", true).order("created_at", { ascending: false }).limit(5000);
   }
 
   const { data, error } = await query;
