@@ -1298,6 +1298,7 @@ async function showApp(email) {
   setTimeout(_fixCargoProductsMeta, 3500);
   setTimeout(_migrateCargoVehicleType, 4000);
   setTimeout(_fixR13CProfile, 4500);
+  setTimeout(_fixSeasonComma, 5000);
 }
 
 // ─── Auth ───
@@ -4047,6 +4048,43 @@ async function _fixR13CProfile() {
   }
   localStorage.setItem(KEY, '1');
   if (fixed > 0) showToast(`✅ R13C: ${fixed} პროდუქტს profile=80 დაემატა`, 'success');
+}
+
+// ─── One-time migration: fix season values that have " , " instead of " " ───
+async function _fixSeasonComma() {
+  const KEY = 'season_comma_fix_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  // Map wrong → correct
+  const fixes = {
+    'ზაფხული , M+S A/T': 'ზაფხული M+S A/T',
+    'ზაფხული , M+S R/T': 'ზაფხული M+S R/T',
+    'ზაფხული , M+S X/T': 'ზაფხული M+S X/T',
+  };
+
+  let total = 0;
+  for (const [wrong, correct] of Object.entries(fixes)) {
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase.from('products')
+        .select('id, specs')
+        .eq('product_type', 'tire')
+        .range(from, from + 999);
+      if (error || !data.length) break;
+      for (const p of data) {
+        if ((p.specs?.season || '') !== wrong) continue;
+        const newSpecs = { ...(p.specs || {}), season: correct };
+        const { error: e } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+        if (!e) total++;
+      }
+      if (data.length < 1000) break;
+      from += 1000;
+    }
+  }
+  localStorage.setItem(KEY, '1');
+  if (total > 0) showToast(`✅ ${total} პროდუქტის სეზონი გასწორდა`, 'success');
 }
 
 
