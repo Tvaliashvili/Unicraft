@@ -923,7 +923,13 @@ window.goPage = function(page) {
 function applyFilters() {
   let list = allProducts;
   if (activeCategory) list = list.filter(p => prodCat(p) === activeCategory);
-  if (searchQ) list = list.filter(p => p.name?.toLowerCase().includes(searchQ) || p.description?.toLowerCase().includes(searchQ) || (p.code || '').toLowerCase().includes(searchQ));
+  if (searchQ) list = list.filter(p =>
+    p.name?.toLowerCase().includes(searchQ) ||
+    p.description?.toLowerCase().includes(searchQ) ||
+    (p.code || '').toLowerCase().includes(searchQ) ||
+    (p.specs?.brand || '').toLowerCase().includes(searchQ) ||
+    (p.specs?.rim || '').toLowerCase().includes(searchQ)
+  );
   Object.entries(activeSpecs).forEach(([key, val]) => {
     if (!val) return;
     if (key === 'vehicle_type') {
