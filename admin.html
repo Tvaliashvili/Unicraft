@@ -759,6 +759,7 @@
             ფასების განახლება
           </button>
         </div>
+        <div id="priceDupWarning" style="display:none;margin-top:10px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;font-size:13px;color:#92400e;text-align:center"></div>
 
         <!-- Filter tabs -->
         <div id="priceTabs" style="display:none;margin-top:16px;border-bottom:2px solid var(--border)">
@@ -3592,12 +3593,11 @@ async function handlePriceFile(file) {
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
 
-      // If this DB product already appeared earlier in the Excel, treat this row as 'same'
-      // (can't apply two different prices to the same product — first row wins)
+      // If this DB product already appeared earlier in the Excel, mark as duplicate — warn user
       if (seenProductIds.has(product.id)) {
         const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
         const currentDiscount = parseFloat(product.specs?.discount_price || 0);
-        return { ...row, status: 'same', product, currentRegular, currentDiscount, hasDuplicate };
+        return { ...row, status: 'duplicate', product, currentRegular, currentDiscount, hasDuplicate };
       }
       seenProductIds.add(product.id);
 
@@ -3610,14 +3610,18 @@ async function handlePriceFile(file) {
 
     const changedCount  = _priceAllRows.filter(r => r.status === 'changed').length;
     const sameCount     = _priceAllRows.filter(r => r.status === 'same').length;
-    const noPriceCount  = _priceAllRows.filter(r => r.status === 'no_price').length;
-    const notFoundCount = _priceAllRows.filter(r => r.status === 'not_found').length;
+    const noPriceCount   = _priceAllRows.filter(r => r.status === 'no_price').length;
+    const notFoundCount  = _priceAllRows.filter(r => r.status === 'not_found').length;
+    const duplicateCount = _priceAllRows.filter(r => r.status === 'duplicate').length;
 
     document.getElementById('priceCountChanged').textContent  = changedCount;
     document.getElementById('priceCountSame').textContent     = sameCount;
     document.getElementById('priceCountNoPrice').textContent  = noPriceCount;
     document.getElementById('priceCountNotFound').textContent = notFoundCount;
     document.getElementById('priceApplyBtn').style.display    = changedCount > 0 ? 'flex' : 'none';
+
+    const dupWarn = document.getElementById('priceDupWarning');
+    if (dupWarn) { dupWarn.style.display = duplicateCount > 0 ? 'block' : 'none'; dupWarn.textContent = `⚠️ ${duplicateCount} Excel row maps to an already-seen product (skipped) — check for duplicate rows in your Excel file.`; }
     document.getElementById('priceSummary').style.display = 'flex';
     document.getElementById('priceTabs').style.display = 'block';
     document.getElementById('priceResults').style.display = 'block';
@@ -3683,6 +3687,7 @@ function renderPriceTable() {
       same:      `<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">✅ იგივეა</span>`,
       no_price:  `<span style="background:#fefce8;color:#854d0e;border:1px solid #fef08a;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">⚠️ ფასი არ არის</span>`,
       not_found: `<span style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ საიტზე არ არის</span>`,
+      duplicate: `<span style="background:#faf5ff;color:#6b21a8;border:1px solid #e9d5ff;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">⚠️ Excel-ში დუბლი</span>`,
     };
 
     return `<tr style="${bg}">
