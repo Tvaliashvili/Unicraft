@@ -20,35 +20,52 @@ serve(async (req) => {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
 
-  let query = supabase.from("products").select("*");
-
+  // Single product by ID
   if (id) {
-    query = query.eq("id", id).single();
-  } else {
-    query = query.eq("active", true).order("created_at", { ascending: false }).limit(5000);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify(strip(data)), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  // Strip discount_price from specs before returning to public
-  const strip = (p: any) => {
-    if (p?.specs?.discount_price !== undefined) {
-      const { discount_price, ...cleanSpecs } = p.specs;
-      return { ...p, specs: cleanSpecs };
+  // Fetch ALL active products by paginating in batches of 1000
+  const PAGE = 1000;
+  let all: any[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("active", true)
+      .order("created_at", { ascending: false })
+      .range(from, from + PAGE - 1);
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-    return p;
-  };
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
 
-  const cleaned = Array.isArray(data) ? data.map(strip) : strip(data);
-
-  return new Response(JSON.stringify(cleaned), {
+  return new Response(JSON.stringify(all.map(strip)), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
+
+// Strip discount_price from specs before returning to public
+function strip(p: any) {
+  if (p?.specs?.discount_price !== undefined) {
+    const { discount_price, ...cleanSpecs } = p.specs;
+    return { ...p, specs: cleanSpecs };
+  }
+  return p;
+}
