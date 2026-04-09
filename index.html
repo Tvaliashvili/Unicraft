@@ -930,14 +930,17 @@ function applyFilters() {
     (p.specs?.brand || '').toLowerCase().includes(searchQ) ||
     (p.specs?.rim || '').toLowerCase().includes(searchQ)
   );
-  Object.entries(activeSpecs).forEach(([key, val]) => {
-    if (!val) return;
-    if (key === 'vehicle_type') {
-      list = list.filter(p => (p.specs?.vehicle_type || 'მსუბუქი ავტომობილი') === val);
-    } else {
-      list = list.filter(p => p.specs?.[key] === val);
-    }
-  });
+  // When searching by text, skip spec filters so results aren't hidden by active rim/season/type filters
+  if (!searchQ) {
+    Object.entries(activeSpecs).forEach(([key, val]) => {
+      if (!val) return;
+      if (key === 'vehicle_type') {
+        list = list.filter(p => (p.specs?.vehicle_type || 'მსუბუქი ავტომობილი') === val);
+      } else {
+        list = list.filter(p => p.specs?.[key] === val);
+      }
+    });
+  }
   if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
   if (activeDiscountOnly) list = list.filter(p => p.oldPrice);
   renderProducts(list);
