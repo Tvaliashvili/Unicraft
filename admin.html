@@ -315,6 +315,7 @@
                 <select class="form-select" id="specVehicleType">
                   <option value="მსუბუქი ავტომობილი">🚗 მსუბუქი ავტომობილი</option>
                   <option value="ჯიპი/პიკაპი">🚙 ჯიპი/პიკაპი</option>
+                  <option value="მსუბუქი სატვირთო">🚐 მსუბუქი სატვირთო</option>
                   <option value="სატვირთო">🚛 სატვირთო</option>
                 </select>
               </div>
@@ -1245,6 +1246,7 @@ async function showApp(email) {
   initApp();
   setTimeout(_migrateCargoRims, 2000);
   setTimeout(_addMissingCargoProducts, 3000);
+  setTimeout(_migrateCargoVehicleType, 4000);
 }
 
 // ─── Auth ───
@@ -3777,6 +3779,43 @@ async function _addMissingCargoProducts() {
 
   localStorage.setItem(KEY, '1');
   if (added > 0) showToast(`✅ ${added} Cargo პროდუქტი დაემატა (inactive)`, 'success');
+}
+
+// ─── One-time migration: set vehicle_type = 'მსუბუქი სატვირთო' for all cargo rim products ───
+async function _migrateCargoVehicleType() {
+  const KEY = 'cargo_vtype_v1';
+  if (localStorage.getItem(KEY)) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const cargoRims = ['R13C','R14C','R15C','R16C','R17C'];
+  let products = [];
+  let from = 0;
+  const PAGE = 1000;
+  while (true) {
+    const { data, error } = await supabase.from('products')
+      .select('id, specs')
+      .eq('product_type', 'tire')
+      .range(from, from + PAGE - 1);
+    if (error) break;
+    products = products.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const rim = p.specs?.rim || '';
+    if (!cargoRims.includes(rim)) continue;
+    if (p.specs?.vehicle_type === 'მსუბუქი სატვირთო') continue;
+    const newSpecs = { ...(p.specs || {}), vehicle_type: 'მსუბუქი სატვირთო' };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} პროდუქტს მიენიჭა "მსუბუქი სატვირთო"`, 'success');
 }
 
 

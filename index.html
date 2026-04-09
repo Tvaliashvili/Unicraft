@@ -641,6 +641,7 @@ function vehicleIcon(p) {
   const vt = p.specs?.vehicle_type || 'მსუბუქი ავტომობილი';
   if (vt === 'სატვირთო') return './icons/truck.svg';
   if (vt === 'ჯიპი/პიკაპი') return './icons/jeep.svg';
+  if (vt === 'მსუბუქი სატვირთო') return './icons/light-truck.svg';
   return './icons/car.svg';
 }
 function seasonBadge(p) {
@@ -725,7 +726,7 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
     const sel = activeSpecs[key] || '';
     let vals;
     if (key === 'vehicle_type') {
-      vals = ['მსუბუქი ავტომობილი', 'ჯიპი/პიკაპი', 'სატვირთო'];
+      vals = ['მსუბუქი ავტომობილი', 'ჯიპი/პიკაპი', 'მსუბუქი სატვირთო', 'სატვირთო'];
     } else {
       vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
       if (vals.length < 1) return;
