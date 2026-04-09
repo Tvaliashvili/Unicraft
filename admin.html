@@ -3321,14 +3321,15 @@ async function handleExcelFile(file) {
     if (nameLabel) nameLabel.textContent = _excelNameLetter;
 
     // Extract code + name columns, skip header row, ignore empty codes
+    // If a cell has multiple codes separated by ";" treat each as its own row
     const excelRows = rows
       .slice(1)
-      .map((r, i) => ({
-        rowNum: i + 2,
-        code: String(r[_excelColIdx] ?? '').trim(),
-        name: String(r[_excelNameIdx] ?? '').trim(),
-      }))
-      .filter(r => r.code.length > 0);
+      .flatMap((r, i) => {
+        const rawCode = String(r[_excelColIdx] ?? '').trim();
+        const name    = String(r[_excelNameIdx] ?? '').trim();
+        if (!rawCode) return [];
+        return rawCode.split(';').map(c => c.trim()).filter(c => c).map(code => ({ rowNum: i + 2, code, name }));
+      });
 
     if (excelRows.length === 0) {
       alert(`${_excelColLetter} სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.`);
@@ -3510,14 +3511,14 @@ async function handlePriceFile(file) {
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
 
     const excelRows = rows.slice(1)
-      .map((r, i) => ({
-        rowNum: i + 2,
-        code: String(r[colCode] ?? '').trim(),
-        excelName: String(r[colName] ?? '').trim(),
-        newPrice:    parseFloat(String(r[colPrice]    ?? '').replace(/,/g, '.')) || 0,
-        newDiscount: parseFloat(String(r[colDiscount] ?? '').replace(/,/g, '.')) || 0,
-      }))
-      .filter(r => r.code.length > 0);
+      .flatMap((r, i) => {
+        const rawCode   = String(r[colCode] ?? '').trim();
+        const excelName = String(r[colName] ?? '').trim();
+        const newPrice    = parseFloat(String(r[colPrice]    ?? '').replace(/,/g, '.')) || 0;
+        const newDiscount = parseFloat(String(r[colDiscount] ?? '').replace(/,/g, '.')) || 0;
+        if (!rawCode) return [];
+        return rawCode.split(';').map(c => c.trim()).filter(c => c).map(code => ({ rowNum: i + 2, code, excelName, newPrice, newDiscount }));
+      });
 
     if (excelRows.length === 0) {
       alert('B სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.');
