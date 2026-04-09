@@ -815,13 +815,13 @@
         </div>
       </div>
 
-      <div class="card" style="max-width:720px">
+      <div class="card" style="max-width:720px;padding:24px">
         <!-- Step 1: name input -->
         <div class="form-group" style="margin-bottom:16px">
           <label class="form-label">პროდუქტის დასახელება</label>
           <div style="display:flex;gap:8px">
-            <input class="form-input" id="bulkImageName" placeholder="მაგ: RA 350" style="flex:1" oninput="bulkImageReset()">
-            <button class="btn btn-primary" onclick="bulkImageSearch()" style="white-space:nowrap">ძებნა</button>
+            <input class="form-input" id="bulkImageName" placeholder="მაგ: RA 350" style="flex:1;min-width:0" oninput="bulkImageReset()">
+            <button class="btn btn-primary" onclick="bulkImageSearch()" style="white-space:nowrap;flex-shrink:0">ძებნა</button>
           </div>
           <div id="bulkImageMatchInfo" style="margin-top:8px;font-size:13px;color:var(--gray-mid)"></div>
         </div>
