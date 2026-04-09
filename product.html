@@ -475,7 +475,7 @@ function renderProduct() {
   let specsRows = [];
   if (specs.brand) specsRows.push(['ბრენდი', specs.brand]);
   if (type === 'tire') {
-    if (specs.width && specs.profile && specs.rim) specsRows.push(['ზომა', `${specs.width}/${specs.profile} ${specs.rim}`]);
+    if (specs.width && specs.rim) specsRows.push(['ზომა', specs.profile ? `${specs.width}/${specs.profile} ${specs.rim}` : `${specs.width}${specs.rim}`]);
     else {
       if (specs.width)   specsRows.push(['სიგანე', specs.width]);
       if (specs.profile) specsRows.push(['პროფილი', specs.profile]);

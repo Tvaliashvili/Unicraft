@@ -764,7 +764,7 @@ function getCardSpecs(p) {
   const rows = [];
   if (s.brand) rows.push(['ბრენდი', s.brand]);
   if (type === 'tire') {
-    if (s.width && s.profile && s.rim) rows.push(['ზომა', `${s.width}/${s.profile} ${s.rim}`]);
+    if (s.width && s.rim) rows.push(['ზომა', s.profile ? `${s.width}/${s.profile} ${s.rim}` : `${s.width}${s.rim}`]);
     if (s.alt_size) rows.push(['ალტ. ზომა', s.alt_size]);
     if (s.season) rows.push(['სეზონი', s.season]);
     rows.push(['ავტომობ. ტიპი', s.vehicle_type || 'მსუბუქი ავტომობილი']);

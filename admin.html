@@ -2546,7 +2546,7 @@ window.showProductInfo = function(id) {
   let rows = '';
   if (s.brand) rows += row('ბრენდი', s.brand);
   if (type === 'tire') {
-    if (s.width && s.profile && s.rim) rows += row('ზომა', `${s.width}/${s.profile} ${s.rim}${s.alt_size ? ' (' + s.alt_size + ')' : ''}`);
+    if (s.width && s.rim) rows += row('ზომა', `${s.profile ? s.width+'/'+s.profile+' '+s.rim : s.width+s.rim}${s.alt_size ? ' (' + s.alt_size + ')' : ''}`);
     if (s.season) rows += row('სეზონი', s.season);
   } else if (type === 'oil') {
     if (s.oil_type)    rows += row('ტიპი', s.oil_type);
@@ -3194,7 +3194,7 @@ window.invRowCode = function(i, code) {
   if (s.brand) parts.push(s.brand);
   if (match.name) parts.push(match.name);
   if (type === 'tire') {
-    if (s.width && s.profile && s.rim) parts.push(s.width + '/' + s.profile + ' ' + s.rim);
+    if (s.width && s.rim) parts.push(s.profile ? s.width + '/' + s.profile + ' ' + s.rim : s.width + s.rim);
     if (s.alt_size) parts.push(s.alt_size);
     if (s.season) parts.push(s.season);
   } else if (type === 'oil') {
