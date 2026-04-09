@@ -3692,6 +3692,46 @@ window.resetAllPrices = async function() {
   else { showToast('ყველა ფასი განულდა ✓', 'success'); _priceRows = []; renderPriceTable(); }
 };
 
+// ─── One-time migration: fix cargo rim sizes (R13C/R14C/R15C/R16C/R17C) ───
+// Runs once after login, then marks itself done in localStorage.
+async function _migrateCargoRims() {
+  const KEY = 'cargo_rim_fix_v1';
+  if (localStorage.getItem(KEY)) return; // already done
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return; // not logged in yet
+
+  const codeToRim = {"RA149301":"R15C","ROBO11":"R15C","1010200002455":"R16C","RA138901":"R16C","6941255816685":"R13C","RA19104":"R13C","RA33303":"R13C","RA33903":"R13C","LICE001":"R14C","6941255815374":"R14C","FICE003":"R14C","30015471":"R14C","30015475":"R14C","RA19204":"R14C","RA19403":"R14C","RA19703":"R14C","RA19503":"R14C","T9232-E":"R14C","T9272-E":"R14C","6941255812434":"R14C","N1208H":"R14C","6975313251767":"R15C","6941255815404":"R15C","30015152":"R15C","N8313H":"R15C","6941255816746":"R15C","6941255816739":"R15C","1010200002300":"R15C","N1213H":"R15C","6941255824413":"R15C","1010200002451":"R15C","RA7142301":"R15C","N2512H":"R15C","1010200002525":"R15C","6941255802336":"R15C","6973803702454":"R15C","N8302H":"R16C","30016451":"R16C","N8308H":"R16C","30016457":"R16C","N8312H":"R16C","N8311H":"R16C","RBICE002":"R16C","PHD118":"R16C","N1237H":"R16C","RA140101":"R16C","3ERM535F":"R16C","3ERM435F":"R16C","N1246H":"R16C","N2515H":"R16C","N2506H":"R16C","N2510H":"R16C","RA134001":"R16C","3ERM534F":"R16C","N2513H":"R16C","N1245H":"R16C","N1206H":"R16C","3ERM267F":"R16C","11134469":"R16C","6941255824536":"R16C","RA34801":"R17C","RA34901":"R17C"};
+  const codes = Object.keys(codeToRim);
+
+  // Fetch products with these codes (paginate just in case)
+  let products = [];
+  for (let i = 0; i < codes.length; i += 100) {
+    const batch = codes.slice(i, i + 100);
+    const { data, error } = await supabase.from('products').select('id, code, specs').in('code', batch);
+    if (!error && data) products = products.concat(data);
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const correctRim = codeToRim[String(p.code).trim()];
+    if (!correctRim) continue;
+    const currentRim = p.specs?.rim || '';
+    if (currentRim === correctRim) continue; // already correct
+    const newSpecs = { ...(p.specs || {}), rim: correctRim };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} პროდუქტის Cargo R ზომა გასწორდა`, 'success');
+}
+
+// Hook into auth state — run after login
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_IN') setTimeout(_migrateCargoRims, 1500);
+});
+
 </script>
 
 
