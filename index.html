@@ -924,11 +924,11 @@ function applyFilters() {
   let list = allProducts;
   if (activeCategory) list = list.filter(p => prodCat(p) === activeCategory);
   if (searchQ) list = list.filter(p =>
-    p.name?.toLowerCase().includes(searchQ) ||
-    p.description?.toLowerCase().includes(searchQ) ||
-    (p.code || '').toLowerCase().includes(searchQ) ||
-    (p.specs?.brand || '').toLowerCase().includes(searchQ) ||
-    (p.specs?.rim || '').toLowerCase().includes(searchQ)
+    normalizeSearch(p.name).includes(searchQ) ||
+    normalizeSearch(p.description).includes(searchQ) ||
+    normalizeSearch(p.code).includes(searchQ) ||
+    normalizeSearch(p.specs?.brand).includes(searchQ) ||
+    normalizeSearch(p.specs?.rim).includes(searchQ)
   );
   // When searching by text, skip spec filters so results aren't hidden by active rim/season/type filters
   if (!searchQ) {
@@ -1015,13 +1015,15 @@ document.addEventListener('click', function(e) {
   if (wrap && !wrap.contains(e.target)) closeCatDropdown();
 });
 
+const normalizeSearch = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
 window.filterProducts = function() {
-  searchQ = document.getElementById('searchInput').value.toLowerCase();
+  searchQ = normalizeSearch(document.getElementById('searchInput').value);
   applyFilters();
 };
 
 window.filterProductsMobile = function() {
-  searchQ = document.getElementById('searchInputMobile').value.toLowerCase();
+  searchQ = normalizeSearch(document.getElementById('searchInputMobile').value);
   const desktop = document.getElementById('searchInput');
   if (desktop) desktop.value = document.getElementById('searchInputMobile').value;
   applyFilters();
@@ -1124,7 +1126,7 @@ async function loadProducts() {
       // Shuffle for random display order on user side
       allProducts = allProducts.slice().sort(() => Math.random() - 0.5);
       buildSidebar();
-      renderProducts(allProducts);
+      applyFilters();
     } else {
       renderProducts([]);
     }
