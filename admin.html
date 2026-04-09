@@ -1230,6 +1230,7 @@ async function uploadProductImage(file) {
   if (!data.url) throw new Error('Drive upload error: ' + (data.error || JSON.stringify(data)));
   return data.url;
 }
+window.uploadProductImage = uploadProductImage;
 
 async function resizeImage(file, maxSize = 1024) {
   return new Promise(resolve => {
