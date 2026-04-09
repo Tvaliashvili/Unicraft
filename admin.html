@@ -136,6 +136,9 @@
       <div class="nav-item" onclick="showPage('price-update')">
         <span class="nav-icon">💰</span> ფასების განახლება
       </div>
+      <div class="nav-item" onclick="showPage('bulk-image')">
+        <span class="nav-icon">🖼</span> სურათების ჩასმა
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:white;margin-bottom:10px" id="adminEmail"></div>
@@ -807,6 +810,53 @@
 </div>
 
 <!-- Order Detail Modal -->
+
+    <!-- Bulk Image Page -->
+    <div class="page" id="page-bulk-image">
+      <div class="page-header">
+        <div>
+          <div class="page-title">სურათების ჩასმა</div>
+          <div class="page-subtitle">ჩაწერე სახელი · ატვირთე ფოტო · ყველა ამ სახელის პროდუქტს ჩაეხება</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:720px">
+        <!-- Step 1: name input -->
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">პროდუქტის დასახელება</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="bulkImageName" placeholder="მაგ: RA 350" style="flex:1" oninput="bulkImageReset()">
+            <button class="btn btn-primary" onclick="bulkImageSearch()" style="white-space:nowrap">ძებნა</button>
+          </div>
+          <div id="bulkImageMatchInfo" style="margin-top:8px;font-size:13px;color:var(--gray-mid)"></div>
+        </div>
+
+        <!-- Step 2: image drop zone (hidden until search done) -->
+        <div id="bulkImageUploadArea" style="display:none">
+          <div id="bulkImageDrop"
+            onclick="document.getElementById('bulkImageFile').click()"
+            ondragover="event.preventDefault();this.style.borderColor='var(--orange)';this.style.background='#fff8f5'"
+            ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+            ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';bulkImagePickFile(event.dataTransfer.files[0])"
+            style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:12px">
+            <input type="file" id="bulkImageFile" accept="image/*" style="display:none" onchange="bulkImagePickFile(this.files[0])">
+            <div id="bulkImagePreview" style="font-size:36px;margin-bottom:8px">📷</div>
+            <div style="font-size:13px;color:var(--gray-mid)">ფოტო ჩააგდე ან დააჭირე</div>
+          </div>
+
+          <button id="bulkImageApplyBtn" onclick="bulkImageApply()" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            სურათის მინიჭება
+          </button>
+        </div>
+
+        <!-- Matching products preview -->
+        <div id="bulkImageResults" style="display:none;margin-top:20px">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid);margin-bottom:10px">შესაბამისი პროდუქტები</div>
+          <div id="bulkImageList"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- Chat Page -->
     <div class="page" id="page-chat">
@@ -3694,6 +3744,108 @@ window.resetAllPrices = async function() {
   const { error } = await supabase.from('products').update({ price: null, old_price: null }).in('id', products.map(p => p.id));
   if (error) showToast('შეცდომა: ' + error.message, 'error');
   else { showToast('ყველა ფასი განულდა ✓', 'success'); _priceRows = []; renderPriceTable(); }
+};
+
+// ─── Bulk Image ───
+let _bulkImageMatches = [];
+let _bulkImageFile = null;
+
+window.bulkImageReset = function() {
+  _bulkImageMatches = [];
+  _bulkImageFile = null;
+  document.getElementById('bulkImageMatchInfo').textContent = '';
+  document.getElementById('bulkImageUploadArea').style.display = 'none';
+  document.getElementById('bulkImageResults').style.display = 'none';
+  document.getElementById('bulkImageApplyBtn').disabled = true;
+  const prev = document.getElementById('bulkImagePreview');
+  prev.innerHTML = ''; prev.textContent = '📷';
+};
+
+window.bulkImageSearch = async function() {
+  const name = document.getElementById('bulkImageName').value.trim();
+  if (!name) return;
+  bulkImageReset();
+  document.getElementById('bulkImageMatchInfo').textContent = 'მიმდინარეობს ძებნა...';
+
+  let all = [], from = 0;
+  while (true) {
+    const { data, error } = await supabase.from('products').select('id,code,name,image_url,specs')
+      .ilike('name', name).range(from, from + 999);
+    if (error || !data.length) break;
+    all = all.concat(data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+
+  _bulkImageMatches = all;
+  const info = document.getElementById('bulkImageMatchInfo');
+  if (!all.length) { info.textContent = 'პროდუქტი ვერ მოიძებნა.'; return; }
+  info.innerHTML = `<span style="color:var(--orange);font-weight:700">${all.length}</span> პროდუქტი მოიძებნა`;
+
+  // show list
+  const list = document.getElementById('bulkImageList');
+  list.innerHTML = all.map((p, i) => {
+    const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
+    const img = p.image_url ? `<img src="${p.image_url}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">` : `<div style="width:36px;height:36px;border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>`;
+    const size = [p.specs?.width, p.specs?.profile ? p.specs.profile : null, p.specs?.rim].filter(Boolean).join('/');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;${bg}">
+      ${img}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:11px;color:var(--gray-mid)">${p.code}${size ? ' · ' + size : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('bulkImageResults').style.display = 'block';
+  document.getElementById('bulkImageUploadArea').style.display = 'block';
+};
+
+window.bulkImagePickFile = function(file) {
+  if (!file) return;
+  _bulkImageFile = file;
+  const prev = document.getElementById('bulkImagePreview');
+  const url = URL.createObjectURL(file);
+  prev.innerHTML = `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid var(--orange)">`;
+  document.getElementById('bulkImageApplyBtn').disabled = false;
+};
+
+window.bulkImageApply = async function() {
+  if (!_bulkImageFile || !_bulkImageMatches.length) return;
+  const btn = document.getElementById('bulkImageApplyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Drive-ზე იტვირთება...';
+
+  try {
+    const imageUrl = await uploadProductImage(_bulkImageFile);
+
+    btn.textContent = `პროდუქტები განახლდება (0/${_bulkImageMatches.length})...`;
+    let done = 0;
+    for (const p of _bulkImageMatches) {
+      // delete old Drive file if exists
+      const oldMatch = (p.image_url || '').match(/\/d\/([^/?]+)/) || (p.image_url || '').match(/[?&]id=([^&]+)/);
+      if (oldMatch) {
+        fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+          method: 'DELETE',
+          headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileId: oldMatch[1] })
+        });
+      }
+      await supabase.from('products').update({ image_url: imageUrl }).eq('id', p.id);
+      done++;
+      btn.textContent = `განახლდება (${done}/${_bulkImageMatches.length})...`;
+    }
+
+    showToast(`✅ ${done} პროდუქტს სურათი მიენიჭა`, 'success');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> სურათის მინიჭება`;
+    btn.disabled = false;
+    // refresh list thumbnails
+    bulkImageSearch();
+  } catch(e) {
+    showToast('შეცდომა: ' + e.message, 'error');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> სურათის მინიჭება`;
+    btn.disabled = false;
+  }
 };
 
 // ─── One-time migration: fix cargo rim sizes (R13C/R14C/R15C/R16C/R17C) ───
