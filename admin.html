@@ -1244,6 +1244,7 @@ async function showApp(email) {
   _me.name = user?.user_metadata?.full_name || user?.user_metadata?.name || email.split('@')[0];
   initApp();
   setTimeout(_migrateCargoRims, 2000);
+  setTimeout(_addMissingCargoProducts, 3000);
 }
 
 // ─── Auth ───
@@ -3726,6 +3727,56 @@ async function _migrateCargoRims() {
 
   localStorage.setItem(KEY, '1');
   if (fixed > 0) showToast(`✅ ${fixed} პროდუქტის Cargo R ზომა გასწორდა`, 'success');
+}
+
+// ─── One-time migration: add 6 missing cargo products ───
+async function _addMissingCargoProducts() {
+  const KEY = 'cargo_add_v1';
+  if (localStorage.getItem(KEY)) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const toAdd = [
+    { code:'6941255816685', name:'RW501', size:'165R13C',   width:'165', profile:'',   rim:'R13C', season:'ზამთარი',        brand:'KAPSEN',     price:153, discount:130 },
+    { code:'RA19104',        name:'RA 350', size:'155R13C', width:'155', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:153, discount:130 },
+    { code:'RA33303',        name:'RA 350', size:'165R13C', width:'165', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:165, discount:140 },
+    { code:'RA33903',        name:'RA 350', size:'175R13C', width:'175', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:165, discount:140 },
+    { code:'RA34801',        name:'RA 350', size:'215/60R17C', width:'215', profile:'60', rim:'R17C', season:'ზაფხული M+S', brand:'ROADCRUZA',  price:230, discount:195 },
+    { code:'RA34901',        name:'RA 350', size:'235/60R17C', width:'235', profile:'60', rim:'R17C', season:'ზაფხული M+S', brand:'ROADCRUZA',  price:271, discount:230 },
+  ];
+
+  // Check which ones already exist
+  const { data: existing } = await supabase.from('products').select('code').in('code', toAdd.map(p => p.code));
+  const existCodes = new Set((existing || []).map(p => p.code));
+
+  let added = 0;
+  for (const p of toAdd) {
+    if (existCodes.has(p.code)) continue;
+    const specs = {
+      brand: p.brand,
+      width: p.width,
+      profile: p.profile,
+      rim: p.rim,
+      season: p.season,
+      vehicle_type: 'სატვირთო',
+      discount_price: p.discount,
+    };
+    const { error } = await supabase.from('products').insert({
+      code: p.code,
+      name: p.name,
+      product_type: 'tire',
+      price: p.price,
+      old_price: null,
+      unit: 'ც',
+      active: false,
+      specs,
+    });
+    if (!error) added++;
+  }
+
+  localStorage.setItem(KEY, '1');
+  if (added > 0) showToast(`✅ ${added} Cargo პროდუქტი დაემატა (inactive)`, 'success');
 }
 
 
