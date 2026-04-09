@@ -3358,16 +3358,19 @@ async function handleExcelFile(file) {
     // Strip duplicate suffix like (2),(3),... → base code
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
     const normName = s => String(s || '').trim().toLowerCase();
+    const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
 
     // Build site lookup: code|name → true (primary), code → count (fallback)
+    // Also split site product codes by ";" so "RA49703; RA749702" indexes each sub-code
     const siteCodeNameSet = new Set();
     const siteBaseCount = {};
     siteProducts.forEach(p => {
-      const code = String(p.code).trim();
-      const base = stripSuffix(code);
       const name = normName(p.name);
-      siteCodeNameSet.add(`${base}|${name}`);
-      siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
+      splitCodes(p.code).forEach(code => {
+        const base = stripSuffix(code);
+        siteCodeNameSet.add(`${base}|${name}`);
+        siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
+      });
     });
 
     // Count how many times each code appears in Excel
@@ -3385,16 +3388,16 @@ async function handleExcelFile(file) {
       return { ...r, status: matched ? 'uploaded' : 'missing' };
     });
 
-    // Add site-only rows
-    const siteBaseCount2 = {};
+    // Add site-only rows — a product is site_only if none of its sub-codes appear in Excel
+    const seenSiteOnly = new Set();
     siteProducts.forEach(p => {
-      const code = String(p.code).trim();
-      const base = stripSuffix(code);
-      const name = normName(p.name);
-      siteBaseCount2[base] = (siteBaseCount2[base] || 0) + 1;
-      const excelCount = excelBaseCount[base] || 0;
-      if (siteBaseCount2[base] > excelCount) {
-        _excelAllRows.push({ rowNum: '—', code, name: p.name || '', status: 'site_only' });
+      const rawCode = String(p.code).trim();
+      if (seenSiteOnly.has(rawCode)) return;
+      const subCodes = splitCodes(rawCode);
+      const anyInExcel = subCodes.some(code => (excelBaseCount[stripSuffix(code)] || 0) > 0);
+      if (!anyInExcel) {
+        seenSiteOnly.add(rawCode);
+        _excelAllRows.push({ rowNum: '—', code: rawCode, name: p.name || '', status: 'site_only' });
       }
     });
 
