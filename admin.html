@@ -1294,6 +1294,7 @@ async function showApp(email) {
   initApp();
   setTimeout(_migrateCargoRims, 2000);
   setTimeout(_addMissingCargoProducts, 3000);
+  setTimeout(_fixCargoProductsMeta, 3500);
   setTimeout(_migrateCargoVehicleType, 4000);
 }
 
@@ -3918,6 +3919,8 @@ async function _addMissingCargoProducts() {
       code: p.code,
       name: p.name,
       product_type: 'tire',
+      category: 'საბურავები',
+      country: '🇨🇳 ჩინეთი',
       price: p.price,
       old_price: null,
       unit: 'ც',
@@ -3929,6 +3932,28 @@ async function _addMissingCargoProducts() {
 
   localStorage.setItem(KEY, '1');
   if (added > 0) showToast(`✅ ${added} Cargo პროდუქტი დაემატა (inactive)`, 'success');
+}
+
+// ─── One-time fix: add missing category+country to the 6 manually seeded cargo products ───
+async function _fixCargoProductsMeta() {
+  const KEY = 'cargo_meta_fix_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const codes = ['6941255816685','RA19104','RA33303','RA33903','RA34801','RA34901'];
+  const { data } = await supabase.from('products').select('id,category,country').in('code', codes);
+  let fixed = 0;
+  for (const p of (data || [])) {
+    if (p.category && p.country) continue;
+    const { error } = await supabase.from('products').update({
+      category: 'საბურავები',
+      country: '🇨🇳 ჩინეთი',
+    }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} Cargo პროდუქტს კატეგორია/ქვეყანა დაემატა`, 'success');
 }
 
 // ─── One-time migration: set vehicle_type = 'მსუბუქი სატვირთო' for all cargo rim products ───
