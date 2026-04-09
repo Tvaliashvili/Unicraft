@@ -3572,6 +3572,7 @@ async function handlePriceFile(file) {
 
     // 3. Compare prices — track how many times each key has been seen to pick the right DB product
     const seenKeys = {};
+    const seenProductIds = new Set(); // ensure each DB product is only compared once (first row wins)
     _priceAllRows = excelRows.map(row => {
       // Match by code+name first; fall back to code-only
       const keyFull = `${row.code}|${normName(row.excelName)}`;
@@ -3589,6 +3590,15 @@ async function handlePriceFile(file) {
       const hasDuplicate = !matchedByName && (baseCodeCount[row.code] || 0) > 1;
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
+
+      // If this DB product already appeared earlier in the Excel, treat this row as 'same'
+      // (can't apply two different prices to the same product — first row wins)
+      if (seenProductIds.has(product.id)) {
+        const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
+        const currentDiscount = parseFloat(product.specs?.discount_price || 0);
+        return { ...row, status: 'same', product, currentRegular, currentDiscount, hasDuplicate };
+      }
+      seenProductIds.add(product.id);
 
       const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
       const currentDiscount = parseFloat(product.specs?.discount_price || 0);
