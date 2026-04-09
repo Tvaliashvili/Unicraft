@@ -620,6 +620,10 @@
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
               <input id="excelColCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
             </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">სახელის სვეტი</div>
+              <input id="excelColName" value="G" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
           </div>
         </div>
 
@@ -668,6 +672,7 @@
               <tr style="background:var(--gray-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid)">
                 <th style="padding:10px 14px;text-align:left">#</th>
                 <th style="padding:10px 14px;text-align:left">კოდი (<span id="excelColCodeLabel">B</span> სვეტი)</th>
+                <th style="padding:10px 14px;text-align:left">სახელი (<span id="excelColNameLabel">G</span> სვეტი)</th>
                 <th style="padding:10px 14px;text-align:left">სტატუსი</th>
               </tr>
             </thead>
@@ -713,6 +718,10 @@
             <div>
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
               <input id="colCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">სახელის სვეტი</div>
+              <input id="colName" value="G" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
             </div>
             <div>
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">ფასის სვეტი</div>
@@ -3247,74 +3256,90 @@ async function handleExcelFile(file) {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
 
-    // Resolve column index from UI input (default B)
+    // Resolve column indices from UI inputs (default B for code, G for name)
     const _excelColLetter = (document.getElementById('excelColCode')?.value || 'B').trim().toUpperCase();
+    const _excelNameLetter = (document.getElementById('excelColName')?.value || 'G').trim().toUpperCase();
     const _excelColToIdx = s => { let n = 0; for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64); return n - 1; };
     const _excelColIdx = _excelColToIdx(_excelColLetter);
+    const _excelNameIdx = _excelColToIdx(_excelNameLetter);
     const colLabel = document.getElementById('excelColCodeLabel');
     if (colLabel) colLabel.textContent = _excelColLetter;
+    const nameLabel = document.getElementById('excelColNameLabel');
+    if (nameLabel) nameLabel.textContent = _excelNameLetter;
 
-    // Extract selected column, skip header row, ignore empty cells
-    const excelCodes = rows
+    // Extract code + name columns, skip header row, ignore empty codes
+    const excelRows = rows
       .slice(1)
-      .map(r => String(r[_excelColIdx] ?? '').trim())
-      .filter(c => c.length > 0);
+      .map((r, i) => ({
+        rowNum: i + 2,
+        code: String(r[_excelColIdx] ?? '').trim(),
+        name: String(r[_excelNameIdx] ?? '').trim(),
+      }))
+      .filter(r => r.code.length > 0);
 
-    if (excelCodes.length === 0) {
+    if (excelRows.length === 0) {
       alert(`${_excelColLetter} სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.`);
       document.getElementById('excelLoading').style.display = 'none';
       return;
     }
 
-    // 2. Fetch product codes from Supabase filtered by selected category
+    // 2. Fetch product codes+names from Supabase filtered by selected category
     const _excelCat = document.getElementById('excelCategory')?.value || 'tire';
-    let siteCodes = new Set();
+    let siteProducts = [];
     let from = 0;
     const PAGE = 1000;
     while (true) {
       const { data, error } = await supabase
         .from('products')
-        .select('code')
+        .select('code, name')
         .eq('product_type', _excelCat)
         .range(from, from + PAGE - 1);
       if (error) throw error;
-      data.forEach(p => siteCodes.add(String(p.code).trim()));
+      siteProducts = siteProducts.concat(data);
       if (data.length < PAGE) break;
       from += PAGE;
     }
 
     // Strip duplicate suffix like (2),(3),... → base code
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
+    const normName = s => String(s || '').trim().toLowerCase();
 
-    // Count how many site products share each base code
+    // Build site lookup: code|name → true (primary), code → count (fallback)
+    const siteCodeNameSet = new Set();
     const siteBaseCount = {};
-    siteCodes.forEach(c => {
-      const base = stripSuffix(c);
+    siteProducts.forEach(p => {
+      const code = String(p.code).trim();
+      const base = stripSuffix(code);
+      const name = normName(p.name);
+      siteCodeNameSet.add(`${base}|${name}`);
       siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
     });
 
     // Count how many times each code appears in Excel
     const excelBaseCount = {};
-    excelCodes.forEach(c => {
-      excelBaseCount[c] = (excelBaseCount[c] || 0) + 1;
+    excelRows.forEach(r => {
+      excelBaseCount[r.code] = (excelBaseCount[r.code] || 0) + 1;
     });
 
-    // 3. Compare
-    const excelCodeSet = new Set(excelCodes);
-    _excelAllRows = excelCodes.map((code, i) => ({
-      rowNum: i + 2,
-      code,
-      status: (siteBaseCount[code] || 0) > 0 ? 'uploaded' : 'missing'
-    }));
+    // 3. Compare — match by code+name; fall back to code-only if name is absent
+    _excelAllRows = excelRows.map(r => {
+      const key = `${r.code}|${normName(r.name)}`;
+      const matchedByBoth = siteCodeNameSet.has(key);
+      const matchedByCode = (siteBaseCount[r.code] || 0) > 0;
+      const matched = r.name ? matchedByBoth : matchedByCode;
+      return { ...r, status: matched ? 'uploaded' : 'missing' };
+    });
 
-    // Add site-only rows — if site has MORE copies than Excel, show the extras
+    // Add site-only rows
     const siteBaseCount2 = {};
-    siteCodes.forEach(code => {
+    siteProducts.forEach(p => {
+      const code = String(p.code).trim();
       const base = stripSuffix(code);
+      const name = normName(p.name);
       siteBaseCount2[base] = (siteBaseCount2[base] || 0) + 1;
       const excelCount = excelBaseCount[base] || 0;
       if (siteBaseCount2[base] > excelCount) {
-        _excelAllRows.push({ rowNum: '—', code, status: 'site_only' });
+        _excelAllRows.push({ rowNum: '—', code, name: p.name || '', status: 'site_only' });
       }
     });
 
@@ -3381,6 +3406,7 @@ function renderExcelTable() {
     return `<tr style="${bg}">
       <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
       <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}</td>
+      <td style="padding:9px 14px;font-size:13px;color:var(--dark)">${r.name || '—'}</td>
       <td style="padding:9px 14px">${badge}</td>
     </tr>`;
   }).join('');
@@ -3390,6 +3416,7 @@ function exportExcelResults() {
   if (!_excelAllRows.length) return;
   const exportData = _excelAllRows.map(r => ({
     'კოდი': r.code,
+    'სახელი': r.name || '',
     'სტატუსი': r.status === 'uploaded' ? 'ატვირთულია' : r.status === 'missing' ? 'არ არის საიტზე' : 'საიტზეა, ექსელში არ არის'
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
@@ -3420,6 +3447,7 @@ async function handlePriceFile(file) {
       return n - 1;
     };
     const colCode     = colLetterToIndex((document.getElementById('colCode')?.value     || 'B'));
+    const colName     = colLetterToIndex((document.getElementById('colName')?.value     || 'G'));
     const colPrice    = colLetterToIndex((document.getElementById('colPrice')?.value    || 'AJ'));
     const colDiscount = colLetterToIndex((document.getElementById('colDiscount')?.value || 'AI'));
 
@@ -3432,6 +3460,7 @@ async function handlePriceFile(file) {
       .map((r, i) => ({
         rowNum: i + 2,
         code: String(r[colCode] ?? '').trim(),
+        excelName: String(r[colName] ?? '').trim(),
         newPrice:    parseFloat(String(r[colPrice]    ?? '').replace(/,/g, '.')) || 0,
         newDiscount: parseFloat(String(r[colDiscount] ?? '').replace(/,/g, '.')) || 0,
       }))
@@ -3460,13 +3489,19 @@ async function handlePriceFile(file) {
       from += PAGE;
     }
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
-    const productMap = {};
-    // First pass: exact codes
-    products.forEach(p => { productMap[String(p.code).trim()] = p; });
-    // Second pass: base codes (without suffix) — only if not already mapped
+    const normName = s => String(s || '').trim().toLowerCase();
+
+    // Build lookup maps
+    const productByCodeName = {}; // "code|name" → product (primary — disambiguates duplicates)
+    const productByCode = {};     // "code" → product (fallback when no name)
     products.forEach(p => {
-      const base = stripSuffix(String(p.code).trim());
-      if (!productMap[base]) productMap[base] = p;
+      const code = String(p.code).trim();
+      const base = stripSuffix(code);
+      const key = `${base}|${normName(p.name)}`;
+      productByCodeName[key] = p;
+      // For code-only fallback: store exact code, then base code (don't overwrite)
+      if (!productByCode[code]) productByCode[code] = p;
+      if (!productByCode[base]) productByCode[base] = p;
     });
 
     // Build base-code → count map to detect duplicates
@@ -3478,8 +3513,12 @@ async function handlePriceFile(file) {
 
     // 3. Compare prices
     _priceAllRows = excelRows.map(row => {
-      const product = productMap[row.code];
-      const hasDuplicate = (baseCodeCount[row.code] || 0) > 1;
+      // Match by code+name first; fall back to code-only
+      const keyFull = `${row.code}|${normName(row.excelName)}`;
+      const matchedByName = !!(row.excelName && productByCodeName[keyFull]);
+      const product = matchedByName ? productByCodeName[keyFull] : productByCode[row.code];
+      // Show duplicate warning only when matched by code-only and there are multiple products with this code
+      const hasDuplicate = !matchedByName && (baseCodeCount[row.code] || 0) > 1;
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
 
