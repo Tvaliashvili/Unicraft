@@ -4279,11 +4279,6 @@ async function cgRender(p) {
   ctx.lineTo(cx+cw,cy+imgH); ctx.lineTo(cx,cy+imgH); ctx.lineTo(cx,cy+cr); ctx.arcTo(cx,cy,cx+cr,cy,cr);
   ctx.closePath(); ctx.fillStyle='#F5F1EB'; ctx.fill(); ctx.restore();
 
-  // orange top strip
-  ctx.save(); ctx.beginPath();
-  ctx.moveTo(cx+cr,cy); ctx.lineTo(cx+cw-cr,cy); ctx.arcTo(cx+cw,cy,cx+cw,cy+cr,cr);
-  ctx.lineTo(cx+cw,cy+10); ctx.lineTo(cx,cy+10); ctx.lineTo(cx,cy+cr); ctx.arcTo(cx,cy,cx+cr,cy,cr);
-  ctx.closePath(); ctx.fillStyle='#E8541A'; ctx.fill(); ctx.restore();
 
   // product image
   const imgPad = 44;
@@ -4354,10 +4349,11 @@ async function cgRender(p) {
   if (p.price) {
     ctx.font='bold 52px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
     const prStr = parseFloat(p.price).toFixed(2)+' ₾';
+    const prWidth = ctx.measureText(prStr).width;
     ctx.fillText(prStr, tx, ty);
     if (p.unit) {
-      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-      ctx.fillText('/ '+(p.unit==='ც'?'ცალი':p.unit), tx+ctx.measureText(prStr).width+10, ty+14);
+      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#6B7280';
+      ctx.fillText('/ '+(p.unit==='ც'?'ცალი':p.unit), tx+prWidth+10, ty+20);
     }
   }
 }
