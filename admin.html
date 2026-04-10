@@ -921,6 +921,35 @@
       </div>
     </div>
 
+    <!-- Card Generator Page -->
+    <div class="page" id="page-card-gen">
+      <div class="page-header">
+        <div class="page-title">ბარათის გენერატორი</div>
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:280px;max-width:420px">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><span class="card-title">პროდუქტის ძიება</span></div>
+            <div style="padding:16px 20px;position:relative">
+              <input class="form-input" id="cgSearchInput" placeholder="კოდი ან სახელი..." oninput="cgSearch(this.value)" autocomplete="off" style="margin-bottom:0">
+              <div id="cgSearchResults" style="display:none;position:absolute;left:20px;right:20px;top:calc(100% - 8px);background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:50;overflow:hidden;max-height:220px;overflow-y:auto"></div>
+            </div>
+          </div>
+          <div id="cgSelectedInfo" style="display:none" class="card">
+            <div style="padding:14px 18px;font-size:13px;color:var(--gray-mid)">არჩეული: <span id="cgSelectedName" style="font-weight:700;color:var(--dark)"></span></div>
+            <div style="padding:0 18px 14px">
+              <button class="btn" id="cgDownloadBtn" onclick="cgDownload()" style="width:100%">⬇ PNG გადმოწერა</button>
+            </div>
+          </div>
+        </div>
+        <div id="cgPreviewWrap" style="display:none;flex-shrink:0">
+          <div class="card" style="padding:20px;display:inline-block">
+            <canvas id="cgCanvas" style="display:block;border-radius:18px;box-shadow:0 4px 28px rgba(0,0,0,0.14)"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -947,35 +976,6 @@
       <button onclick="closeInfoModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray-mid);line-height:1;padding:0 4px">&times;</button>
     </div>
     <div style="padding:20px 24px;overflow-y:auto;font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--gray-dark)" id="infoModalDesc"></div>
-  </div>
-</div>
-
-<!-- Card Generator Page -->
-<div class="page" id="page-card-gen">
-  <div class="page-header">
-    <div class="page-title">ბარათის გენერატორი</div>
-  </div>
-  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
-    <div style="flex:1;min-width:280px;max-width:420px">
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header"><span class="card-title">პროდუქტის ძიება</span></div>
-        <div style="padding:16px 20px;position:relative">
-          <input class="form-input" id="cgSearchInput" placeholder="კოდი ან სახელი..." oninput="cgSearch(this.value)" autocomplete="off" style="margin-bottom:0">
-          <div id="cgSearchResults" style="display:none;position:absolute;left:20px;right:20px;top:calc(100% - 8px);background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:50;overflow:hidden;max-height:220px;overflow-y:auto"></div>
-        </div>
-      </div>
-      <div id="cgSelectedInfo" style="display:none" class="card">
-        <div style="padding:14px 18px;font-size:13px;color:var(--gray-mid)">არჩეული: <span id="cgSelectedName" style="font-weight:700;color:var(--dark)"></span></div>
-        <div style="padding:0 18px 14px;display:flex;gap:8px">
-          <button class="btn" id="cgDownloadBtn" onclick="cgDownload()" style="flex:1">⬇ PNG გადმოწერა</button>
-        </div>
-      </div>
-    </div>
-    <div id="cgPreviewWrap" style="display:none;flex-shrink:0">
-      <div class="card" style="padding:20px;display:inline-block">
-        <canvas id="cgCanvas" style="display:block;border-radius:18px;box-shadow:0 4px 28px rgba(0,0,0,0.14)"></canvas>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -1379,7 +1379,7 @@ window.showPage = function(name) {
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
   });
-  if (name === 'products') loadProductsList();
+  if (name === 'products' || name === 'card-gen') loadProductsList();
   if (name === 'add-product') {
     loadCategories();
   }
