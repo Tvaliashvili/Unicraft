@@ -4271,6 +4271,8 @@ async function cgRender(p) {
   // card shadow + body
   ctx.save(); ctx.shadowColor='rgba(0,0,0,0.18)'; ctx.shadowBlur=50; ctx.shadowOffsetY=10;
   rr(cx,cy,cw,ch,cr); ctx.fillStyle='white'; ctx.fill(); ctx.restore();
+  // card border
+  rr(cx,cy,cw,ch,cr); ctx.strokeStyle='#1A1714'; ctx.lineWidth=2; ctx.stroke();
 
   // image area (cream, rounded top only)
   const imgH = 400;
