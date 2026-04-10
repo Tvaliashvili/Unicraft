@@ -3401,8 +3401,8 @@ async function handleExcelFile(file) {
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
     const normName = s => String(s || '').trim().toLowerCase();
     const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
-    // Normalize code for comparison: trim, uppercase, collapse inner spaces
-    const normCode = c => String(c || '').trim().toUpperCase().replace(/\s+/g, '');
+    // Normalize code for comparison: keep only alphanumeric chars, uppercase
+    const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     // Build site lookup: code|name → true (primary), code → count (fallback)
     // Also split site product codes by ";" so "RA49703; RA749702" indexes each sub-code
