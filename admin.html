@@ -1302,6 +1302,7 @@ async function showApp(email) {
   setTimeout(_migrateCargoVehicleType, 4000);
   setTimeout(_fixR13CProfile, 4500);
   setTimeout(_fixSeasonComma, 5000);
+  setTimeout(_fixLTVehicleType, 5500);
 }
 
 // ─── Auth ───
@@ -4110,6 +4111,36 @@ async function _fixSeasonComma() {
   }
   localStorage.setItem(KEY, '1');
   if (total > 0) showToast(`✅ ${total} პროდუქტის სეზონი გასწორდა`, 'success');
+}
+
+// ─── One-time migration: set vehicle_type = 'ჯიპი/პიკაპი' for tires with LT width ───
+async function _fixLTVehicleType() {
+  const KEY = 'lt_vehicle_type_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  let products = [], from = 0;
+  while (true) {
+    const { data, error } = await supabase.from('products')
+      .select('id, specs').eq('product_type', 'tire').range(from, from + 999);
+    if (error || !data.length) break;
+    products = products.concat(data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const width = (p.specs?.width || '').trim();
+    if (!width.startsWith('LT')) continue;
+    if (p.specs?.vehicle_type === 'ჯიპი/პიკაპი') continue;
+    const newSpecs = { ...(p.specs || {}), vehicle_type: 'ჯიპი/პიკაპი' };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} LT პროდუქტს მიენიჭა "ჯიპი/პიკაპი"`, 'success');
 }
 
 
