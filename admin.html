@@ -933,11 +933,11 @@
             <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
               <div>
                 <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">კოდი</label>
-                <input class="form-input" id="cgCodeInput" placeholder="მაგ. TR12345..." autocomplete="off" style="margin-bottom:0">
+                <input class="form-input" id="cgCodeInput" placeholder="მაგ. TR12345..." autocomplete="off" style="margin-bottom:0" onkeydown="if(event.key==='Enter')cgSearch()">
               </div>
               <div>
                 <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">სახელი</label>
-                <input class="form-input" id="cgNameInput" placeholder="მაგ. Bridgestone..." autocomplete="off" style="margin-bottom:0">
+                <input class="form-input" id="cgNameInput" placeholder="მაგ. Bridgestone..." autocomplete="off" style="margin-bottom:0" onkeydown="if(event.key==='Enter')cgSearch()">
               </div>
               <button class="btn btn-secondary" onclick="cgSearch()" style="width:100%">🔍 ძიება</button>
               <div id="cgSearchResults" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.10);overflow:hidden;max-height:260px;overflow-y:auto"></div>
@@ -4186,11 +4186,17 @@ async function _fixLTVehicleType() {
 // ─── Card Generator ───
 let _cgProduct = null;
 
-window.cgSearch = function() {
+window.cgSearch = async function() {
   const qCode = (document.getElementById('cgCodeInput').value || '').trim().toLowerCase();
   const qName = (document.getElementById('cgNameInput').value || '').trim().toLowerCase();
   const el = document.getElementById('cgSearchResults');
   if (!qCode && !qName) { el.style.display = 'none'; return; }
+  // If cache not yet loaded, load it first
+  if (Object.keys(productCache).length === 0) {
+    el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--gray-mid)">⏳ იტვირთება...</div>';
+    el.style.display = 'block';
+    await loadProductsList();
+  }
   const hits = Object.values(productCache).filter(p => {
     const codeOk = !qCode || (p.code||'').toLowerCase().includes(qCode);
     const nameOk = !qName || (p.name||'').toLowerCase().includes(qName);
