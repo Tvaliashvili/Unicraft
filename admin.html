@@ -4341,7 +4341,7 @@ async function cgRender(p) {
   } else if (p.product_type==='filter') {
     row('ბრენდი', specs.brand); row('ფილტრის ტიპი', specs.filter_type); row('ავტ. მარკა', specs.car_make);
   }
-  row('ქვეყანა', p.country ? p.country.split(' ').slice(1).join(' ') : '');
+  row('ქვეყანა', p.country || '');
 
   ty+=4;
   ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=26;
