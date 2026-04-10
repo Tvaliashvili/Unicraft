@@ -137,6 +137,9 @@
       <div class="nav-item" onclick="showPage('bulk-image')">
         <span class="nav-icon">🖼</span> სურათების ჩასმა
       </div>
+      <div class="nav-item" onclick="showPage('card-gen')">
+        <span class="nav-icon">🃏</span> ბარათის გენერატორი
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:white;margin-bottom:10px" id="adminEmail"></div>
@@ -944,6 +947,35 @@
       <button onclick="closeInfoModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray-mid);line-height:1;padding:0 4px">&times;</button>
     </div>
     <div style="padding:20px 24px;overflow-y:auto;font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--gray-dark)" id="infoModalDesc"></div>
+  </div>
+</div>
+
+<!-- Card Generator Page -->
+<div class="page" id="page-card-gen">
+  <div class="page-header">
+    <div class="page-title">ბარათის გენერატორი</div>
+  </div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+    <div style="flex:1;min-width:280px;max-width:420px">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><span class="card-title">პროდუქტის ძიება</span></div>
+        <div style="padding:16px 20px;position:relative">
+          <input class="form-input" id="cgSearchInput" placeholder="კოდი ან სახელი..." oninput="cgSearch(this.value)" autocomplete="off" style="margin-bottom:0">
+          <div id="cgSearchResults" style="display:none;position:absolute;left:20px;right:20px;top:calc(100% - 8px);background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:50;overflow:hidden;max-height:220px;overflow-y:auto"></div>
+        </div>
+      </div>
+      <div id="cgSelectedInfo" style="display:none" class="card">
+        <div style="padding:14px 18px;font-size:13px;color:var(--gray-mid)">არჩეული: <span id="cgSelectedName" style="font-weight:700;color:var(--dark)"></span></div>
+        <div style="padding:0 18px 14px;display:flex;gap:8px">
+          <button class="btn" id="cgDownloadBtn" onclick="cgDownload()" style="flex:1">⬇ PNG გადმოწერა</button>
+        </div>
+      </div>
+    </div>
+    <div id="cgPreviewWrap" style="display:none;flex-shrink:0">
+      <div class="card" style="padding:20px;display:inline-block">
+        <canvas id="cgCanvas" style="display:block;border-radius:18px;box-shadow:0 4px 28px rgba(0,0,0,0.14)"></canvas>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -4135,6 +4167,169 @@ async function _fixLTVehicleType() {
   }
   localStorage.setItem(KEY, '1');
   if (fixed > 0) showToast(`✅ ${fixed} LT პროდუქტს მიენიჭა "ჯიპი/პიკაპი"`, 'success');
+}
+
+// ─── Card Generator ───
+let _cgProduct = null;
+
+window.cgSearch = function(q) {
+  q = q.trim().toLowerCase();
+  const el = document.getElementById('cgSearchResults');
+  if (!q) { el.style.display = 'none'; return; }
+  const hits = Object.values(productCache).filter(p =>
+    (p.code||'').toLowerCase().includes(q) || (p.name||'').toLowerCase().includes(q)
+  ).slice(0, 10);
+  if (!hits.length) {
+    el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--gray-mid)">ვერ მოიძებნა</div>';
+  } else {
+    el.innerHTML = hits.map(p => `
+      <div onclick="cgSelect('${p.id}')" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);font-size:13px"
+        onmouseenter="this.style.background='#fdf5f1'" onmouseleave="this.style.background=''">
+        ${p.image_url ? `<img src="${p.image_url}" style="width:34px;height:34px;object-fit:contain;border-radius:4px;flex-shrink:0">` : `<span style="font-size:22px;flex-shrink:0">📦</span>`}
+        <div><div style="font-weight:600">${p.name}</div><div style="color:var(--gray-mid);font-size:11px">${p.code||''}</div></div>
+      </div>`).join('');
+  }
+  el.style.display = 'block';
+};
+
+window.cgSelect = async function(id) {
+  const p = productCache[id];
+  if (!p) return;
+  _cgProduct = p;
+  document.getElementById('cgSearchInput').value = p.name;
+  document.getElementById('cgSearchResults').style.display = 'none';
+  document.getElementById('cgSelectedName').textContent = p.name;
+  document.getElementById('cgSelectedInfo').style.display = 'block';
+  document.getElementById('cgPreviewWrap').style.display = 'block';
+  document.getElementById('cgDownloadBtn').textContent = '⏳ გენერირება...';
+  document.getElementById('cgDownloadBtn').disabled = true;
+  await cgRender(p);
+  document.getElementById('cgDownloadBtn').textContent = '⬇ PNG გადმოწერა';
+  document.getElementById('cgDownloadBtn').disabled = false;
+};
+
+window.cgDownload = function() {
+  if (!_cgProduct) return;
+  const a = document.createElement('a');
+  a.href = document.getElementById('cgCanvas').toDataURL('image/png');
+  a.download = (_cgProduct.name || 'product').replace(/[^\w\s]/g,'') + '_card.png';
+  a.click();
+};
+
+async function cgRender(p) {
+  await document.fonts.ready;
+  const W = 760, H = 1060;
+  const canvas = document.getElementById('cgCanvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = '380px'; canvas.style.height = '530px';
+  const ctx = canvas.getContext('2d');
+  const specs = p.specs || {};
+  const cx = 28, cy = 28, cw = W-56, ch = H-56, cr = 32;
+
+  function rr(x,y,w,h,r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();
+  }
+
+  // outer bg
+  ctx.fillStyle = '#EDE8E0'; ctx.fillRect(0,0,W,H);
+
+  // card shadow + body
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,0.18)'; ctx.shadowBlur=50; ctx.shadowOffsetY=10;
+  rr(cx,cy,cw,ch,cr); ctx.fillStyle='white'; ctx.fill(); ctx.restore();
+
+  // image area (cream, rounded top only)
+  const imgH = 400;
+  ctx.save(); ctx.beginPath();
+  ctx.moveTo(cx+cr,cy); ctx.lineTo(cx+cw-cr,cy); ctx.arcTo(cx+cw,cy,cx+cw,cy+cr,cr);
+  ctx.lineTo(cx+cw,cy+imgH); ctx.lineTo(cx,cy+imgH); ctx.lineTo(cx,cy+cr); ctx.arcTo(cx,cy,cx+cr,cy,cr);
+  ctx.closePath(); ctx.fillStyle='#F5F1EB'; ctx.fill(); ctx.restore();
+
+  // orange top strip
+  ctx.save(); ctx.beginPath();
+  ctx.moveTo(cx+cr,cy); ctx.lineTo(cx+cw-cr,cy); ctx.arcTo(cx+cw,cy,cx+cw,cy+cr,cr);
+  ctx.lineTo(cx+cw,cy+10); ctx.lineTo(cx,cy+10); ctx.lineTo(cx,cy+cr); ctx.arcTo(cx,cy,cx+cr,cy,cr);
+  ctx.closePath(); ctx.fillStyle='#E8541A'; ctx.fill(); ctx.restore();
+
+  // product image
+  const imgPad = 44;
+  if (p.image_url) {
+    try {
+      const img = await new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=p.image_url; });
+      const sc = Math.min((cw-imgPad*2)/img.width, (imgH-imgPad*2)/img.height);
+      const dw=img.width*sc, dh=img.height*sc;
+      ctx.drawImage(img, cx+(cw-dw)/2, cy+(imgH-dh)/2, dw, dh);
+    } catch(e) {
+      ctx.font='120px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('🛞', cx+cw/2, cy+imgH/2);
+    }
+  } else {
+    ctx.font='120px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('📦', cx+cw/2, cy+imgH/2);
+  }
+
+  // vehicle + season icons (bottom-right of image)
+  const vt = specs.vehicle_type || 'მსუბუქი ავტომობილი';
+  const vEmoji = vt==='ჯიპი/პიკაპი'?'🚙': vt==='სატვირთო'?'🚛': vt==='მსუბუქი სატვირთო'?'🚐':'🚗';
+  const season = specs.season || '';
+  const sEmoji = season.includes('ზამთ')?'❄️': (season.includes('ზაფხ')||season.includes('M+S'))?'☀️': (/4|ყველ/i.test(season)?'⛅':'');
+  ctx.font='54px serif'; ctx.textAlign='right'; ctx.textBaseline='bottom';
+  const ir = cx+cw-18, ib = cy+imgH-14;
+  if (sEmoji) { ctx.fillText(sEmoji, ir, ib); ctx.fillText(vEmoji, ir-62, ib); }
+  else         { ctx.fillText(vEmoji, ir, ib); }
+
+  // text area
+  const tx = cx+40; let ty = cy+imgH+34;
+  ctx.textAlign='left'; ctx.textBaseline='top';
+
+  const catMap = {tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები'};
+  ctx.font='bold 26px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
+  ctx.fillText((catMap[p.product_type]||p.category||'').toUpperCase(), tx, ty); ty+=38;
+
+  ctx.font='bold 36px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+  ctx.fillText(p.name||'', tx, ty); ty+=52;
+
+  ctx.strokeStyle='#E5E7EB'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=20;
+
+  const row = (lbl,val) => {
+    if (!val) return;
+    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#6B7280'; ctx.fillText(lbl+':', tx, ty);
+    ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(String(val), tx+210, ty);
+    ty+=40;
+  };
+
+  if (p.product_type==='tire') {
+    const w=specs.width||'', pr=specs.profile||'', rim=specs.rim||'';
+    row('ბრენდი', specs.brand);
+    row('ზომა', pr ? `${w}/${pr} ${rim}` : `${w} ${rim}`.trim());
+    row('სეზონი', season);
+    row('ავტომობ. ტიპი', vt);
+  } else if (p.product_type==='oil') {
+    row('ბრენდი', specs.brand); row('ტიპი', specs.oil_type);
+    row('სიბლანტე', specs.viscosity); row('მოცულობა', specs.volume);
+    row('დანიშნულება', specs.application);
+  } else if (p.product_type==='filter') {
+    row('ბრენდი', specs.brand); row('ფილტრის ტიპი', specs.filter_type); row('ავტ. მარკა', specs.car_make);
+  }
+  row('ქვეყანა', p.country ? p.country.split(' ').slice(1).join(' ') : '');
+
+  ty+=4;
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=26;
+
+  if (p.price) {
+    ctx.font='bold 52px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
+    const prStr = parseFloat(p.price).toFixed(2)+' ₾';
+    ctx.fillText(prStr, tx, ty);
+    if (p.unit) {
+      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+      ctx.fillText('/ '+(p.unit==='ც'?'ცალი':p.unit), tx+ctx.measureText(prStr).width+10, ty+14);
+    }
+  }
 }
 
 
