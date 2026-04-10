@@ -930,16 +930,17 @@
         <div style="flex:1;min-width:280px;max-width:420px">
           <div class="card" style="margin-bottom:16px">
             <div class="card-header"><span class="card-title">პროდუქტის ძიება</span></div>
-            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;position:relative">
-              <div style="position:relative">
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+              <div>
                 <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">კოდი</label>
-                <input class="form-input" id="cgCodeInput" placeholder="მაგ. TR12345..." oninput="cgSearch()" autocomplete="off" style="margin-bottom:0">
+                <input class="form-input" id="cgCodeInput" placeholder="მაგ. TR12345..." autocomplete="off" style="margin-bottom:0">
               </div>
-              <div style="position:relative">
+              <div>
                 <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">სახელი</label>
-                <input class="form-input" id="cgNameInput" placeholder="მაგ. Bridgestone..." oninput="cgSearch()" autocomplete="off" style="margin-bottom:0">
+                <input class="form-input" id="cgNameInput" placeholder="მაგ. Bridgestone..." autocomplete="off" style="margin-bottom:0">
               </div>
-              <div id="cgSearchResults" style="display:none;position:absolute;left:20px;right:20px;bottom:0;transform:translateY(100%);background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:50;overflow:hidden;max-height:220px;overflow-y:auto"></div>
+              <button class="btn btn-secondary" onclick="cgSearch()" style="width:100%">🔍 ძიება</button>
+              <div id="cgSearchResults" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.10);overflow:hidden;max-height:260px;overflow-y:auto"></div>
             </div>
           </div>
           <div id="cgSelectedInfo" style="display:none" class="card">
