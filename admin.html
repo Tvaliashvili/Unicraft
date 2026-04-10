@@ -3401,6 +3401,8 @@ async function handleExcelFile(file) {
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
     const normName = s => String(s || '').trim().toLowerCase();
     const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
+    // Normalize code for comparison: trim, uppercase, collapse inner spaces
+    const normCode = c => String(c || '').trim().toUpperCase().replace(/\s+/g, '');
 
     // Build site lookup: code|name → true (primary), code → count (fallback)
     // Also split site product codes by ";" so "RA49703; RA749702" indexes each sub-code
@@ -3409,23 +3411,25 @@ async function handleExcelFile(file) {
     siteProducts.forEach(p => {
       const name = normName(p.name);
       splitCodes(p.code).forEach(code => {
-        const base = stripSuffix(code);
+        const base = normCode(stripSuffix(code));
         siteCodeNameSet.add(`${base}|${name}`);
         siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
       });
     });
 
-    // Count how many times each code appears in Excel
+    // Count how many times each code appears in Excel (normalized)
     const excelBaseCount = {};
     excelRows.forEach(r => {
-      excelBaseCount[r.code] = (excelBaseCount[r.code] || 0) + 1;
+      const nc = normCode(r.code);
+      excelBaseCount[nc] = (excelBaseCount[nc] || 0) + 1;
     });
 
     // 3. Compare — match by code+name; fall back to code-only if name is absent
     _excelAllRows = excelRows.map(r => {
-      const key = `${r.code}|${normName(r.name)}`;
+      const nc  = normCode(r.code);
+      const key = `${nc}|${normName(r.name)}`;
       const matchedByBoth = siteCodeNameSet.has(key);
-      const matchedByCode = (siteBaseCount[r.code] || 0) > 0;
+      const matchedByCode = (siteBaseCount[nc] || 0) > 0;
       const matched = r.name ? matchedByBoth : matchedByCode;
       return { ...r, status: matched ? 'uploaded' : 'missing' };
     });
@@ -3436,7 +3440,7 @@ async function handleExcelFile(file) {
       const rawCode = String(p.code).trim();
       if (seenSiteOnly.has(rawCode)) return;
       const subCodes = splitCodes(rawCode);
-      const anyInExcel = subCodes.some(code => (excelBaseCount[stripSuffix(code)] || 0) > 0);
+      const anyInExcel = subCodes.some(code => (excelBaseCount[normCode(stripSuffix(code))] || 0) > 0);
       if (!anyInExcel) {
         seenSiteOnly.add(rawCode);
         _excelAllRows.push({ rowNum: '—', code: rawCode, name: p.name || '', status: 'site_only' });
