@@ -868,7 +868,7 @@ function renderPage() {
         <div class="pt-2 border-t border-dark">
           ${p.price
             ? `<div class="flex items-baseline gap-2 flex-wrap">
-                ${p.oldPrice ? `<span class="text-[11px] text-gray-400 line-through">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>` : ''}
+                ${p.oldPrice ? `<span class="text-[11px] text-dark line-through">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>` : ''}
                 <span class="text-[14px] font-bold text-orange">${parseFloat(p.price).toFixed(2)} <span class="text-[17px]">₾</span>${p.unit ? `<span class="text-[11px] font-bold text-dark ml-0.5">/ ცალი</span>` : ''}</span>
               </div>`
             : `<div class="text-[14px] text-dark italic">ფასი დააზუსტეთ დილერთან</div>`}
