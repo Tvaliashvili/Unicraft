@@ -4299,12 +4299,12 @@ async function cgRender(p) {
     ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('📦', cx+cw/2, cy+imgH/2);
   }
 
-  // discount badge (top-left of image area)
+  // discount badge (top-right of image area)
   if (p.old_price) {
     const badgeText = 'ფასდაკლება';
     ctx.font = 'bold 26px "Noto Sans Georgian",sans-serif';
     const bw = ctx.measureText(badgeText).width + 32;
-    const bh = 44, bx = cx + 20, by = cy + 20, br = 10;
+    const bh = 44, bx = cx + cw - 20 - bw, by = cy + 20, br = 10;
     ctx.save();
     ctx.fillStyle = '#E8541A';
     ctx.beginPath();
