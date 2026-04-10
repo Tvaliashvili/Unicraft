@@ -4318,12 +4318,9 @@ async function cgRender(p) {
   ctx.font='bold 36px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
   ctx.fillText(p.name||'', tx, ty); ty+=52;
 
-  ctx.strokeStyle='#E5E7EB'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=20;
-
   const row = (lbl,val) => {
     if (!val) return;
-    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#6B7280'; ctx.fillText(lbl+':', tx, ty);
+    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(lbl+':', tx, ty);
     ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(String(val), tx+210, ty);
     ty+=40;
   };
@@ -4349,12 +4346,12 @@ async function cgRender(p) {
   if (p.price) {
     // If discount active: show old price crossed out above, then discounted price
     if (p.old_price) {
-      ctx.font='28px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#9CA3AF';
+      ctx.font='28px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
       const oldStr = parseFloat(p.old_price).toFixed(2)+' ₾';
       const oldWidth = ctx.measureText(oldStr).width;
       ctx.fillText(oldStr, tx, ty);
       // strikethrough line
-      ctx.save(); ctx.strokeStyle='#9CA3AF'; ctx.lineWidth=2;
+      ctx.save(); ctx.strokeStyle='#1A1714'; ctx.lineWidth=2;
       const oldMetrics = ctx.measureText(oldStr);
       const strikeY = ty + 14;
       ctx.beginPath(); ctx.moveTo(tx, strikeY); ctx.lineTo(tx + oldMetrics.width, strikeY); ctx.stroke();
@@ -4366,7 +4363,7 @@ async function cgRender(p) {
     const prWidth = ctx.measureText(prStr).width;
     ctx.fillText(prStr, tx, ty);
     if (p.unit) {
-      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#6B7280';
+      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
       ctx.fillText('/ '+(p.unit==='ც'?'ცალი':p.unit), tx+prWidth+10, ty+20);
     }
   }
