@@ -4186,6 +4186,7 @@ async function _fixLTVehicleType() {
 // ─── Card Generator ───
 let _cgProduct = null;
 const _cgCache = {}; // local cache for card-gen search results
+const _CG_FLAG_CODES = {'გერმანია':'de','საფრანგეთი':'fr','იაპონია':'jp','აშშ':'us','იტალია':'it','სამხრეთ კორეა':'kr','ბრიტანეთი':'gb','ნიდერლანდი':'nl','რუსეთი':'ru','ჩინეთი':'cn','თურქეთი':'tr','ავსტრია':'at','შვედეთი':'se','ჩეხეთი':'cz','პოლონეთი':'pl','ბელგია':'be','ინდოეთი':'in','ბრაზილია':'br','უკრაინა':'ua','საქართველო':'ge'};
 
 window.cgSearch = async function() {
   const qCode = (document.getElementById('cgCodeInput').value || '').trim();
@@ -4359,7 +4360,33 @@ async function cgRender(p) {
   } else if (p.product_type==='filter') {
     row('ბრენდი', specs.brand); row('ფილტრის ტიპი', specs.filter_type); row('ავტ. მარკა', specs.car_make);
   }
-  row('ქვეყანა', p.country || '');
+  // country row with flag image
+  if (p.country) {
+    const countryName = p.country.split(' ').slice(1).join(' ');
+    const flagCode = _CG_FLAG_CODES[countryName];
+    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+    ctx.fillText('ქვეყანა:', tx, ty);
+    if (flagCode) {
+      try {
+        const flagImg = await new Promise((res, rej) => {
+          const fi = new Image(); fi.crossOrigin='anonymous';
+          fi.onload = () => res(fi); fi.onerror = rej;
+          fi.src = `https://flagicons.lipis.dev/flags/4x3/${flagCode}.svg`;
+        });
+        const fh = 26, fw = Math.round(fh * 4/3);
+        ctx.drawImage(flagImg, tx+210, ty, fw, fh);
+        ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+        ctx.fillText(countryName, tx+210+fw+8, ty);
+      } catch {
+        ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+        ctx.fillText(countryName, tx+210, ty);
+      }
+    } else {
+      ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+      ctx.fillText(countryName, tx+210, ty);
+    }
+    ty+=40;
+  }
 
   ty+=4;
   ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=26;
