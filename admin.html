@@ -4199,7 +4199,7 @@ window.cgSearch = async function() {
   try {
     let query = window.supabase
       .from('products')
-      .select('id, code, name, image_url, specs, price, unit, product_type, country');
+      .select('id, code, name, image_url, specs, price, old_price, unit, product_type, country');
     if (qCode) query = query.ilike('code', `%${qCode}%`);
     if (qName) query = query.ilike('name', `%${qName}%`);
     const { data, error } = await query.limit(10);
@@ -4347,6 +4347,20 @@ async function cgRender(p) {
   ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=26;
 
   if (p.price) {
+    // If discount active: show old price crossed out above, then discounted price
+    if (p.old_price) {
+      ctx.font='28px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#9CA3AF';
+      const oldStr = parseFloat(p.old_price).toFixed(2)+' ₾';
+      const oldWidth = ctx.measureText(oldStr).width;
+      ctx.fillText(oldStr, tx, ty);
+      // strikethrough line
+      ctx.save(); ctx.strokeStyle='#9CA3AF'; ctx.lineWidth=2;
+      const oldMetrics = ctx.measureText(oldStr);
+      const strikeY = ty + 14;
+      ctx.beginPath(); ctx.moveTo(tx, strikeY); ctx.lineTo(tx + oldMetrics.width, strikeY); ctx.stroke();
+      ctx.restore();
+      ty += 38;
+    }
     ctx.font='bold 52px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
     const prStr = parseFloat(p.price).toFixed(2)+' ₾';
     const prWidth = ctx.measureText(prStr).width;
