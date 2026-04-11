@@ -3594,13 +3594,14 @@ async function handlePriceFile(file) {
     }
     const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
     const normName = s => String(s || '').trim().toLowerCase();
+    const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     // Build lookup maps — store arrays so Nth Excel row maps to Nth DB product
-    const productsByCodeName = {}; // "code|name" → [product, ...]
-    const productsByCode = {};     // "code" → [product, ...]
+    const productsByCodeName = {}; // "normCode|name" → [product, ...]
+    const productsByCode = {};     // "normCode" → [product, ...]
     products.forEach(p => {
       const code = String(p.code).trim();
-      const base = stripSuffix(code);
+      const base = normCode(stripSuffix(code));
       const key = `${base}|${normName(p.name)}`;
       if (!productsByCodeName[key]) productsByCodeName[key] = [];
       productsByCodeName[key].push(p);
@@ -3611,7 +3612,7 @@ async function handlePriceFile(file) {
     // Build base-code → count map to detect duplicates
     const baseCodeCount = {};
     products.forEach(p => {
-      const base = stripSuffix(String(p.code).trim());
+      const base = normCode(stripSuffix(String(p.code).trim()));
       baseCodeCount[base] = (baseCodeCount[base] || 0) + 1;
     });
 
@@ -3620,19 +3621,20 @@ async function handlePriceFile(file) {
     const seenProductIds = new Set(); // ensure each DB product is only compared once (first row wins)
     _priceAllRows = excelRows.map(row => {
       // Match by code+name first; fall back to code-only
-      const keyFull = `${row.code}|${normName(row.excelName)}`;
+      const rowBase = normCode(stripSuffix(row.code));
+      const keyFull = `${rowBase}|${normName(row.excelName)}`;
       const arrByName = row.excelName ? (productsByCodeName[keyFull] || []) : [];
       const matchedByName = arrByName.length > 0;
       // Pick the Nth product for this key (so duplicates map to different DB products)
       const idx = seenKeys[keyFull] ?? 0;
       seenKeys[keyFull] = idx + 1;
-      const codeKey = row.code;
+      const codeKey = rowBase;
       const arrByCode = productsByCode[codeKey] || [];
       const product = matchedByName
         ? (arrByName[idx] || arrByName[arrByName.length - 1])
         : (arrByCode[idx] || arrByCode[arrByCode.length - 1] || null);
       // Show duplicate warning only when matched by code-only and there are multiple products with this code
-      const hasDuplicate = !matchedByName && (baseCodeCount[row.code] || 0) > 1;
+      const hasDuplicate = !matchedByName && (baseCodeCount[codeKey] || 0) > 1;
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
 
