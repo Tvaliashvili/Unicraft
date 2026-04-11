@@ -3596,15 +3596,10 @@ async function handlePriceFile(file) {
     const normName = s => String(s || '').trim().toLowerCase();
     const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-    // Build lookup maps — store arrays so Nth Excel row maps to Nth DB product
-    const productsByCodeName = {}; // "normCode|name" → [product, ...]
-    const productsByCode = {};     // "normCode" → [product, ...]
+    // Build lookup map: normCode → [products with that base code]
+    const productsByCode = {};
     products.forEach(p => {
-      const code = String(p.code).trim();
-      const base = normCode(stripSuffix(code));
-      const key = `${base}|${normName(p.name)}`;
-      if (!productsByCodeName[key]) productsByCodeName[key] = [];
-      productsByCodeName[key].push(p);
+      const base = normCode(stripSuffix(String(p.code).trim()));
       if (!productsByCode[base]) productsByCode[base] = [];
       productsByCode[base].push(p);
     });
@@ -3616,34 +3611,41 @@ async function handlePriceFile(file) {
       baseCodeCount[base] = (baseCodeCount[base] || 0) + 1;
     });
 
-    // 3. Compare prices — track how many times each key has been seen to pick the right DB product
-    const seenKeys = {};
-    const seenProductIds = new Set(); // ensure each DB product is only compared once (first row wins)
+    // 3. Compare prices — 3-step match: exact name → partial name → code-only
+    // Each DB product is matched at most once (seenProductIds tracks used products)
+    const seenProductIds = new Set();
     _priceAllRows = excelRows.map(row => {
-      // Match by code+name first; fall back to code-only
       const rowBase = normCode(stripSuffix(row.code));
-      const keyFull = `${rowBase}|${normName(row.excelName)}`;
-      const arrByName = row.excelName ? (productsByCodeName[keyFull] || []) : [];
-      const matchedByName = arrByName.length > 0;
-      // Pick the Nth product for this key (so duplicates map to different DB products)
-      const idx = seenKeys[keyFull] ?? 0;
-      seenKeys[keyFull] = idx + 1;
-      const codeKey = rowBase;
-      const arrByCode = productsByCode[codeKey] || [];
-      const product = matchedByName
-        ? (arrByName[idx] || arrByName[arrByName.length - 1])
-        : (arrByCode[idx] || arrByCode[arrByCode.length - 1] || null);
-      // Show duplicate warning only when matched by code-only and there are multiple products with this code
-      const hasDuplicate = !matchedByName && (baseCodeCount[codeKey] || 0) > 1;
+      const allWithCode = productsByCode[rowBase] || [];
+      const excelNameNorm = normName(row.excelName);
+
+      let product = null;
+      let matchedByName = false;
+
+      if (allWithCode.length > 0) {
+        // 1. Exact code + name match (unseen products only)
+        if (row.excelName) {
+          product = allWithCode.find(p => !seenProductIds.has(p.id) && normName(p.name) === excelNameNorm) || null;
+          if (product) matchedByName = true;
+        }
+        // 2. Partial name match: one name contains the other (unseen products only)
+        if (!product && row.excelName) {
+          product = allWithCode.find(p => {
+            const pn = normName(p.name);
+            return !seenProductIds.has(p.id) && (pn.includes(excelNameNorm) || excelNameNorm.includes(pn));
+          }) || null;
+          if (product) matchedByName = true;
+        }
+        // 3. Code-only fallback: first unseen product with this base code
+        if (!product) {
+          product = allWithCode.find(p => !seenProductIds.has(p.id)) || null;
+        }
+      }
+
+      const hasDuplicate = !matchedByName && (baseCodeCount[rowBase] || 0) > 1;
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
 
-      // If this DB product already appeared earlier in the Excel, mark as duplicate — warn user
-      if (seenProductIds.has(product.id)) {
-        const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
-        const currentDiscount = parseFloat(product.specs?.discount_price || 0);
-        return { ...row, status: 'duplicate', product, currentRegular, currentDiscount, hasDuplicate };
-      }
       seenProductIds.add(product.id);
 
       const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
