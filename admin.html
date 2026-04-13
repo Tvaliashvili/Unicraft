@@ -3599,18 +3599,29 @@ async function handlePriceFile(file) {
     const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     // Build lookup map: normCode → [products with that base code]
-    // Split DB product code by ";" so "RA131201; RA131201-(PI1120)" indexes each segment
+    // Split DB product code by ";" so "RA131201; RA131201-(PI1120)" indexes each segment.
+    // Empty or whitespace-only segments are discarded by .filter(c => c).
     const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
     const productsByCode = {};
     products.forEach(p => {
       splitCodes(p.code).forEach(seg => {
         const base = normCode(stripSuffix(seg));
         if (!productsByCode[base]) productsByCode[base] = [];
+        // Warn on collision: same normalized segment maps to a different product
+        const others = productsByCode[base].filter(x => x.id !== p.id);
+        if (others.length > 0) {
+          console.warn(
+            `[Price Update] Code collision — segment "${seg}" (key: "${base}") already mapped to:`,
+            others.map(x => `"${x.name}" (id:${x.id})`).join(', '),
+            `| also matched by: "${p.name}" (id:${p.id})`,
+            '— Column G name will be used to disambiguate.'
+          );
+        }
         productsByCode[base].push(p);
       });
     });
 
-    // Build base-code → count map to detect duplicates
+    // Build base-code → count map to detect duplicates (used for hasDuplicate flag)
     const baseCodeCount = {};
     products.forEach(p => {
       splitCodes(p.code).forEach(seg => {
