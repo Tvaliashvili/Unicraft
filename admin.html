@@ -3223,7 +3223,9 @@ window.invRowCode = function(i, code) {
     if (codeEl) { codeEl.style.borderColor = 'var(--border)'; codeEl.style.background = 'white'; }
     return;
   }
-  const match = Object.values(productCache).find(p => (p.code || '').toUpperCase() === trimmed);
+  const match = Object.values(productCache).find(p =>
+    String(p.code || '').split(';').map(c => c.trim().toUpperCase()).filter(c => c).includes(trimmed)
+  );
   if (!match) {
     invGenRows[i]._codeMatched = false;
     const codeEl = document.getElementById('inv-code-' + i);
@@ -3597,18 +3599,24 @@ async function handlePriceFile(file) {
     const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     // Build lookup map: normCode → [products with that base code]
+    // Split DB product code by ";" so "RA131201; RA131201-(PI1120)" indexes each segment
+    const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
     const productsByCode = {};
     products.forEach(p => {
-      const base = normCode(stripSuffix(String(p.code).trim()));
-      if (!productsByCode[base]) productsByCode[base] = [];
-      productsByCode[base].push(p);
+      splitCodes(p.code).forEach(seg => {
+        const base = normCode(stripSuffix(seg));
+        if (!productsByCode[base]) productsByCode[base] = [];
+        productsByCode[base].push(p);
+      });
     });
 
     // Build base-code → count map to detect duplicates
     const baseCodeCount = {};
     products.forEach(p => {
-      const base = normCode(stripSuffix(String(p.code).trim()));
-      baseCodeCount[base] = (baseCodeCount[base] || 0) + 1;
+      splitCodes(p.code).forEach(seg => {
+        const base = normCode(stripSuffix(seg));
+        baseCodeCount[base] = (baseCodeCount[base] || 0) + 1;
+      });
     });
 
     // 3. Compare prices — 3-step match: exact name → partial name → code-only
