@@ -3365,16 +3365,17 @@ async function handleExcelFile(file) {
     const nameLabel = document.getElementById('excelColNameLabel');
     if (nameLabel) nameLabel.textContent = _excelNameLetter;
 
-    // Extract code + name columns, skip header row, ignore empty codes
-    // If a cell has multiple codes separated by ";" treat each as its own row
+    // Extract code + name columns, one entry per Excel row.
+    // Cells with multiple codes ("A; B; C") are kept intact here;
+    // segment iteration happens during matching so each row is counted once.
     const excelRows = rows
       .slice(1)
-      .flatMap((r, i) => {
+      .map((r, i) => {
         const rawCode = String(r[_excelColIdx] ?? '').trim();
         const name    = String(r[_excelNameIdx] ?? '').trim();
-        if (!rawCode) return [];
-        return rawCode.split(';').map(c => c.trim()).filter(c => c).map(code => ({ rowNum: i + 2, code, name }));
-      });
+        return { rowNum: i + 2, code: rawCode, name };
+      })
+      .filter(r => r.code);
 
     if (excelRows.length === 0) {
       alert(`${_excelColLetter} სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.`);
@@ -3419,20 +3420,29 @@ async function handleExcelFile(file) {
       });
     });
 
-    // Count how many times each code appears in Excel (normalized)
+    // Build excelBaseCount from every segment of every row so site-only detection
+    // can check whether any segment of a site product appears in the Excel.
     const excelBaseCount = {};
     excelRows.forEach(r => {
-      const nc = normCode(r.code);
-      excelBaseCount[nc] = (excelBaseCount[nc] || 0) + 1;
+      splitCodes(r.code).forEach(seg => {
+        const nc = normCode(stripSuffix(seg));
+        excelBaseCount[nc] = (excelBaseCount[nc] || 0) + 1;
+      });
     });
 
-    // 3. Compare — match by code+name; fall back to code-only if name is absent
+    // 3. Compare — one result per Excel row.
+    // Try every segment of the code cell; mark 'uploaded' on the first segment
+    // that matches the site (by code+name, or code-only when name is absent).
     _excelAllRows = excelRows.map(r => {
-      const nc  = normCode(r.code);
-      const key = `${nc}|${normName(r.name)}`;
-      const matchedByBoth = siteCodeNameSet.has(key);
-      const matchedByCode = (siteBaseCount[nc] || 0) > 0;
-      const matched = r.name ? matchedByBoth : matchedByCode;
+      const nameNorm = normName(r.name);
+      let matched = false;
+      for (const seg of splitCodes(r.code)) {
+        const nc  = normCode(stripSuffix(seg));
+        const key = `${nc}|${nameNorm}`;
+        const hitByBoth = siteCodeNameSet.has(key);
+        const hitByCode = (siteBaseCount[nc] || 0) > 0;
+        if (r.name ? hitByBoth : hitByCode) { matched = true; break; }
+      }
       return { ...r, status: matched ? 'uploaded' : 'missing' };
     });
 
@@ -3452,12 +3462,14 @@ async function handleExcelFile(file) {
     const uploadedCount  = _excelAllRows.filter(r => r.status === 'uploaded').length;
     const missingCount   = _excelAllRows.filter(r => r.status === 'missing').length;
     const siteOnlyCount  = _excelAllRows.filter(r => r.status === 'site_only').length;
+    // Total = original Excel rows only (excludes site_only rows appended above)
+    const excelRowTotal  = excelRows.length;
 
     // 4. Show summary
     document.getElementById('excelCountUploaded').textContent  = uploadedCount;
     document.getElementById('excelCountMissing').textContent   = missingCount;
     document.getElementById('excelCountSiteOnly').textContent  = siteOnlyCount;
-    document.getElementById('excelCountTotal').textContent     = _excelAllRows.length;
+    document.getElementById('excelCountTotal').textContent     = excelRowTotal;
     document.getElementById('excelSummary').style.display = 'flex';
     document.getElementById('excelTabs').style.display = 'block';
     document.getElementById('excelResults').style.display = 'block';
