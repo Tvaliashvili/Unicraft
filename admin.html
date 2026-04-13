@@ -3563,14 +3563,14 @@ async function handlePriceFile(file) {
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
 
     const excelRows = rows.slice(1)
-      .flatMap((r, i) => {
+      .map((r, i) => {
         const rawCode   = String(r[colCode] ?? '').trim();
         const excelName = String(r[colName] ?? '').trim();
         const newPrice    = parseFloat(String(r[colPrice]    ?? '').replace(/,/g, '.')) || 0;
         const newDiscount = parseFloat(String(r[colDiscount] ?? '').replace(/,/g, '.')) || 0;
-        if (!rawCode) return [];
-        return rawCode.split(';').map(c => c.trim()).filter(c => c).map(code => ({ rowNum: i + 2, code, excelName, newPrice, newDiscount }));
-      });
+        return { rowNum: i + 2, code: rawCode, excelName, newPrice, newDiscount };
+      })
+      .filter(r => r.code); // drop rows with no code in Column B
 
     if (excelRows.length === 0) {
       alert('B სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.');
@@ -3630,43 +3630,59 @@ async function handlePriceFile(file) {
       });
     });
 
-    // 3. Compare prices — 3-step match: exact name → partial name → code-only
-    // Each DB product is matched at most once (seenProductIds tracks used products)
+    // 3. Compare prices — 3 passes across all code segments in the cell.
+    // Each Excel row keeps its original cell value; segments are tried in order.
+    // Pass 1: exact Column-G name match across all segments.
+    // Pass 2: partial name match across all segments (only if pass 1 found nothing).
+    // Pass 3: code-only fallback across all segments (only if passes 1-2 found nothing).
+    // Each DB product is claimed at most once (seenProductIds).
     const seenProductIds = new Set();
     _priceAllRows = excelRows.map(row => {
-      const rowBase = normCode(stripSuffix(row.code));
-      const allWithCode = productsByCode[rowBase] || [];
+      const segments     = splitCodes(row.code); // split "A; B; C" → ["A","B","C"]
       const excelNameNorm = normName(row.excelName);
-
       let product = null;
       let matchedByName = false;
 
-      if (allWithCode.length > 0) {
-        // 1. Exact code + name match (unseen products only)
-        if (row.excelName) {
-          product = allWithCode.find(p => !seenProductIds.has(p.id) && normName(p.name) === excelNameNorm) || null;
-          if (product) matchedByName = true;
-        }
-        // 2. Partial name match: one name contains the other (unseen products only)
-        if (!product && row.excelName) {
-          product = allWithCode.find(p => {
-            const pn = normName(p.name);
-            return !seenProductIds.has(p.id) && (pn.includes(excelNameNorm) || excelNameNorm.includes(pn));
-          }) || null;
-          if (product) matchedByName = true;
-        }
-        // 3. Code-only fallback: first unseen product with this base code
-        if (!product) {
-          product = allWithCode.find(p => !seenProductIds.has(p.id)) || null;
+      // Pass 1 — exact name match
+      if (row.excelName) {
+        for (const seg of segments) {
+          const base = normCode(stripSuffix(seg));
+          const hit  = (productsByCode[base] || []).find(
+            p => !seenProductIds.has(p.id) && normName(p.name) === excelNameNorm
+          );
+          if (hit) { product = hit; matchedByName = true; break; }
         }
       }
 
-      const hasDuplicate = !matchedByName && (baseCodeCount[rowBase] || 0) > 1;
+      // Pass 2 — partial name match (one name contains the other)
+      if (!product && row.excelName) {
+        for (const seg of segments) {
+          const base = normCode(stripSuffix(seg));
+          const hit  = (productsByCode[base] || []).find(p => {
+            const pn = normName(p.name);
+            return !seenProductIds.has(p.id) && (pn.includes(excelNameNorm) || excelNameNorm.includes(pn));
+          });
+          if (hit) { product = hit; matchedByName = true; break; }
+        }
+      }
+
+      // Pass 3 — code-only fallback: first unseen product across all segments
+      if (!product) {
+        for (const seg of segments) {
+          const base = normCode(stripSuffix(seg));
+          const hit  = (productsByCode[base] || []).find(p => !seenProductIds.has(p.id));
+          if (hit) { product = hit; break; }
+        }
+      }
+
+      // hasDuplicate: true if any segment has >1 DB product and name didn't disambiguate
+      const hasDuplicate = !matchedByName &&
+        segments.some(seg => (baseCodeCount[normCode(stripSuffix(seg))] || 0) > 1);
+
       if (!product) return { ...row, status: 'not_found', product: null };
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
 
       seenProductIds.add(product.id);
-
       const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
       const currentDiscount = parseFloat(product.specs?.discount_price || 0);
       const changed = Math.abs(currentRegular - row.newPrice) > 0.001 ||
