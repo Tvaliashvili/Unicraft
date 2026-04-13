@@ -3391,7 +3391,7 @@ async function handleExcelFile(file) {
     while (true) {
       const { data, error } = await supabase
         .from('products')
-        .select('code, name')
+        .select('id, code, name')
         .eq('product_type', _excelCat)
         .range(from, from + PAGE - 1);
       if (error) throw error;
@@ -3420,12 +3420,13 @@ async function handleExcelFile(file) {
       });
     });
 
-    // Build excelBaseCount from every segment of every row so site-only detection
-    // can check whether any segment of a site product appears in the Excel.
+    // Build excelBaseCount — strict, no stripSuffix.
+    // A DB product is only "in Excel" if its exact normalized code appears in a cell segment.
+    // This ensures duplicate DB entries like "RA49703(2)" are NOT hidden by their base code.
     const excelBaseCount = {};
     excelRows.forEach(r => {
       splitCodes(r.code).forEach(seg => {
-        const nc = normCode(stripSuffix(seg));
+        const nc = normCode(seg); // strict — no stripSuffix
         excelBaseCount[nc] = (excelBaseCount[nc] || 0) + 1;
       });
     });
@@ -3446,16 +3447,19 @@ async function handleExcelFile(file) {
       return { ...r, status: matched ? 'uploaded' : 'missing' };
     });
 
-    // Add site-only rows — a product is site_only if none of its sub-codes appear in Excel
+    // Add site-only rows — strict match (no stripSuffix on DB side either).
+    // A product is "extra" only if none of its exact normalized code segments
+    // appear in the Excel. This surfaces duplicates like "RA49703(2)" when
+    // the Excel only contains "RA49703".
     const seenSiteOnly = new Set();
     siteProducts.forEach(p => {
       const rawCode = String(p.code).trim();
       if (seenSiteOnly.has(rawCode)) return;
       const subCodes = splitCodes(rawCode);
-      const anyInExcel = subCodes.some(code => (excelBaseCount[normCode(stripSuffix(code))] || 0) > 0);
+      const anyInExcel = subCodes.some(code => (excelBaseCount[normCode(code)] || 0) > 0); // strict
       if (!anyInExcel) {
         seenSiteOnly.add(rawCode);
-        _excelAllRows.push({ rowNum: '—', code: rawCode, name: p.name || '', status: 'site_only' });
+        _excelAllRows.push({ rowNum: '—', code: rawCode, name: p.name || '', id: p.id, status: 'site_only' });
       }
     });
 
@@ -3520,12 +3524,21 @@ function renderExcelTable() {
       : r.status === 'missing'
       ? `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ არ არის საიტზე</span>`
       : `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">🔵 ექსელში არ არის</span>`;
+    const deleteBtn = r.status === 'site_only' && r.id
+      ? `<button onclick="deleteSiteOnlyProduct(${r.id}, this)"
+           style="margin-left:8px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer">
+           🗑 წაშლა
+         </button>`
+      : '';
+    const idLabel = r.status === 'site_only' && r.id
+      ? `<span style="font-size:11px;color:var(--gray-mid);margin-left:6px">id:${r.id}</span>`
+      : '';
     const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
-    return `<tr style="${bg}">
+    return `<tr style="${bg}" id="site-only-row-${r.id || ''}">
       <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
-      <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}</td>
+      <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}${idLabel}</td>
       <td style="padding:9px 14px;font-size:13px;color:var(--dark)">${r.name || '—'}</td>
-      <td style="padding:9px 14px">${badge}</td>
+      <td style="padding:9px 14px">${badge}${deleteBtn}</td>
     </tr>`;
   }).join('');
 }
@@ -3541,6 +3554,26 @@ function exportExcelResults() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'შედარება');
   XLSX.writeFile(wb, 'product_check.xlsx');
+}
+
+async function deleteSiteOnlyProduct(id, btn) {
+  if (!confirm('ამ პროდუქტის წაშლა მონაცემთა ბაზიდან?')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) {
+    alert('შეცდომა: ' + error.message);
+    btn.disabled = false;
+    btn.textContent = '🗑 წაშლა';
+    return;
+  }
+  // Remove row from data and DOM
+  _excelAllRows = _excelAllRows.filter(r => r.id !== id);
+  const row = document.getElementById('site-only-row-' + id);
+  if (row) row.remove();
+  // Update counter
+  const siteOnlyCount = _excelAllRows.filter(r => r.status === 'site_only').length;
+  document.getElementById('excelCountSiteOnly').textContent = siteOnlyCount;
 }
 
 // ─── Price Update Tool ───
