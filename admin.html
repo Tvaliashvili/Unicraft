@@ -117,6 +117,9 @@
       <div class="nav-item" onclick="showPage('products')">
         <span class="nav-icon">📦</span> პროდუქტები
       </div>
+      <div class="nav-item" onclick="showPage('rentals')">
+        <span class="nav-icon">🔴</span> გაქირავებულები
+      </div>
       <div class="nav-item" onclick="showPage('orders')">
         <span class="nav-icon">🧾</span> შეკვეთები
         <span id="newOrdersBadge" style="display:none;margin-left:auto;background:var(--orange);color:white;border-radius:20px;padding:1px 8px;font-size:12px"></span>
@@ -162,19 +165,21 @@
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon green">🧾</div>
+          <div class="stat-icon green">🔴</div>
           <div>
-            <div class="stat-value" id="statOrders">–</div>
-            <div class="stat-label">სულ შეკვეთა</div>
+            <div class="stat-value" id="statRented">–</div>
+            <div class="stat-label">გაქირავებული</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon blue">🆕</div>
-          <div>
-            <div class="stat-value" id="statNew">–</div>
-            <div class="stat-label">ახალი შეკვეთა</div>
-          </div>
+      </div>
+
+      <!-- Currently rented -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-title">ამჟამად გაქირავებული</span>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('rentals')">ყველა →</button>
         </div>
+        <div id="dashboardRentals" style="padding:0 20px 16px"></div>
       </div>
 
       <!-- Recent orders -->
@@ -288,11 +293,23 @@
               <!-- Status -->
               <div class="form-group">
                 <label class="form-label">სტატუსი</label>
-                <select class="form-select" id="prodStatus">
+                <select class="form-select" id="prodStatus" onchange="toggleRenterFields('prod')">
                   <option value="available">✅ ხელმისაწვდომია</option>
                   <option value="rented">🔴 გაქირავებულია</option>
                   <option value="maintenance">🛠 შეკეთებაშია</option>
                 </select>
+              </div>
+              <div class="form-group rental-info" id="prodRenterFields" style="display:none">
+                <label class="form-label">ვისზეა გაქირავებული</label>
+                <input class="form-input" id="prodRenterName" placeholder="სახელი გვარი">
+              </div>
+              <div class="form-group rental-info" id="prodRenterPhoneWrap" style="display:none">
+                <label class="form-label">ტელეფონი</label>
+                <input class="form-input" id="prodRenterPhone" placeholder="მაგ: +995 5XX XX XX XX">
+              </div>
+              <div class="form-group rental-info" id="prodReturnDateWrap" style="display:none">
+                <label class="form-label">დაბრუნების თარიღი</label>
+                <input class="form-input" id="prodReturnDate" type="date">
               </div>
               <!-- Description -->
               <div class="form-group full">
@@ -351,6 +368,21 @@
           <span>მოქმედება</span>
         </div>
         <div id="productsList">
+          <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rentals -->
+    <div class="page" id="page-rentals">
+      <div class="page-header">
+        <div>
+          <div class="page-title">გაქირავებულები</div>
+          <div class="page-subtitle" id="rentalsCountLabel"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div id="rentalsList">
           <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
         </div>
       </div>
@@ -633,11 +665,23 @@
         <!-- Status -->
         <div class="form-group">
           <label class="form-label">სტატუსი</label>
-          <select class="form-select" id="editStatus">
+          <select class="form-select" id="editStatus" onchange="toggleRenterFields('edit')">
             <option value="available">✅ ხელმისაწვდომია</option>
             <option value="rented">🔴 გაქირავებულია</option>
             <option value="maintenance">🛠 შეკეთებაშია</option>
           </select>
+        </div>
+        <div class="form-group rental-info" id="editRenterFields" style="display:none">
+          <label class="form-label">ვისზეა გაქირავებული</label>
+          <input class="form-input" id="editRenterName" placeholder="სახელი გვარი">
+        </div>
+        <div class="form-group rental-info" id="editRenterPhoneWrap" style="display:none">
+          <label class="form-label">ტელეფონი</label>
+          <input class="form-input" id="editRenterPhone" placeholder="მაგ: +995 5XX XX XX XX">
+        </div>
+        <div class="form-group rental-info" id="editReturnDateWrap" style="display:none">
+          <label class="form-label">დაბრუნების თარიღი</label>
+          <input class="form-input" id="editReturnDate" type="date">
         </div>
         <!-- Description -->
         <div class="form-group full">
@@ -897,7 +941,8 @@ window.showPage = function(name) {
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
   });
-  if (name === 'products' || name === 'card-gen') loadProductsList();
+  if (name === 'products') loadProductsList();
+  if (name === 'rentals') loadRentalsList();
   if (name === 'add-product') {
     loadCategories();
   }
@@ -946,21 +991,74 @@ async function initApp() {
 
   // Stats
   try {
-    const [{ count: prodCount }, { count: orderCount }, { data: newOrders }] = await Promise.all([
+    const [{ count: prodCount }, { data: rented }, { data: newOrders }] = await Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }),
-      supabase.from('orders').select('*', { count: 'exact', head: true }),
+      supabase.from('products').select('*').eq('status', 'rented').order('created_at', { ascending: false }),
       supabase.from('orders').select('id').in('status', ['pending', 'new'])
     ]);
     document.getElementById('statProducts').textContent = prodCount || 0;
-    document.getElementById('statOrders').textContent = orderCount || 0;
-    const newCount = newOrders?.length || 0;
-    document.getElementById('statNew').textContent = newCount;
-    updateOrderBadge(newCount);
+    document.getElementById('statRented').textContent = rented?.length || 0;
+    updateOrderBadge(newOrders?.length || 0);
+    renderDashboardRentals(rented || []);
     // Recent orders
     const { data: recentOrders } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
     renderRecentOrders(recentOrders || []);
   } catch(e) { console.error(e); }
 }
+
+function renderDashboardRentals(rows) {
+  const el = document.getElementById('dashboardRentals');
+  if (!el) return;
+  if (!rows.length) { el.innerHTML = '<p style="color:var(--gray-mid);font-size:13px;margin:0">ამჟამად არაფერია გაქირავებული</p>'; return; }
+  el.innerHTML = rentalRowsHTML(rows.slice(0, 5));
+}
+
+function rentalRowsHTML(rows) {
+  return rows.map(p => {
+    const s = p.specs || {};
+    const overdue = s.return_date && new Date(s.return_date) < new Date(new Date().toDateString());
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div class="prod-img-thumb" style="flex-shrink:0">
+        ${p.image_url ? `<img src="${p.image_url}" alt="" style="width:100%;height:100%;object-fit:cover">` : (p.emoji || '📦')}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px;color:var(--dark)">${p.name}</div>
+        <div style="font-size:12px;color:var(--gray-mid);margin-top:2px">
+          ${s.renter_name ? `👤 ${s.renter_name}` : '<span style="color:#c2410c">ვინ იქირავა — არ არის მითითებული</span>'}
+          ${s.renter_phone ? ` · 📞 ${s.renter_phone}` : ''}
+        </div>
+        ${s.return_date ? `<div style="font-size:11px;margin-top:2px;${overdue ? 'color:#b91c1c;font-weight:700' : 'color:var(--gray-mid)'}">${overdue ? '⚠ ვადაგადაცილებული — ' : 'დაბრუნება: '}${s.return_date}</div>` : ''}
+      </div>
+      <button class="btn btn-sm" onclick="markReturned('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;flex-shrink:0">✓ დაბრუნებულია</button>
+    </div>`;
+  }).join('');
+}
+
+async function loadRentalsList() {
+  const el = document.getElementById('rentalsList');
+  if (el) el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
+  const { data, error } = await supabase.from('products').select('*').eq('status', 'rented').order('created_at', { ascending: false });
+  const label = document.getElementById('rentalsCountLabel');
+  if (error) { if (el) el.innerHTML = '<div class="table-empty"><p>შეცდომა: ' + error.message + '</p></div>'; return; }
+  const rows = data || [];
+  rows.forEach(p => { productCache[p.id] = p; });
+  if (label) label.textContent = rows.length + ' გაქირავებული';
+  if (!el) return;
+  if (!rows.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🔴</div><p>ამჟამად არაფერია გაქირავებული</p></div>'; return; }
+  el.innerHTML = `<div style="padding:0 20px">${rentalRowsHTML(rows)}</div>`;
+}
+
+window.markReturned = async function(id) {
+  if (!confirm('პროდუქტი დაბრუნებულად მოინიშნოს?')) return;
+  const p = productCache[id];
+  const specs = { ...(p?.specs || {}), renter_name: null, renter_phone: null, return_date: null };
+  const { error } = await supabase.from('products').update({ status: 'available', specs }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  showToast('✓ პროდუქტი დაბრუნებულია', 'success');
+  loadRentalsList();
+  const dashEl = document.getElementById('dashboardRentals');
+  if (dashEl) initApp();
+};
 
 function renderRecentOrders(rows) {
   const el = document.getElementById('recentOrders');
@@ -1184,6 +1282,30 @@ window.toggleAutoCode = function() {
   input.style.display = checked ? 'none' : '';
 };
 
+function renterSpecsFromForm(prefix) {
+  const statusEl = document.getElementById(prefix + 'Status');
+  if (!statusEl || statusEl.value !== 'rented') {
+    return { renter_name: null, renter_phone: null, return_date: null };
+  }
+  return {
+    renter_name: (document.getElementById(prefix + 'RenterName')?.value || '').trim() || null,
+    renter_phone: (document.getElementById(prefix + 'RenterPhone')?.value || '').trim() || null,
+    return_date: document.getElementById(prefix + 'ReturnDate')?.value || null,
+  };
+}
+
+window.toggleRenterFields = function(prefix) {
+  const statusEl = document.getElementById(prefix + 'Status');
+  const show = statusEl && statusEl.value === 'rented';
+  const display = show ? '' : 'none';
+  const fieldsEl = document.getElementById(prefix + 'RenterFields');
+  const phoneEl = document.getElementById(prefix + 'RenterPhoneWrap');
+  const returnEl = document.getElementById(prefix + 'ReturnDateWrap');
+  if (fieldsEl) fieldsEl.style.display = display;
+  if (phoneEl) phoneEl.style.display = display;
+  if (returnEl) returnEl.style.display = display;
+};
+
 window.toggleBrandMgr = function() {
   const p = document.getElementById('brandMgrPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
@@ -1308,6 +1430,7 @@ window.addProduct = async function() {
     brand_model: document.getElementById('specBrandModel').value.trim(),
     power_source: document.getElementById('specPowerSource').value,
     weight: document.getElementById('specWeight').value ? parseFloat(document.getElementById('specWeight').value) : null,
+    ...renterSpecsFromForm('prod'),
   };
   if (!specs.brand) { showToast('ბრენდი სავალდებულოა', 'error'); return; }
   const dailyRate = parseFloat(document.getElementById('prodDailyRate').value) || 0;
@@ -1376,7 +1499,8 @@ window.clearForm = function() {
   _currentCategory = '';
   // reset all select/input fields
   ['prodName','prodDailyRate','prodDeposit','prodBrand',
-   'specCustomCode','specBrandModel','specPowerSource','specWeight']
+   'specCustomCode','specBrandModel','specPowerSource','specWeight',
+   'prodRenterName','prodRenterPhone','prodReturnDate']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
@@ -1384,6 +1508,7 @@ window.clearForm = function() {
   if (specCustomCode) { specCustomCode.style.display = ''; }
   document.getElementById('prodStatus').value = 'available';
   document.getElementById('prodCategory').value = '';
+  toggleRenterFields('prod');
   // clear textarea
   const descEl = document.getElementById('prodDescRows');
   if (descEl) descEl.value = '';
@@ -1455,6 +1580,7 @@ function productRowHTML(p, isActive) {
       <div class="prod-name">${p.name}</div>
       ${p.added_by ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">👤 ${p.added_by}</div>` : ''}
       <div style="margin-top:2px">${STATUS_BADGES[p.status] || ''}</div>
+      ${p.status === 'rented' && p.specs?.renter_name ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">🔴 ${p.specs.renter_name}</div>` : ''}
     </div>
     <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
@@ -1534,6 +1660,10 @@ window.editProduct = function(id) {
   document.getElementById('editDailyRate').value = p.daily_rate || '';
   document.getElementById('editDeposit').value = p.security_deposit || '';
   document.getElementById('editStatus').value = p.status || 'available';
+  document.getElementById('editRenterName').value = specs.renter_name || '';
+  document.getElementById('editRenterPhone').value = specs.renter_phone || '';
+  document.getElementById('editReturnDate').value = specs.return_date || '';
+  toggleRenterFields('edit');
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editCodeDisplay').value = p.code || '';
@@ -1588,6 +1718,7 @@ window.saveProductEdit = async function() {
     brand_model: document.getElementById('editSpecBrandModel').value.trim(),
     power_source: document.getElementById('editSpecPowerSource').value,
     weight: document.getElementById('editSpecWeight').value ? parseFloat(document.getElementById('editSpecWeight').value) : null,
+    ...renterSpecsFromForm('edit'),
   };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
@@ -1877,6 +2008,11 @@ window.showProductInfo = function(id) {
   if (p.daily_rate) rows += row('დღიური ღირებულება', p.daily_rate + ' ₾');
   if (p.security_deposit) rows += row('გირაო', p.security_deposit + ' ₾');
   if (p.status) rows += row('სტატუსი', STATUS_BADGES[p.status] || p.status);
+  if (p.status === 'rented') {
+    if (s.renter_name) rows += row('ვისზეა გაქირავებული', s.renter_name);
+    if (s.renter_phone) rows += row('ტელეფონი', s.renter_phone);
+    if (s.return_date) rows += row('დაბრუნების თარიღი', s.return_date);
+  }
   let html = '';
   if (rows) html += `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--dark);margin-bottom:4px">სპეციფიკაცია</div>${rows}</div>`;
   if (p.description) {
