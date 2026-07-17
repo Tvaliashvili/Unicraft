@@ -573,7 +573,7 @@ function renderBookingBlock() {
       <div style="width:80px">
         <div class="text-[10px] font-semibold text-dark mb-1">დღეები</div>
         <input type="number" id="bookDays" min="1" step="1" value="1" oninput="updateBookingTotal()"
-          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark text-center outline-none focus:border-orange">
       </div>
       <button onclick="bookNow()" class="bg-orange text-white font-bold text-sm rounded-lg py-1.5 px-5 hover:opacity-90 transition-opacity">დაჯავშნა</button>
     </div>
@@ -589,7 +589,8 @@ window.updateBookingTotal = function() {
   if (!(days > 0)) { displayEl.innerHTML = `<span class="text-red-600">შეიყვანეთ დღეების რაოდენობა</span>`; return; }
   const calc = calcBookingTotal(days);
   displayEl.innerHTML = `
-    <div class="flex justify-between font-bold text-orange"><span>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</span><span>${calc.total.toFixed(2)} ₾</span></div>`;
+    <div>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</div>
+    <div class="font-bold text-orange">${calc.total.toFixed(2)} ₾</div>`;
 };
 
 window.bookNow = function() {
