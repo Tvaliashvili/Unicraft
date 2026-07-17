@@ -531,7 +531,8 @@ function renderProduct() {
         <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5">
           <div class="font-semibold">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
           <div>8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
-          <div>15+ დღე — <span class="font-semibold text-orange">40%</span> ფასდაკლება</div>
+          <div>15–29 დღე — <span class="font-semibold text-orange">30%</span> ფასდაკლება</div>
+          <div>30+ დღე — <span class="font-semibold text-orange">50%</span> ფასდაკლება</div>
         </div>
       </div>`;
   } else {
@@ -550,7 +551,7 @@ function renderProduct() {
 function calcBookingTotal(days) {
   if (!(days > 0)) return null;
   const base = days * (product.daily_rate || 0);
-  const discountPct = days >= 15 ? 40 : (days > 7 ? 10 : 0);
+  const discountPct = days >= 30 ? 50 : (days >= 15 ? 30 : (days > 7 ? 10 : 0));
   const total = base * (1 - discountPct / 100);
   const deposit = parseFloat(product.security_deposit || 0);
   return { days, total, deposit, grandTotal: total + deposit, discountPct };
