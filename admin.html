@@ -137,9 +137,6 @@
       <div class="nav-item" onclick="showPage('bulk-image')">
         <span class="nav-icon">🖼</span> სურათების ჩასმა
       </div>
-      <div class="nav-item" onclick="showPage('card-gen')">
-        <span class="nav-icon">🃏</span> ბარათის გენერატორი
-      </div>
     </nav>
     <div class="sidebar-bottom">
       <div style="font-size:12px;color:white;margin-bottom:10px" id="adminEmail"></div>
@@ -221,22 +218,28 @@
       </div>
       <div class="card">
         <div class="product-form">
-          <!-- Product type selector -->
-          <div style="margin-bottom:24px">
-            <div class="form-label" style="margin-bottom:12px">პროდუქტის ტიპი <span class="required">*</span></div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <button id="typeBtn_tire" onclick="selectProdType('tire')" style="flex:1;min-width:100px;padding:18px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;color:var(--dark);transition:all 0.15s">
-                <span style="font-size:40px">🛞</span>საბურავი
-              </button>
+          <!-- Category selector -->
+          <div class="form-group" style="margin-bottom:24px;max-width:420px">
+            <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+              <span>კატეგორია <span class="required">*</span></span>
+              <span onclick="toggleCategoryMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+            </label>
+            <select class="form-select" id="prodCategory" onchange="selectProdCategory(this.value)"><option value="">კატეგორია...</option></select>
+            <div id="categoryMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+              <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+                <input class="form-input" id="newCatInput" placeholder="ახალი კატეგორია" style="flex:1;min-width:120px;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addCategory()">
+                <button class="btn btn-primary" onclick="addCategory()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+              </div>
+              <div id="categoryList"></div>
             </div>
           </div>
-          <!-- Form (visible after type selection) -->
+          <!-- Form (visible after category selection) -->
           <div id="prodFormBody" style="display:none">
             <div class="form-grid">
               <!-- Name -->
               <div class="form-group">
-                <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
-                <input class="form-input" id="prodName" placeholder="მაგ: Michelin Pilot Sport 4">
+                <label class="form-label">ინსტრუმენტის სახელი <span class="required">*</span></label>
+                <input class="form-input" id="prodName" placeholder="მაგ: Bosch GSB 13 RE">
               </div>
               <!-- Brand with manager -->
               <div class="form-group">
@@ -257,41 +260,23 @@
                   <div id="brandList"></div>
                 </div>
               </div>
-              <!-- TIRE specs -->
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between"><span>სიგანე <span class="required">*</span></span><span onclick="toggleTireSpecMgr('width')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
-                <select class="form-select" id="specWidth"><option value="">სიგანე...</option></select>
-                <div id="widthMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                  <div style="display:flex;gap:6px;margin-bottom:10px">
-                    <input class="form-input" id="newWidthInput" placeholder="მაგ: 195" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('width')">
-                    <button class="btn btn-primary" onclick="addTireSpec('width')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                  </div>
-                  <div id="widthList"></div>
-                </div>
+              <!-- Instrument specs -->
+              <div class="form-group">
+                <label class="form-label">მოდელი</label>
+                <input class="form-input" id="specBrandModel" placeholder="მაგ: GSB 13 RE">
               </div>
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between"><span>პროფილი <span class="required">*</span></span><span onclick="toggleTireSpecMgr('profile')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
-                <select class="form-select" id="specProfile"><option value="">პროფილი...</option></select>
-                <div id="profileMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                  <div style="display:flex;gap:6px;margin-bottom:10px">
-                    <input class="form-input" id="newProfileInput" placeholder="მაგ: 55" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('profile')">
-                    <button class="btn btn-primary" onclick="addTireSpec('profile')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                  </div>
-                  <div id="profileList"></div>
-                </div>
+              <div class="form-group">
+                <label class="form-label">კვების წყარო</label>
+                <select class="form-select" id="specPowerSource">
+                  <option value="">კვების წყარო...</option>
+                  <option>ელექტრო</option><option>ბენზინი</option><option>დიზელი</option><option>აკუმულატორი</option><option>მექანიკური</option>
+                </select>
               </div>
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between"><span>დიამეტრი (R) <span class="required">*</span></span><span onclick="toggleTireSpecMgr('rim')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
-                <select class="form-select" id="specRim"><option value="">დიამეტრი...</option></select>
-                <div id="rimMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                  <div style="display:flex;gap:6px;margin-bottom:10px">
-                    <input class="form-input" id="newRimInput" placeholder="მაგ: R17" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('rim')">
-                    <button class="btn btn-primary" onclick="addTireSpec('rim')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                  </div>
-                  <div id="rimList"></div>
-                </div>
+              <div class="form-group">
+                <label class="form-label">წონა (კგ)</label>
+                <input class="form-input" id="specWeight" type="number" min="0" step="0.1" placeholder="0.0">
               </div>
-              <div class="form-group specs-tire" style="display:none">
+              <div class="form-group">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
                   <span>კოდი <span class="required">*</span></span>
                   <label style="font-size:12px;color:var(--orange);font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;margin:0">
@@ -300,113 +285,27 @@
                 </label>
                 <input class="form-input" id="specCustomCode" placeholder="შეიყვანეთ კოდი">
               </div>
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                  <span>სეზონი <span class="required">*</span></span>
-                  <span onclick="toggleSeasonMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
-                </label>
-                <select class="form-select" id="specSeason"><option value="">სეზონი...</option></select>
-                <div id="seasonMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                  <div style="display:flex;gap:6px;margin-bottom:10px">
-                    <input class="form-input" id="newSeasonInput" placeholder="ახალი სეზონი" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addSeason()">
-                    <button class="btn btn-primary" onclick="addSeason()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                  </div>
-                  <div id="seasonList"></div>
-                </div>
-              </div>
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">ავტომობილის ტიპი</label>
-                <select class="form-select" id="specVehicleType">
-                  <option value="მსუბუქი ავტომობილი">🚗 მსუბუქი ავტომობილი</option>
-                  <option value="ჯიპი/პიკაპი">🚙 ჯიპი/პიკაპი</option>
-                  <option value="მსუბუქი სატვირთო">🚐 მსუბუქი სატვირთო</option>
-                  <option value="სატვირთო">🚛 სატვირთო</option>
-                </select>
-              </div>
-              <div class="form-group specs-tire" style="display:none">
-                <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
-                <input class="form-input" id="specAltSize" placeholder="მაგ: 37x13.50R17LT">
-              </div>
-              <!-- OIL specs -->
-              <div class="form-group specs-oil" style="display:none">
-                <label class="form-label">ტიპი</label>
-                <select class="form-select" id="specOilType">
-                  <option value="">ტიპი...</option>
-                  <option>სინთეტიკური</option><option>ნახევრად სინთეტიკური</option><option>მინერალური</option>
-                </select>
-              </div>
-              <div class="form-group specs-oil" style="display:none">
-                <label class="form-label">სიბლანტე</label>
-                <select class="form-select" id="specViscosity">
-                  <option value="">სიბლანტე...</option>
-                  <option>0W-20</option><option>5W-30</option><option>5W-40</option><option>10W-30</option><option>10W-40</option><option>15W-40</option><option>20W-50</option>
-                </select>
-              </div>
-              <div class="form-group specs-oil" style="display:none">
-                <label class="form-label">მოცულობა</label>
-                <select class="form-select" id="specVolume">
-                  <option value="">მოცულობა...</option>
-                  <option>1 ლ</option><option>4 ლ</option><option>5 ლ</option><option>10 ლ</option><option>20 ლ</option><option>60 ლ</option><option>205 ლ</option>
-                </select>
-              </div>
-              <div class="form-group specs-oil" style="display:none">
-                <label class="form-label">დანიშნულება</label>
-                <select class="form-select" id="specOilApp">
-                  <option value="">დანიშნულება...</option>
-                  <option>ძრავი</option><option>გადაცემათა კოლოფი</option><option>ჰიდრავლიკა</option><option>სამუხრუჭე</option>
-                </select>
-              </div>
-              <!-- FILTER specs -->
-              <div class="form-group specs-filter" style="display:none">
-                <label class="form-label">ტიპი</label>
-                <select class="form-select" id="specFilterType">
-                  <option value="">ტიპი...</option>
-                  <option>ზეთის ფილტრი</option><option>საჰაერო ფილტრი</option><option>საწვავის ფილტრი</option><option>სალონის ფილტრი</option>
-                </select>
-              </div>
-              <div class="form-group specs-filter" style="display:none">
-                <label class="form-label">OEM ნომერი</label>
-                <input class="form-input" id="specOEM" placeholder="მაგ: 90915-YZZD2">
-              </div>
-              <div class="form-group specs-filter" style="display:none">
-                <label class="form-label">ავტომობილის მარკა</label>
-                <input class="form-input" id="specCarMake" placeholder="მაგ: Toyota, BMW">
-              </div>
-              <!-- Price -->
+              <!-- Rental pricing -->
               <div class="form-group">
-                <label class="form-label">ფასი (₾)</label>
-                <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
+                <label class="form-label">დღიური ღირებულება (₾) <span class="required">*</span></label>
+                <input class="form-input" id="prodDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
-              <!-- Discount -->
               <div class="form-group">
-                <label class="form-label">ფასდაკლება (₾)</label>
-                <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+                <label class="form-label">კვირის ღირებულება (₾)</label>
+                <input class="form-input" id="prodWeeklyRate" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
-              <!-- Unit -->
               <div class="form-group">
-                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-                  ერთეული
-                  <span onclick="toggleUnitMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
-                </label>
-                <select class="form-select" id="prodUnit">
-                  <option value="ც">ცალი</option>
-                  <option value="ლ">ლიტრი</option>
-                  <option value="კგ">კგ</option>
-                  <option value="ტ">ტონა</option>
-                  <option value="მ²">მ²</option>
-                  <option value="მ³">მ³</option>
-                  <option value="მ">მეტრი</option>
-                  <option value="კონტ">კონტეინერი</option>
-                  <option value="ტომ">ტომარა</option>
+                <label class="form-label">გირაო (₾)</label>
+                <input class="form-input" id="prodDeposit" type="number" min="0" step="0.01" placeholder="0.00">
+              </div>
+              <!-- Status -->
+              <div class="form-group">
+                <label class="form-label">სტატუსი</label>
+                <select class="form-select" id="prodStatus">
+                  <option value="available">✅ ხელმისაწვდომია</option>
+                  <option value="rented">🔴 გაქირავებულია</option>
+                  <option value="maintenance">🛠 შეკეთებაშია</option>
                 </select>
-                <div id="unitMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-                  <div style="display:flex;gap:6px;margin-bottom:10px">
-                    <input class="form-input" id="newUnitValue" placeholder="მნიშვნელობა (მაგ: ლ)" style="flex:1;font-size:13px;padding:6px 10px">
-                    <input class="form-input" id="newUnitLabel" placeholder="სახელი (მაგ: ლიტრი)" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addUnit()">
-                    <button class="btn btn-primary" onclick="addUnit()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-                  </div>
-                  <div id="unitList"></div>
-                </div>
               </div>
               <!-- Description -->
               <div class="form-group full">
@@ -618,7 +517,7 @@
             <div>
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კატეგორია</div>
               <select id="excelCategory" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff">
-                <option value="tire">🛞 საბურავები</option>
+                <option value="">ყველა კატეგორია</option>
               </select>
             </div>
             <div>
@@ -717,7 +616,7 @@
             <div>
               <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კატეგორია</div>
               <select id="priceCategory" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff">
-                <option value="tire">🛞 საბურავები</option>
+                <option value="">ყველა კატეგორია</option>
               </select>
             </div>
             <div>
@@ -729,11 +628,11 @@
               <input id="colName" value="G" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
             </div>
             <div>
-              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">ფასის სვეტი</div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">დღიური ღირ. სვეტი</div>
               <input id="colPrice" value="AJ" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
             </div>
             <div>
-              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">ფასდაკლების სვეტი</div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კვირის ღირ. სვეტი</div>
               <input id="colDiscount" value="AI" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
             </div>
           </div>
@@ -921,43 +820,6 @@
       </div>
     </div>
 
-    <!-- Card Generator Page -->
-    <div class="page" id="page-card-gen">
-      <div class="page-header">
-        <div class="page-title">ბარათის გენერატორი</div>
-      </div>
-      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
-        <div style="flex:1;min-width:280px;max-width:420px">
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-header"><span class="card-title">პროდუქტის ძიება</span></div>
-            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
-              <div>
-                <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">კოდი</label>
-                <input class="form-input" id="cgCodeInput" placeholder="მაგ. TR12345..." autocomplete="off" style="margin-bottom:0" onkeydown="if(event.key==='Enter')cgSearch()">
-              </div>
-              <div>
-                <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">სახელი</label>
-                <input class="form-input" id="cgNameInput" placeholder="მაგ. Bridgestone..." autocomplete="off" style="margin-bottom:0" onkeydown="if(event.key==='Enter')cgSearch()">
-              </div>
-              <button class="btn btn-secondary" onclick="cgSearch()" style="width:100%">🔍 ძიება</button>
-              <div id="cgSearchResults" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.10);overflow:hidden;max-height:260px;overflow-y:auto"></div>
-            </div>
-          </div>
-          <div id="cgSelectedInfo" style="display:none" class="card">
-            <div style="padding:14px 18px;font-size:13px;color:var(--gray-mid)">არჩეული: <span id="cgSelectedName" style="font-weight:700;color:var(--dark)"></span></div>
-            <div style="padding:0 18px 14px">
-              <button class="btn" id="cgDownloadBtn" onclick="cgDownload()" style="width:100%">⬇ PNG გადმოწერა</button>
-            </div>
-          </div>
-        </div>
-        <div id="cgPreviewWrap" style="display:none;flex-shrink:0">
-          <div class="card" style="padding:20px;display:inline-block">
-            <canvas id="cgCanvas" style="display:block;border-radius:18px;box-shadow:0 4px 28px rgba(0,0,0,0.14)"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -996,129 +858,62 @@
     </div>
     <div class="product-form">
       <input type="hidden" id="editProdId">
-      <input type="hidden" id="editProdType">
       <div style="padding:10px 20px 0;display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--gray-mid)">პროდუქტის კოდი:</span>
         <input id="editCodeDisplay" style="font-family:monospace;font-size:14px;font-weight:700;color:var(--gray-dark);background:var(--gray-light);padding:2px 10px;border-radius:6px;letter-spacing:1px;border:1.5px solid var(--border);outline:none;width:140px" />
       </div>
-      <!-- Type selector -->
+      <!-- Category selector -->
       <div style="padding:16px 20px 0">
-        <div class="form-label" style="margin-bottom:10px">პროდუქტის ტიპი</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button id="editTypeBtn_tire" onclick="editSelectType('tire')" style="flex:1;min-width:90px;padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--dark);transition:all 0.15s">
-            <span style="font-size:28px">🛞</span>საბურავი
-          </button>
-        </div>
+        <div class="form-label" style="margin-bottom:10px">კატეგორია</div>
+        <select class="form-select" id="editProdCategory" onchange="editSelectCategory(this.value, document.getElementById('editBrand').value)"><option value="">კატეგორია...</option></select>
       </div>
       <div class="form-grid" style="margin-top:8px">
         <!-- Name -->
         <div class="form-group">
-          <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
-          <input class="form-input" id="editName" placeholder="მაგ: Michelin Pilot Sport 4">
+          <label class="form-label">ინსტრუმენტის სახელი <span class="required">*</span></label>
+          <input class="form-input" id="editName" placeholder="მაგ: Bosch GSB 13 RE">
         </div>
         <!-- Brand -->
         <div class="form-group">
           <label class="form-label">ბრენდი</label>
           <select class="form-select" id="editBrand"><option value="">ბრენდი...</option></select>
         </div>
-        <!-- TIRE specs -->
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">სიგანე</label>
-          <select class="form-select" id="editSpecWidth"><option value="">სიგანე...</option></select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">პროფილი</label>
-          <select class="form-select" id="editSpecProfile"><option value="">პროფილი...</option></select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">დიამეტრი (R)</label>
-          <select class="form-select" id="editSpecRim"><option value="">დიამეტრი...</option></select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">სეზონი</label>
-          <select class="form-select" id="editSpecSeason"><option value="">სეზონი...</option></select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">ავტომობილის ტიპი</label>
-          <select class="form-select" id="editSpecVehicleType">
-            <option value="მსუბუქი ავტომობილი">🚗 მსუბუქი ავტომობილი</option>
-            <option value="ჯიპი/პიკაპი">🚙 ჯიპი/პიკაპი</option>
-            <option value="მსუბუქი სატვირთო">🚐 მსუბუქი სატვირთო</option>
-            <option value="სატვირთო">🚛 სატვირთო</option>
-          </select>
-        </div>
-        <div class="form-group edit-specs-tire" style="display:none">
-          <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
-          <input class="form-input" id="editAltSize" placeholder="მაგ: 37x13.50R17LT">
-        </div>
-        <!-- OIL specs -->
-        <div class="form-group edit-specs-oil" style="display:none">
-          <label class="form-label">ტიპი</label>
-          <select class="form-select" id="editSpecOilType">
-            <option value="">ტიპი...</option>
-            <option>სინთეტიკური</option><option>ნახევრად სინთეტიკური</option><option>მინერალური</option>
-          </select>
-        </div>
-        <div class="form-group edit-specs-oil" style="display:none">
-          <label class="form-label">სიბლანტე</label>
-          <select class="form-select" id="editSpecViscosity">
-            <option value="">სიბლანტე...</option>
-            <option>0W-20</option><option>5W-30</option><option>5W-40</option><option>10W-30</option><option>10W-40</option><option>15W-40</option><option>20W-50</option>
-          </select>
-        </div>
-        <div class="form-group edit-specs-oil" style="display:none">
-          <label class="form-label">მოცულობა</label>
-          <select class="form-select" id="editSpecVolume">
-            <option value="">მოცულობა...</option>
-            <option>1 ლ</option><option>4 ლ</option><option>5 ლ</option><option>10 ლ</option><option>20 ლ</option><option>60 ლ</option><option>205 ლ</option>
-          </select>
-        </div>
-        <div class="form-group edit-specs-oil" style="display:none">
-          <label class="form-label">დანიშნულება</label>
-          <select class="form-select" id="editSpecOilApp">
-            <option value="">დანიშნულება...</option>
-            <option>ძრავი</option><option>გადაცემათა კოლოფი</option><option>ჰიდრავლიკა</option><option>სამუხრუჭე</option>
-          </select>
-        </div>
-        <!-- FILTER specs -->
-        <div class="form-group edit-specs-filter" style="display:none">
-          <label class="form-label">ტიპი</label>
-          <select class="form-select" id="editSpecFilterType">
-            <option value="">ტიპი...</option>
-            <option>ზეთის ფილტრი</option><option>საჰაერო ფილტრი</option><option>საწვავის ფილტრი</option><option>სალონის ფილტრი</option>
-          </select>
-        </div>
-        <div class="form-group edit-specs-filter" style="display:none">
-          <label class="form-label">OEM ნომერი</label>
-          <input class="form-input" id="editSpecOEM" placeholder="მაგ: 90915-YZZD2">
-        </div>
-        <div class="form-group edit-specs-filter" style="display:none">
-          <label class="form-label">ავტომობილის მარკა</label>
-          <input class="form-input" id="editSpecCarMake" placeholder="მაგ: Toyota, BMW">
-        </div>
-        <!-- Price -->
+        <!-- Instrument specs -->
         <div class="form-group">
-          <label class="form-label">ფასი (₾)</label>
-          <input class="form-input" id="editPrice" type="number" min="0" step="0.01" placeholder="0.00">
+          <label class="form-label">მოდელი</label>
+          <input class="form-input" id="editSpecBrandModel" placeholder="მაგ: GSB 13 RE">
         </div>
-        <!-- Discount -->
         <div class="form-group">
-          <label class="form-label">ფასდაკლება (₾)</label>
-          <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+          <label class="form-label">კვების წყარო</label>
+          <select class="form-select" id="editSpecPowerSource">
+            <option value="">კვების წყარო...</option>
+            <option>ელექტრო</option><option>ბენზინი</option><option>დიზელი</option><option>აკუმულატორი</option><option>მექანიკური</option>
+          </select>
         </div>
-        <!-- Unit -->
         <div class="form-group">
-          <label class="form-label">ერთეული</label>
-          <select class="form-select" id="editUnit">
-            <option value="ც">ცალი</option>
-            <option value="ლ">ლიტრი</option>
-            <option value="კგ">კგ</option>
-            <option value="ტ">ტონა</option>
-            <option value="მ²">მ²</option>
-            <option value="მ³">მ³</option>
-            <option value="მ">მეტრი</option>
-            <option value="კონტ">კონტეინერი</option>
-            <option value="ტომ">ტომარა</option>
+          <label class="form-label">წონა (კგ)</label>
+          <input class="form-input" id="editSpecWeight" type="number" min="0" step="0.1" placeholder="0.0">
+        </div>
+        <!-- Rental pricing -->
+        <div class="form-group">
+          <label class="form-label">დღიური ღირებულება (₾)</label>
+          <input class="form-input" id="editDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">კვირის ღირებულება (₾)</label>
+          <input class="form-input" id="editWeeklyRate" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">გირაო (₾)</label>
+          <input class="form-input" id="editDeposit" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <!-- Status -->
+        <div class="form-group">
+          <label class="form-label">სტატუსი</label>
+          <select class="form-select" id="editStatus">
+            <option value="available">✅ ხელმისაწვდომია</option>
+            <option value="rented">🔴 გაქირავებულია</option>
+            <option value="maintenance">🛠 შეკეთებაშია</option>
           </select>
         </div>
         <!-- Description -->
@@ -1333,14 +1128,6 @@ async function showApp(email) {
   const { data: { user } } = await supabase.auth.getUser();
   _me.name = user?.user_metadata?.full_name || user?.user_metadata?.name || email.split('@')[0];
   initApp();
-  setTimeout(_addCargoRimsToBrands, 1500);
-  setTimeout(_migrateCargoRims, 2000);
-  setTimeout(_addMissingCargoProducts, 3000);
-  setTimeout(_fixCargoProductsMeta, 3500);
-  setTimeout(_migrateCargoVehicleType, 4000);
-  setTimeout(_fixR13CProfile, 4500);
-  setTimeout(_fixSeasonComma, 5000);
-  setTimeout(_fixLTVehicleType, 5500);
 }
 
 // ─── Auth ───
@@ -1639,7 +1426,7 @@ function getCountryForBrand(name) {
 
 // ─── Brands ───
 let _brands = [];
-let _currentProdType = '';
+let _currentCategory = '';
 
 async function loadBrands(type) {
   const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
@@ -1684,15 +1471,15 @@ window.addBrand = async function() {
   const countryEl = document.getElementById('newBrandCountry');
   const name = input.value.trim();
   const country = countryEl ? countryEl.value : '';
-  if (!name || !_currentProdType) return;
+  if (!name || !_currentCategory) return;
   if (_brands.find(b => b.name.toLowerCase() === name.toLowerCase())) { showToast('ეს ბრენდი უკვე არსებობს', 'error'); return; }
-  const { error } = await supabase.from('brands').insert({ product_type: _currentProdType, name, country: country || null });
+  const { error } = await supabase.from('brands').insert({ product_type: _currentCategory, name, country: country || null });
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   if (country) _saveBrandCountry(name, country);
   input.value = '';
   if (countryEl) countryEl.value = '🇨🇳 ჩინეთი';
   showToast('✓ ბრენდი დაემატა', 'success');
-  loadBrands(_currentProdType);
+  loadBrands(_currentCategory);
 };
 
 window.deleteBrand = async function(name, productType) {
@@ -1701,190 +1488,28 @@ window.deleteBrand = async function(name, productType) {
   if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
   const { error: pe } = await supabase.from('products').delete().filter('specs->>brand', 'eq', name);
   if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
-  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || _currentProdType);
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || _currentCategory);
   if (be) { alert('ბრენდის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
   _removeBrandCountry(name);
   showToast('ბრენდი წაიშალა', 'error');
-  loadBrands(_currentProdType);
+  loadBrands(_currentCategory);
   loadProductsList();
 };
 
-// ─── Seasons ───
-let _seasons = [];
+window.editSelectCategory = function(category, selectedBrand) {
+  document.getElementById('editProdCategory').value = category;
+  loadEditBrands(category, selectedBrand);
+};
 
-async function loadSeasons(pendingEditValue) {
-  const { data } = await supabase.from('brands').select('*').eq('product_type', 'tire_season').order('name');
-  _seasons = data || [];
-  const opts = '<option value="">სეზონი...</option>' + _seasons.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-  const addEl = document.getElementById('specSeason');
-  if (addEl) addEl.innerHTML = opts;
-  const editEl = document.getElementById('editSpecSeason');
-  if (editEl) { editEl.innerHTML = opts; if (pendingEditValue) editEl.value = pendingEditValue; }
-  renderSeasonList();
-}
-
-function renderSeasonList() {
-  const el = document.getElementById('seasonList');
-  if (!el) return;
-  if (!_seasons.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">სეზონი არ არის</div>'; return; }
-  el.innerHTML = _seasons.map(s => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:14px">${s.name}</span>
-      <button onclick="deleteSeason('${s.name.replace(/'/g,"\\'")}','${s.product_type}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
-    </div>
-  `).join('');
-}
-
-window.toggleSeasonMgr = function() {
-  const p = document.getElementById('seasonMgrPanel');
+window.toggleCategoryMgr = function() {
+  const p = document.getElementById('categoryMgrPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
 };
 
-window.addSeason = async function() {
-  const input = document.getElementById('newSeasonInput');
-  const name = input.value.trim();
-  if (!name) return;
-  if (_seasons.find(s => s.name.toLowerCase() === name.toLowerCase())) { showToast('ეს სეზონი უკვე არსებობს', 'error'); return; }
-  const { error } = await supabase.from('brands').insert({ product_type: 'tire_season', name });
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  input.value = '';
-  showToast('✓ სეზონი დაემატა', 'success');
-  loadSeasons();
-};
-
-window.deleteSeason = async function(name, productType) {
-  if (!confirm(`სეზონი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ სეზონით ასევე წაიშლება!`)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
-  const { error: pe } = await supabase.from('products').delete().filter('specs->>season', 'eq', name);
-  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
-  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || 'tire_season');
-  if (be) { alert('სეზონის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
-  showToast('სეზონი წაიშალა', 'error');
-  loadSeasons();
-  loadProductsList();
-};
-
-// ─── Tire Spec Managers (width, profile, rim) ───
-const _tireSpecData = { width: [], profile: [], rim: [] };
-const _tireSpecCfg = {
-  width:   { type: 'tire_width',   addId: 'specWidth',   editId: 'editSpecWidth',   inputId: 'newWidthInput',   listId: 'widthList',   panelId: 'widthMgrPanel',   emptyOpt: 'სიგანე...' },
-  profile: { type: 'tire_profile', addId: 'specProfile', editId: 'editSpecProfile', inputId: 'newProfileInput', listId: 'profileList', panelId: 'profileMgrPanel', emptyOpt: 'პროფილი...' },
-  rim:     { type: 'tire_rim',     addId: 'specRim',     editId: 'editSpecRim',     inputId: 'newRimInput',     listId: 'rimList',     panelId: 'rimMgrPanel',     emptyOpt: 'დიამეტრი...' },
-};
-
-async function loadTireSpec(key, pendingEditValue) {
-  const cfg = _tireSpecCfg[key];
-  const { data } = await supabase.from('brands').select('*').eq('product_type', cfg.type).order('name');
-  _tireSpecData[key] = data || [];
-  const opts = `<option value="">${cfg.emptyOpt}</option>` + _tireSpecData[key].map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-  const addEl = document.getElementById(cfg.addId);
-  if (addEl) addEl.innerHTML = opts;
-  const editEl = document.getElementById(cfg.editId);
-  if (editEl) { editEl.innerHTML = opts; if (pendingEditValue) editEl.value = pendingEditValue; }
-  renderTireSpecList(key);
-}
-
-function renderTireSpecList(key) {
-  const cfg = _tireSpecCfg[key];
-  const el = document.getElementById(cfg.listId);
-  if (!el) return;
-  const items = _tireSpecData[key];
-  if (!items.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ჩანაწერი არ არის</div>'; return; }
-  el.innerHTML = items.map(s => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:14px">${s.name}</span>
-      <button onclick="deleteTireSpec('${key}','${s.name.replace(/'/g,"\\'")}','${s.product_type}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
-    </div>
-  `).join('');
-}
-
-window.toggleTireSpecMgr = function(key) {
-  const panel = document.getElementById(_tireSpecCfg[key].panelId);
-  if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-};
-
-window.addTireSpec = async function(key) {
-  const cfg = _tireSpecCfg[key];
-  const input = document.getElementById(cfg.inputId);
-  const name = input.value.trim();
-  if (!name) return;
-  if (_tireSpecData[key].find(s => s.name === name)) { showToast('უკვე არსებობს', 'error'); return; }
-  const { error } = await supabase.from('brands').insert({ product_type: cfg.type, name });
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  input.value = '';
-  showToast('✓ დაემატა', 'success');
-  loadTireSpec(key);
-};
-
-window.deleteTireSpec = async function(key, name, productType) {
-  if (!confirm(`"${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ${key === 'width' ? 'სიგანით' : key === 'profile' ? 'პროფილით' : 'დიამეტრით'} ასევე წაიშლება!`)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
-  const { error: pe } = await supabase.from('products').delete().filter(`specs->>${key}`, 'eq', name);
-  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
-  const cfg = _tireSpecCfg[key];
-  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || cfg.type);
-  if (be) { alert('სპეციფიკაციის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
-  showToast('წაიშალა', 'error');
-  loadTireSpec(key);
-  loadProductsList();
-};
-
-window.editSelectType = function(type, selectedBrand, specs) {
-  document.getElementById('editProdType').value = type;
-  ['tire','oil','filter'].forEach(t => {
-    const btn = document.getElementById('editTypeBtn_' + t);
-    if (!btn) return;
-    if (t === type) {
-      btn.style.borderColor = 'var(--orange)';
-      btn.style.background = '#fff5f0';
-      btn.style.color = 'var(--orange)';
-    } else {
-      btn.style.borderColor = 'var(--border)';
-      btn.style.background = '#fff';
-      btn.style.color = 'var(--dark)';
-    }
-  });
-  document.querySelectorAll('.edit-specs-tire,.edit-specs-oil,.edit-specs-filter').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.edit-specs-' + type).forEach(el => el.style.display = '');
-  loadEditBrands(type, selectedBrand);
-  if (type === 'tire') {
-    loadSeasons(specs?.season || '');
-    loadTireSpec('width', specs?.width || '');
-    loadTireSpec('profile', specs?.profile || '');
-    loadTireSpec('rim', specs?.rim || '');
-    const vt = document.getElementById('editSpecVehicleType');
-    if (vt) vt.value = specs?.vehicle_type || 'მსუბუქი ავტომობილი';
-  }
-};
-
-window.selectProdType = function(type) {
-  _currentProdType = type;
-  // highlight selected button
-  ['tire','oil','filter'].forEach(t => {
-    const btn = document.getElementById('typeBtn_' + t);
-    if (!btn) return;
-    if (t === type) {
-      btn.style.borderColor = 'var(--orange)';
-      btn.style.background = '#fff5f0';
-      btn.style.color = 'var(--orange)';
-    } else {
-      btn.style.borderColor = 'var(--border)';
-      btn.style.background = '#fff';
-      btn.style.color = 'var(--dark)';
-    }
-  });
-  // show/hide spec fields
-  document.querySelectorAll('.specs-tire,.specs-oil,.specs-filter').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.specs-' + type).forEach(el => el.style.display = '');
-  // set default unit
-  const unitMap = { tire: 'ც', oil: 'ლ', filter: 'ც' };
-  document.getElementById('prodUnit').value = unitMap[type] || 'ც';
-  // show form
-  document.getElementById('prodFormBody').style.display = 'block';
-  loadBrands(type);
-  if (type === 'tire') { loadSeasons(); loadTireSpec('width'); loadTireSpec('profile'); loadTireSpec('rim'); }
+window.selectProdCategory = function(category) {
+  _currentCategory = category;
+  document.getElementById('prodFormBody').style.display = category ? 'block' : 'none';
+  if (category) loadBrands(category);
 };
 
 // ─── Categories ───
@@ -1896,7 +1521,10 @@ async function loadCategories() {
   const opts = '<option value="">კატეგორია...</option>' + _categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   const catEl = document.getElementById('prodCategory');
   if (catEl) catEl.innerHTML = opts;
-  // editCategory removed from new modal
+  const editCatEl = document.getElementById('editProdCategory');
+  if (editCatEl) editCatEl.innerHTML = opts;
+  const filterOpts = '<option value="">ყველა კატეგორია</option>' + _categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  ['excelCategory','priceCategory'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = filterOpts; });
   renderCategoryList();
 }
 
@@ -1950,34 +1578,19 @@ async function genProductCode() {
 
 window.addProduct = async function() {
   const name = document.getElementById('prodName').value.trim();
-  if (!name || !_currentProdType) {
+  if (!name || !_currentCategory) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
   // collect specs
-  const specs = { brand: document.getElementById('prodBrand').value || '' };
-  if (_currentProdType === 'tire') {
-    specs.width       = document.getElementById('specWidth').value;
-    specs.profile     = document.getElementById('specProfile').value;
-    specs.rim         = document.getElementById('specRim').value;
-    specs.season        = document.getElementById('specSeason').value;
-    specs.vehicle_type  = document.getElementById('specVehicleType').value || 'მსუბუქი ავტომობილი';
-    const _altSize = document.getElementById('specAltSize').value.trim();
-    if (_altSize) specs.alt_size = _altSize;
-    if (!specs.brand)   { showToast('ბრენდი სავალდებულოა', 'error'); return; }
-    if (!specs.width)   { showToast('სიგანე სავალდებულოა', 'error'); return; }
-    if (!specs.profile) { showToast('პროფილი სავალდებულოა', 'error'); return; }
-    if (!specs.rim)     { showToast('დიამეტრი სავალდებულოა', 'error'); return; }
-    if (!specs.season)  { showToast('სეზონი სავალდებულოა', 'error'); return; }
-  } else if (_currentProdType === 'oil') {
-    specs.oil_type    = document.getElementById('specOilType').value;
-    specs.viscosity   = document.getElementById('specViscosity').value;
-    specs.volume      = document.getElementById('specVolume').value;
-    specs.application = document.getElementById('specOilApp').value;
-  } else if (_currentProdType === 'filter') {
-    specs.filter_type = document.getElementById('specFilterType').value;
-    specs.oem         = document.getElementById('specOEM').value.trim();
-    specs.car_make    = document.getElementById('specCarMake').value.trim();
-  }
+  const specs = {
+    brand: document.getElementById('prodBrand').value || '',
+    brand_model: document.getElementById('specBrandModel').value.trim(),
+    power_source: document.getElementById('specPowerSource').value,
+    weight: document.getElementById('specWeight').value ? parseFloat(document.getElementById('specWeight').value) : null,
+  };
+  if (!specs.brand) { showToast('ბრენდი სავალდებულოა', 'error'); return; }
+  const dailyRate = parseFloat(document.getElementById('prodDailyRate').value) || 0;
+  if (!dailyRate) { showToast('დღიური ღირებულება სავალდებულოა', 'error'); return; }
   const btn = document.getElementById('addProductBtn');
   btn.disabled = true; btn.textContent = 'ემატება...';
   try {
@@ -2014,21 +1627,16 @@ window.addProduct = async function() {
     } else {
       showToast('კოდი სავალდებულოა ან ჩართე ავტო გენერაცია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return;
     }
-    const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
-    const priceRaw = parseFloat(document.getElementById('prodPrice').value) || 0;
-    const discountPrice = parseFloat(document.getElementById('prodDiscount').value) || 0;
-    const finalPrice = discountPrice > 0 ? discountPrice : priceRaw;
-    const oldPriceVal = discountPrice > 0 ? priceRaw : null;
-    if (discountPrice > 0) specs.discount_price = discountPrice;
+    const weeklyRateVal = document.getElementById('prodWeeklyRate').value;
     const { error } = await supabase.from('products').insert({
       name,
-      category: TYPE_LABELS[_currentProdType] || _currentProdType,
-      product_type: _currentProdType,
+      category: _currentCategory,
       specs,
       country: getCountryForBrand(specs.brand) || null,
-      price: finalPrice,
-      old_price: oldPriceVal,
-      unit: document.getElementById('prodUnit').value,
+      daily_rate: dailyRate,
+      weekly_rate: weeklyRateVal ? parseFloat(weeklyRateVal) : null,
+      security_deposit: parseFloat(document.getElementById('prodDeposit').value) || 0,
+      status: document.getElementById('prodStatus').value || 'available',
       description: getDescValue('prodDescRows'),
       image_url: imageUrl,
       active: false,
@@ -2046,20 +1654,17 @@ window.addProduct = async function() {
 };
 
 window.clearForm = function() {
-  _currentProdType = '';
+  _currentCategory = '';
   // reset all select/input fields
-  ['prodName','prodPrice','prodDiscount','prodBrand','prodUnit',
-   'specCustomCode','specWidth','specProfile','specRim','specSeason','specAltSize',
-   'specOilType','specViscosity','specVolume','specOilApp',
-   'specFilterType','specOEM','specCarMake']
+  ['prodName','prodDailyRate','prodWeeklyRate','prodDeposit','prodBrand',
+   'specCustomCode','specBrandModel','specPowerSource','specWeight']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  const vt = document.getElementById('specVehicleType');
-  if (vt) vt.value = 'მსუბუქი ავტომობილი';
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
   const specCustomCode = document.getElementById('specCustomCode');
   if (specCustomCode) { specCustomCode.style.display = ''; }
-  document.getElementById('prodUnit').value = 'ც';
+  document.getElementById('prodStatus').value = 'available';
+  document.getElementById('prodCategory').value = '';
   // clear textarea
   const descEl = document.getElementById('prodDescRows');
   if (descEl) descEl.value = '';
@@ -2067,13 +1672,7 @@ window.clearForm = function() {
   prodFileData = null;
   ['prodFile','prodFileCamera'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
-  // reset type buttons and hide form
-  ['tire','oil','filter'].forEach(t => {
-    const btn = document.getElementById('typeBtn_' + t);
-    if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.background = '#fff'; btn.style.color = 'var(--dark)'; }
-  });
   document.getElementById('prodFormBody').style.display = 'none';
-  document.querySelectorAll('.specs-tire,.specs-oil,.specs-filter').forEach(el => el.style.display = 'none');
 };
 
 async function loadProductsList() {
@@ -2106,19 +1705,17 @@ async function loadProductsList() {
   renderProductRows(rows);
 }
 
+const STATUS_BADGES = {
+  available:   '<span style="font-size:10px;font-weight:700;color:#166534;background:#dcfce7;border-radius:6px;padding:2px 6px">✅ ხელმისაწვდომია</span>',
+  rented:      '<span style="font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:2px 6px">🔴 გაქირავებული</span>',
+  maintenance: '<span style="font-size:10px;font-weight:700;color:#92400e;background:#fef3c7;border-radius:6px;padding:2px 6px">🛠 შეკეთებაში</span>',
+};
+
 function productRowHTML(p, isActive) {
-  const hasDiscount = p.specs?.discount_price > 0;
-  const isSalesOn = !!p.old_price;
-  const salesBtn = hasDiscount
-    ? (isSalesOn
-        ? `<button class="btn btn-sm" onclick="salesOff('${p.id}')" style="background:#dcfce7;color:#166534;border:1px solid #86efac;font-weight:700" title="ფასდაკლება გააქტიურებულია — გამორთვა">Sales ON</button>`
-        : `<button class="btn btn-sm" onclick="salesOn('${p.id}')" style="background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1" title="ფასდაკლების გააქტიურება">Sales OFF</button>`)
-    : '';
   const activeButtons = `
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
-      ${salesBtn}
       <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa" title="არააქტიურში გადატანა">OFF</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none">🗑 წაშლა</button>
     </div>`;
@@ -2126,7 +1723,6 @@ function productRowHTML(p, isActive) {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
-      ${salesBtn}
       <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0" title="აქტიურში გადატანა">ON</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none" title="წაშლა">🗑 წაშლა</button>
     </div>`;
@@ -2139,10 +1735,11 @@ function productRowHTML(p, isActive) {
     <div style="justify-self:start;min-width:0">
       <div class="prod-name">${p.name}</div>
       ${p.added_by ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">👤 ${p.added_by}</div>` : ''}
+      <div style="margin-top:2px">${STATUS_BADGES[p.status] || ''}</div>
     </div>
     <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
-    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.old_price ? `<span style="font-size:11px;color:var(--gray-mid);text-decoration:line-through;display:block">${parseFloat(p.old_price).toFixed(2)} ₾</span>` : ''}${p.price ? parseFloat(p.price).toFixed(2) + ' ₾' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
+    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.daily_rate ? parseFloat(p.daily_rate).toFixed(2) + ' ₾/დღე' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}${p.weekly_rate ? `<span style="font-size:11px;color:var(--gray-mid);display:block">${parseFloat(p.weekly_rate).toFixed(2)} ₾/კვირა</span>` : ''}</span>
     ${isActive ? activeButtons : inactiveButtons}
   </div>`;
 }
@@ -2215,30 +1812,20 @@ window.editProduct = function(id) {
   const specs = p.specs || {};
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
-  document.getElementById('editPrice').value = p.old_price || p.price || '';
-  document.getElementById('editDiscount').value = p.old_price ? p.price : (p.specs?.discount_price || '');
-  document.getElementById('editUnit').value = p.unit || 'ც';
+  document.getElementById('editDailyRate').value = p.daily_rate || '';
+  document.getElementById('editWeeklyRate').value = p.weekly_rate || '';
+  document.getElementById('editDeposit').value = p.security_deposit || '';
+  document.getElementById('editStatus').value = p.status || 'available';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editCodeDisplay').value = p.code || '';
   document.getElementById('editFile').value = '';
 
-  // type + brand + specs
-  const type = p.product_type || 'tire';
-  editSelectType(type, specs.brand || '', specs);
-
-  if (type === 'tire') {
-    document.getElementById('editAltSize').value = specs.alt_size || '';
-  } else if (type === 'oil') {
-    document.getElementById('editSpecOilType').value = specs.oil_type || '';
-    document.getElementById('editSpecViscosity').value = specs.viscosity || '';
-    document.getElementById('editSpecVolume').value = specs.volume || '';
-    document.getElementById('editSpecOilApp').value = specs.application || '';
-  } else if (type === 'filter') {
-    document.getElementById('editSpecFilterType').value = specs.filter_type || '';
-    document.getElementById('editSpecOEM').value = specs.oem || '';
-    document.getElementById('editSpecCarMake').value = specs.car_make || '';
-  }
+  // category + brand + specs
+  editSelectCategory(p.category || '', specs.brand || '');
+  document.getElementById('editSpecBrandModel').value = specs.brand_model || '';
+  document.getElementById('editSpecPowerSource').value = specs.power_source || '';
+  document.getElementById('editSpecWeight').value = specs.weight ?? '';
 
   if (p.image_url) {
     showDropPreview('edit', p.image_url);
@@ -2256,13 +1843,10 @@ window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
   let newCode = document.getElementById('editCodeDisplay').value.trim();
   const name = document.getElementById('editName').value.trim();
-  const type = document.getElementById('editProdType').value;
-  const priceRaw = parseFloat(document.getElementById('editPrice').value) || 0;
-  const discountVal = parseFloat(document.getElementById('editDiscount').value) || 0;
-  const isSalesOn = !!productCache[id]?.old_price;
-  const price = (isSalesOn && discountVal > 0) ? discountVal : priceRaw;
-  const oldPrice = (isSalesOn && discountVal > 0) ? priceRaw : null;
-  if (!name || !type || !newCode) {
+  const category = document.getElementById('editProdCategory').value;
+  const dailyRate = parseFloat(document.getElementById('editDailyRate').value) || 0;
+  const weeklyRateVal = document.getElementById('editWeeklyRate').value;
+  if (!name || !category || !newCode) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
   // Check for duplicate code (excluding current product)
@@ -2282,27 +1866,12 @@ window.saveProductEdit = async function() {
     document.getElementById('editCodeDisplay').value = candidateCode;
   }
   // collect specs
-  const specs = { brand: document.getElementById('editBrand').value || '' };
-  if (type === 'tire') {
-    specs.width        = document.getElementById('editSpecWidth').value;
-    specs.profile      = document.getElementById('editSpecProfile').value;
-    specs.rim          = document.getElementById('editSpecRim').value;
-    specs.season        = document.getElementById('editSpecSeason').value;
-    specs.vehicle_type  = document.getElementById('editSpecVehicleType').value || 'მსუბუქი ავტომობილი';
-    const _editAltSize = document.getElementById('editAltSize').value.trim();
-    if (_editAltSize) specs.alt_size = _editAltSize;
-  } else if (type === 'oil') {
-    specs.oil_type    = document.getElementById('editSpecOilType').value;
-    specs.viscosity   = document.getElementById('editSpecViscosity').value;
-    specs.volume      = document.getElementById('editSpecVolume').value;
-    specs.application = document.getElementById('editSpecOilApp').value;
-  } else if (type === 'filter') {
-    specs.filter_type = document.getElementById('editSpecFilterType').value;
-    specs.oem         = document.getElementById('editSpecOEM').value.trim();
-    specs.car_make    = document.getElementById('editSpecCarMake').value.trim();
-  }
-  if (discountVal > 0) specs.discount_price = discountVal;
-  const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
+  const specs = {
+    brand: document.getElementById('editBrand').value || '',
+    brand_model: document.getElementById('editSpecBrandModel').value.trim(),
+    power_source: document.getElementById('editSpecPowerSource').value,
+    weight: document.getElementById('editSpecWeight').value ? parseFloat(document.getElementById('editSpecWeight').value) : null,
+  };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
   try {
@@ -2323,13 +1892,13 @@ window.saveProductEdit = async function() {
     const { error: updateError } = await supabase.from('products').update({
       code: newCode,
       name,
-      category: TYPE_LABELS[type] || type,
-      product_type: type,
+      category,
       specs,
       country: getCountryForBrand(specs.brand) || productCache[id]?.country || null,
-      price,
-      old_price: oldPrice,
-      unit: document.getElementById('editUnit').value,
+      daily_rate: dailyRate,
+      weekly_rate: weeklyRateVal ? parseFloat(weeklyRateVal) : null,
+      security_deposit: parseFloat(document.getElementById('editDeposit').value) || 0,
+      status: document.getElementById('editStatus').value || 'available',
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
     }).eq('id', id);
@@ -2479,27 +2048,6 @@ window.toggleSection = function(id) {
   chevron.textContent = open ? '▲' : '▼';
 };
 
-window.salesOn = async function(id) {
-  const p = productCache[id];
-  const discountPrice = p.specs?.discount_price;
-  if (!discountPrice) return;
-  const { error } = await supabase.from('products').update({ price: discountPrice, old_price: p.price }).eq('id', id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  productCache[id] = { ...p, price: discountPrice, old_price: p.price };
-  renderProductRows(Object.values(productCache));
-  showToast('✓ Sales ON — ფასდაკლება გააქტიურდა', 'success');
-};
-
-window.salesOff = async function(id) {
-  const p = productCache[id];
-  if (!p.old_price) return;
-  const { error } = await supabase.from('products').update({ price: p.old_price, old_price: null }).eq('id', id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  productCache[id] = { ...p, price: p.old_price, old_price: null };
-  renderProductRows(Object.values(productCache));
-  showToast('Sales OFF — ფასდაკლება გაუქმდა', '');
-};
-
 window.activateProduct = async function(id) {
   const { error } = await supabase.from('products').update({ active: true }).eq('id', id);
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
@@ -2588,28 +2136,17 @@ window.showProductInfo = function(id) {
   document.getElementById('infoModalName').textContent = p.name;
   const el = document.getElementById('infoModalDesc');
   const s = p.specs || {};
-  const type = p.product_type;
   const row = (k, v) => `<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid #e5e7eb"><span style="color:#555">${k}</span><span style="font-weight:600;text-align:right">${v}</span></div>`;
   let rows = '';
   if (s.brand) rows += row('ბრენდი', s.brand);
-  if (type === 'tire') {
-    if (s.width && s.rim) rows += row('ზომა', `${s.profile ? s.width+'/'+s.profile+' '+s.rim : s.width+s.rim}${s.alt_size ? ' (' + s.alt_size + ')' : ''}`);
-    if (s.season) rows += row('სეზონი', s.season);
-  } else if (type === 'oil') {
-    if (s.oil_type)    rows += row('ტიპი', s.oil_type);
-    if (s.viscosity)   rows += row('სიბლანტე', s.viscosity);
-    if (s.volume)      rows += row('მოცულობა', s.volume);
-    if (s.application) rows += row('დანიშნულება', s.application);
-  } else if (type === 'filter') {
-    if (s.filter_type) rows += row('ფილტრის ტიპი', s.filter_type);
-    if (s.oem)         rows += row('OEM ნომერი', s.oem);
-    if (s.car_make)    rows += row('ავტომობ. მარკა', s.car_make);
-  }
+  if (s.brand_model) rows += row('მოდელი', s.brand_model);
+  if (s.power_source) rows += row('კვების წყარო', s.power_source);
+  if (s.weight) rows += row('წონა', s.weight + ' კგ');
   if (p.country) rows += row('ქვეყანა', p.country);
-  const priceVal = p.old_price
-    ? `<span style="text-decoration:line-through;color:#aaa;margin-right:6px">${p.old_price} ₾</span><span style="color:#16a34a">${p.price} ₾</span>`
-    : `${p.price} ₾`;
-  rows += row('ფასი', priceVal);
+  if (p.daily_rate) rows += row('დღიური ღირებულება', p.daily_rate + ' ₾');
+  if (p.weekly_rate) rows += row('კვირის ღირებულება', p.weekly_rate + ' ₾');
+  if (p.security_deposit) rows += row('გირაო', p.security_deposit + ' ₾');
+  if (p.status) rows += row('სტატუსი', STATUS_BADGES[p.status] || p.status);
   let html = '';
   if (rows) html += `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--dark);margin-bottom:4px">სპეციფიკაცია</div>${rows}</div>`;
   if (p.description) {
@@ -3234,26 +2771,13 @@ window.invRowCode = function(i, code) {
   }
   // Build full name with specs
   const s = match.specs || {};
-  const type = match.product_type;
   const parts = [];
   if (s.brand) parts.push(s.brand);
   if (match.name) parts.push(match.name);
-  if (type === 'tire') {
-    if (s.width && s.rim) parts.push(s.profile ? s.width + '/' + s.profile + ' ' + s.rim : s.width + s.rim);
-    if (s.alt_size) parts.push(s.alt_size);
-    if (s.season) parts.push(s.season);
-  } else if (type === 'oil') {
-    if (s.viscosity) parts.push(s.viscosity);
-    if (s.oil_type) parts.push(s.oil_type);
-    if (s.volume) parts.push(s.volume);
-  } else if (type === 'filter') {
-    if (s.filter_type) parts.push(s.filter_type);
-    if (s.oem) parts.push(s.oem);
-  }
+  if (s.brand_model) parts.push(s.brand_model);
   const fullName = parts.filter(Boolean).join(' ');
   invGenRows[i].name = fullName;
   invGenRows[i]._codeMatched = true;
-  if (match.unit) invGenRows[i].unit = match.unit;
   // Update DOM directly without re-rendering whole list
   const nameEl = document.getElementById('inv-name-' + i);
   if (nameEl) nameEl.value = fullName;
@@ -3384,16 +2908,14 @@ async function handleExcelFile(file) {
     }
 
     // 2. Fetch product codes+names from Supabase filtered by selected category
-    const _excelCat = document.getElementById('excelCategory')?.value || 'tire';
+    const _excelCat = document.getElementById('excelCategory')?.value || '';
     let siteProducts = [];
     let from = 0;
     const PAGE = 1000;
     while (true) {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, code, name')
-        .eq('product_type', _excelCat)
-        .range(from, from + PAGE - 1);
+      let q = supabase.from('products').select('id, code, name').range(from, from + PAGE - 1);
+      if (_excelCat) q = q.eq('category', _excelCat);
+      const { data, error } = await q;
       if (error) throw error;
       siteProducts = siteProducts.concat(data);
       if (data.length < PAGE) break;
@@ -3624,16 +3146,14 @@ async function handlePriceFile(file) {
     }
 
     // 2. Fetch products from Supabase filtered by selected category
-    const _priceCat = document.getElementById('priceCategory')?.value || 'tire';
+    const _priceCat = document.getElementById('priceCategory')?.value || '';
     let products = [];
     let from = 0;
     const PAGE = 1000;
     while (true) {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, code, name, price, old_price, specs')
-        .eq('product_type', _priceCat)
-        .range(from, from + PAGE - 1);
+      let q = supabase.from('products').select('id, code, name, daily_rate, weekly_rate').range(from, from + PAGE - 1);
+      if (_priceCat) q = q.eq('category', _priceCat);
+      const { data, error } = await q;
       if (error) throw error;
       products = products.concat(data);
       if (data.length < PAGE) break;
@@ -3728,8 +3248,8 @@ async function handlePriceFile(file) {
       if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
 
       seenProductIds.add(product.id);
-      const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
-      const currentDiscount = parseFloat(product.specs?.discount_price || 0);
+      const currentRegular  = parseFloat(product.daily_rate || 0);
+      const currentDiscount = parseFloat(product.weekly_rate || 0);
       const changed = Math.abs(currentRegular - row.newPrice) > 0.001 ||
                       Math.abs(currentDiscount - row.newDiscount) > 0.001;
       return { ...row, status: changed ? 'changed' : 'same', product, currentRegular, currentDiscount, hasDuplicate };
@@ -3799,11 +3319,11 @@ function renderPriceTable() {
 
     let currentDisplay = '—';
     if (r.product) {
-      const reg  = r.currentRegular  ?? (r.product.old_price ? parseFloat(r.product.old_price) : parseFloat(r.product.price || 0));
-      const disc = r.currentDiscount ?? (r.product.old_price ? parseFloat(r.product.price || 0) : 0);
-      currentDisplay = disc > 0
-        ? `<span style="text-decoration:line-through;color:var(--gray-mid);font-size:11px">${reg.toFixed(2)} ₾</span><br><strong>${disc.toFixed(2)} ₾</strong>`
-        : `${reg.toFixed(2)} ₾`;
+      const daily  = r.currentRegular  ?? parseFloat(r.product.daily_rate || 0);
+      const weekly = r.currentDiscount ?? parseFloat(r.product.weekly_rate || 0);
+      currentDisplay = weekly > 0
+        ? `${daily.toFixed(2)} ₾/დღე<br><span style="font-size:11px;color:var(--gray-mid)">${weekly.toFixed(2)} ₾/კვირა</span>`
+        : `${daily.toFixed(2)} ₾/დღე`;
     }
 
     const newPriceDisplay = r.newPrice    > 0 ? `${r.newPrice.toFixed(2)} ₾`    : '<span style="color:var(--gray-mid)">—</span>';
@@ -3841,31 +3361,9 @@ async function applyPriceUpdates() {
   let successCount = 0, errorCount = 0;
 
   for (const row of toUpdate) {
-    const salesIsOn = !!row.product.old_price; // preserve current Sales ON/OFF state
-    const newSpecs = { ...(row.product.specs || {}) };
-    let newFinalPrice, newOldPrice;
-
-    if (row.newDiscount > 0) {
-      newSpecs.discount_price = row.newDiscount;
-      if (salesIsOn) {
-        // Sales already ON — keep it ON with updated prices
-        newFinalPrice = row.newDiscount;
-        newOldPrice   = row.newPrice;
-      } else {
-        // Sales OFF — store discount in specs only, don't activate
-        newFinalPrice = row.newPrice;
-        newOldPrice   = null;
-      }
-    } else {
-      delete newSpecs.discount_price;
-      newFinalPrice = row.newPrice;
-      newOldPrice   = null;
-    }
-
     const { error } = await supabase.from('products').update({
-      price: newFinalPrice,
-      old_price: newOldPrice,
-      specs: newSpecs
+      daily_rate: row.newPrice,
+      weekly_rate: row.newDiscount > 0 ? row.newDiscount : null,
     }).eq('id', row.product.id);
 
     if (error) errorCount++;
@@ -3877,8 +3375,8 @@ async function applyPriceUpdates() {
         r.status = 'same';
         r.currentRegular  = row.newPrice;
         r.currentDiscount = row.newDiscount;
-        r.product.price     = newFinalPrice;
-        r.product.old_price = newOldPrice;
+        r.product.daily_rate  = row.newPrice;
+        r.product.weekly_rate = row.newDiscount > 0 ? row.newDiscount : null;
       }
     }
   }
@@ -3899,7 +3397,7 @@ window.resetAllPrices = async function() {
   const { data: products, error: fetchErr } = await supabase.from('products').select('id');
   if (fetchErr) { showToast('შეცდომა: ' + fetchErr.message, 'error'); return; }
   showToast('მიმდინარეობს განულება...', 'success');
-  const { error } = await supabase.from('products').update({ price: null, old_price: null }).in('id', products.map(p => p.id));
+  const { error } = await supabase.from('products').update({ daily_rate: null, weekly_rate: null }).in('id', products.map(p => p.id));
   if (error) showToast('შეცდომა: ' + error.message, 'error');
   else { showToast('ყველა ფასი განულდა ✓', 'success'); _priceRows = []; renderPriceTable(); }
 };
@@ -4006,500 +3504,6 @@ window.bulkImageApply = async function() {
   }
 };
 
-// ─── One-time migration: add cargo rim sizes to brands table so they appear in dropdowns ───
-async function _addCargoRimsToBrands() {
-  const KEY = 'cargo_rims_brands_v1';
-  if (localStorage.getItem(KEY)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  const cargoRims = ['R13C', 'R14C', 'R15C', 'R16C', 'R17C'];
-  const { data: existing } = await supabase.from('brands').select('name').eq('product_type', 'tire_rim').in('name', cargoRims);
-  const existSet = new Set((existing || []).map(r => r.name));
-  const toInsert = cargoRims.filter(r => !existSet.has(r)).map(r => ({ product_type: 'tire_rim', name: r }));
-  if (toInsert.length > 0) {
-    await supabase.from('brands').insert(toInsert);
-  }
-  localStorage.setItem(KEY, '1');
-  if (toInsert.length > 0) showToast(`✅ Cargo დიამეტრები დაემატა: ${toInsert.map(r=>r.name).join(', ')}`, 'success');
-}
-
-// ─── One-time migration: fix cargo rim sizes (R13C/R14C/R15C/R16C/R17C) ───
-// Runs once after login, then marks itself done in localStorage.
-async function _migrateCargoRims() {
-  const KEY = 'cargo_rim_fix_v2';
-  if (localStorage.getItem(KEY)) return; // already done
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return; // not logged in yet
-
-  const codeToRim = {"RA149301":"R15C","ROBO11":"R15C","1010200002455":"R16C","RA138901":"R16C","6941255816685":"R13C","RA19104":"R13C","RA33303":"R13C","RA33903":"R13C","LICE001":"R14C","6941255815374":"R14C","FICE003":"R14C","30015471":"R14C","30015475":"R14C","RA19204":"R14C","RA19403":"R14C","RA19703":"R14C","RA19503":"R14C","T9232-E":"R14C","T9272-E":"R14C","6941255812434":"R14C","N1208H":"R14C","6975313251767":"R15C","6941255815404":"R15C","30015152":"R15C","N8313H":"R15C","6941255816746":"R15C","6941255816739":"R15C","1010200002300":"R15C","N1213H":"R15C","6941255824413":"R15C","1010200002451":"R15C","RA7142301":"R15C","N2512H":"R15C","1010200002525":"R15C","6941255802336":"R15C","6973803702454":"R15C","N8302H":"R16C","30016451":"R16C","N8308H":"R16C","30016457":"R16C","N8312H":"R16C","N8311H":"R16C","RBICE002":"R16C","PHD118":"R16C","N1237H":"R16C","RA140101":"R16C","3ERM535F":"R16C","3ERM435F":"R16C","N1246H":"R16C","N2515H":"R16C","N2506H":"R16C","N2510H":"R16C","RA134001":"R16C","3ERM534F":"R16C","N2513H":"R16C","N1245H":"R16C","N1206H":"R16C","3ERM267F":"R16C","11134469":"R16C","6941255824536":"R16C","RA34801":"R17C","RA34901":"R17C"};
-  const codes = Object.keys(codeToRim);
-
-  // Fetch products with these codes (paginate just in case)
-  let products = [];
-  for (let i = 0; i < codes.length; i += 100) {
-    const batch = codes.slice(i, i + 100);
-    const { data, error } = await supabase.from('products').select('id, code, specs').in('code', batch);
-    if (!error && data) products = products.concat(data);
-  }
-
-  let fixed = 0;
-  for (const p of products) {
-    const correctRim = codeToRim[String(p.code).trim()];
-    if (!correctRim) continue;
-    const currentRim = p.specs?.rim || '';
-    if (currentRim === correctRim) continue; // already correct
-    const newSpecs = { ...(p.specs || {}), rim: correctRim };
-    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
-    if (!error) fixed++;
-  }
-
-  localStorage.setItem(KEY, '1');
-  if (fixed > 0) showToast(`✅ ${fixed} პროდუქტის Cargo R ზომა გასწორდა`, 'success');
-}
-
-// ─── One-time migration: add 6 missing cargo products ───
-async function _addMissingCargoProducts() {
-  const KEY = 'cargo_add_v1';
-  if (localStorage.getItem(KEY)) return;
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  const toAdd = [
-    { code:'6941255816685', name:'RW501', size:'165R13C',   width:'165', profile:'',   rim:'R13C', season:'ზამთარი',        brand:'KAPSEN',     price:153, discount:130 },
-    { code:'RA19104',        name:'RA 350', size:'155R13C', width:'155', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:153, discount:130 },
-    { code:'RA33303',        name:'RA 350', size:'165R13C', width:'165', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:165, discount:140 },
-    { code:'RA33903',        name:'RA 350', size:'175R13C', width:'175', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:165, discount:140 },
-    { code:'RA34801',        name:'RA 350', size:'215/60R17C', width:'215', profile:'60', rim:'R17C', season:'ზაფხული M+S', brand:'ROADCRUZA',  price:230, discount:195 },
-    { code:'RA34901',        name:'RA 350', size:'235/60R17C', width:'235', profile:'60', rim:'R17C', season:'ზაფხული M+S', brand:'ROADCRUZA',  price:271, discount:230 },
-  ];
-
-  // Check which ones already exist
-  const { data: existing } = await supabase.from('products').select('code').in('code', toAdd.map(p => p.code));
-  const existCodes = new Set((existing || []).map(p => p.code));
-
-  let added = 0;
-  for (const p of toAdd) {
-    if (existCodes.has(p.code)) continue;
-    const specs = {
-      brand: p.brand,
-      width: p.width,
-      profile: p.profile,
-      rim: p.rim,
-      season: p.season,
-      vehicle_type: 'სატვირთო',
-      discount_price: p.discount,
-    };
-    const { error } = await supabase.from('products').insert({
-      code: p.code,
-      name: p.name,
-      product_type: 'tire',
-      category: 'საბურავები',
-      country: '🇨🇳 ჩინეთი',
-      price: p.price,
-      old_price: null,
-      unit: 'ც',
-      active: false,
-      specs,
-    });
-    if (!error) added++;
-  }
-
-  localStorage.setItem(KEY, '1');
-  if (added > 0) showToast(`✅ ${added} Cargo პროდუქტი დაემატა (inactive)`, 'success');
-}
-
-// ─── One-time fix: add missing category+country to the 6 manually seeded cargo products ───
-async function _fixCargoProductsMeta() {
-  const KEY = 'cargo_meta_fix_v1';
-  if (localStorage.getItem(KEY)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  const codes = ['6941255816685','RA19104','RA33303','RA33903','RA34801','RA34901'];
-  const { data } = await supabase.from('products').select('id,category,country').in('code', codes);
-  let fixed = 0;
-  for (const p of (data || [])) {
-    if (p.category && p.country) continue;
-    const { error } = await supabase.from('products').update({
-      category: 'საბურავები',
-      country: '🇨🇳 ჩინეთი',
-    }).eq('id', p.id);
-    if (!error) fixed++;
-  }
-  localStorage.setItem(KEY, '1');
-  if (fixed > 0) showToast(`✅ ${fixed} Cargo პროდუქტს კატეგორია/ქვეყანა დაემატა`, 'success');
-}
-
-// ─── One-time migration: set vehicle_type = 'მსუბუქი სატვირთო' for all cargo rim products ───
-async function _migrateCargoVehicleType() {
-  const KEY = 'cargo_vtype_v1';
-  if (localStorage.getItem(KEY)) return;
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  const cargoRims = ['R13C','R14C','R15C','R16C','R17C'];
-  let products = [];
-  let from = 0;
-  const PAGE = 1000;
-  while (true) {
-    const { data, error } = await supabase.from('products')
-      .select('id, specs')
-      .eq('product_type', 'tire')
-      .range(from, from + PAGE - 1);
-    if (error) break;
-    products = products.concat(data);
-    if (data.length < PAGE) break;
-    from += PAGE;
-  }
-
-  let fixed = 0;
-  for (const p of products) {
-    const rim = p.specs?.rim || '';
-    if (!cargoRims.includes(rim)) continue;
-    if (p.specs?.vehicle_type === 'მსუბუქი სატვირთო') continue;
-    const newSpecs = { ...(p.specs || {}), vehicle_type: 'მსუბუქი სატვირთო' };
-    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
-    if (!error) fixed++;
-  }
-
-  localStorage.setItem(KEY, '1');
-  if (fixed > 0) showToast(`✅ ${fixed} პროდუქტს მიენიჭა "მსუბუქი სატვირთო"`, 'success');
-}
-
-// ─── One-time migration: set profile = "80" for R13C tires with empty profile ───
-async function _fixR13CProfile() {
-  const KEY = 'r13c_profile_fix_v1';
-  if (localStorage.getItem(KEY)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  let products = [], from = 0;
-  while (true) {
-    const { data, error } = await supabase.from('products')
-      .select('id, specs').eq('product_type', 'tire').range(from, from + 999);
-    if (error || !data.length) break;
-    products = products.concat(data);
-    if (data.length < 1000) break;
-    from += 1000;
-  }
-
-  let fixed = 0;
-  for (const p of products) {
-    const rim = (p.specs?.rim || '').trim();
-    const profile = (p.specs?.profile ?? '');
-    if (rim !== 'R13C' || profile !== '') continue;
-    const newSpecs = { ...(p.specs || {}), profile: '80' };
-    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
-    if (!error) fixed++;
-  }
-  localStorage.setItem(KEY, '1');
-  if (fixed > 0) showToast(`✅ R13C: ${fixed} პროდუქტს profile=80 დაემატა`, 'success');
-}
-
-// ─── One-time migration: fix season values that have " , " instead of " " ───
-async function _fixSeasonComma() {
-  const KEY = 'season_comma_fix_v1';
-  if (localStorage.getItem(KEY)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  // Map wrong → correct
-  const fixes = {
-    'ზაფხული , M+S A/T': 'ზაფხული M+S A/T',
-    'ზაფხული , M+S R/T': 'ზაფხული M+S R/T',
-    'ზაფხული , M+S X/T': 'ზაფხული M+S X/T',
-  };
-
-  let total = 0;
-  for (const [wrong, correct] of Object.entries(fixes)) {
-    let from = 0;
-    while (true) {
-      const { data, error } = await supabase.from('products')
-        .select('id, specs')
-        .eq('product_type', 'tire')
-        .range(from, from + 999);
-      if (error || !data.length) break;
-      for (const p of data) {
-        if ((p.specs?.season || '') !== wrong) continue;
-        const newSpecs = { ...(p.specs || {}), season: correct };
-        const { error: e } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
-        if (!e) total++;
-      }
-      if (data.length < 1000) break;
-      from += 1000;
-    }
-  }
-  localStorage.setItem(KEY, '1');
-  if (total > 0) showToast(`✅ ${total} პროდუქტის სეზონი გასწორდა`, 'success');
-}
-
-// ─── One-time migration: set vehicle_type = 'ჯიპი/პიკაპი' for tires with LT width ───
-async function _fixLTVehicleType() {
-  const KEY = 'lt_vehicle_type_v1';
-  if (localStorage.getItem(KEY)) return;
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  let products = [], from = 0;
-  while (true) {
-    const { data, error } = await supabase.from('products')
-      .select('id, specs').eq('product_type', 'tire').range(from, from + 999);
-    if (error || !data.length) break;
-    products = products.concat(data);
-    if (data.length < 1000) break;
-    from += 1000;
-  }
-
-  let fixed = 0;
-  for (const p of products) {
-    const width = (p.specs?.width || '').trim();
-    if (!width.startsWith('LT')) continue;
-    if (p.specs?.vehicle_type === 'ჯიპი/პიკაპი') continue;
-    const newSpecs = { ...(p.specs || {}), vehicle_type: 'ჯიპი/პიკაპი' };
-    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
-    if (!error) fixed++;
-  }
-  localStorage.setItem(KEY, '1');
-  if (fixed > 0) showToast(`✅ ${fixed} LT პროდუქტს მიენიჭა "ჯიპი/პიკაპი"`, 'success');
-}
-
-// ─── Card Generator ───
-let _cgProduct = null;
-const _cgCache = {}; // local cache for card-gen search results
-const _CG_FLAG_CODES = {'გერმანია':'de','საფრანგეთი':'fr','იაპონია':'jp','აშშ':'us','იტალია':'it','სამხრეთ კორეა':'kr','ბრიტანეთი':'gb','ნიდერლანდი':'nl','რუსეთი':'ru','ჩინეთი':'cn','თურქეთი':'tr','ავსტრია':'at','შვედეთი':'se','ჩეხეთი':'cz','პოლონეთი':'pl','ბელგია':'be','ინდოეთი':'in','ბრაზილია':'br','უკრაინა':'ua','საქართველო':'ge'};
-
-window.cgSearch = async function() {
-  const qCode = (document.getElementById('cgCodeInput').value || '').trim();
-  const qName = (document.getElementById('cgNameInput').value || '').trim();
-  const el = document.getElementById('cgSearchResults');
-  if (!qCode && !qName) { el.style.display = 'none'; return; }
-
-  el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--gray-mid)">⏳ იტვირთება...</div>';
-  el.style.display = 'block';
-
-  try {
-    let query = window.supabase
-      .from('products')
-      .select('id, code, name, image_url, specs, price, old_price, unit, product_type, country');
-    if (qCode) query = query.ilike('code', `%${qCode}%`);
-    if (qName) query = query.ilike('name', `%${qName}%`);
-    const { data, error } = await query.limit(10);
-    if (error) throw error;
-
-    if (!data || !data.length) {
-      el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--gray-mid)">ვერ მოიძებნა</div>';
-    } else {
-      data.forEach(p => { _cgCache[p.id] = p; });
-      el.innerHTML = data.map(p => `
-        <div onclick="cgSelect('${p.id}')" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);font-size:13px"
-          onmouseenter="this.style.background='#fdf5f1'" onmouseleave="this.style.background=''">
-          ${p.image_url ? `<img src="${p.image_url}" style="width:34px;height:34px;object-fit:contain;border-radius:4px;flex-shrink:0">` : `<span style="font-size:22px;flex-shrink:0">📦</span>`}
-          <div><div style="font-weight:600">${p.name}</div><div style="color:var(--gray-mid);font-size:11px">${p.code||''}</div></div>
-        </div>`).join('');
-    }
-  } catch(e) {
-    el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--accent)">შეცდომა: ' + e.message + '</div>';
-  }
-};
-
-window.cgSelect = async function(id) {
-  const p = _cgCache[id];
-  if (!p) return;
-  _cgProduct = p;
-  document.getElementById('cgCodeInput').value = p.code || '';
-  document.getElementById('cgNameInput').value = p.name || '';
-  document.getElementById('cgSearchResults').style.display = 'none';
-  document.getElementById('cgSelectedName').textContent = p.name;
-  document.getElementById('cgSelectedInfo').style.display = 'block';
-  document.getElementById('cgPreviewWrap').style.display = 'block';
-  document.getElementById('cgDownloadBtn').textContent = '⏳ გენერირება...';
-  document.getElementById('cgDownloadBtn').disabled = true;
-  await cgRender(p);
-  document.getElementById('cgDownloadBtn').textContent = '⬇ PNG გადმოწერა';
-  document.getElementById('cgDownloadBtn').disabled = false;
-};
-
-window.cgDownload = function() {
-  if (!_cgProduct) return;
-  const a = document.createElement('a');
-  a.href = document.getElementById('cgCanvas').toDataURL('image/png');
-  a.download = (_cgProduct.name || 'product').replace(/[^\w\s]/g,'') + '_card.png';
-  a.click();
-};
-
-async function cgRender(p) {
-  await document.fonts.ready;
-  const W = 760, H = 1060;
-  const canvas = document.getElementById('cgCanvas');
-  canvas.width = W; canvas.height = H;
-  canvas.style.width = '380px'; canvas.style.height = '530px';
-  const ctx = canvas.getContext('2d');
-  const specs = p.specs || {};
-  const cx = 28, cy = 28, cw = W-56, ch = H-56, cr = 32;
-
-  function rr(x,y,w,h,r) {
-    ctx.beginPath();
-    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
-    ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-    ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
-    ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
-    ctx.closePath();
-  }
-
-  // outer bg
-  ctx.fillStyle = '#EDE8E0'; ctx.fillRect(0,0,W,H);
-
-  // card shadow + body
-  ctx.save(); ctx.shadowColor='rgba(0,0,0,0.18)'; ctx.shadowBlur=50; ctx.shadowOffsetY=10;
-  rr(cx,cy,cw,ch,cr); ctx.fillStyle='white'; ctx.fill(); ctx.restore();
-  // card border
-  rr(cx,cy,cw,ch,cr); ctx.strokeStyle='#1A1714'; ctx.lineWidth=2; ctx.stroke();
-
-  // image area (cream, rounded top only)
-  const imgH = 400;
-  ctx.save(); ctx.beginPath();
-  ctx.moveTo(cx+cr,cy); ctx.lineTo(cx+cw-cr,cy); ctx.arcTo(cx+cw,cy,cx+cw,cy+cr,cr);
-  ctx.lineTo(cx+cw,cy+imgH); ctx.lineTo(cx,cy+imgH); ctx.lineTo(cx,cy+cr); ctx.arcTo(cx,cy,cx+cr,cy,cr);
-  ctx.closePath(); ctx.fillStyle='#F5F1EB'; ctx.fill(); ctx.restore();
-
-
-  // product image
-  const imgPad = 44;
-  if (p.image_url) {
-    try {
-      const img = await new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=p.image_url; });
-      const sc = Math.min((cw-imgPad*2)/img.width, (imgH-imgPad*2)/img.height);
-      const dw=img.width*sc, dh=img.height*sc;
-      ctx.drawImage(img, cx+(cw-dw)/2, cy+(imgH-dh)/2, dw, dh);
-    } catch(e) {
-      ctx.font='120px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('🛞', cx+cw/2, cy+imgH/2);
-    }
-  } else {
-    ctx.font='120px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('📦', cx+cw/2, cy+imgH/2);
-  }
-
-  // discount badge (top-right of image area)
-  if (p.old_price) {
-    const badgeText = 'ფასდაკლება';
-    ctx.font = 'bold 26px "Noto Sans Georgian",sans-serif';
-    const bw = ctx.measureText(badgeText).width + 32;
-    const bh = 44, bx = cx + cw - 20 - bw, by = cy + 20, br = 10;
-    ctx.save();
-    ctx.fillStyle = '#E8541A';
-    ctx.beginPath();
-    ctx.moveTo(bx+br,by); ctx.lineTo(bx+bw-br,by); ctx.arcTo(bx+bw,by,bx+bw,by+br,br);
-    ctx.lineTo(bx+bw,by+bh-br); ctx.arcTo(bx+bw,by+bh,bx+bw-br,by+bh,br);
-    ctx.lineTo(bx+br,by+bh); ctx.arcTo(bx,by+bh,bx,by+bh-br,br);
-    ctx.lineTo(bx,by+br); ctx.arcTo(bx,by,bx+br,by,br);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'white'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText(badgeText, bx+16, by+bh/2);
-    ctx.restore();
-  }
-
-  // vehicle + season icons (bottom-right of image)
-  const vt = specs.vehicle_type || 'მსუბუქი ავტომობილი';
-  const vEmoji = vt==='ჯიპი/პიკაპი'?'🚙': vt==='სატვირთო'?'🚛': vt==='მსუბუქი სატვირთო'?'🚐':'🚗';
-  const season = specs.season || '';
-  const sEmoji = season.includes('ზამთ')?'❄️': (season.includes('ზაფხ')||season.includes('M+S'))?'☀️': (/4|ყველ/i.test(season)?'⛅':'');
-  ctx.font='54px serif'; ctx.textAlign='right'; ctx.textBaseline='bottom';
-  const ir = cx+cw-18, ib = cy+imgH-14;
-  if (sEmoji) { ctx.fillText(sEmoji, ir, ib); ctx.fillText(vEmoji, ir-62, ib); }
-  else         { ctx.fillText(vEmoji, ir, ib); }
-
-  // text area
-  const tx = cx+40; let ty = cy+imgH+34;
-  ctx.textAlign='left'; ctx.textBaseline='top';
-
-  const catMap = {tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები'};
-  ctx.font='bold 26px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
-  ctx.fillText((catMap[p.product_type]||p.category||'').toUpperCase(), tx, ty); ty+=38;
-
-  ctx.font='bold 36px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-  ctx.fillText(p.name||'', tx, ty); ty+=52;
-
-  const row = (lbl,val) => {
-    if (!val) return;
-    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(lbl+':', tx, ty);
-    ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(String(val), tx+210, ty);
-    ty+=40;
-  };
-
-  if (p.product_type==='tire') {
-    const w=specs.width||'', pr=specs.profile||'', rim=specs.rim||'';
-    row('ბრენდი', specs.brand);
-    row('ზომა', pr ? `${w}/${pr} ${rim}` : `${w} ${rim}`.trim());
-    row('სეზონი', season);
-    row('ავტომობ. ტიპი', vt);
-  } else if (p.product_type==='oil') {
-    row('ბრენდი', specs.brand); row('ტიპი', specs.oil_type);
-    row('სიბლანტე', specs.viscosity); row('მოცულობა', specs.volume);
-    row('დანიშნულება', specs.application);
-  } else if (p.product_type==='filter') {
-    row('ბრენდი', specs.brand); row('ფილტრის ტიპი', specs.filter_type); row('ავტ. მარკა', specs.car_make);
-  }
-  // country row with flag image
-  if (p.country) {
-    const countryName = p.country.split(' ').slice(1).join(' ');
-    const flagCode = _CG_FLAG_CODES[countryName];
-    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-    ctx.fillText('ქვეყანა:', tx, ty);
-    if (flagCode) {
-      try {
-        const flagImg = await new Promise((res, rej) => {
-          const fi = new Image(); fi.crossOrigin='anonymous';
-          fi.onload = () => res(fi); fi.onerror = rej;
-          fi.src = `https://flagicons.lipis.dev/flags/4x3/${flagCode}.svg`;
-        });
-        const fh = 26, fw = Math.round(fh * 4/3);
-        ctx.drawImage(flagImg, tx+210, ty, fw, fh);
-        ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-        ctx.fillText(countryName, tx+210+fw+8, ty);
-      } catch {
-        ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-        ctx.fillText(countryName, tx+210, ty);
-      }
-    } else {
-      ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-      ctx.fillText(countryName, tx+210, ty);
-    }
-    ty+=40;
-  }
-
-  ty+=4;
-  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=26;
-
-  if (p.price) {
-    // If discount active: show old price crossed out above, then discounted price
-    if (p.old_price) {
-      ctx.font='28px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-      const oldStr = parseFloat(p.old_price).toFixed(2)+' ₾';
-      const oldWidth = ctx.measureText(oldStr).width;
-      ctx.fillText(oldStr, tx, ty);
-      // strikethrough line
-      ctx.save(); ctx.strokeStyle='#1A1714'; ctx.lineWidth=2;
-      const oldMetrics = ctx.measureText(oldStr);
-      const strikeY = ty + 14;
-      ctx.beginPath(); ctx.moveTo(tx, strikeY); ctx.lineTo(tx + oldMetrics.width, strikeY); ctx.stroke();
-      ctx.restore();
-      ty += 38;
-    }
-    ctx.font='bold 52px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
-    const prStr = parseFloat(p.price).toFixed(2)+' ₾';
-    const prWidth = ctx.measureText(prStr).width;
-    ctx.fillText(prStr, tx, ty);
-    if (p.unit) {
-      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
-      ctx.fillText('/ '+(p.unit==='ც'?'ცალი':p.unit), tx+prWidth+10, ty+20);
-    }
-  }
-}
 
 
 </script>
