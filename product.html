@@ -178,33 +178,39 @@ tailwind.config = {
 <div id="productContent" class="hidden max-w-7xl mx-auto px-6 py-10">
 
   <!-- Top section -->
-  <div class="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-x-10 md:gap-y-4 mb-12">
+  <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-x-10 mb-12">
 
-    <!-- Image ("ხელსაწყოები") -->
-    <div class="order-1 md:order-none md:col-start-1 bg-white border border-gray-800 rounded-xl relative overflow-hidden">
-      <div id="productBadge" class="hidden absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10"></div>
-      <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
+    <!-- Left column: image + description (grouped as one flex column on desktop, independent height from the right column) -->
+    <div class="contents md:flex md:flex-col md:gap-4 md:w-1/2">
+      <!-- Image ("ხელსაწყოები") -->
+      <div class="order-1 bg-white border border-gray-800 rounded-xl relative overflow-hidden">
+        <div id="productBadge" class="hidden absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10"></div>
+        <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
+      </div>
+
+      <!-- Other info ("სხვა ინფორმაცია") -->
+      <div id="productDescContainer" class="hidden order-7 border border-gray-800 rounded-xl p-4">
+        <div class="text-sm font-bold tracking-[2px] text-dark uppercase mb-2">სხვა ინფორმაცია</div>
+        <p id="productDesc" class="text-sm text-dark leading-relaxed whitespace-pre-line"></p>
+      </div>
     </div>
 
-    <!-- Category + Name -->
-    <div class="order-2 md:order-none md:col-start-2">
-      <div id="productCategory" class="text-[13px] font-bold text-orange uppercase mb-2"></div>
-      <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
-    </div>
+    <!-- Right column: name, price, code, specs, meta (grouped as one flex column on desktop) -->
+    <div class="contents md:flex md:flex-col md:gap-4 md:w-1/2">
+      <!-- Category + Name -->
+      <div class="order-2">
+        <div id="productCategory" class="text-[13px] font-bold text-orange uppercase mb-2"></div>
+        <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
+      </div>
 
-    <!-- Price + Booking -->
-    <div id="productPriceBlock" class="order-3 md:order-none md:col-start-2"></div>
-    <!-- Code -->
-    <div id="productCode" class="hidden order-4 md:order-none md:col-start-2 border-t border-gray-800 pt-3"></div>
-    <!-- Specs -->
-    <div id="productSpecs" class="hidden order-5 md:order-none md:col-start-2 border border-gray-800 rounded-xl p-4"></div>
-    <!-- Meta -->
-    <div class="order-6 md:order-none md:col-start-2 border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
-
-    <!-- Other info ("სხვა ინფორმაცია") -->
-    <div id="productDescContainer" class="hidden order-7 md:order-none md:col-start-1 border border-gray-800 rounded-xl p-4">
-      <div class="text-sm font-bold tracking-[2px] text-dark uppercase mb-2">სხვა ინფორმაცია</div>
-      <p id="productDesc" class="text-sm text-dark leading-relaxed whitespace-pre-line"></p>
+      <!-- Price + Booking -->
+      <div id="productPriceBlock" class="order-3"></div>
+      <!-- Code -->
+      <div id="productCode" class="hidden order-4 border-t border-gray-800 pt-3"></div>
+      <!-- Specs -->
+      <div id="productSpecs" class="hidden order-5 border border-gray-800 rounded-xl p-4"></div>
+      <!-- Meta -->
+      <div class="order-6 border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
     </div>
   </div>
 
