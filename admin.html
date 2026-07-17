@@ -435,8 +435,8 @@
         <!-- Products table -->
         <div style="padding:16px 24px 8px">
           <div style="font-size:12px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E8541A;margin-bottom:10px">პროდუქციის ჩამონათვალი</div>
-          <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;color:#141210;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
-            <span>კოდი</span><span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
+          <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 60px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;color:#141210;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
+            <span>კოდი</span><span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:center">დღ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
           </div>
           <div id="invGenRows"></div>
           <button onclick="addInvRow()" style="margin-top:10px;background:none;border:1px dashed #e5e7eb;color:#E8541A;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500">+ სტრიქონის დამატება</button>
@@ -466,10 +466,6 @@
 
         <!-- Actions -->
         <div style="padding:12px 24px 20px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border)">
-          <button onclick="submitInvGenOrder()" class="btn" style="display:flex;align-items:center;gap:6px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:700">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            შეკვეთის გაფორმება
-          </button>
           <button onclick="doAdminInvoicePDF()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;margin-left:auto;margin-right:auto">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             ჩამოტვირთე PDF
@@ -2423,14 +2419,14 @@ function initInvGen() {
   if (nameEl)  nameEl.value  = '';
   if (idEl)    idEl.value    = '';
   if (phoneEl) phoneEl.value = '';
-  invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
+  invGenRows = [{ name:'', qty:1, unit:'ც', days:'', price:0 }];
   renderInvRows();
 }
 
 function renderInvRows() {
   const el = document.getElementById('invGenRows');
   el.innerHTML = invGenRows.map((r, i) => `
-    <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
+    <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 60px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
       <input id="inv-code-${i}" value="${r._code||''}" oninput="invRowCode(${i},this.value)"
         placeholder="კოდი..."
         style="width:100%;border:1px solid ${r._codeMatched?'#86efac':'var(--border)'};border-radius:6px;padding:6px 8px;font-size:12px;font-family:monospace;outline:none;color:var(--dark);background:${r._codeMatched?'#f0fdf4':'white'}">
@@ -2442,10 +2438,13 @@ function renderInvRows() {
       <input value="${r.unit}" oninput="invRowSet(${i},'unit',this.value)"
         placeholder="ც"
         style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:center;color:var(--dark)">
+      <input type="number" value="${r.days||''}" min="0" step="1" oninput="invRowSet(${i},'days',this.value)"
+        placeholder="დღე"
+        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:center;color:var(--dark)">
       <input type="number" value="${r.price}" min="0" step="0.01" oninput="invRowSet(${i},'price',this.value)"
         placeholder="0.00"
         style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:right;color:var(--dark)">
-      <div style="text-align:right;font-weight:600;font-size:13px;color:var(--dark)">${(parseFloat(r.qty)||0) * (parseFloat(r.price)||0) > 0 ? ((parseFloat(r.qty)||0)*(parseFloat(r.price)||0)).toFixed(2)+' ₾' : '–'}</div>
+      <div style="text-align:right;font-weight:600;font-size:13px;color:var(--dark)">${(parseFloat(r.qty)||0) * (parseFloat(r.price)||0) * (parseFloat(r.days)||1) > 0 ? ((parseFloat(r.qty)||0)*(parseFloat(r.price)||0)*(parseFloat(r.days)||1)).toFixed(2)+' ₾' : '–'}</div>
       <button onclick="removeInvRow(${i})" style="background:none;border:none;color:var(--gray-mid);cursor:pointer;font-size:16px;padding:2px;line-height:1" title="წაშლა">✕</button>
     </div>`).join('');
   calcInvTotals();
@@ -2458,8 +2457,8 @@ window.invRowSet = function(i, field, val) {
   // update only the total cell for this row without full re-render (avoid losing focus)
   const rows = document.getElementById('invGenRows').children;
   if (rows[i]) {
-    const totalCell = rows[i].children[5];
-    const line = (parseFloat(invGenRows[i].qty)||0) * (parseFloat(invGenRows[i].price)||0);
+    const totalCell = rows[i].children[6];
+    const line = (parseFloat(invGenRows[i].qty)||0) * (parseFloat(invGenRows[i].price)||0) * (parseFloat(invGenRows[i].days)||1);
     totalCell.textContent = line > 0 ? line.toFixed(2) + ' ₾' : '–';
   }
 };
@@ -2501,14 +2500,14 @@ window.invRowCode = function(i, code) {
 };
 
 function calcInvTotals() {
-  const total = invGenRows.reduce((s,r) => s + (parseFloat(r.qty)||0)*(parseFloat(r.price)||0), 0);
+  const total = invGenRows.reduce((s,r) => s + (parseFloat(r.qty)||0)*(parseFloat(r.price)||0)*(parseFloat(r.days)||1), 0);
   const vat = total * 18 / 118;
   document.getElementById('invGenVat').textContent = vat.toFixed(2) + ' ₾';
   document.getElementById('invGenTotal').textContent = total.toFixed(2) + ' ₾';
 }
 
 window.addInvRow = function() {
-  invGenRows.push({ name:'', qty:1, unit:'ც', price:0 });
+  invGenRows.push({ name:'', qty:1, unit:'ც', days:'', price:0 });
   renderInvRows();
   // focus the name input of the new row
   const rows = document.getElementById('invGenRows').children;
@@ -2516,35 +2515,12 @@ window.addInvRow = function() {
 };
 
 window.removeInvRow = function(i) {
-  if (invGenRows.length === 1) { invGenRows[0] = { name:'', qty:1, unit:'ც', price:0 }; }
+  if (invGenRows.length === 1) { invGenRows[0] = { name:'', qty:1, unit:'ც', days:'', price:0 }; }
   else invGenRows.splice(i, 1);
   renderInvRows();
 };
 
 window.resetInvGen = function() { initInvGen(); };
-
-// ─── Submit Invoice as Order ───
-window.submitInvGenOrder = async function() {
-  const buyerName  = (document.getElementById('invGenBuyerName')?.value  || '').trim();
-  const buyerId    = (document.getElementById('invGenBuyerId')?.value    || '').trim();
-  const buyerPhone = (document.getElementById('invGenBuyerPhone')?.value || '').trim();
-  const validRows = invGenRows.filter(r => r.name.trim());
-  if (!buyerName) { showToast('შეავსე მყიდველის სახელი', 'error'); return; }
-  if (!validRows.length) { showToast('დაამატე მინიმუმ ერთი პროდუქტი', 'error'); return; }
-  const total = validRows.reduce((s, r) => s + (parseFloat(r.qty) || 0) * (parseFloat(r.price) || 0), 0);
-  const { error } = await supabase.from('orders').insert({
-    invoice_no: invGenNo,
-    buyer_name: buyerName,
-    buyer_id: buyerId,
-    buyer_phone: buyerPhone,
-    items: validRows,
-    total,
-    status: 'pending',
-  });
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  showToast('✓ შეკვეთა გაფორმდა!', 'success');
-  initInvGen();
-};
 
 window.doAdminInvoicePDF = function() {
   const dateStr   = document.getElementById('invGenDate').textContent;

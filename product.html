@@ -405,10 +405,10 @@ function renderProduct() {
   }
 
   const b = document.getElementById('productBadge');
-  if (product.status && product.status !== 'available') {
+  if (product.status) {
     b.classList.remove('hidden');
-    b.textContent = product.status === 'rented' ? 'გაქირავებულია' : 'შეკეთებაშია';
-    b.style.background = product.status === 'rented' ? '#dc2626' : '#b45309';
+    b.textContent = product.status === 'rented' ? 'გაქირავებულია' : (product.status === 'maintenance' ? 'შეკეთებაშია' : 'ხელმისაწვდომია');
+    b.style.background = product.status === 'rented' ? '#dc2626' : (product.status === 'maintenance' ? '#b45309' : '#16a34a');
   } else if (product.badge) {
     b.classList.remove('hidden');
     b.textContent = product.badge;
