@@ -197,10 +197,8 @@ tailwind.config = {
       <div id="productCategory" class="text-[10px] font-bold tracking-[2px] text-orange uppercase mb-2"></div>
       <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
 
-      <!-- Price -->
+      <!-- Price + Booking -->
       <div id="productPriceBlock" class="mb-4"></div>
-      <!-- Booking -->
-      <div id="productBookingBlock" class="mb-4"></div>
       <!-- Code -->
       <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
       <!-- Specs -->
@@ -524,15 +522,20 @@ function renderProduct() {
   if (product.daily_rate) {
     priceBlock.innerHTML = `
       <div class="border border-gray-800 rounded-xl p-4">
-        <div class="flex items-baseline gap-3 flex-wrap">
-          <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
-        </div>
-        ${product.security_deposit ? `<div class="text-xs text-dark mt-1">გირაო: ${parseFloat(product.security_deposit).toFixed(2)} ₾</div>` : ''}
-        <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5">
-          <div class="font-semibold">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
-          <div>8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
-          <div>15–29 დღე — <span class="font-semibold text-orange">30%</span> ფასდაკლება</div>
-          <div>30+ დღე — <span class="font-semibold text-orange">50%</span> ფასდაკლება</div>
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div class="flex items-baseline gap-3 flex-wrap">
+              <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
+            </div>
+            ${product.security_deposit ? `<div class="text-xs text-dark mt-1">გირაო: ${parseFloat(product.security_deposit).toFixed(2)} ₾</div>` : ''}
+            <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5">
+              <div class="font-semibold">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
+              <div>8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
+              <div>15–29 დღე — <span class="font-semibold text-orange">30%</span> ფასდაკლება</div>
+              <div>30+ დღე — <span class="font-semibold text-orange">50%</span> ფასდაკლება</div>
+            </div>
+          </div>
+          <div id="productBookingBlock" class="flex-shrink-0"></div>
         </div>
       </div>`;
   } else {
@@ -562,23 +565,21 @@ function renderBookingBlock() {
   if (!el) return;
   if (!product.daily_rate) { el.innerHTML = ''; return; }
   if (product.status && product.status !== 'available') {
-    el.innerHTML = `<div class="border border-gray-800 rounded-xl p-4 text-sm text-dark">
+    el.innerHTML = `<div class="text-sm text-dark max-w-[180px]">
       ${product.status === 'rented' ? '🔴 ამჟამად გაქირავებულია' : '🛠 ამჟამად შეკეთებაშია'} — დაგვიკავშირდით ხელმისაწვდომობის დასაზუსტებლად.
     </div>`;
     return;
   }
   el.innerHTML = `
-    <div class="border border-gray-800 rounded-xl p-4">
-      <div class="flex items-end gap-2 mb-3">
-        <div class="flex-1">
-          <div class="text-[10px] font-semibold text-dark mb-1">დღეების რაოდენობა</div>
-          <input type="number" id="bookDays" min="1" step="1" value="1" oninput="updateBookingTotal()"
-            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
-        </div>
-        <button onclick="bookNow()" class="bg-orange text-white font-bold text-sm rounded-lg py-1.5 px-5 hover:opacity-90 transition-opacity">დაჯავშნა</button>
+    <div class="flex items-end gap-2">
+      <div style="width:80px">
+        <div class="text-[10px] font-semibold text-dark mb-1">დღეები</div>
+        <input type="number" id="bookDays" min="1" step="1" value="1" oninput="updateBookingTotal()"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
       </div>
-      <div id="bookTotalDisplay" class="text-sm text-dark"></div>
-    </div>`;
+      <button onclick="bookNow()" class="bg-orange text-white font-bold text-sm rounded-lg py-1.5 px-5 hover:opacity-90 transition-opacity">დაჯავშნა</button>
+    </div>
+    <div id="bookTotalDisplay" class="text-sm text-dark mt-2 text-right"></div>`;
   updateBookingTotal();
 }
 
