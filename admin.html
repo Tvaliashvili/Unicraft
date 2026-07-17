@@ -1688,14 +1688,23 @@ window.toggleSelectAll = function(secId, checked) {
   if (compBtn) compBtn.style.display = show;
 };
 
+// Splits a list of ids into chunks so bulk requests don't blow past URL length limits (PostgREST puts `.in()` ids in the query string).
+function chunkIds(ids, size) {
+  const chunks = [];
+  for (let i = 0; i < ids.length; i += size) chunks.push(ids.slice(i, i + size));
+  return chunks;
+}
+
 window.bulkDeactivate = async function(secId) {
   const body = document.getElementById(secId + '-body');
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გაუქმდეს (OFF)?`)) return;
-  const { error } = await supabase.from('products').update({ active: false }).in('id', ids);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  ids.forEach(id => { if (productCache[id]) productCache[id].active = false; });
+  for (const chunk of chunkIds(ids, 50)) {
+    const { error } = await supabase.from('products').update({ active: false }).in('id', chunk);
+    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+    chunk.forEach(id => { if (productCache[id]) productCache[id].active = false; });
+  }
   renderProductRows(Object.values(productCache));
   showToast(`${ids.length} პროდუქტი გაუქმდა`, '');
 };
@@ -1705,9 +1714,11 @@ window.bulkDelete = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი სამუდამოდ წაიშალოს?`)) return;
-  const { error } = await supabase.from('products').delete().in('id', ids);
-  if (error) { showToast('წაშლის შეცდომა: ' + error.message, 'error'); return; }
-  ids.forEach(id => delete productCache[id]);
+  for (const chunk of chunkIds(ids, 50)) {
+    const { error } = await supabase.from('products').delete().in('id', chunk);
+    if (error) { showToast('წაშლის შეცდომა: ' + error.message, 'error'); return; }
+    chunk.forEach(id => delete productCache[id]);
+  }
   renderProductRows(Object.values(productCache));
   showToast(`🗑 ${ids.length} პროდუქტი წაიშალა`, 'error');
 };
@@ -1717,9 +1728,11 @@ window.bulkActivate = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გააქტიურდეს?`)) return;
-  const { error } = await supabase.from('products').update({ active: true }).in('id', ids);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  ids.forEach(id => { if (productCache[id]) productCache[id].active = true; });
+  for (const chunk of chunkIds(ids, 50)) {
+    const { error } = await supabase.from('products').update({ active: true }).in('id', chunk);
+    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+    chunk.forEach(id => { if (productCache[id]) productCache[id].active = true; });
+  }
   renderProductRows(Object.values(productCache));
   showToast(`✓ ${ids.length} პროდუქტი გააქტიურდა`, 'success');
 };
