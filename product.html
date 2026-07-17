@@ -567,20 +567,12 @@ function renderBookingBlock() {
     </div>`;
     return;
   }
-  const today = new Date().toISOString().slice(0, 10);
   el.innerHTML = `
     <div class="border border-gray-800 rounded-xl p-4">
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <div>
-          <div class="text-[10px] font-semibold text-dark mb-1">დაწყების თარიღი</div>
-          <input type="date" id="bookStartDate" min="${today}" value="${today}" oninput="updateBookingTotal()"
-            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
-        </div>
-        <div>
-          <div class="text-[10px] font-semibold text-dark mb-1">დასრულების თარიღი</div>
-          <input type="date" id="bookEndDate" min="${today}" oninput="updateBookingTotal()"
-            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
-        </div>
+      <div class="mb-3">
+        <div class="text-[10px] font-semibold text-dark mb-1">დღეების რაოდენობა</div>
+        <input type="number" id="bookDays" min="1" step="1" value="1" oninput="updateBookingTotal()"
+          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
       </div>
       <div id="bookTotalDisplay" class="text-sm text-dark mb-3"></div>
       <button onclick="bookNow()" class="w-full bg-orange text-white font-bold text-sm rounded-lg py-2.5 hover:opacity-90 transition-opacity">დაჯავშნა</button>
@@ -589,13 +581,11 @@ function renderBookingBlock() {
 }
 
 window.updateBookingTotal = function() {
-  const startEl = document.getElementById('bookStartDate');
-  const endEl = document.getElementById('bookEndDate');
+  const daysEl = document.getElementById('bookDays');
   const displayEl = document.getElementById('bookTotalDisplay');
-  if (!startEl || !endEl || !displayEl) return;
-  if (!endEl.value) { displayEl.innerHTML = ''; return; }
-  const days = Math.round((new Date(endEl.value) - new Date(startEl.value)) / 86400000);
-  if (days <= 0) { displayEl.innerHTML = `<span class="text-red-600">დასრულების თარიღი უნდა იყოს დაწყების თარიღის შემდეგ</span>`; return; }
+  if (!daysEl || !displayEl) return;
+  const days = Math.round(parseFloat(daysEl.value));
+  if (!(days > 0)) { displayEl.innerHTML = `<span class="text-red-600">შეიყვანეთ დღეების რაოდენობა</span>`; return; }
   const calc = calcBookingTotal(days);
   displayEl.innerHTML = `
     <div class="flex justify-between"><span>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</span><span class="font-semibold">${calc.total.toFixed(2)} ₾</span></div>
@@ -604,14 +594,12 @@ window.updateBookingTotal = function() {
 };
 
 window.bookNow = function() {
-  const startEl = document.getElementById('bookStartDate');
-  const endEl = document.getElementById('bookEndDate');
-  if (!startEl || !endEl || !endEl.value) { showToast('აირჩიეთ ჯავშნის თარიღები'); return; }
-  const days = Math.round((new Date(endEl.value) - new Date(startEl.value)) / 86400000);
+  const daysEl = document.getElementById('bookDays');
+  const days = daysEl ? Math.round(parseFloat(daysEl.value)) : 0;
   const calc = calcBookingTotal(days);
-  if (!calc) { showToast('აირჩიეთ სწორი თარიღები'); return; }
+  if (!calc) { showToast('შეიყვანეთ დღეების რაოდენობა'); return; }
   const msg = `დაინტერესებული ვარ ჯავშნით: ${product.name}${product.code ? ' (კოდი: ' + product.code + ')' : ''}\n` +
-    `თარიღები: ${startEl.value} — ${endEl.value} (${calc.days} დღე)\n` +
+    `ხანგრძლივობა: ${calc.days} დღე\n` +
     `სავარაუდო ღირებულება: ${calc.total.toFixed(2)} ₾${calc.deposit ? ' + გირაო ' + calc.deposit.toFixed(2) + ' ₾' : ''} = ${calc.grandTotal.toFixed(2)} ₾`;
   _pendingBookingMsg = msg;
   if (!chatOpen) toggleChat();
