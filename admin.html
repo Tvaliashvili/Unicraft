@@ -282,10 +282,6 @@
                 <input class="form-input" id="prodDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
               <div class="form-group">
-                <label class="form-label">კვირის ღირებულება (₾)</label>
-                <input class="form-input" id="prodWeeklyRate" type="number" min="0" step="0.01" placeholder="0.00">
-              </div>
-              <div class="form-group">
                 <label class="form-label">გირაო (₾)</label>
                 <input class="form-input" id="prodDeposit" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
@@ -629,10 +625,6 @@
         <div class="form-group">
           <label class="form-label">დღიური ღირებულება (₾)</label>
           <input class="form-input" id="editDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
-        </div>
-        <div class="form-group">
-          <label class="form-label">კვირის ღირებულება (₾)</label>
-          <input class="form-input" id="editWeeklyRate" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
         <div class="form-group">
           <label class="form-label">გირაო (₾)</label>
@@ -1356,14 +1348,12 @@ window.addProduct = async function() {
     } else {
       showToast('კოდი სავალდებულოა ან ჩართე ავტო გენერაცია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return;
     }
-    const weeklyRateVal = document.getElementById('prodWeeklyRate').value;
     const { error } = await supabase.from('products').insert({
       name,
       category: _currentCategory,
       specs,
       country: getCountryForBrand(specs.brand) || null,
       daily_rate: dailyRate,
-      weekly_rate: weeklyRateVal ? parseFloat(weeklyRateVal) : null,
       security_deposit: parseFloat(document.getElementById('prodDeposit').value) || 0,
       status: document.getElementById('prodStatus').value || 'available',
       description: getDescValue('prodDescRows'),
@@ -1385,7 +1375,7 @@ window.addProduct = async function() {
 window.clearForm = function() {
   _currentCategory = '';
   // reset all select/input fields
-  ['prodName','prodDailyRate','prodWeeklyRate','prodDeposit','prodBrand',
+  ['prodName','prodDailyRate','prodDeposit','prodBrand',
    'specCustomCode','specBrandModel','specPowerSource','specWeight']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const autoCodeCheck = document.getElementById('autoCodeCheck');
@@ -1468,7 +1458,7 @@ function productRowHTML(p, isActive) {
     </div>
     <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
-    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.daily_rate ? parseFloat(p.daily_rate).toFixed(2) + ' ₾/დღე' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}${p.weekly_rate ? `<span style="font-size:11px;color:var(--gray-mid);display:block">${parseFloat(p.weekly_rate).toFixed(2)} ₾/კვირა</span>` : ''}</span>
+    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.daily_rate ? parseFloat(p.daily_rate).toFixed(2) + ' ₾/დღე' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}</span>
     ${isActive ? activeButtons : inactiveButtons}
   </div>`;
 }
@@ -1542,7 +1532,6 @@ window.editProduct = function(id) {
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editDailyRate').value = p.daily_rate || '';
-  document.getElementById('editWeeklyRate').value = p.weekly_rate || '';
   document.getElementById('editDeposit').value = p.security_deposit || '';
   document.getElementById('editStatus').value = p.status || 'available';
   renderDescRows('editDescRows', p.description || '');
@@ -1574,7 +1563,6 @@ window.saveProductEdit = async function() {
   const name = document.getElementById('editName').value.trim();
   const category = document.getElementById('editProdCategory').value;
   const dailyRate = parseFloat(document.getElementById('editDailyRate').value) || 0;
-  const weeklyRateVal = document.getElementById('editWeeklyRate').value;
   if (!name || !category || !newCode) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
@@ -1625,7 +1613,6 @@ window.saveProductEdit = async function() {
       specs,
       country: getCountryForBrand(specs.brand) || productCache[id]?.country || null,
       daily_rate: dailyRate,
-      weekly_rate: weeklyRateVal ? parseFloat(weeklyRateVal) : null,
       security_deposit: parseFloat(document.getElementById('editDeposit').value) || 0,
       status: document.getElementById('editStatus').value || 'available',
       description: getDescValue('editDescRows'),
@@ -1888,7 +1875,6 @@ window.showProductInfo = function(id) {
   if (s.weight) rows += row('წონა', s.weight + ' კგ');
   if (p.country) rows += row('ქვეყანა', p.country);
   if (p.daily_rate) rows += row('დღიური ღირებულება', p.daily_rate + ' ₾');
-  if (p.weekly_rate) rows += row('კვირის ღირებულება', p.weekly_rate + ' ₾');
   if (p.security_deposit) rows += row('გირაო', p.security_deposit + ' ₾');
   if (p.status) rows += row('სტატუსი', STATUS_BADGES[p.status] || p.status);
   let html = '';
