@@ -199,6 +199,8 @@ tailwind.config = {
 
       <!-- Price -->
       <div id="productPriceBlock" class="mb-4"></div>
+      <!-- Booking -->
+      <div id="productBookingBlock" class="mb-4"></div>
       <!-- Code -->
       <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
       <!-- Specs -->
@@ -371,7 +373,7 @@ async function init() {
       fetch(FUNC, { headers: { apikey: APIKEY, Authorization: `Bearer ${APIKEY}` } }).then(r => r.json())
     ]);
     if (!product_data || product_data.error) { showError(); return; }
-    product = { ...product_data, imageUrl: product_data.image_url, oldPrice: product_data.old_price || null };
+    product = { ...product_data, imageUrl: product_data.image_url };
     allProducts = (Array.isArray(allData) ? allData : []).map(p => ({ ...p, imageUrl: p.image_url }));
     renderProduct();
   } catch(e) {
@@ -392,7 +394,7 @@ function renderProduct() {
   document.title = product.name + ' — UniCraft';
   document.getElementById('breadcrumbName').textContent = product.name;
   const _CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები' };
-  document.getElementById('productCategory').textContent = _CAT_DISPLAY[product.product_type] || product.category || 'სხვა';
+  document.getElementById('productCategory').textContent = product.category || _CAT_DISPLAY[product.product_type] || 'სხვა';
   document.getElementById('productName').textContent = product.name;
   const descText = (product.description || '').trim();
   const descContainer = document.getElementById('productDescContainer');
@@ -405,9 +407,10 @@ function renderProduct() {
   }
 
   const b = document.getElementById('productBadge');
-  if (product.oldPrice) {
+  if (product.status && product.status !== 'available') {
     b.classList.remove('hidden');
-    b.textContent = 'ფასდაკლება';
+    b.textContent = product.status === 'rented' ? 'გაქირავებულია' : 'შეკეთებაშია';
+    b.style.background = product.status === 'rented' ? '#dc2626' : '#b45309';
   } else if (product.badge) {
     b.classList.remove('hidden');
     b.textContent = product.badge;
@@ -426,7 +429,7 @@ function renderProduct() {
   const _vehicleSrc = _isTire ? (_vt === 'სატვირთო' ? './icons/truck.svg' : _vt === 'ჯიპი/პიკაპი' ? './icons/jeep.svg' : './icons/car.svg') : '';
   const _existingSeasonBadge = document.getElementById('productSeasonBadge');
   if (_existingSeasonBadge) _existingSeasonBadge.remove();
-  if (_vehicleSrc || _seasonIcon) {
+  if (_vehicleSrc || _seasonSrc) {
     const _sb = document.createElement('div');
     _sb.id = 'productSeasonBadge';
     _sb.style.cssText = 'position:absolute;bottom:12px;right:12px;display:flex;gap:4px;align-items:center';
@@ -496,6 +499,11 @@ function renderProduct() {
     if (specs.oem)         specsRows.push(['OEM ნომერი', specs.oem]);
     if (specs.car_make)    specsRows.push(['ავტომობ. მარკა', specs.car_make]);
     if (product.country)   specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
+  } else {
+    if (specs.brand_model)  specsRows.push(['მოდელი', specs.brand_model]);
+    if (specs.power_source) specsRows.push(['კვების წყარო', specs.power_source]);
+    if (specs.weight)       specsRows.push(['წონა', specs.weight + ' კგ']);
+    if (product.country)    specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
   }
   const specsEl = document.getElementById('productSpecs');
   if (specsEl) {
@@ -513,13 +521,14 @@ function renderProduct() {
   }
 
   const priceBlock = document.getElementById('productPriceBlock');
-  if (product.price) {
+  if (product.daily_rate) {
     priceBlock.innerHTML = `
       <div class="border border-gray-800 rounded-xl p-4">
         <div class="flex items-baseline gap-3 flex-wrap">
-          ${product.oldPrice ? `<span class="text-sm text-dark line-through">${parseFloat(product.oldPrice).toFixed(2)} ₾</span>` : ''}
-          <span class="text-2xl font-bold text-orange">${parseFloat(product.price).toFixed(2)} ₾${product.unit ? `<span class="text-sm font-bold text-dark ml-1">/ ცალი</span>` : ''}</span>
+          <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
+          ${product.weekly_rate ? `<span class="text-sm text-dark">${parseFloat(product.weekly_rate).toFixed(2)} ₾ / კვირაში</span>` : ''}
         </div>
+        ${product.security_deposit ? `<div class="text-xs text-dark mt-1">გირაო: ${parseFloat(product.security_deposit).toFixed(2)} ₾</div>` : ''}
       </div>`;
   } else {
     priceBlock.innerHTML = `
@@ -528,10 +537,89 @@ function renderProduct() {
       </div>`;
   }
 
+  renderBookingBlock();
+
   document.getElementById('loadingState').classList.add('hidden');
   document.getElementById('productContent').classList.remove('hidden');
 }
 
+function calcBookingTotal(days) {
+  if (!(days > 0)) return null;
+  let total;
+  if (product.weekly_rate && days >= 7) {
+    const weeks = Math.floor(days / 7);
+    const remDays = days % 7;
+    total = weeks * product.weekly_rate + remDays * (product.daily_rate || 0);
+  } else {
+    total = days * (product.daily_rate || 0);
+  }
+  const deposit = parseFloat(product.security_deposit || 0);
+  return { days, total, deposit, grandTotal: total + deposit };
+}
+
+function renderBookingBlock() {
+  const el = document.getElementById('productBookingBlock');
+  if (!el) return;
+  if (!product.daily_rate) { el.innerHTML = ''; return; }
+  if (product.status && product.status !== 'available') {
+    el.innerHTML = `<div class="border border-gray-800 rounded-xl p-4 text-sm text-dark">
+      ${product.status === 'rented' ? '🔴 ამჟამად გაქირავებულია' : '🛠 ამჟამად შეკეთებაშია'} — დაგვიკავშირდით ხელმისაწვდომობის დასაზუსტებლად.
+    </div>`;
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  el.innerHTML = `
+    <div class="border border-gray-800 rounded-xl p-4">
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <div class="text-[10px] font-semibold text-dark mb-1">დაწყების თარიღი</div>
+          <input type="date" id="bookStartDate" min="${today}" value="${today}" oninput="updateBookingTotal()"
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
+        </div>
+        <div>
+          <div class="text-[10px] font-semibold text-dark mb-1">დასრულების თარიღი</div>
+          <input type="date" id="bookEndDate" min="${today}" oninput="updateBookingTotal()"
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark outline-none focus:border-orange">
+        </div>
+      </div>
+      <div id="bookTotalDisplay" class="text-sm text-dark mb-3"></div>
+      <button onclick="bookNow()" class="w-full bg-orange text-white font-bold text-sm rounded-lg py-2.5 hover:opacity-90 transition-opacity">დაჯავშნა</button>
+    </div>`;
+  updateBookingTotal();
+}
+
+window.updateBookingTotal = function() {
+  const startEl = document.getElementById('bookStartDate');
+  const endEl = document.getElementById('bookEndDate');
+  const displayEl = document.getElementById('bookTotalDisplay');
+  if (!startEl || !endEl || !displayEl) return;
+  if (!endEl.value) { displayEl.innerHTML = ''; return; }
+  const days = Math.round((new Date(endEl.value) - new Date(startEl.value)) / 86400000);
+  if (days <= 0) { displayEl.innerHTML = `<span class="text-red-600">დასრულების თარიღი უნდა იყოს დაწყების თარიღის შემდეგ</span>`; return; }
+  const calc = calcBookingTotal(days);
+  displayEl.innerHTML = `
+    <div class="flex justify-between"><span>${days} დღე</span><span class="font-semibold">${calc.total.toFixed(2)} ₾</span></div>
+    ${calc.deposit ? `<div class="flex justify-between text-dark"><span>გირაო</span><span class="font-semibold">${calc.deposit.toFixed(2)} ₾</span></div>` : ''}
+    <div class="flex justify-between border-t border-gray-800 mt-1 pt-1 font-bold text-orange"><span>ჯამში</span><span>${calc.grandTotal.toFixed(2)} ₾</span></div>`;
+};
+
+window.bookNow = function() {
+  const startEl = document.getElementById('bookStartDate');
+  const endEl = document.getElementById('bookEndDate');
+  if (!startEl || !endEl || !endEl.value) { showToast('აირჩიეთ ჯავშნის თარიღები'); return; }
+  const days = Math.round((new Date(endEl.value) - new Date(startEl.value)) / 86400000);
+  const calc = calcBookingTotal(days);
+  if (!calc) { showToast('აირჩიეთ სწორი თარიღები'); return; }
+  const msg = `დაინტერესებული ვარ ჯავშნით: ${product.name}${product.code ? ' (კოდი: ' + product.code + ')' : ''}\n` +
+    `თარიღები: ${startEl.value} — ${endEl.value} (${calc.days} დღე)\n` +
+    `სავარაუდო ღირებულება: ${calc.total.toFixed(2)} ₾${calc.deposit ? ' + გირაო ' + calc.deposit.toFixed(2) + ' ₾' : ''} = ${calc.grandTotal.toFixed(2)} ₾`;
+  _pendingBookingMsg = msg;
+  if (!chatOpen) toggleChat();
+  if (chatUserInfo && chatChannel) {
+    document.getElementById('chatInput').value = _pendingBookingMsg;
+    _pendingBookingMsg = null;
+  }
+};
 
 function showError() {
   document.getElementById('loadingState').classList.add('hidden');
@@ -550,6 +638,7 @@ init();
 let chatSessionId = localStorage.getItem('uc_chat_session');
 if (!chatSessionId) { chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6); localStorage.setItem('uc_chat_session', chatSessionId); }
 let chatChannel = null, chatOpen = false;
+let _pendingBookingMsg = null;
 let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '', _chatUserPhone = chatUserInfo?.phone || '';
 let _customerIp = null;
@@ -682,6 +771,7 @@ async function initChatSession(name, phone) {
     document.getElementById('chatClosedBanner').style.display = 'none';
     document.getElementById('chatInputRow').style.display = 'flex';
     document.getElementById('chatInput').focus();
+    if (_pendingBookingMsg) { document.getElementById('chatInput').value = _pendingBookingMsg; _pendingBookingMsg = null; }
     const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
     if (!existing || !existing.length) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
