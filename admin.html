@@ -120,10 +120,6 @@
       <div class="nav-item" onclick="showPage('rentals')">
         <span class="nav-icon">🔴</span> გაქირავებულები
       </div>
-      <div class="nav-item" onclick="showPage('orders')">
-        <span class="nav-icon">🧾</span> შეკვეთები
-        <span id="newOrdersBadge" style="display:none;margin-left:auto;background:var(--orange);color:white;border-radius:20px;padding:1px 8px;font-size:12px"></span>
-      </div>
       <div class="nav-item" onclick="showPage('invoice-gen')">
         <span class="nav-icon">📄</span> ინვ. გენერაცია
       </div>
@@ -182,26 +178,6 @@
         <div id="dashboardRentals" style="padding:0 20px 16px"></div>
       </div>
 
-      <!-- Recent orders -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">ბოლო შეკვეთები</span>
-          <button class="btn btn-secondary btn-sm" onclick="showPage('orders')">ყველა →</button>
-        </div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr style="background:var(--gray-light);font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:0.5px">
-              <th style="padding:10px 12px;text-align:center;white-space:nowrap">თარიღი</th>
-              <th style="padding:10px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
-              <th style="padding:10px 12px;text-align:center">მყიდველი</th>
-              <th style="padding:10px 12px;text-align:center">ტელეფონი</th>
-              <th style="padding:10px 12px;text-align:center">სულ</th>
-              <th style="padding:10px 12px;text-align:center">სტატუსი</th>
-            </tr></thead>
-            <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
     </div>
 
     <!-- Add Product -->
@@ -381,36 +357,39 @@
           <div class="page-subtitle" id="rentalsCountLabel"></div>
         </div>
       </div>
+
+      <!-- Quick rent by code -->
+      <div class="card" style="max-width:600px;margin-bottom:20px">
+        <div class="card-header"><span class="card-title">გაქირავება კოდით</span></div>
+        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">კოდი</label>
+            <input class="form-input" id="rentCodeInput" placeholder="მაგ: 123456" autocomplete="off" oninput="matchRentCode(this.value)" style="margin-bottom:0">
+            <div id="rentCodeMatch" style="font-size:12px;margin-top:6px"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">ვისზეა</label>
+              <input class="form-input" id="rentNameInput" placeholder="სახელი გვარი" style="margin-bottom:0">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">ტელეფონი</label>
+              <input class="form-input" id="rentPhoneInput" placeholder="+995 5XX XX XX XX" style="margin-bottom:0">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">დღეების რაოდენობა</label>
+            <input class="form-input" id="rentDaysInput" type="number" min="1" step="1" placeholder="მაგ: 3" oninput="updateRentReturnDate()" style="margin-bottom:0">
+            <div id="rentReturnDatePreview" style="font-size:12px;color:var(--gray-mid);margin-top:4px"></div>
+          </div>
+          <button class="btn btn-primary" onclick="submitRentByCode()" style="width:100%">🔴 გაქირავება</button>
+        </div>
+      </div>
+
       <div class="card">
         <div id="rentalsList">
           <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
         </div>
-      </div>
-    </div>
-
-    <!-- Orders -->
-    <div class="page" id="page-orders">
-      <div class="page-header">
-        <div>
-          <div class="page-title">შეკვეთები</div>
-          <div class="page-subtitle" id="orderCountLabel"></div>
-        </div>
-      </div>
-      <div class="card" style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;min-width:860px">
-          <thead><tr style="background:var(--gray-light);font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:0.5px">
-            <th style="padding:11px 12px;text-align:center;white-space:nowrap">თარიღი</th>
-            <th style="padding:11px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
-            <th style="padding:11px 12px;text-align:center">მყიდველი</th>
-            <th style="padding:11px 12px;text-align:center">ტელეფონი</th>
-            <th style="padding:11px 12px;text-align:center">სულ</th>
-            <th style="padding:11px 12px;text-align:center">სტატუსი</th>
-            <th style="padding:11px 12px;width:36px"></th>
-          </tr></thead>
-          <tbody id="ordersList">
-            <tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
@@ -946,8 +925,6 @@ window.showPage = function(name) {
   if (name === 'add-product') {
     loadCategories();
   }
-  if (name === 'orders') loadOrdersList();
-  if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
   if (name === 'chat') {
     loadChatSessions();
     loadBannedIps();
@@ -981,7 +958,6 @@ async function initApp() {
   loadMaintenanceStatus();
   renderDescRows('prodDescRows');
   initChatBadgeListener();
-  initOrdersBadgeListener();
   // Load initial chat badge count
   supabase.from('chats').select('unread').then(({ data }) => {
     const total = (data || []).reduce((s, c) => s + (c.unread || 0), 0);
@@ -991,18 +967,13 @@ async function initApp() {
 
   // Stats
   try {
-    const [{ count: prodCount }, { data: rented }, { data: newOrders }] = await Promise.all([
+    const [{ count: prodCount }, { data: rented }] = await Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }),
       supabase.from('products').select('*').eq('status', 'rented').order('created_at', { ascending: false }),
-      supabase.from('orders').select('id').in('status', ['pending', 'new'])
     ]);
     document.getElementById('statProducts').textContent = prodCount || 0;
     document.getElementById('statRented').textContent = rented?.length || 0;
-    updateOrderBadge(newOrders?.length || 0);
     renderDashboardRentals(rented || []);
-    // Recent orders
-    const { data: recentOrders } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
-    renderRecentOrders(recentOrders || []);
   } catch(e) { console.error(e); }
 }
 
@@ -1046,7 +1017,74 @@ async function loadRentalsList() {
   if (!el) return;
   if (!rows.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🔴</div><p>ამჟამად არაფერია გაქირავებული</p></div>'; return; }
   el.innerHTML = `<div style="padding:0 20px">${rentalRowsHTML(rows)}</div>`;
+  loadRentAllProducts();
 }
+
+// ─── Quick rent by code ───
+let _rentAllProducts = [];
+let _rentMatched = null;
+
+async function loadRentAllProducts() {
+  let all = [], from = 0;
+  while (true) {
+    const { data, error } = await supabase.from('products').select('id,code,name,category,daily_rate,status,specs').range(from, from + 999);
+    if (error || !data || !data.length) break;
+    all = all.concat(data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+  _rentAllProducts = all;
+}
+
+window.matchRentCode = function(code) {
+  const trimmed = code.trim().toUpperCase();
+  const matchEl = document.getElementById('rentCodeMatch');
+  _rentMatched = null;
+  if (!trimmed) { matchEl.innerHTML = ''; return; }
+  const match = _rentAllProducts.find(p =>
+    String(p.code || '').split(';').map(c => c.trim().toUpperCase()).filter(c => c).includes(trimmed)
+  );
+  if (!match) { matchEl.innerHTML = '<span style="color:#b91c1c">პროდუქტი ვერ მოიძებნა</span>'; return; }
+  _rentMatched = match;
+  if (match.status === 'rented') {
+    matchEl.innerHTML = `<span style="color:#c2410c">⚠ ${match.name} — უკვე გაქირავებულია</span>`;
+  } else {
+    matchEl.innerHTML = `<span style="color:#166534">✓ ${match.name} ${match.daily_rate ? '(' + parseFloat(match.daily_rate).toFixed(2) + ' ₾/დღე)' : ''}</span>`;
+  }
+};
+
+window.updateRentReturnDate = function() {
+  const daysEl = document.getElementById('rentDaysInput');
+  const previewEl = document.getElementById('rentReturnDatePreview');
+  const days = parseInt(daysEl.value, 10);
+  if (!(days > 0)) { previewEl.textContent = ''; return; }
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  previewEl.textContent = 'დაბრუნება: ' + d.toISOString().slice(0, 10);
+};
+
+window.submitRentByCode = async function() {
+  if (!_rentMatched) { showToast('შეიყვანე სწორი კოდი', 'error'); return; }
+  const name = document.getElementById('rentNameInput').value.trim();
+  const phone = document.getElementById('rentPhoneInput').value.trim();
+  const days = parseInt(document.getElementById('rentDaysInput').value, 10);
+  if (!name) { showToast('შეავსე ვისზეა გაქირავებული', 'error'); return; }
+  let returnDate = null;
+  if (days > 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    returnDate = d.toISOString().slice(0, 10);
+  }
+  const specs = { ...(_rentMatched.specs || {}), renter_name: name, renter_phone: phone || null, return_date: returnDate };
+  const { error } = await supabase.from('products').update({ status: 'rented', specs }).eq('id', _rentMatched.id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  showToast('✓ გაქირავებულია', 'success');
+  ['rentCodeInput','rentNameInput','rentPhoneInput','rentDaysInput'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('rentCodeMatch').innerHTML = '';
+  document.getElementById('rentReturnDatePreview').textContent = '';
+  _rentMatched = null;
+  loadRentalsList();
+};
 
 window.markReturned = async function(id) {
   if (!confirm('პროდუქტი დაბრუნებულად მოინიშნოს?')) return;
@@ -1059,31 +1097,6 @@ window.markReturned = async function(id) {
   const dashEl = document.getElementById('dashboardRentals');
   if (dashEl) initApp();
 };
-
-function renderRecentOrders(rows) {
-  const el = document.getElementById('recentOrders');
-  if (!rows.length) { el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">შეკვეთები ჯერ არ არის</td></tr>'; return; }
-  el.innerHTML = rows.map(o => {
-    const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
-    const status = o.status || 'pending';
-    const td = 'style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"';
-    const isConfirmed = status === 'confirmed';
-    const isRejected  = status === 'rejected' || status === 'cancelled';
-    const statusDot = isConfirmed
-      ? `<span style="font-size:13px;color:#15803d;font-weight:700">✓</span>`
-      : isRejected
-        ? `<span style="font-size:13px;color:#b91c1c;font-weight:700">✕</span>`
-        : `<span style="font-size:11px;color:var(--gray-mid)">–</span>`;
-    return `<tr style="cursor:pointer" onclick="showPage('orders')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid)">${date}</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600">${o.invoice_no || '–'}</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || '–'}</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
-      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">${statusDot}</td>
-    </tr>`;
-  }).join('');
-}
 
 window.toggleCatMgr = function() {
   const p = document.getElementById('catMgrPanel');
@@ -2028,110 +2041,6 @@ window.closeInfoModal = function() {
   document.getElementById('infoModal').style.display = 'none';
 };
 
-// ─── Orders cache ───
-let ordersCache = {};
-let ordersChannel = null;
-
-function updateOrderBadge(count) {
-  const badge = document.getElementById('newOrdersBadge');
-  if (!badge) return;
-  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
-  else { badge.style.display = 'none'; }
-}
-
-// ─── Demo orders ───
-const DEMO_ORDERS = [];
-
-function renderOrderRow(id, o, dateStr) {
-  ordersCache[id] = { ...o, _dateStr: dateStr };
-  const status = o.status || 'pending';
-  const isConfirmed = status === 'confirmed';
-  const isRejected  = status === 'rejected' || status === 'cancelled';
-  const td = `style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"`;
-  const vBtn = `<button onclick="event.stopPropagation();confirmOrder('${id}')" title="დადასტურება" style="background:${isConfirmed?'#dcfce7':'none'};color:${isConfirmed?'#15803d':'#9ca3af'};border:1px solid ${isConfirmed?'#86efac':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✓</button>`;
-  const xBtn = `<button onclick="event.stopPropagation();rejectOrder('${id}')"  title="უარყოფა"   style="background:${isRejected?'#fee2e2':'none'};color:${isRejected?'#b91c1c':'#9ca3af'};border:1px solid ${isRejected?'#fca5a5':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✕</button>`;
-  return `<tr id="order-row-${id}" style="cursor:pointer" onclick="viewOrderPDF('${id}')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || o.buyerName || '–'}</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
-      <div style="display:flex;align-items:center;justify-content:center;gap:4px">${vBtn}${xBtn}</div>
-    </td>
-    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
-      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑</button>
-    </td>
-  </tr>`;
-}
-
-// ─── Orders ───
-async function loadOrdersList() {
-  const el = document.getElementById('ordersList');
-  el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner" style="margin:auto"></div></td></tr>';
-
-  let hasRealData = false;
-  try {
-    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (!error && data && data.length) {
-      hasRealData = true;
-      const pendingCount = data.filter(o => !o.status || o.status === 'pending' || o.status === 'new').length;
-      document.getElementById('orderCountLabel').textContent = data.length + ' შეკვეთა · ' + pendingCount + ' განუხილველი';
-      updateOrderBadge(pendingCount);
-      el.innerHTML = data.map(o => {
-        const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
-        return renderOrderRow(o.id, o, date);
-      }).join('');
-    }
-  } catch(e) {}
-
-  if (!hasRealData) {
-    document.getElementById('orderCountLabel').textContent = '0 შეკვეთა';
-    el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-mid);font-size:13px">🧾 შეკვეთები ჯერ არ არის</td></tr>';
-  }
-
-  // Real-time subscription for new orders
-  if (ordersChannel) supabase.removeChannel(ordersChannel);
-  ordersChannel = supabase
-    .channel('orders-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-      loadOrdersList();
-    })
-    .subscribe();
-}
-
-window.deleteOrder = async function(id) {
-  if (!confirm('ნამდვილად გსურთ ამ შეკვეთის წაშლა?')) return;
-  await supabase.from('orders').delete().eq('id', id);
-  delete ordersCache[id];
-  loadOrdersList();
-};
-
-window.confirmOrder = async function(id) {
-  const { error } = await supabase.from('orders').update({ status: 'confirmed' }).eq('id', id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  if (ordersCache[id]) ordersCache[id].status = 'confirmed';
-  const row = document.getElementById('order-row-' + id);
-  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
-};
-
-window.rejectOrder = async function(id) {
-  const { error } = await supabase.from('orders').update({ status: 'rejected' }).eq('id', id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  if (ordersCache[id]) ordersCache[id].status = 'rejected';
-  const row = document.getElementById('order-row-' + id);
-  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
-};
-
-
-window.viewOrderPDF = function(id) {
-  const o = ordersCache[id];
-  if (!o) return;
-  const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
-  const dateStr = o.created_at ? fmtGeoDate(new Date(o.created_at)) : (o._dateStr || '–');
-  downloadAdminInvoicePDF(items, o.invoice_no || o.invoiceNo || '–', dateStr, o.buyer_name || o.buyerName || '', o.buyer_id || o.buyerId || '', o.buyer_phone || '');
-};
-
 // ─── Chat (Admin) ───
 let currentChatSessionId = null;
 let currentChatIp = null;
@@ -2150,24 +2059,6 @@ function playNotifSound() {
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.4);
   } catch(e) {}
-}
-
-function initOrdersBadgeListener() {
-  supabase.channel('global-orders-badge')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
-      supabase.from('orders').select('id').in('status', ['pending', 'new']).then(({ data }) => {
-        updateOrderBadge((data || []).length);
-      });
-      // Reload orders list if on orders page
-      if (document.getElementById('page-orders')?.classList.contains('active')) {
-        loadOrdersList();
-      }
-      // Always reload dashboard recent orders
-      supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
-        if (data) renderRecentOrders(data);
-      });
-    })
-    .subscribe();
 }
 
 function initChatBadgeListener() {
@@ -2696,7 +2587,6 @@ window.submitInvGenOrder = async function() {
   });
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   showToast('✓ შეკვეთა გაფორმდა!', 'success');
-  loadOrdersList();
   initInvGen();
 };
 
