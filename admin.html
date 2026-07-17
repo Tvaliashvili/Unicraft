@@ -169,15 +169,6 @@
         </div>
       </div>
 
-      <!-- Currently rented -->
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-header">
-          <span class="card-title">ამჟამად გაქირავებული</span>
-          <button class="btn btn-secondary btn-sm" onclick="showPage('rentals')">ყველა →</button>
-        </div>
-        <div id="dashboardRentals" style="padding:0 20px 16px"></div>
-      </div>
-
     </div>
 
     <!-- Add Product -->
@@ -959,21 +950,13 @@ async function initApp() {
 
   // Stats
   try {
-    const [{ count: prodCount }, { data: rented }] = await Promise.all([
+    const [{ count: prodCount }, { count: rentedCount }] = await Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }),
-      supabase.from('products').select('*').eq('status', 'rented').order('created_at', { ascending: false }),
+      supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'rented'),
     ]);
     document.getElementById('statProducts').textContent = prodCount || 0;
-    document.getElementById('statRented').textContent = rented?.length || 0;
-    renderDashboardRentals(rented || []);
+    document.getElementById('statRented').textContent = rentedCount || 0;
   } catch(e) { console.error(e); }
-}
-
-function renderDashboardRentals(rows) {
-  const el = document.getElementById('dashboardRentals');
-  if (!el) return;
-  if (!rows.length) { el.innerHTML = '<p style="color:var(--gray-mid);font-size:13px;margin:0">ამჟამად არაფერია გაქირავებული</p>'; return; }
-  el.innerHTML = rentalRowsHTML(rows.slice(0, 5));
 }
 
 function rentalRowsHTML(rows) {
@@ -1073,8 +1056,6 @@ window.markReturned = async function(id) {
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   showToast('✓ პროდუქტი დაბრუნებულია', 'success');
   loadRentalsList();
-  const dashEl = document.getElementById('dashboardRentals');
-  if (dashEl) initApp();
 };
 
 window.toggleCatMgr = function() {
