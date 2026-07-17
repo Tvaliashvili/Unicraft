@@ -258,8 +258,8 @@
                 <label class="form-label">სტატუსი</label>
                 <select class="form-select" id="prodStatus" onchange="toggleRenterFields('prod')">
                   <option value="available">✅ ხელმისაწვდომია</option>
-                  <option value="rented">🔴 გაქირავებულია</option>
-                  <option value="maintenance">🛠 შეკეთებაშია</option>
+                  <option value="rented">🔴 მიუწვდომელია — გაქირავებულია</option>
+                  <option value="maintenance">🔴 მიუწვდომელია — შეკეთებაშია</option>
                 </select>
               </div>
               <div class="form-group rental-info" id="prodRenterFields" style="display:none">
@@ -625,8 +625,8 @@
           <label class="form-label">სტატუსი</label>
           <select class="form-select" id="editStatus" onchange="toggleRenterFields('edit')">
             <option value="available">✅ ხელმისაწვდომია</option>
-            <option value="rented">🔴 გაქირავებულია</option>
-            <option value="maintenance">🛠 შეკეთებაშია</option>
+            <option value="rented">🔴 მიუწვდომელია — გაქირავებულია</option>
+            <option value="maintenance">🔴 მიუწვდომელია — შეკეთებაშია</option>
           </select>
         </div>
         <div class="form-group rental-info" id="editRenterFields" style="display:none">
@@ -1519,8 +1519,8 @@ async function loadProductsList() {
 
 const STATUS_BADGES = {
   available:   '<span style="font-size:10px;font-weight:700;color:#166534;background:#dcfce7;border-radius:6px;padding:2px 6px">✅ ხელმისაწვდომია</span>',
-  rented:      '<span style="font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:2px 6px">🔴 გაქირავებული</span>',
-  maintenance: '<span style="font-size:10px;font-weight:700;color:#92400e;background:#fef3c7;border-radius:6px;padding:2px 6px">🛠 შეკეთებაში</span>',
+  rented:      '<span style="font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:2px 6px">🔴 მიუწვდომელია</span>',
+  maintenance: '<span style="font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:2px 6px">🔴 მიუწვდომელია</span>',
 };
 
 function productRowHTML(p, isActive) {
