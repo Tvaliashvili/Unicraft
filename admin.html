@@ -256,22 +256,10 @@
               <!-- Status -->
               <div class="form-group">
                 <label class="form-label">სტატუსი</label>
-                <select class="form-select" id="prodStatus" onchange="toggleRenterFields('prod')">
+                <select class="form-select" id="prodStatus">
                   <option value="available">✅ ხელმისაწვდომია</option>
                   <option value="rented">🔴 მიუწვდომელია</option>
                 </select>
-              </div>
-              <div class="form-group rental-info" id="prodRenterFields" style="display:none">
-                <label class="form-label">ვისზეა გაქირავებული</label>
-                <input class="form-input" id="prodRenterName" placeholder="სახელი გვარი">
-              </div>
-              <div class="form-group rental-info" id="prodRenterPhoneWrap" style="display:none">
-                <label class="form-label">ტელეფონი</label>
-                <input class="form-input" id="prodRenterPhone" placeholder="მაგ: +995 5XX XX XX XX">
-              </div>
-              <div class="form-group rental-info" id="prodReturnDateWrap" style="display:none">
-                <label class="form-label">დაბრუნების თარიღი</label>
-                <input class="form-input" id="prodReturnDate" type="date">
               </div>
               <!-- Description -->
               <div class="form-group full">
@@ -622,22 +610,10 @@
         <!-- Status -->
         <div class="form-group">
           <label class="form-label">სტატუსი</label>
-          <select class="form-select" id="editStatus" onchange="toggleRenterFields('edit')">
+          <select class="form-select" id="editStatus">
             <option value="available">✅ ხელმისაწვდომია</option>
             <option value="rented">🔴 მიუწვდომელია</option>
           </select>
-        </div>
-        <div class="form-group rental-info" id="editRenterFields" style="display:none">
-          <label class="form-label">ვისზეა გაქირავებული</label>
-          <input class="form-input" id="editRenterName" placeholder="სახელი გვარი">
-        </div>
-        <div class="form-group rental-info" id="editRenterPhoneWrap" style="display:none">
-          <label class="form-label">ტელეფონი</label>
-          <input class="form-input" id="editRenterPhone" placeholder="მაგ: +995 5XX XX XX XX">
-        </div>
-        <div class="form-group rental-info" id="editReturnDateWrap" style="display:none">
-          <label class="form-label">დაბრუნების თარიღი</label>
-          <input class="form-input" id="editReturnDate" type="date">
         </div>
         <!-- Description -->
         <div class="form-group full">
@@ -1249,30 +1225,6 @@ window.toggleAutoCode = function() {
   input.style.display = checked ? 'none' : '';
 };
 
-function renterSpecsFromForm(prefix) {
-  const statusEl = document.getElementById(prefix + 'Status');
-  if (!statusEl || statusEl.value !== 'rented') {
-    return { renter_name: null, renter_phone: null, return_date: null };
-  }
-  return {
-    renter_name: (document.getElementById(prefix + 'RenterName')?.value || '').trim() || null,
-    renter_phone: (document.getElementById(prefix + 'RenterPhone')?.value || '').trim() || null,
-    return_date: document.getElementById(prefix + 'ReturnDate')?.value || null,
-  };
-}
-
-window.toggleRenterFields = function(prefix) {
-  const statusEl = document.getElementById(prefix + 'Status');
-  const show = statusEl && statusEl.value === 'rented';
-  const display = show ? '' : 'none';
-  const fieldsEl = document.getElementById(prefix + 'RenterFields');
-  const phoneEl = document.getElementById(prefix + 'RenterPhoneWrap');
-  const returnEl = document.getElementById(prefix + 'ReturnDateWrap');
-  if (fieldsEl) fieldsEl.style.display = display;
-  if (phoneEl) phoneEl.style.display = display;
-  if (returnEl) returnEl.style.display = display;
-};
-
 window.toggleBrandMgr = function() {
   const p = document.getElementById('brandMgrPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
@@ -1397,7 +1349,6 @@ window.addProduct = async function() {
     brand_model: document.getElementById('specBrandModel').value.trim(),
     power_source: document.getElementById('specPowerSource').value,
     weight: document.getElementById('specWeight').value ? parseFloat(document.getElementById('specWeight').value) : null,
-    ...renterSpecsFromForm('prod'),
   };
   if (!specs.brand) { showToast('ბრენდი სავალდებულოა', 'error'); return; }
   const dailyRate = parseFloat(document.getElementById('prodDailyRate').value) || 0;
@@ -1465,8 +1416,7 @@ window.clearForm = function() {
   _currentCategory = '';
   // reset all select/input fields
   ['prodName','prodDailyRate','prodBrand',
-   'specCustomCode','specBrandModel','specPowerSource','specWeight',
-   'prodRenterName','prodRenterPhone','prodReturnDate']
+   'specCustomCode','specBrandModel','specPowerSource','specWeight']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
@@ -1474,7 +1424,6 @@ window.clearForm = function() {
   if (specCustomCode) { specCustomCode.style.display = ''; }
   document.getElementById('prodStatus').value = 'available';
   document.getElementById('prodCategory').value = '';
-  toggleRenterFields('prod');
   // clear textarea
   const descEl = document.getElementById('prodDescRows');
   if (descEl) descEl.value = '';
@@ -1625,10 +1574,6 @@ window.editProduct = function(id) {
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editDailyRate').value = p.daily_rate || '';
   document.getElementById('editStatus').value = p.status || 'available';
-  document.getElementById('editRenterName').value = specs.renter_name || '';
-  document.getElementById('editRenterPhone').value = specs.renter_phone || '';
-  document.getElementById('editReturnDate').value = specs.return_date || '';
-  toggleRenterFields('edit');
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editCodeDisplay').value = p.code || '';
@@ -1677,13 +1622,16 @@ window.saveProductEdit = async function() {
     newCode = candidateCode;
     document.getElementById('editCodeDisplay').value = candidateCode;
   }
-  // collect specs
+  // collect specs (renter_name/phone/return_date are managed from the Rentals page, not this form)
+  const existingSpecs = productCache[id]?.specs || {};
   const specs = {
     brand: document.getElementById('editBrand').value || '',
     brand_model: document.getElementById('editSpecBrandModel').value.trim(),
     power_source: document.getElementById('editSpecPowerSource').value,
     weight: document.getElementById('editSpecWeight').value ? parseFloat(document.getElementById('editSpecWeight').value) : null,
-    ...renterSpecsFromForm('edit'),
+    renter_name: existingSpecs.renter_name || null,
+    renter_phone: existingSpecs.renter_phone || null,
+    return_date: existingSpecs.return_date || null,
   };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
