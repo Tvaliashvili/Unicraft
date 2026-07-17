@@ -602,7 +602,12 @@ window.bookNow = function() {
     `ხანგრძლივობა: ${calc.days} დღე\n` +
     `სავარაუდო ღირებულება: ${calc.total.toFixed(2)} ₾`;
   _pendingBookingMsg = msg;
-  if (!chatOpen) toggleChat();
+  const showingOffHours = chatOpen && document.getElementById('chatOffHours')?.style.display === 'flex' && !chatChannel;
+  if (!chatOpen) {
+    toggleChat();
+  } else if (showingOffHours) {
+    toggleChat(); toggleChat();
+  }
   if (chatUserInfo && chatChannel) {
     document.getElementById('chatInput').value = _pendingBookingMsg;
     _pendingBookingMsg = null;
@@ -704,7 +709,7 @@ window.toggleChat = function() {
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
     document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
-    if (!isWorkingHours()) {
+    if (!isWorkingHours() && !_pendingBookingMsg) {
       document.getElementById('chatOffHours').style.display = 'flex';
       document.getElementById('chatOffHours').style.flexDirection = 'column';
       document.getElementById('chatIntro').style.display = 'none';
