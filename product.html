@@ -527,7 +527,6 @@ function renderProduct() {
             <div class="flex items-baseline gap-3 flex-wrap">
               <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
             </div>
-            ${product.security_deposit ? `<div class="text-xs text-dark mt-1">გირაო: ${parseFloat(product.security_deposit).toFixed(2)} ₾</div>` : ''}
             <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5">
               <div class="font-semibold">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
               <div>8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
@@ -556,8 +555,7 @@ function calcBookingTotal(days) {
   const base = days * (product.daily_rate || 0);
   const discountPct = days >= 30 ? 50 : (days >= 15 ? 30 : (days > 7 ? 10 : 0));
   const total = base * (1 - discountPct / 100);
-  const deposit = parseFloat(product.security_deposit || 0);
-  return { days, total, deposit, grandTotal: total + deposit, discountPct };
+  return { days, total, discountPct };
 }
 
 function renderBookingBlock() {
@@ -591,9 +589,7 @@ window.updateBookingTotal = function() {
   if (!(days > 0)) { displayEl.innerHTML = `<span class="text-red-600">შეიყვანეთ დღეების რაოდენობა</span>`; return; }
   const calc = calcBookingTotal(days);
   displayEl.innerHTML = `
-    <div class="flex justify-between"><span>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</span><span class="font-semibold">${calc.total.toFixed(2)} ₾</span></div>
-    ${calc.deposit ? `<div class="flex justify-between text-dark"><span>გირაო</span><span class="font-semibold">${calc.deposit.toFixed(2)} ₾</span></div>` : ''}
-    <div class="flex justify-between border-t border-gray-800 mt-1 pt-1 font-bold text-orange"><span>ჯამში</span><span>${calc.grandTotal.toFixed(2)} ₾</span></div>`;
+    <div class="flex justify-between font-bold text-orange"><span>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</span><span>${calc.total.toFixed(2)} ₾</span></div>`;
 };
 
 window.bookNow = function() {
@@ -603,7 +599,7 @@ window.bookNow = function() {
   if (!calc) { showToast('შეიყვანეთ დღეების რაოდენობა'); return; }
   const msg = `დაინტერესებული ვარ ჯავშნით: ${product.name}${product.code ? ' (კოდი: ' + product.code + ')' : ''}\n` +
     `ხანგრძლივობა: ${calc.days} დღე\n` +
-    `სავარაუდო ღირებულება: ${calc.total.toFixed(2)} ₾${calc.deposit ? ' + გირაო ' + calc.deposit.toFixed(2) + ' ₾' : ''} = ${calc.grandTotal.toFixed(2)} ₾`;
+    `სავარაუდო ღირებულება: ${calc.total.toFixed(2)} ₾`;
   _pendingBookingMsg = msg;
   if (!chatOpen) toggleChat();
   if (chatUserInfo && chatChannel) {

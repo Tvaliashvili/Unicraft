@@ -1017,31 +1017,18 @@ async function loadRentalsList() {
   if (!el) return;
   if (!rows.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🔴</div><p>ამჟამად არაფერია გაქირავებული</p></div>'; return; }
   el.innerHTML = `<div style="padding:0 20px">${rentalRowsHTML(rows)}</div>`;
-  loadRentAllProducts();
+  loadProductsList();
 }
 
 // ─── Quick rent by code ───
-let _rentAllProducts = [];
 let _rentMatched = null;
-
-async function loadRentAllProducts() {
-  let all = [], from = 0;
-  while (true) {
-    const { data, error } = await supabase.from('products').select('id,code,name,category,daily_rate,status,specs').range(from, from + 999);
-    if (error || !data || !data.length) break;
-    all = all.concat(data);
-    if (data.length < 1000) break;
-    from += 1000;
-  }
-  _rentAllProducts = all;
-}
 
 window.matchRentCode = function(code) {
   const trimmed = code.trim().toUpperCase();
   const matchEl = document.getElementById('rentCodeMatch');
   _rentMatched = null;
   if (!trimmed) { matchEl.innerHTML = ''; return; }
-  const match = _rentAllProducts.find(p =>
+  const match = Object.values(productCache).find(p =>
     String(p.code || '').split(';').map(c => c.trim().toUpperCase()).filter(c => c).includes(trimmed)
   );
   if (!match) { matchEl.innerHTML = '<span style="color:#b91c1c">პროდუქტი ვერ მოიძებნა</span>'; return; }
