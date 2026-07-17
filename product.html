@@ -526,7 +526,6 @@ function renderProduct() {
       <div class="border border-gray-800 rounded-xl p-4">
         <div class="flex items-baseline gap-3 flex-wrap">
           <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
-          ${product.weekly_rate ? `<span class="text-sm text-dark">${parseFloat(product.weekly_rate).toFixed(2)} ₾ / კვირაში</span>` : ''}
         </div>
         ${product.security_deposit ? `<div class="text-xs text-dark mt-1">გირაო: ${parseFloat(product.security_deposit).toFixed(2)} ₾</div>` : ''}
       </div>`;
@@ -545,16 +544,11 @@ function renderProduct() {
 
 function calcBookingTotal(days) {
   if (!(days > 0)) return null;
-  let total;
-  if (product.weekly_rate && days >= 7) {
-    const weeks = Math.floor(days / 7);
-    const remDays = days % 7;
-    total = weeks * product.weekly_rate + remDays * (product.daily_rate || 0);
-  } else {
-    total = days * (product.daily_rate || 0);
-  }
+  const base = days * (product.daily_rate || 0);
+  const discountPct = days >= 15 ? 40 : (days > 7 ? 10 : 0);
+  const total = base * (1 - discountPct / 100);
   const deposit = parseFloat(product.security_deposit || 0);
-  return { days, total, deposit, grandTotal: total + deposit };
+  return { days, total, deposit, grandTotal: total + deposit, discountPct };
 }
 
 function renderBookingBlock() {
@@ -598,7 +592,7 @@ window.updateBookingTotal = function() {
   if (days <= 0) { displayEl.innerHTML = `<span class="text-red-600">დასრულების თარიღი უნდა იყოს დაწყების თარიღის შემდეგ</span>`; return; }
   const calc = calcBookingTotal(days);
   displayEl.innerHTML = `
-    <div class="flex justify-between"><span>${days} დღე</span><span class="font-semibold">${calc.total.toFixed(2)} ₾</span></div>
+    <div class="flex justify-between"><span>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</span><span class="font-semibold">${calc.total.toFixed(2)} ₾</span></div>
     ${calc.deposit ? `<div class="flex justify-between text-dark"><span>გირაო</span><span class="font-semibold">${calc.deposit.toFixed(2)} ₾</span></div>` : ''}
     <div class="flex justify-between border-t border-gray-800 mt-1 pt-1 font-bold text-orange"><span>ჯამში</span><span>${calc.grandTotal.toFixed(2)} ₾</span></div>`;
 };
@@ -618,6 +612,7 @@ window.bookNow = function() {
   if (chatUserInfo && chatChannel) {
     document.getElementById('chatInput').value = _pendingBookingMsg;
     _pendingBookingMsg = null;
+    sendChatMsg();
   }
 };
 
@@ -771,7 +766,6 @@ async function initChatSession(name, phone) {
     document.getElementById('chatClosedBanner').style.display = 'none';
     document.getElementById('chatInputRow').style.display = 'flex';
     document.getElementById('chatInput').focus();
-    if (_pendingBookingMsg) { document.getElementById('chatInput').value = _pendingBookingMsg; _pendingBookingMsg = null; }
     const { data: existing } = await supabase.from('chat_messages').select('*').eq('session_id', chatSessionId).order('created_at');
     if (!existing || !existing.length) {
       const welcomeText = `გამარჯობა ${n}! 👋 რით შეგვიძლია დაგეხმაროთ?`;
@@ -790,6 +784,11 @@ async function initChatSession(name, phone) {
         if (payload.new.status === 'banned') showChatBanned();
         else if (payload.new.status === 'closed') showChatClosed();
       }).subscribe();
+    if (_pendingBookingMsg) {
+      document.getElementById('chatInput').value = _pendingBookingMsg;
+      _pendingBookingMsg = null;
+      sendChatMsg();
+    }
   } catch(e) {
     try {
       const { data: cd } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
