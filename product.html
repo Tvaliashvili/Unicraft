@@ -407,8 +407,8 @@ function renderProduct() {
   const b = document.getElementById('productBadge');
   if (product.status) {
     b.classList.remove('hidden');
-    b.textContent = product.status === 'rented' ? 'გაქირავებულია' : (product.status === 'maintenance' ? 'შეკეთებაშია' : 'ხელმისაწვდომია');
-    b.style.background = product.status === 'rented' ? '#dc2626' : (product.status === 'maintenance' ? '#b45309' : '#16a34a');
+    b.textContent = product.status !== 'available' ? 'მიუწვდომელი' : 'ხელმისაწვდომი';
+    b.style.background = product.status !== 'available' ? '#dc2626' : '#16a34a';
   } else if (product.badge) {
     b.classList.remove('hidden');
     b.textContent = product.badge;
@@ -564,7 +564,7 @@ function renderBookingBlock() {
   if (!product.daily_rate) { el.innerHTML = ''; return; }
   if (product.status && product.status !== 'available') {
     el.innerHTML = `<div class="text-sm text-dark max-w-[180px]">
-      ${product.status === 'rented' ? '🔴 ამჟამად გაქირავებულია' : '🛠 ამჟამად შეკეთებაშია'} — დაგვიკავშირდით ხელმისაწვდომობის დასაზუსტებლად.
+      🔴 ამჟამად მიუწვდომელია — დაგვიკავშირდით ხელმისაწვდომობის დასაზუსტებლად.
     </div>`;
     return;
   }
