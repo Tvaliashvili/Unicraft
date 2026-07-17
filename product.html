@@ -178,33 +178,33 @@ tailwind.config = {
 <div id="productContent" class="hidden max-w-7xl mx-auto px-6 py-10">
 
   <!-- Top section -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+  <div class="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-10 mb-12">
 
-    <!-- Image -->
-    <div class="flex flex-col gap-4">
-      <div class="bg-white border border-gray-800 rounded-xl relative overflow-hidden">
-        <div id="productBadge" class="hidden absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10"></div>
-        <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
-      </div>
-      <div id="productDescContainer" class="hidden border border-gray-800 rounded-xl p-4">
-        <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-2">სხვა ინფორმაცია</div>
-        <p id="productDesc" class="text-sm text-dark leading-relaxed whitespace-pre-line"></p>
-      </div>
+    <!-- Image ("ხელსაწყოები") -->
+    <div class="order-1 md:order-none md:col-start-1 bg-white border border-gray-800 rounded-xl relative overflow-hidden">
+      <div id="productBadge" class="hidden absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10"></div>
+      <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
     </div>
 
-    <!-- Info -->
-    <div class="flex flex-col">
-      <div id="productCategory" class="text-[10px] font-bold tracking-[2px] text-orange uppercase mb-2"></div>
+    <!-- Category + Name -->
+    <div class="order-2 md:order-none md:col-start-2">
+      <div id="productCategory" class="text-[13px] font-bold text-orange uppercase mb-2"></div>
       <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
+    </div>
 
-      <!-- Price + Booking -->
-      <div id="productPriceBlock" class="mb-4"></div>
-      <!-- Code -->
-      <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
-      <!-- Specs -->
-      <div id="productSpecs" class="hidden border border-gray-800 rounded-xl p-4 mb-4"></div>
-      <!-- Meta -->
-      <div class="border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
+    <!-- Price + Booking -->
+    <div id="productPriceBlock" class="order-3 md:order-none md:col-start-2"></div>
+    <!-- Code -->
+    <div id="productCode" class="hidden order-4 md:order-none md:col-start-2 border-t border-gray-800 pt-3"></div>
+    <!-- Specs -->
+    <div id="productSpecs" class="hidden order-5 md:order-none md:col-start-2 border border-gray-800 rounded-xl p-4"></div>
+    <!-- Meta -->
+    <div class="order-6 md:order-none md:col-start-2 border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
+
+    <!-- Other info ("სხვა ინფორმაცია") -->
+    <div id="productDescContainer" class="hidden order-7 md:order-none md:col-start-1 border border-gray-800 rounded-xl p-4">
+      <div class="text-sm font-bold tracking-[2px] text-dark uppercase mb-2">სხვა ინფორმაცია</div>
+      <p id="productDesc" class="text-sm text-dark leading-relaxed whitespace-pre-line"></p>
     </div>
   </div>
 
@@ -527,11 +527,11 @@ function renderProduct() {
             <div class="flex items-baseline gap-3 flex-wrap">
               <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
             </div>
-            <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5">
-              <div class="font-semibold">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
-              <div>8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
-              <div>15–29 დღე — <span class="font-semibold text-orange">30%</span> ფასდაკლება</div>
-              <div>30+ დღე — <span class="font-semibold text-orange">50%</span> ფასდაკლება</div>
+            <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5 text-left">
+              <div class="font-semibold text-left">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
+              <div class="text-left">8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
+              <div class="text-left">15–29 დღე — <span class="font-semibold text-orange">30%</span> ფასდაკლება</div>
+              <div class="text-left">30+ დღე — <span class="font-semibold text-orange">50%</span> ფასდაკლება</div>
             </div>
           </div>
           <div id="productBookingBlock" class="flex-shrink-0"></div>
@@ -571,7 +571,7 @@ function renderBookingBlock() {
   el.innerHTML = `
     <div class="flex items-end gap-2">
       <div style="width:80px">
-        <div class="text-[10px] font-semibold text-dark mb-1">დღეები</div>
+        <div class="text-sm font-semibold text-dark mb-1">დღეები</div>
         <input type="number" id="bookDays" min="1" step="1" value="1" oninput="updateBookingTotal()"
           class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark text-center outline-none focus:border-orange">
       </div>

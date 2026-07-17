@@ -262,10 +262,6 @@
                 <label class="form-label">დღიური ღირებულება (₾) <span class="required">*</span></label>
                 <input class="form-input" id="prodDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
-              <div class="form-group">
-                <label class="form-label">გირაო (₾)</label>
-                <input class="form-input" id="prodDeposit" type="number" min="0" step="0.01" placeholder="0.00">
-              </div>
               <!-- Status -->
               <div class="form-group">
                 <label class="form-label">სტატუსი</label>
@@ -636,10 +632,6 @@
         <div class="form-group">
           <label class="form-label">დღიური ღირებულება (₾)</label>
           <input class="form-input" id="editDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
-        </div>
-        <div class="form-group">
-          <label class="form-label">გირაო (₾)</label>
-          <input class="form-input" id="editDeposit" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
         <!-- Status -->
         <div class="form-group">
@@ -1477,7 +1469,6 @@ window.addProduct = async function() {
       specs,
       country: getCountryForBrand(specs.brand) || null,
       daily_rate: dailyRate,
-      security_deposit: parseFloat(document.getElementById('prodDeposit').value) || 0,
       status: document.getElementById('prodStatus').value || 'available',
       description: getDescValue('prodDescRows'),
       image_url: imageUrl,
@@ -1498,7 +1489,7 @@ window.addProduct = async function() {
 window.clearForm = function() {
   _currentCategory = '';
   // reset all select/input fields
-  ['prodName','prodDailyRate','prodDeposit','prodBrand',
+  ['prodName','prodDailyRate','prodBrand',
    'specCustomCode','specBrandModel','specPowerSource','specWeight',
    'prodRenterName','prodRenterPhone','prodReturnDate']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -1658,7 +1649,6 @@ window.editProduct = function(id) {
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editDailyRate').value = p.daily_rate || '';
-  document.getElementById('editDeposit').value = p.security_deposit || '';
   document.getElementById('editStatus').value = p.status || 'available';
   document.getElementById('editRenterName').value = specs.renter_name || '';
   document.getElementById('editRenterPhone').value = specs.renter_phone || '';
@@ -1744,7 +1734,6 @@ window.saveProductEdit = async function() {
       specs,
       country: getCountryForBrand(specs.brand) || productCache[id]?.country || null,
       daily_rate: dailyRate,
-      security_deposit: parseFloat(document.getElementById('editDeposit').value) || 0,
       status: document.getElementById('editStatus').value || 'available',
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
@@ -2006,7 +1995,6 @@ window.showProductInfo = function(id) {
   if (s.weight) rows += row('წონა', s.weight + ' კგ');
   if (p.country) rows += row('ქვეყანა', p.country);
   if (p.daily_rate) rows += row('დღიური ღირებულება', p.daily_rate + ' ₾');
-  if (p.security_deposit) rows += row('გირაო', p.security_deposit + ' ₾');
   if (p.status) rows += row('სტატუსი', STATUS_BADGES[p.status] || p.status);
   if (p.status === 'rented') {
     if (s.renter_name) rows += row('ვისზეა გაქირავებული', s.renter_name);
