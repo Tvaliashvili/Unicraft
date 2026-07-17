@@ -1644,7 +1644,8 @@ window.saveProductEdit = async function() {
 window.deleteProduct = async function(id) {
   if (!confirm('ნამდვილად წაშლა?')) return;
   const { data } = await supabase.from('products').select('image_url').eq('id', id).single();
-  await supabase.from('products').delete().eq('id', id);
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) { showToast('წაშლის შეცდომა: ' + error.message, 'error'); return; }
   if (data?.image_url) {
     const match = data.image_url.match(/\/d\/([^/?]+)/) || data.image_url.match(/[?&]id=([^&]+)/);
     if (match) {
@@ -1704,7 +1705,8 @@ window.bulkDelete = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი სამუდამოდ წაიშალოს?`)) return;
-  await supabase.from('products').delete().in('id', ids);
+  const { error } = await supabase.from('products').delete().in('id', ids);
+  if (error) { showToast('წაშლის შეცდომა: ' + error.message, 'error'); return; }
   ids.forEach(id => delete productCache[id]);
   renderProductRows(Object.values(productCache));
   showToast(`🗑 ${ids.length} პროდუქტი წაიშალა`, 'error');
