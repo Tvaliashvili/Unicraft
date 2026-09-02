@@ -1096,11 +1096,13 @@ async function loadProducts() {
 
   // Load from Supabase in background
   try {
-    const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products?_=' + Date.now(), {
+    const SB_URL = 'https://orvhvhhstwfkfsloqsuf.supabase.co';
+    const SB_KEY = 'sb_publishable_Iv8vPVoqq5-gu2IgZHNr6w_bcQweWrp';
+    const res = await fetch(`${SB_URL}/rest/v1/products?select=*&active=eq.true&order=created_at.desc`, {
       cache: 'no-store',
       headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo'
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`
       }
     });
     const data = await res.json();
