@@ -364,13 +364,16 @@ const id = params.get('id');
 async function init() {
   if (!id) { showError(); return; }
   try {
-    const FUNC = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products';
-    const APIKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo';
-    const [product_data, allData] = await Promise.all([
-      fetch(`${FUNC}?id=${id}`, { headers: { apikey: APIKEY, Authorization: `Bearer ${APIKEY}` } }).then(r => r.json()),
-      fetch(FUNC, { headers: { apikey: APIKEY, Authorization: `Bearer ${APIKEY}` } }).then(r => r.json())
+    const SB_URL = 'https://orvhvhhstwfkfsloqsuf.supabase.co';
+    const SB_KEY = 'sb_publishable_Iv8vPVoqq5-gu2IgZHNr6w_bcQweWrp';
+    const REST = `${SB_URL}/rest/v1/products`;
+    const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
+    const [productRows, allData] = await Promise.all([
+      fetch(`${REST}?select=*&id=eq.${id}`, { cache: 'no-store', headers }).then(r => r.json()),
+      fetch(`${REST}?select=*&active=eq.true&order=created_at.desc`, { cache: 'no-store', headers }).then(r => r.json())
     ]);
-    if (!product_data || product_data.error) { showError(); return; }
+    const product_data = Array.isArray(productRows) ? productRows[0] : null;
+    if (!product_data) { showError(); return; }
     product = { ...product_data, imageUrl: product_data.image_url, oldPrice: product_data.old_price || null };
     allProducts = (Array.isArray(allData) ? allData : []).map(p => ({ ...p, imageUrl: p.image_url }));
     renderProduct();

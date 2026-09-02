@@ -1255,22 +1255,34 @@ function toWebP(file, maxSize = 800) {
   });
 }
 
-// Upload File to Google Drive via Edge Function, return public URL
+// Upload file to Supabase Storage, return its public URL
+const PRODUCT_IMAGES_BUCKET = 'product-images';
+
 async function uploadProductImage(file) {
   const webpBlob = await toWebP(file);
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
-  const formData = new FormData();
-  formData.append('file', new File([webpBlob], fileName, { type: 'image/webp' }));
-  const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
-    method: 'POST',
-    headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
-    body: formData
+  const { error } = await supabase.storage.from(PRODUCT_IMAGES_BUCKET).upload(fileName, webpBlob, {
+    contentType: 'image/webp',
+    upsert: false,
   });
-  const data = await res.json();
-  if (!data.url) throw new Error('Drive upload error: ' + (data.error || JSON.stringify(data)));
-  return data.url;
+  if (error) throw new Error('სურათის ატვირთვის შეცდომა: ' + error.message);
+  const { data } = supabase.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(fileName);
+  return data.publicUrl;
 }
 window.uploadProductImage = uploadProductImage;
+
+// Best-effort delete of a previously-uploaded product image from Storage
+async function deleteProductImage(url) {
+  if (!url) return;
+  try {
+    const marker = `/${PRODUCT_IMAGES_BUCKET}/`;
+    const idx = url.indexOf(marker);
+    if (idx === -1) return; // not a Supabase Storage URL for this bucket (e.g. an old Drive image) — nothing to clean up
+    const path = decodeURIComponent(url.slice(idx + marker.length));
+    await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([path]);
+  } catch (e) { /* cleanup is best-effort, never block on it */ }
+}
+window.deleteProductImage = deleteProductImage;
 
 async function resizeImage(file, maxSize = 1024) {
   return new Promise(resolve => {
@@ -2311,14 +2323,7 @@ window.saveProductEdit = async function() {
     if (editFileData) {
       btn.textContent = 'ფოტო იტვირთება...';
       imageUrl = await uploadProductImage(editFileData);
-      if (oldImageUrl) {
-        const oldMatch = oldImageUrl.match(/\/d\/([^/?]+)/) || oldImageUrl.match(/[?&]id=([^&]+)/);
-        if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
-          body: JSON.stringify({ fileId: oldMatch[1] })
-        }).catch(() => {});
-      }
+      if (oldImageUrl) deleteProductImage(oldImageUrl);
     }
     const { error: updateError } = await supabase.from('products').update({
       code: newCode,
@@ -2347,16 +2352,7 @@ window.deleteProduct = async function(id) {
   if (!confirm('ნამდვილად წაშლა?')) return;
   const { data } = await supabase.from('products').select('image_url').eq('id', id).single();
   await supabase.from('products').delete().eq('id', id);
-  if (data?.image_url) {
-    const match = data.image_url.match(/\/d\/([^/?]+)/) || data.image_url.match(/[?&]id=([^&]+)/);
-    if (match) {
-      fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
-        body: JSON.stringify({ fileId: match[1] })
-      }).catch(() => {});
-    }
-  }
+  if (data?.image_url) deleteProductImage(data.image_url);
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
 };
@@ -2452,12 +2448,7 @@ window.bulkRecompress = async function(secId) {
       await supabase.from('products').update({ image_url: newUrl }).eq('id', id);
       if (productCache[id]) productCache[id].image_url = newUrl;
       cb.dataset.imageUrl = newUrl;
-      const oldMatch = oldUrl.match(/\/d\/([^/?]+)/) || oldUrl.match(/[?&]id=([^&]+)/);
-      if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
-        body: JSON.stringify({ fileId: oldMatch[1] })
-      }).catch(() => {});
+      deleteProductImage(oldUrl);
       done++;
       if (compBtn) compBtn.textContent = `${done}/${withImage.length}...`;
     } catch(e) {
@@ -2541,13 +2532,8 @@ window.removeBgForProduct = async function(id) {
     const noBgBlob = await removeBg(resized);
     const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
     const newUrl = await uploadProductImage(processed);
-    const oldMatch = p.image_url.match(/\/d\/([^/?]+)/) || p.image_url.match(/[?&]id=([^&]+)/);
     await supabase.from('products').update({ image_url: newUrl }).eq('id', id);
-    if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
-      body: JSON.stringify({ fileId: oldMatch[1] })
-    }).catch(() => {});
+    deleteProductImage(p.image_url);
     showToast('✓ ფონი მოხსნილია!', 'success');
     loadProductsList();
   } catch(e) {
@@ -3980,15 +3966,7 @@ window.bulkImageApply = async function() {
     btn.textContent = `პროდუქტები განახლდება (0/${_bulkImageMatches.length})...`;
     let done = 0;
     for (const p of _bulkImageMatches) {
-      // delete old Drive file if exists
-      const oldMatch = (p.image_url || '').match(/\/d\/([^/?]+)/) || (p.image_url || '').match(/[?&]id=([^&]+)/);
-      if (oldMatch) {
-        fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
-          method: 'DELETE',
-          headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileId: oldMatch[1] })
-        });
-      }
+      deleteProductImage(p.image_url);
       await supabase.from('products').update({ image_url: imageUrl }).eq('id', p.id);
       done++;
       btn.textContent = `განახლდება (${done}/${_bulkImageMatches.length})...`;
