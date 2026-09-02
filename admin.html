@@ -117,8 +117,9 @@
       <div class="nav-item" onclick="showPage('products')">
         <span class="nav-icon">📦</span> პროდუქტები
       </div>
-      <div class="nav-item" onclick="showPage('rentals')">
-        <span class="nav-icon">🔴</span> გაქირავებულები
+      <div class="nav-item" onclick="showPage('orders')">
+        <span class="nav-icon">🧾</span> შეკვეთები
+        <span id="newOrdersBadge" style="display:none;margin-left:auto;background:var(--orange);color:white;border-radius:20px;padding:1px 8px;font-size:12px"></span>
       </div>
       <div class="nav-item" onclick="showPage('invoice-gen')">
         <span class="nav-icon">📄</span> ინვ. გენერაცია
@@ -126,6 +127,18 @@
       <div class="nav-item" onclick="showPage('chat')">
         <span class="nav-icon">💬</span> ჩატი
         <span id="chatAdminBadge" style="display:none;margin-left:auto;background:#ef4444;color:white;border-radius:20px;padding:1px 8px;font-size:12px">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('excel-check')">
+        <span class="nav-icon">📊</span> Excel შედარება
+      </div>
+      <div class="nav-item" onclick="showPage('price-update')">
+        <span class="nav-icon">💰</span> ფასების განახლება
+      </div>
+      <div class="nav-item" onclick="showPage('bulk-image')">
+        <span class="nav-icon">🖼</span> სურათების ჩასმა
+      </div>
+      <div class="nav-item" onclick="showPage('card-gen')">
+        <span class="nav-icon">🃏</span> ბარათის გენერატორი
       </div>
     </nav>
     <div class="sidebar-bottom">
@@ -161,14 +174,41 @@
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon green">🔴</div>
+          <div class="stat-icon green">🧾</div>
           <div>
-            <div class="stat-value" id="statRented">–</div>
-            <div class="stat-label">გაქირავებული</div>
+            <div class="stat-value" id="statOrders">–</div>
+            <div class="stat-label">სულ შეკვეთა</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">🆕</div>
+          <div>
+            <div class="stat-value" id="statNew">–</div>
+            <div class="stat-label">ახალი შეკვეთა</div>
           </div>
         </div>
       </div>
 
+      <!-- Recent orders -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">ბოლო შეკვეთები</span>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('orders')">ყველა →</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="background:var(--gray-light);font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:0.5px">
+              <th style="padding:10px 12px;text-align:center;white-space:nowrap">თარიღი</th>
+              <th style="padding:10px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
+              <th style="padding:10px 12px;text-align:center">მყიდველი</th>
+              <th style="padding:10px 12px;text-align:center">ტელეფონი</th>
+              <th style="padding:10px 12px;text-align:center">სულ</th>
+              <th style="padding:10px 12px;text-align:center">სტატუსი</th>
+            </tr></thead>
+            <tbody id="recentOrders"><tr><td colspan="6" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Add Product -->
@@ -181,28 +221,22 @@
       </div>
       <div class="card">
         <div class="product-form">
-          <!-- Category selector -->
-          <div class="form-group" style="margin-bottom:24px;max-width:420px">
-            <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-              <span>კატეგორია <span class="required">*</span></span>
-              <span onclick="toggleCategoryMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
-            </label>
-            <select class="form-select" id="prodCategory" onchange="selectProdCategory(this.value)"><option value="">კატეგორია...</option></select>
-            <div id="categoryMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
-              <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-                <input class="form-input" id="newCatInput" placeholder="ახალი კატეგორია" style="flex:1;min-width:120px;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addCategory()">
-                <button class="btn btn-primary" onclick="addCategory()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
-              </div>
-              <div id="categoryList"></div>
+          <!-- Product type selector -->
+          <div style="margin-bottom:24px">
+            <div class="form-label" style="margin-bottom:12px">პროდუქტის ტიპი <span class="required">*</span></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button id="typeBtn_tire" onclick="selectProdType('tire')" style="flex:1;min-width:100px;padding:18px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;color:var(--dark);transition:all 0.15s">
+                <span style="font-size:40px">🛞</span>საბურავი
+              </button>
             </div>
           </div>
-          <!-- Form (visible after category selection) -->
+          <!-- Form (visible after type selection) -->
           <div id="prodFormBody" style="display:none">
             <div class="form-grid">
               <!-- Name -->
               <div class="form-group">
-                <label class="form-label">ინსტრუმენტის სახელი <span class="required">*</span></label>
-                <input class="form-input" id="prodName" placeholder="მაგ: Bosch GSB 13 RE">
+                <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
+                <input class="form-input" id="prodName" placeholder="მაგ: Michelin Pilot Sport 4">
               </div>
               <!-- Brand with manager -->
               <div class="form-group">
@@ -223,23 +257,41 @@
                   <div id="brandList"></div>
                 </div>
               </div>
-              <!-- Instrument specs -->
-              <div class="form-group">
-                <label class="form-label">მოდელი</label>
-                <input class="form-input" id="specBrandModel" placeholder="მაგ: GSB 13 RE">
+              <!-- TIRE specs -->
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between"><span>სიგანე <span class="required">*</span></span><span onclick="toggleTireSpecMgr('width')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <select class="form-select" id="specWidth"><option value="">სიგანე...</option></select>
+                <div id="widthMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newWidthInput" placeholder="მაგ: 195" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('width')">
+                    <button class="btn btn-primary" onclick="addTireSpec('width')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="widthList"></div>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">კვების წყარო</label>
-                <select class="form-select" id="specPowerSource">
-                  <option value="">კვების წყარო...</option>
-                  <option>ელექტრო</option><option>ბენზინი</option><option>დიზელი</option><option>აკუმულატორი</option><option>მექანიკური</option>
-                </select>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between"><span>პროფილი <span class="required">*</span></span><span onclick="toggleTireSpecMgr('profile')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <select class="form-select" id="specProfile"><option value="">პროფილი...</option></select>
+                <div id="profileMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newProfileInput" placeholder="მაგ: 55" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('profile')">
+                    <button class="btn btn-primary" onclick="addTireSpec('profile')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="profileList"></div>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">წონა (კგ)</label>
-                <input class="form-input" id="specWeight" type="number" min="0" step="0.1" placeholder="0.0">
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between"><span>დიამეტრი (R) <span class="required">*</span></span><span onclick="toggleTireSpecMgr('rim')" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span></label>
+                <select class="form-select" id="specRim"><option value="">დიამეტრი...</option></select>
+                <div id="rimMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newRimInput" placeholder="მაგ: R17" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addTireSpec('rim')">
+                    <button class="btn btn-primary" onclick="addTireSpec('rim')" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="rimList"></div>
+                </div>
               </div>
-              <div class="form-group">
+              <div class="form-group specs-tire" style="display:none">
                 <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
                   <span>კოდი <span class="required">*</span></span>
                   <label style="font-size:12px;color:var(--orange);font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;margin:0">
@@ -248,18 +300,113 @@
                 </label>
                 <input class="form-input" id="specCustomCode" placeholder="შეიყვანეთ კოდი">
               </div>
-              <!-- Rental pricing -->
-              <div class="form-group">
-                <label class="form-label">დღიური ღირებულება (₾) <span class="required">*</span></label>
-                <input class="form-input" id="prodDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  <span>სეზონი <span class="required">*</span></span>
+                  <span onclick="toggleSeasonMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+                </label>
+                <select class="form-select" id="specSeason"><option value="">სეზონი...</option></select>
+                <div id="seasonMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newSeasonInput" placeholder="ახალი სეზონი" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addSeason()">
+                    <button class="btn btn-primary" onclick="addSeason()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="seasonList"></div>
+                </div>
               </div>
-              <!-- Status -->
-              <div class="form-group">
-                <label class="form-label">სტატუსი</label>
-                <select class="form-select" id="prodStatus">
-                  <option value="available">✅ ხელმისაწვდომია</option>
-                  <option value="rented">🔴 მიუწვდომელია</option>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">ავტომობილის ტიპი</label>
+                <select class="form-select" id="specVehicleType">
+                  <option value="მსუბუქი ავტომობილი">🚗 მსუბუქი ავტომობილი</option>
+                  <option value="ჯიპი/პიკაპი">🚙 ჯიპი/პიკაპი</option>
+                  <option value="მსუბუქი სატვირთო">🚐 მსუბუქი სატვირთო</option>
+                  <option value="სატვირთო">🚛 სატვირთო</option>
                 </select>
+              </div>
+              <div class="form-group specs-tire" style="display:none">
+                <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
+                <input class="form-input" id="specAltSize" placeholder="მაგ: 37x13.50R17LT">
+              </div>
+              <!-- OIL specs -->
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">ტიპი</label>
+                <select class="form-select" id="specOilType">
+                  <option value="">ტიპი...</option>
+                  <option>სინთეტიკური</option><option>ნახევრად სინთეტიკური</option><option>მინერალური</option>
+                </select>
+              </div>
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">სიბლანტე</label>
+                <select class="form-select" id="specViscosity">
+                  <option value="">სიბლანტე...</option>
+                  <option>0W-20</option><option>5W-30</option><option>5W-40</option><option>10W-30</option><option>10W-40</option><option>15W-40</option><option>20W-50</option>
+                </select>
+              </div>
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">მოცულობა</label>
+                <select class="form-select" id="specVolume">
+                  <option value="">მოცულობა...</option>
+                  <option>1 ლ</option><option>4 ლ</option><option>5 ლ</option><option>10 ლ</option><option>20 ლ</option><option>60 ლ</option><option>205 ლ</option>
+                </select>
+              </div>
+              <div class="form-group specs-oil" style="display:none">
+                <label class="form-label">დანიშნულება</label>
+                <select class="form-select" id="specOilApp">
+                  <option value="">დანიშნულება...</option>
+                  <option>ძრავი</option><option>გადაცემათა კოლოფი</option><option>ჰიდრავლიკა</option><option>სამუხრუჭე</option>
+                </select>
+              </div>
+              <!-- FILTER specs -->
+              <div class="form-group specs-filter" style="display:none">
+                <label class="form-label">ტიპი</label>
+                <select class="form-select" id="specFilterType">
+                  <option value="">ტიპი...</option>
+                  <option>ზეთის ფილტრი</option><option>საჰაერო ფილტრი</option><option>საწვავის ფილტრი</option><option>სალონის ფილტრი</option>
+                </select>
+              </div>
+              <div class="form-group specs-filter" style="display:none">
+                <label class="form-label">OEM ნომერი</label>
+                <input class="form-input" id="specOEM" placeholder="მაგ: 90915-YZZD2">
+              </div>
+              <div class="form-group specs-filter" style="display:none">
+                <label class="form-label">ავტომობილის მარკა</label>
+                <input class="form-input" id="specCarMake" placeholder="მაგ: Toyota, BMW">
+              </div>
+              <!-- Price -->
+              <div class="form-group">
+                <label class="form-label">ფასი (₾)</label>
+                <input class="form-input" id="prodPrice" type="number" min="0" step="0.01" placeholder="0.00">
+              </div>
+              <!-- Discount -->
+              <div class="form-group">
+                <label class="form-label">ფასდაკლება (₾)</label>
+                <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+              </div>
+              <!-- Unit -->
+              <div class="form-group">
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  ერთეული
+                  <span onclick="toggleUnitMgr()" style="font-size:11px;color:var(--orange);cursor:pointer;font-weight:600;text-decoration:underline">⚙ მართვა</span>
+                </label>
+                <select class="form-select" id="prodUnit">
+                  <option value="ც">ცალი</option>
+                  <option value="ლ">ლიტრი</option>
+                  <option value="კგ">კგ</option>
+                  <option value="ტ">ტონა</option>
+                  <option value="მ²">მ²</option>
+                  <option value="მ³">მ³</option>
+                  <option value="მ">მეტრი</option>
+                  <option value="კონტ">კონტეინერი</option>
+                  <option value="ტომ">ტომარა</option>
+                </select>
+                <div id="unitMgrPanel" style="display:none;margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--gray-light)">
+                  <div style="display:flex;gap:6px;margin-bottom:10px">
+                    <input class="form-input" id="newUnitValue" placeholder="მნიშვნელობა (მაგ: ლ)" style="flex:1;font-size:13px;padding:6px 10px">
+                    <input class="form-input" id="newUnitLabel" placeholder="სახელი (მაგ: ლიტრი)" style="flex:1;font-size:13px;padding:6px 10px" onkeydown="if(event.key==='Enter')addUnit()">
+                    <button class="btn btn-primary" onclick="addUnit()" style="font-size:12px;padding:6px 12px">+ დამატება</button>
+                  </div>
+                  <div id="unitList"></div>
+                </div>
               </div>
               <!-- Description -->
               <div class="form-group full">
@@ -323,47 +470,29 @@
       </div>
     </div>
 
-    <!-- Rentals -->
-    <div class="page" id="page-rentals">
+    <!-- Orders -->
+    <div class="page" id="page-orders">
       <div class="page-header">
         <div>
-          <div class="page-title">გაქირავებულები</div>
-          <div class="page-subtitle" id="rentalsCountLabel"></div>
+          <div class="page-title">შეკვეთები</div>
+          <div class="page-subtitle" id="orderCountLabel"></div>
         </div>
       </div>
-
-      <!-- Quick rent by code -->
-      <div class="card" style="max-width:600px;margin-bottom:20px">
-        <div class="card-header"><span class="card-title">გაქირავება კოდით</span></div>
-        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">კოდი</label>
-            <input class="form-input" id="rentCodeInput" placeholder="მაგ: 123456" autocomplete="off" oninput="matchRentCode(this.value)" style="margin-bottom:0">
-            <div id="rentCodeMatch" style="font-size:12px;margin-top:6px"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div>
-              <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">ვისზეა</label>
-              <input class="form-input" id="rentNameInput" placeholder="სახელი გვარი" style="margin-bottom:0">
-            </div>
-            <div>
-              <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">ტელეფონი</label>
-              <input class="form-input" id="rentPhoneInput" placeholder="+995 5XX XX XX XX" style="margin-bottom:0">
-            </div>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">დღეების რაოდენობა</label>
-            <input class="form-input" id="rentDaysInput" type="number" min="1" step="1" placeholder="მაგ: 3" oninput="updateRentReturnDate()" style="margin-bottom:0">
-            <div id="rentReturnDatePreview" style="font-size:12px;color:var(--gray-mid);margin-top:4px"></div>
-          </div>
-          <button class="btn btn-primary" onclick="submitRentByCode()" style="width:100%">🔴 გაქირავება</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div id="rentalsList">
-          <div class="table-loading"><div class="spinner"></div> იტვირთება...</div>
-        </div>
+      <div class="card" style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:860px">
+          <thead><tr style="background:var(--gray-light);font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:0.5px">
+            <th style="padding:11px 12px;text-align:center;white-space:nowrap">თარიღი</th>
+            <th style="padding:11px 12px;text-align:center;white-space:nowrap">ინვ. ნომ.</th>
+            <th style="padding:11px 12px;text-align:center">მყიდველი</th>
+            <th style="padding:11px 12px;text-align:center">ტელეფონი</th>
+            <th style="padding:11px 12px;text-align:center">სულ</th>
+            <th style="padding:11px 12px;text-align:center">სტატუსი</th>
+            <th style="padding:11px 12px;width:36px"></th>
+          </tr></thead>
+          <tbody id="ordersList">
+            <tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -422,8 +551,8 @@
         <!-- Products table -->
         <div style="padding:16px 24px 8px">
           <div style="font-size:12px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E8541A;margin-bottom:10px">პროდუქციის ჩამონათვალი</div>
-          <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 60px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;color:#141210;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
-            <span>კოდი</span><span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:center">დღ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
+          <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 90px 80px 32px;gap:6px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;color:#141210;padding-bottom:8px;border-bottom:2px solid #f3f4f6">
+            <span>კოდი</span><span>დასახელება</span><span style="text-align:center">რ-ბა</span><span style="text-align:center">ერთ.</span><span style="text-align:right">ფასი</span><span style="text-align:right">სულ</span><span></span>
           </div>
           <div id="invGenRows"></div>
           <button onclick="addInvRow()" style="margin-top:10px;background:none;border:1px dashed #e5e7eb;color:#E8541A;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500">+ სტრიქონის დამატება</button>
@@ -453,11 +582,275 @@
 
         <!-- Actions -->
         <div style="padding:12px 24px 20px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border)">
+          <button onclick="submitInvGenOrder()" class="btn" style="display:flex;align-items:center;gap:6px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:700">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            შეკვეთის გაფორმება
+          </button>
           <button onclick="doAdminInvoicePDF()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;margin-left:auto;margin-right:auto">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             ჩამოტვირთე PDF
           </button>
           <button onclick="resetInvGen()" class="btn btn-secondary">გასუფთავება</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Excel Check Page -->
+    <div class="page" id="page-excel-check">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Excel შედარება</div>
+          <div class="page-subtitle">ატვირთე Excel ფაილი და შეადარე კოდები საიტის პროდუქტებს</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:860px">
+        <!-- Upload area -->
+        <div id="excelDropZone" onclick="document.getElementById('excelFileInput').click()"
+          style="border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:0"
+          ondragover="event.preventDefault();this.style.borderColor='var(--orange)';this.style.background='#fff8f5'"
+          ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+          ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handleExcelFile(event.dataTransfer.files[0])">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(this.files[0])">
+          <div style="font-size:36px;margin-bottom:8px">📂</div>
+          <div style="font-weight:600;color:var(--dark);margin-bottom:8px">Excel ფაილის ატვირთვა</div>
+          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap" onclick="event.stopPropagation()">
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კატეგორია</div>
+              <select id="excelCategory" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff">
+                <option value="tire">🛞 საბურავები</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
+              <input id="excelColCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">სახელის სვეტი</div>
+              <input id="excelColName" value="G" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary bar (hidden until results) -->
+        <div id="excelSummary" style="display:none;margin-top:20px;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#166534">
+              ✅ <span id="excelCountUploaded">0</span> ატვირთული
+            </div>
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#c2410c">
+              ❌ <span id="excelCountMissing">0</span> არ არის საიტზე
+            </div>
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#1d4ed8">
+              🔵 <span id="excelCountSiteOnly">0</span> საიტზეა, ექსელში არ არის
+            </div>
+            <div style="background:var(--gray-light);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:var(--gray-dark)">
+              📋 <span id="excelCountTotal">0</span> სულ
+            </div>
+          </div>
+          <button onclick="exportExcelResults()" class="btn btn-primary" style="flex-shrink:0;display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel-ში გამოტანა
+          </button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div id="excelTabs" style="display:none;margin-top:16px;border-bottom:2px solid var(--border);display:none">
+          <button id="excelTabMissing" onclick="filterExcelTable('missing')"
+            style="background:none;border:none;border-bottom:2px solid var(--orange);margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--orange);cursor:pointer;font-family:inherit">
+            არ არის საიტზე
+          </button>
+          <button id="excelTabSiteOnly" onclick="filterExcelTable('site_only')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            საიტზეა, ექსელში არ არის
+          </button>
+          <button id="excelTabAll" onclick="filterExcelTable('all')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            ყველა
+          </button>
+        </div>
+
+        <!-- Results table -->
+        <div id="excelResults" style="display:none;margin-top:0;overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--gray-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid)">
+                <th style="padding:10px 14px;text-align:left">#</th>
+                <th style="padding:10px 14px;text-align:left">კოდი (<span id="excelColCodeLabel">B</span> სვეტი)</th>
+                <th style="padding:10px 14px;text-align:left">სახელი (<span id="excelColNameLabel">G</span> სვეტი)</th>
+                <th style="padding:10px 14px;text-align:left">სტატუსი</th>
+              </tr>
+            </thead>
+            <tbody id="excelTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Loading state -->
+        <div id="excelLoading" style="display:none;text-align:center;padding:30px">
+          <div class="spinner"></div>
+          <div style="margin-top:10px;font-size:13px;color:var(--gray-mid)">მიმდინარეობს შედარება...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Update Page -->
+    <div class="page" id="page-price-update">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ფასების განახლება</div>
+          <div class="page-subtitle">ატვირთე Excel ფაილი · B სვეტი = კოდი · AI = ფასდაკლება · AJ = ფასი</div>
+        </div>
+        <button onclick="resetAllPrices()" class="btn" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;font-size:13px">🗑 ფასების განულება</button>
+      </div>
+
+      <div class="card" style="max-width:960px">
+        <!-- Upload area -->
+        <div id="priceDropZone" onclick="document.getElementById('priceFileInput').click()"
+          style="border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:0"
+          ondragover="event.preventDefault();this.style.borderColor='var(--orange)';this.style.background='#fff8f5'"
+          ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+          ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handlePriceFile(event.dataTransfer.files[0])">
+          <input type="file" id="priceFileInput" accept=".xlsx,.xls" style="display:none" onchange="handlePriceFile(this.files[0])">
+          <div style="font-size:36px;margin-bottom:8px">💰</div>
+          <div style="font-weight:600;color:var(--dark);margin-bottom:12px">Excel ფაილის ატვირთვა</div>
+          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap" onclick="event.stopPropagation()">
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კატეგორია</div>
+              <select id="priceCategory" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:#fff">
+                <option value="tire">🛞 საბურავები</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">კოდის სვეტი</div>
+              <input id="colCode" value="B" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">სახელის სვეტი</div>
+              <input id="colName" value="G" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">ფასის სვეტი</div>
+              <input id="colPrice" value="AJ" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--gray-mid);margin-bottom:4px">ფასდაკლების სვეტი</div>
+              <input id="colDiscount" value="AI" style="width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;text-align:center;text-transform:uppercase;cursor:text" maxlength="3" oninput="this.value=this.value.toUpperCase()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary bar -->
+        <div id="priceSummary" style="display:none;margin-top:20px;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#c2410c">
+              🔄 <span id="priceCountChanged">0</span> შეიცვლება
+            </div>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#166534">
+              ✅ <span id="priceCountSame">0</span> იგივეა
+            </div>
+            <div style="background:#fefce8;border:1px solid #fef08a;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#854d0e">
+              ⚠️ <span id="priceCountNoPrice">0</span> ფასი არ არის
+            </div>
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;color:#991b1b">
+              ❌ <span id="priceCountNotFound">0</span> საიტზე არ არის
+            </div>
+          </div>
+          <button id="priceApplyBtn" onclick="applyPriceUpdates()" class="btn btn-primary" style="flex-shrink:0;display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            ფასების განახლება
+          </button>
+        </div>
+        <div id="priceDupWarning" style="display:none;margin-top:10px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;font-size:13px;color:#92400e;text-align:center"></div>
+
+        <!-- Filter tabs -->
+        <div id="priceTabs" style="display:none;margin-top:16px;border-bottom:2px solid var(--border)">
+          <button id="priceTabChanged" onclick="filterPriceTable('changed')"
+            style="background:none;border:none;border-bottom:2px solid var(--orange);margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--orange);cursor:pointer;font-family:inherit">
+            შეიცვლება
+          </button>
+          <button id="priceTabNoPrice" onclick="filterPriceTable('no_price')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            ფასი არ არის
+          </button>
+          <button id="priceTabNotFound" onclick="filterPriceTable('not_found')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            საიტზე არ არის
+          </button>
+          <button id="priceTabAll" onclick="filterPriceTable('all')"
+            style="background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;font-family:inherit">
+            ყველა
+          </button>
+        </div>
+
+        <!-- Results table -->
+        <div id="priceResults" style="display:none;margin-top:0;overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--gray-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid)">
+                <th style="padding:10px 14px;text-align:left">#</th>
+                <th style="padding:10px 14px;text-align:left">კოდი</th>
+                <th style="padding:10px 14px;text-align:left">დასახელება</th>
+                <th style="padding:10px 14px;text-align:right">მიმდინარე ფასი</th>
+                <th style="padding:10px 14px;text-align:right">ახალი ფასი (AJ)</th>
+                <th style="padding:10px 14px;text-align:right">ფასდაკლება (AI)</th>
+                <th style="padding:10px 14px;text-align:left">სტატუსი</th>
+              </tr>
+            </thead>
+            <tbody id="priceTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Loading state -->
+        <div id="priceLoading" style="display:none;text-align:center;padding:30px">
+          <div class="spinner"></div>
+          <div style="margin-top:10px;font-size:13px;color:var(--gray-mid)">მიმდინარეობს ანალიზი...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Image Page -->
+    <div class="page" id="page-bulk-image">
+      <div class="page-header">
+        <div>
+          <div class="page-title">სურათების ჩასმა</div>
+          <div class="page-subtitle">ჩაწერე სახელი · ატვირთე ფოტო · ყველა ამ სახელის პროდუქტს ჩაეხება</div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:720px;padding:24px">
+        <!-- Step 1: name input -->
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">პროდუქტის დასახელება</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="bulkImageName" placeholder="მაგ: RA 350" style="flex:1;min-width:0" oninput="bulkImageReset()">
+            <button class="btn btn-primary" onclick="bulkImageSearch()" style="white-space:nowrap;flex-shrink:0">ძებნა</button>
+          </div>
+          <div id="bulkImageMatchInfo" style="margin-top:8px;font-size:13px;color:var(--gray-mid)"></div>
+        </div>
+
+        <!-- Step 2: image drop zone (hidden until search done) -->
+        <div id="bulkImageUploadArea" style="display:none">
+          <div id="bulkImageDrop"
+            onclick="document.getElementById('bulkImageFile').click()"
+            ondragover="event.preventDefault();this.style.borderColor='var(--orange)';this.style.background='#fff8f5'"
+            ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+            ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';bulkImagePickFile(event.dataTransfer.files[0])"
+            style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:12px">
+            <input type="file" id="bulkImageFile" accept="image/*" style="display:none" onchange="bulkImagePickFile(this.files[0])">
+            <div id="bulkImagePreview" style="font-size:36px;margin-bottom:8px">📷</div>
+            <div style="font-size:13px;color:var(--gray-mid)">ფოტო ჩააგდე ან დააჭირე</div>
+          </div>
+
+          <button id="bulkImageApplyBtn" onclick="bulkImageApply()" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            სურათის მინიჭება
+          </button>
+        </div>
+
+        <!-- Matching products preview -->
+        <div id="bulkImageResults" style="display:none;margin-top:20px">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-mid);margin-bottom:10px">შესაბამისი პროდუქტები</div>
+          <div id="bulkImageList"></div>
         </div>
       </div>
     </div>
@@ -528,6 +921,43 @@
       </div>
     </div>
 
+    <!-- Card Generator Page -->
+    <div class="page" id="page-card-gen">
+      <div class="page-header">
+        <div class="page-title">ბარათის გენერატორი</div>
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:280px;max-width:420px">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><span class="card-title">პროდუქტის ძიება</span></div>
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">კოდი</label>
+                <input class="form-input" id="cgCodeInput" placeholder="მაგ. TR12345..." autocomplete="off" style="margin-bottom:0" onkeydown="if(event.key==='Enter')cgSearch()">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">სახელი</label>
+                <input class="form-input" id="cgNameInput" placeholder="მაგ. Bridgestone..." autocomplete="off" style="margin-bottom:0" onkeydown="if(event.key==='Enter')cgSearch()">
+              </div>
+              <button class="btn btn-secondary" onclick="cgSearch()" style="width:100%">🔍 ძიება</button>
+              <div id="cgSearchResults" style="display:none;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.10);overflow:hidden;max-height:260px;overflow-y:auto"></div>
+            </div>
+          </div>
+          <div id="cgSelectedInfo" style="display:none" class="card">
+            <div style="padding:14px 18px;font-size:13px;color:var(--gray-mid)">არჩეული: <span id="cgSelectedName" style="font-weight:700;color:var(--dark)"></span></div>
+            <div style="padding:0 18px 14px">
+              <button class="btn" id="cgDownloadBtn" onclick="cgDownload()" style="width:100%">⬇ PNG გადმოწერა</button>
+            </div>
+          </div>
+        </div>
+        <div id="cgPreviewWrap" style="display:none;flex-shrink:0">
+          <div class="card" style="padding:20px;display:inline-block">
+            <canvas id="cgCanvas" style="display:block;border-radius:18px;box-shadow:0 4px 28px rgba(0,0,0,0.14)"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -566,53 +996,129 @@
     </div>
     <div class="product-form">
       <input type="hidden" id="editProdId">
+      <input type="hidden" id="editProdType">
       <div style="padding:10px 20px 0;display:flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--gray-mid)">პროდუქტის კოდი:</span>
         <input id="editCodeDisplay" style="font-family:monospace;font-size:14px;font-weight:700;color:var(--gray-dark);background:var(--gray-light);padding:2px 10px;border-radius:6px;letter-spacing:1px;border:1.5px solid var(--border);outline:none;width:140px" />
       </div>
-      <!-- Category selector -->
+      <!-- Type selector -->
       <div style="padding:16px 20px 0">
-        <div class="form-label" style="margin-bottom:10px">კატეგორია</div>
-        <select class="form-select" id="editProdCategory" onchange="editSelectCategory(this.value, document.getElementById('editBrand').value)"><option value="">კატეგორია...</option></select>
+        <div class="form-label" style="margin-bottom:10px">პროდუქტის ტიპი</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button id="editTypeBtn_tire" onclick="editSelectType('tire')" style="flex:1;min-width:90px;padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--dark);transition:all 0.15s">
+            <span style="font-size:28px">🛞</span>საბურავი
+          </button>
+        </div>
       </div>
       <div class="form-grid" style="margin-top:8px">
         <!-- Name -->
         <div class="form-group">
-          <label class="form-label">ინსტრუმენტის სახელი <span class="required">*</span></label>
-          <input class="form-input" id="editName" placeholder="მაგ: Bosch GSB 13 RE">
+          <label class="form-label">პროდუქტის სახელი <span class="required">*</span></label>
+          <input class="form-input" id="editName" placeholder="მაგ: Michelin Pilot Sport 4">
         </div>
         <!-- Brand -->
         <div class="form-group">
           <label class="form-label">ბრენდი</label>
           <select class="form-select" id="editBrand"><option value="">ბრენდი...</option></select>
         </div>
-        <!-- Instrument specs -->
-        <div class="form-group">
-          <label class="form-label">მოდელი</label>
-          <input class="form-input" id="editSpecBrandModel" placeholder="მაგ: GSB 13 RE">
+        <!-- TIRE specs -->
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">სიგანე</label>
+          <select class="form-select" id="editSpecWidth"><option value="">სიგანე...</option></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">კვების წყარო</label>
-          <select class="form-select" id="editSpecPowerSource">
-            <option value="">კვების წყარო...</option>
-            <option>ელექტრო</option><option>ბენზინი</option><option>დიზელი</option><option>აკუმულატორი</option><option>მექანიკური</option>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">პროფილი</label>
+          <select class="form-select" id="editSpecProfile"><option value="">პროფილი...</option></select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">დიამეტრი (R)</label>
+          <select class="form-select" id="editSpecRim"><option value="">დიამეტრი...</option></select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">სეზონი</label>
+          <select class="form-select" id="editSpecSeason"><option value="">სეზონი...</option></select>
+        </div>
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">ავტომობილის ტიპი</label>
+          <select class="form-select" id="editSpecVehicleType">
+            <option value="მსუბუქი ავტომობილი">🚗 მსუბუქი ავტომობილი</option>
+            <option value="ჯიპი/პიკაპი">🚙 ჯიპი/პიკაპი</option>
+            <option value="მსუბუქი სატვირთო">🚐 მსუბუქი სატვირთო</option>
+            <option value="სატვირთო">🚛 სატვირთო</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">წონა (კგ)</label>
-          <input class="form-input" id="editSpecWeight" type="number" min="0" step="0.1" placeholder="0.0">
+        <div class="form-group edit-specs-tire" style="display:none">
+          <label class="form-label">დამატებითი ზომა <span style="color:#999;font-size:11px;font-weight:400">(არასავ. — მაგ: 37x13.50R17LT)</span></label>
+          <input class="form-input" id="editAltSize" placeholder="მაგ: 37x13.50R17LT">
         </div>
-        <!-- Rental pricing -->
-        <div class="form-group">
-          <label class="form-label">დღიური ღირებულება (₾)</label>
-          <input class="form-input" id="editDailyRate" type="number" min="0" step="0.01" placeholder="0.00">
+        <!-- OIL specs -->
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">ტიპი</label>
+          <select class="form-select" id="editSpecOilType">
+            <option value="">ტიპი...</option>
+            <option>სინთეტიკური</option><option>ნახევრად სინთეტიკური</option><option>მინერალური</option>
+          </select>
         </div>
-        <!-- Status -->
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">სიბლანტე</label>
+          <select class="form-select" id="editSpecViscosity">
+            <option value="">სიბლანტე...</option>
+            <option>0W-20</option><option>5W-30</option><option>5W-40</option><option>10W-30</option><option>10W-40</option><option>15W-40</option><option>20W-50</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">მოცულობა</label>
+          <select class="form-select" id="editSpecVolume">
+            <option value="">მოცულობა...</option>
+            <option>1 ლ</option><option>4 ლ</option><option>5 ლ</option><option>10 ლ</option><option>20 ლ</option><option>60 ლ</option><option>205 ლ</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-oil" style="display:none">
+          <label class="form-label">დანიშნულება</label>
+          <select class="form-select" id="editSpecOilApp">
+            <option value="">დანიშნულება...</option>
+            <option>ძრავი</option><option>გადაცემათა კოლოფი</option><option>ჰიდრავლიკა</option><option>სამუხრუჭე</option>
+          </select>
+        </div>
+        <!-- FILTER specs -->
+        <div class="form-group edit-specs-filter" style="display:none">
+          <label class="form-label">ტიპი</label>
+          <select class="form-select" id="editSpecFilterType">
+            <option value="">ტიპი...</option>
+            <option>ზეთის ფილტრი</option><option>საჰაერო ფილტრი</option><option>საწვავის ფილტრი</option><option>სალონის ფილტრი</option>
+          </select>
+        </div>
+        <div class="form-group edit-specs-filter" style="display:none">
+          <label class="form-label">OEM ნომერი</label>
+          <input class="form-input" id="editSpecOEM" placeholder="მაგ: 90915-YZZD2">
+        </div>
+        <div class="form-group edit-specs-filter" style="display:none">
+          <label class="form-label">ავტომობილის მარკა</label>
+          <input class="form-input" id="editSpecCarMake" placeholder="მაგ: Toyota, BMW">
+        </div>
+        <!-- Price -->
         <div class="form-group">
-          <label class="form-label">სტატუსი</label>
-          <select class="form-select" id="editStatus">
-            <option value="available">✅ ხელმისაწვდომია</option>
-            <option value="rented">🔴 მიუწვდომელია</option>
+          <label class="form-label">ფასი (₾)</label>
+          <input class="form-input" id="editPrice" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <!-- Discount -->
+        <div class="form-group">
+          <label class="form-label">ფასდაკლება (₾)</label>
+          <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <!-- Unit -->
+        <div class="form-group">
+          <label class="form-label">ერთეული</label>
+          <select class="form-select" id="editUnit">
+            <option value="ც">ცალი</option>
+            <option value="ლ">ლიტრი</option>
+            <option value="კგ">კგ</option>
+            <option value="ტ">ტონა</option>
+            <option value="მ²">მ²</option>
+            <option value="მ³">მ³</option>
+            <option value="მ">მეტრი</option>
+            <option value="კონტ">კონტეინერი</option>
+            <option value="ტომ">ტომარა</option>
           </select>
         </div>
         <!-- Description -->
@@ -749,34 +1255,22 @@ function toWebP(file, maxSize = 800) {
   });
 }
 
-// Upload file to Supabase Storage, return its public URL
-const PRODUCT_IMAGES_BUCKET = 'product-images';
-
+// Upload File to Google Drive via Edge Function, return public URL
 async function uploadProductImage(file) {
   const webpBlob = await toWebP(file);
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
-  const { error } = await supabase.storage.from(PRODUCT_IMAGES_BUCKET).upload(fileName, webpBlob, {
-    contentType: 'image/webp',
-    upsert: false,
+  const formData = new FormData();
+  formData.append('file', new File([webpBlob], fileName, { type: 'image/webp' }));
+  const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+    method: 'POST',
+    headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+    body: formData
   });
-  if (error) throw new Error('სურათის ატვირთვის შეცდომა: ' + error.message);
-  const { data } = supabase.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(fileName);
-  return data.publicUrl;
+  const data = await res.json();
+  if (!data.url) throw new Error('Drive upload error: ' + (data.error || JSON.stringify(data)));
+  return data.url;
 }
 window.uploadProductImage = uploadProductImage;
-
-// Best-effort delete of a previously-uploaded product image from Storage
-async function deleteProductImage(url) {
-  if (!url) return;
-  try {
-    const marker = `/${PRODUCT_IMAGES_BUCKET}/`;
-    const idx = url.indexOf(marker);
-    if (idx === -1) return; // not a Supabase Storage URL for this bucket (e.g. an old Drive image) — nothing to clean up
-    const path = decodeURIComponent(url.slice(idx + marker.length));
-    await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([path]);
-  } catch (e) { /* cleanup is best-effort, never block on it */ }
-}
-window.deleteProductImage = deleteProductImage;
 
 async function resizeImage(file, maxSize = 1024) {
   return new Promise(resolve => {
@@ -839,6 +1333,14 @@ async function showApp(email) {
   const { data: { user } } = await supabase.auth.getUser();
   _me.name = user?.user_metadata?.full_name || user?.user_metadata?.name || email.split('@')[0];
   initApp();
+  setTimeout(_addCargoRimsToBrands, 1500);
+  setTimeout(_migrateCargoRims, 2000);
+  setTimeout(_addMissingCargoProducts, 3000);
+  setTimeout(_fixCargoProductsMeta, 3500);
+  setTimeout(_migrateCargoVehicleType, 4000);
+  setTimeout(_fixR13CProfile, 4500);
+  setTimeout(_fixSeasonComma, 5000);
+  setTimeout(_fixLTVehicleType, 5500);
 }
 
 // ─── Auth ───
@@ -885,11 +1387,12 @@ window.showPage = function(name) {
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
   });
-  if (name === 'products') loadProductsList();
-  if (name === 'rentals') loadRentalsList();
+  if (name === 'products' || name === 'card-gen') loadProductsList();
   if (name === 'add-product') {
     loadCategories();
   }
+  if (name === 'orders') loadOrdersList();
+  if (name !== 'orders' && ordersChannel) { supabase.removeChannel(ordersChannel); ordersChannel = null; }
   if (name === 'chat') {
     loadChatSessions();
     loadBannedIps();
@@ -923,6 +1426,7 @@ async function initApp() {
   loadMaintenanceStatus();
   renderDescRows('prodDescRows');
   initChatBadgeListener();
+  initOrdersBadgeListener();
   // Load initial chat badge count
   supabase.from('chats').select('unread').then(({ data }) => {
     const total = (data || []).reduce((s, c) => s + (c.unread || 0), 0);
@@ -932,113 +1436,46 @@ async function initApp() {
 
   // Stats
   try {
-    const [{ count: prodCount }, { count: rentedCount }] = await Promise.all([
+    const [{ count: prodCount }, { count: orderCount }, { data: newOrders }] = await Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }),
-      supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'rented'),
+      supabase.from('orders').select('*', { count: 'exact', head: true }),
+      supabase.from('orders').select('id').in('status', ['pending', 'new'])
     ]);
     document.getElementById('statProducts').textContent = prodCount || 0;
-    document.getElementById('statRented').textContent = rentedCount || 0;
+    document.getElementById('statOrders').textContent = orderCount || 0;
+    const newCount = newOrders?.length || 0;
+    document.getElementById('statNew').textContent = newCount;
+    updateOrderBadge(newCount);
+    // Recent orders
+    const { data: recentOrders } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
+    renderRecentOrders(recentOrders || []);
   } catch(e) { console.error(e); }
 }
 
-function rentalRowsHTML(rows) {
-  return rows.map(p => {
-    const s = p.specs || {};
-    const overdue = s.return_date && new Date(s.return_date) < new Date(new Date().toDateString());
-    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
-      <div class="prod-img-thumb" style="flex-shrink:0">
-        ${p.image_url ? `<img src="${p.image_url}" alt="" style="width:100%;height:100%;object-fit:cover">` : (p.emoji || '📦')}
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:var(--dark)">${p.name}</div>
-        <div style="font-size:12px;color:var(--gray-mid);margin-top:2px">
-          ${s.renter_name ? `👤 ${s.renter_name}` : '<span style="color:#c2410c">ვინ იქირავა — არ არის მითითებული</span>'}
-          ${s.renter_phone ? ` · 📞 ${s.renter_phone}` : ''}
-        </div>
-        ${s.return_date ? `<div style="font-size:11px;margin-top:2px;${overdue ? 'color:#b91c1c;font-weight:700' : 'color:var(--gray-mid)'}">${overdue ? '⚠ ვადაგადაცილებული — ' : 'დაბრუნება: '}${s.return_date}</div>` : ''}
-      </div>
-      <button class="btn btn-sm" onclick="markReturned('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;flex-shrink:0">✓ დაბრუნებულია</button>
-    </div>`;
+function renderRecentOrders(rows) {
+  const el = document.getElementById('recentOrders');
+  if (!rows.length) { el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">შეკვეთები ჯერ არ არის</td></tr>'; return; }
+  el.innerHTML = rows.map(o => {
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
+    const status = o.status || 'pending';
+    const td = 'style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"';
+    const isConfirmed = status === 'confirmed';
+    const isRejected  = status === 'rejected' || status === 'cancelled';
+    const statusDot = isConfirmed
+      ? `<span style="font-size:13px;color:#15803d;font-weight:700">✓</span>`
+      : isRejected
+        ? `<span style="font-size:13px;color:#b91c1c;font-weight:700">✕</span>`
+        : `<span style="font-size:11px;color:var(--gray-mid)">–</span>`;
+    return `<tr style="cursor:pointer" onclick="showPage('orders')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid)">${date}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600">${o.invoice_no || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
+      <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">${statusDot}</td>
+    </tr>`;
   }).join('');
 }
-
-async function loadRentalsList() {
-  const el = document.getElementById('rentalsList');
-  if (el) el.innerHTML = '<div class="table-loading"><div class="spinner"></div> იტვირთება...</div>';
-  const { data, error } = await supabase.from('products').select('*').eq('status', 'rented').order('created_at', { ascending: false });
-  const label = document.getElementById('rentalsCountLabel');
-  if (error) { if (el) el.innerHTML = '<div class="table-empty"><p>შეცდომა: ' + error.message + '</p></div>'; return; }
-  const rows = data || [];
-  rows.forEach(p => { productCache[p.id] = p; });
-  if (label) label.textContent = rows.length + ' გაქირავებული';
-  if (!el) return;
-  if (!rows.length) { el.innerHTML = '<div class="table-empty"><div class="icon">🔴</div><p>ამჟამად არაფერია გაქირავებული</p></div>'; return; }
-  el.innerHTML = `<div style="padding:0 20px">${rentalRowsHTML(rows)}</div>`;
-  loadProductsList();
-}
-
-// ─── Quick rent by code ───
-let _rentMatched = null;
-
-window.matchRentCode = function(code) {
-  const trimmed = code.trim().toUpperCase();
-  const matchEl = document.getElementById('rentCodeMatch');
-  _rentMatched = null;
-  if (!trimmed) { matchEl.innerHTML = ''; return; }
-  const match = Object.values(productCache).find(p =>
-    String(p.code || '').split(';').map(c => c.trim().toUpperCase()).filter(c => c).includes(trimmed)
-  );
-  if (!match) { matchEl.innerHTML = '<span style="color:#b91c1c">პროდუქტი ვერ მოიძებნა</span>'; return; }
-  _rentMatched = match;
-  if (match.status === 'rented') {
-    matchEl.innerHTML = `<span style="color:#c2410c">⚠ ${match.name} — უკვე გაქირავებულია</span>`;
-  } else {
-    matchEl.innerHTML = `<span style="color:#166534">✓ ${match.name} ${match.daily_rate ? '(' + parseFloat(match.daily_rate).toFixed(2) + ' ₾/დღე)' : ''}</span>`;
-  }
-};
-
-window.updateRentReturnDate = function() {
-  const daysEl = document.getElementById('rentDaysInput');
-  const previewEl = document.getElementById('rentReturnDatePreview');
-  const days = parseInt(daysEl.value, 10);
-  if (!(days > 0)) { previewEl.textContent = ''; return; }
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  previewEl.textContent = 'დაბრუნება: ' + d.toISOString().slice(0, 10);
-};
-
-window.submitRentByCode = async function() {
-  if (!_rentMatched) { showToast('შეიყვანე სწორი კოდი', 'error'); return; }
-  const name = document.getElementById('rentNameInput').value.trim();
-  const phone = document.getElementById('rentPhoneInput').value.trim();
-  const days = parseInt(document.getElementById('rentDaysInput').value, 10);
-  if (!name) { showToast('შეავსე ვისზეა გაქირავებული', 'error'); return; }
-  let returnDate = null;
-  if (days > 0) {
-    const d = new Date();
-    d.setDate(d.getDate() + days);
-    returnDate = d.toISOString().slice(0, 10);
-  }
-  const specs = { ...(_rentMatched.specs || {}), renter_name: name, renter_phone: phone || null, return_date: returnDate };
-  const { error } = await supabase.from('products').update({ status: 'rented', specs }).eq('id', _rentMatched.id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  showToast('✓ გაქირავებულია', 'success');
-  ['rentCodeInput','rentNameInput','rentPhoneInput','rentDaysInput'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('rentCodeMatch').innerHTML = '';
-  document.getElementById('rentReturnDatePreview').textContent = '';
-  _rentMatched = null;
-  loadRentalsList();
-};
-
-window.markReturned = async function(id) {
-  if (!confirm('პროდუქტი დაბრუნებულად მოინიშნოს?')) return;
-  const p = productCache[id];
-  const specs = { ...(p?.specs || {}), renter_name: null, renter_phone: null, return_date: null };
-  const { error } = await supabase.from('products').update({ status: 'available', specs }).eq('id', id);
-  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-  showToast('✓ პროდუქტი დაბრუნებულია', 'success');
-  loadRentalsList();
-};
 
 window.toggleCatMgr = function() {
   const p = document.getElementById('catMgrPanel');
@@ -1202,7 +1639,7 @@ function getCountryForBrand(name) {
 
 // ─── Brands ───
 let _brands = [];
-let _currentCategory = '';
+let _currentProdType = '';
 
 async function loadBrands(type) {
   const { data } = await supabase.from('brands').select('*').eq('product_type', type).order('name');
@@ -1247,15 +1684,15 @@ window.addBrand = async function() {
   const countryEl = document.getElementById('newBrandCountry');
   const name = input.value.trim();
   const country = countryEl ? countryEl.value : '';
-  if (!name || !_currentCategory) return;
+  if (!name || !_currentProdType) return;
   if (_brands.find(b => b.name.toLowerCase() === name.toLowerCase())) { showToast('ეს ბრენდი უკვე არსებობს', 'error'); return; }
-  const { error } = await supabase.from('brands').insert({ product_type: _currentCategory, name, country: country || null });
+  const { error } = await supabase.from('brands').insert({ product_type: _currentProdType, name, country: country || null });
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   if (country) _saveBrandCountry(name, country);
   input.value = '';
   if (countryEl) countryEl.value = '🇨🇳 ჩინეთი';
   showToast('✓ ბრენდი დაემატა', 'success');
-  loadBrands(_currentCategory);
+  loadBrands(_currentProdType);
 };
 
 window.deleteBrand = async function(name, productType) {
@@ -1264,28 +1701,190 @@ window.deleteBrand = async function(name, productType) {
   if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
   const { error: pe } = await supabase.from('products').delete().filter('specs->>brand', 'eq', name);
   if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
-  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || _currentCategory);
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || _currentProdType);
   if (be) { alert('ბრენდის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
   _removeBrandCountry(name);
   showToast('ბრენდი წაიშალა', 'error');
-  loadBrands(_currentCategory);
+  loadBrands(_currentProdType);
   loadProductsList();
 };
 
-window.editSelectCategory = function(category, selectedBrand) {
-  document.getElementById('editProdCategory').value = category;
-  loadEditBrands(category, selectedBrand);
-};
+// ─── Seasons ───
+let _seasons = [];
 
-window.toggleCategoryMgr = function() {
-  const p = document.getElementById('categoryMgrPanel');
+async function loadSeasons(pendingEditValue) {
+  const { data } = await supabase.from('brands').select('*').eq('product_type', 'tire_season').order('name');
+  _seasons = data || [];
+  const opts = '<option value="">სეზონი...</option>' + _seasons.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  const addEl = document.getElementById('specSeason');
+  if (addEl) addEl.innerHTML = opts;
+  const editEl = document.getElementById('editSpecSeason');
+  if (editEl) { editEl.innerHTML = opts; if (pendingEditValue) editEl.value = pendingEditValue; }
+  renderSeasonList();
+}
+
+function renderSeasonList() {
+  const el = document.getElementById('seasonList');
+  if (!el) return;
+  if (!_seasons.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">სეზონი არ არის</div>'; return; }
+  el.innerHTML = _seasons.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${s.name}</span>
+      <button onclick="deleteSeason('${s.name.replace(/'/g,"\\'")}','${s.product_type}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.toggleSeasonMgr = function() {
+  const p = document.getElementById('seasonMgrPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
 };
 
-window.selectProdCategory = function(category) {
-  _currentCategory = category;
-  document.getElementById('prodFormBody').style.display = category ? 'block' : 'none';
-  if (category) loadBrands(category);
+window.addSeason = async function() {
+  const input = document.getElementById('newSeasonInput');
+  const name = input.value.trim();
+  if (!name) return;
+  if (_seasons.find(s => s.name.toLowerCase() === name.toLowerCase())) { showToast('ეს სეზონი უკვე არსებობს', 'error'); return; }
+  const { error } = await supabase.from('brands').insert({ product_type: 'tire_season', name });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ სეზონი დაემატა', 'success');
+  loadSeasons();
+};
+
+window.deleteSeason = async function(name, productType) {
+  if (!confirm(`სეზონი "${name}" წაიშალოს?\n\nყველა პროდუქტი ამ სეზონით ასევე წაიშლება!`)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
+  const { error: pe } = await supabase.from('products').delete().filter('specs->>season', 'eq', name);
+  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || 'tire_season');
+  if (be) { alert('სეზონის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
+  showToast('სეზონი წაიშალა', 'error');
+  loadSeasons();
+  loadProductsList();
+};
+
+// ─── Tire Spec Managers (width, profile, rim) ───
+const _tireSpecData = { width: [], profile: [], rim: [] };
+const _tireSpecCfg = {
+  width:   { type: 'tire_width',   addId: 'specWidth',   editId: 'editSpecWidth',   inputId: 'newWidthInput',   listId: 'widthList',   panelId: 'widthMgrPanel',   emptyOpt: 'სიგანე...' },
+  profile: { type: 'tire_profile', addId: 'specProfile', editId: 'editSpecProfile', inputId: 'newProfileInput', listId: 'profileList', panelId: 'profileMgrPanel', emptyOpt: 'პროფილი...' },
+  rim:     { type: 'tire_rim',     addId: 'specRim',     editId: 'editSpecRim',     inputId: 'newRimInput',     listId: 'rimList',     panelId: 'rimMgrPanel',     emptyOpt: 'დიამეტრი...' },
+};
+
+async function loadTireSpec(key, pendingEditValue) {
+  const cfg = _tireSpecCfg[key];
+  const { data } = await supabase.from('brands').select('*').eq('product_type', cfg.type).order('name');
+  _tireSpecData[key] = data || [];
+  const opts = `<option value="">${cfg.emptyOpt}</option>` + _tireSpecData[key].map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  const addEl = document.getElementById(cfg.addId);
+  if (addEl) addEl.innerHTML = opts;
+  const editEl = document.getElementById(cfg.editId);
+  if (editEl) { editEl.innerHTML = opts; if (pendingEditValue) editEl.value = pendingEditValue; }
+  renderTireSpecList(key);
+}
+
+function renderTireSpecList(key) {
+  const cfg = _tireSpecCfg[key];
+  const el = document.getElementById(cfg.listId);
+  if (!el) return;
+  const items = _tireSpecData[key];
+  if (!items.length) { el.innerHTML = '<div style="color:var(--gray-mid);font-size:13px">ჩანაწერი არ არის</div>'; return; }
+  el.innerHTML = items.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${s.name}</span>
+      <button onclick="deleteTireSpec('${key}','${s.name.replace(/'/g,"\\'")}','${s.product_type}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">წაშლა</button>
+    </div>
+  `).join('');
+}
+
+window.toggleTireSpecMgr = function(key) {
+  const panel = document.getElementById(_tireSpecCfg[key].panelId);
+  if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+};
+
+window.addTireSpec = async function(key) {
+  const cfg = _tireSpecCfg[key];
+  const input = document.getElementById(cfg.inputId);
+  const name = input.value.trim();
+  if (!name) return;
+  if (_tireSpecData[key].find(s => s.name === name)) { showToast('უკვე არსებობს', 'error'); return; }
+  const { error } = await supabase.from('brands').insert({ product_type: cfg.type, name });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  input.value = '';
+  showToast('✓ დაემატა', 'success');
+  loadTireSpec(key);
+};
+
+window.deleteTireSpec = async function(key, name, productType) {
+  if (!confirm(`"${name}" წაიშალოს?\n\nყველა პროდუქტი ამ ${key === 'width' ? 'სიგანით' : key === 'profile' ? 'პროფილით' : 'დიამეტრით'} ასევე წაიშლება!`)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { alert('სესია ამოიწურა. გვერდი განაახლე და შედი ხელახლა.'); return; }
+  const { error: pe } = await supabase.from('products').delete().filter(`specs->>${key}`, 'eq', name);
+  if (pe) { alert('პროდუქტების წაშლის შეცდომა: ' + pe.message + ' [' + pe.code + ']'); return; }
+  const cfg = _tireSpecCfg[key];
+  const { error: be } = await supabase.from('brands').delete().eq('name', name).eq('product_type', productType || cfg.type);
+  if (be) { alert('სპეციფიკაციის წაშლის შეცდომა: ' + be.message + ' [' + be.code + ']'); return; }
+  showToast('წაიშალა', 'error');
+  loadTireSpec(key);
+  loadProductsList();
+};
+
+window.editSelectType = function(type, selectedBrand, specs) {
+  document.getElementById('editProdType').value = type;
+  ['tire','oil','filter'].forEach(t => {
+    const btn = document.getElementById('editTypeBtn_' + t);
+    if (!btn) return;
+    if (t === type) {
+      btn.style.borderColor = 'var(--orange)';
+      btn.style.background = '#fff5f0';
+      btn.style.color = 'var(--orange)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background = '#fff';
+      btn.style.color = 'var(--dark)';
+    }
+  });
+  document.querySelectorAll('.edit-specs-tire,.edit-specs-oil,.edit-specs-filter').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.edit-specs-' + type).forEach(el => el.style.display = '');
+  loadEditBrands(type, selectedBrand);
+  if (type === 'tire') {
+    loadSeasons(specs?.season || '');
+    loadTireSpec('width', specs?.width || '');
+    loadTireSpec('profile', specs?.profile || '');
+    loadTireSpec('rim', specs?.rim || '');
+    const vt = document.getElementById('editSpecVehicleType');
+    if (vt) vt.value = specs?.vehicle_type || 'მსუბუქი ავტომობილი';
+  }
+};
+
+window.selectProdType = function(type) {
+  _currentProdType = type;
+  // highlight selected button
+  ['tire','oil','filter'].forEach(t => {
+    const btn = document.getElementById('typeBtn_' + t);
+    if (!btn) return;
+    if (t === type) {
+      btn.style.borderColor = 'var(--orange)';
+      btn.style.background = '#fff5f0';
+      btn.style.color = 'var(--orange)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background = '#fff';
+      btn.style.color = 'var(--dark)';
+    }
+  });
+  // show/hide spec fields
+  document.querySelectorAll('.specs-tire,.specs-oil,.specs-filter').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.specs-' + type).forEach(el => el.style.display = '');
+  // set default unit
+  const unitMap = { tire: 'ც', oil: 'ლ', filter: 'ც' };
+  document.getElementById('prodUnit').value = unitMap[type] || 'ც';
+  // show form
+  document.getElementById('prodFormBody').style.display = 'block';
+  loadBrands(type);
+  if (type === 'tire') { loadSeasons(); loadTireSpec('width'); loadTireSpec('profile'); loadTireSpec('rim'); }
 };
 
 // ─── Categories ───
@@ -1297,8 +1896,7 @@ async function loadCategories() {
   const opts = '<option value="">კატეგორია...</option>' + _categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   const catEl = document.getElementById('prodCategory');
   if (catEl) catEl.innerHTML = opts;
-  const editCatEl = document.getElementById('editProdCategory');
-  if (editCatEl) editCatEl.innerHTML = opts;
+  // editCategory removed from new modal
   renderCategoryList();
 }
 
@@ -1352,19 +1950,34 @@ async function genProductCode() {
 
 window.addProduct = async function() {
   const name = document.getElementById('prodName').value.trim();
-  if (!name || !_currentCategory) {
+  if (!name || !_currentProdType) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
   // collect specs
-  const specs = {
-    brand: document.getElementById('prodBrand').value || '',
-    brand_model: document.getElementById('specBrandModel').value.trim(),
-    power_source: document.getElementById('specPowerSource').value,
-    weight: document.getElementById('specWeight').value ? parseFloat(document.getElementById('specWeight').value) : null,
-  };
-  if (!specs.brand) { showToast('ბრენდი სავალდებულოა', 'error'); return; }
-  const dailyRate = parseFloat(document.getElementById('prodDailyRate').value) || 0;
-  if (!dailyRate) { showToast('დღიური ღირებულება სავალდებულოა', 'error'); return; }
+  const specs = { brand: document.getElementById('prodBrand').value || '' };
+  if (_currentProdType === 'tire') {
+    specs.width       = document.getElementById('specWidth').value;
+    specs.profile     = document.getElementById('specProfile').value;
+    specs.rim         = document.getElementById('specRim').value;
+    specs.season        = document.getElementById('specSeason').value;
+    specs.vehicle_type  = document.getElementById('specVehicleType').value || 'მსუბუქი ავტომობილი';
+    const _altSize = document.getElementById('specAltSize').value.trim();
+    if (_altSize) specs.alt_size = _altSize;
+    if (!specs.brand)   { showToast('ბრენდი სავალდებულოა', 'error'); return; }
+    if (!specs.width)   { showToast('სიგანე სავალდებულოა', 'error'); return; }
+    if (!specs.profile) { showToast('პროფილი სავალდებულოა', 'error'); return; }
+    if (!specs.rim)     { showToast('დიამეტრი სავალდებულოა', 'error'); return; }
+    if (!specs.season)  { showToast('სეზონი სავალდებულოა', 'error'); return; }
+  } else if (_currentProdType === 'oil') {
+    specs.oil_type    = document.getElementById('specOilType').value;
+    specs.viscosity   = document.getElementById('specViscosity').value;
+    specs.volume      = document.getElementById('specVolume').value;
+    specs.application = document.getElementById('specOilApp').value;
+  } else if (_currentProdType === 'filter') {
+    specs.filter_type = document.getElementById('specFilterType').value;
+    specs.oem         = document.getElementById('specOEM').value.trim();
+    specs.car_make    = document.getElementById('specCarMake').value.trim();
+  }
   const btn = document.getElementById('addProductBtn');
   btn.disabled = true; btn.textContent = 'ემატება...';
   try {
@@ -1401,13 +2014,21 @@ window.addProduct = async function() {
     } else {
       showToast('კოდი სავალდებულოა ან ჩართე ავტო გენერაცია', 'error'); btn.disabled = false; btn.textContent = '✓ კატალოგში დამატება'; return;
     }
+    const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
+    const priceRaw = parseFloat(document.getElementById('prodPrice').value) || 0;
+    const discountPrice = parseFloat(document.getElementById('prodDiscount').value) || 0;
+    const finalPrice = discountPrice > 0 ? discountPrice : priceRaw;
+    const oldPriceVal = discountPrice > 0 ? priceRaw : null;
+    if (discountPrice > 0) specs.discount_price = discountPrice;
     const { error } = await supabase.from('products').insert({
       name,
-      category: _currentCategory,
+      category: TYPE_LABELS[_currentProdType] || _currentProdType,
+      product_type: _currentProdType,
       specs,
       country: getCountryForBrand(specs.brand) || null,
-      daily_rate: dailyRate,
-      status: document.getElementById('prodStatus').value || 'available',
+      price: finalPrice,
+      old_price: oldPriceVal,
+      unit: document.getElementById('prodUnit').value,
       description: getDescValue('prodDescRows'),
       image_url: imageUrl,
       active: false,
@@ -1425,17 +2046,20 @@ window.addProduct = async function() {
 };
 
 window.clearForm = function() {
-  _currentCategory = '';
+  _currentProdType = '';
   // reset all select/input fields
-  ['prodName','prodDailyRate','prodBrand',
-   'specCustomCode','specBrandModel','specPowerSource','specWeight']
+  ['prodName','prodPrice','prodDiscount','prodBrand','prodUnit',
+   'specCustomCode','specWidth','specProfile','specRim','specSeason','specAltSize',
+   'specOilType','specViscosity','specVolume','specOilApp',
+   'specFilterType','specOEM','specCarMake']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const vt = document.getElementById('specVehicleType');
+  if (vt) vt.value = 'მსუბუქი ავტომობილი';
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
   const specCustomCode = document.getElementById('specCustomCode');
   if (specCustomCode) { specCustomCode.style.display = ''; }
-  document.getElementById('prodStatus').value = 'available';
-  document.getElementById('prodCategory').value = '';
+  document.getElementById('prodUnit').value = 'ც';
   // clear textarea
   const descEl = document.getElementById('prodDescRows');
   if (descEl) descEl.value = '';
@@ -1443,7 +2067,13 @@ window.clearForm = function() {
   prodFileData = null;
   ['prodFile','prodFileCamera'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('prodPreview').innerHTML = DROPZONE_EMPTY;
+  // reset type buttons and hide form
+  ['tire','oil','filter'].forEach(t => {
+    const btn = document.getElementById('typeBtn_' + t);
+    if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.background = '#fff'; btn.style.color = 'var(--dark)'; }
+  });
   document.getElementById('prodFormBody').style.display = 'none';
+  document.querySelectorAll('.specs-tire,.specs-oil,.specs-filter').forEach(el => el.style.display = 'none');
 };
 
 async function loadProductsList() {
@@ -1476,17 +2106,19 @@ async function loadProductsList() {
   renderProductRows(rows);
 }
 
-const STATUS_BADGES = {
-  available:   '<span style="font-size:10px;font-weight:700;color:#166534;background:#dcfce7;border-radius:6px;padding:2px 6px">✅ ხელმისაწვდომია</span>',
-  rented:      '<span style="font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:2px 6px">🔴 მიუწვდომელია</span>',
-  maintenance: '<span style="font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;border-radius:6px;padding:2px 6px">🔴 მიუწვდომელია</span>',
-};
-
 function productRowHTML(p, isActive) {
+  const hasDiscount = p.specs?.discount_price > 0;
+  const isSalesOn = !!p.old_price;
+  const salesBtn = hasDiscount
+    ? (isSalesOn
+        ? `<button class="btn btn-sm" onclick="salesOff('${p.id}')" style="background:#dcfce7;color:#166534;border:1px solid #86efac;font-weight:700" title="ფასდაკლება გააქტიურებულია — გამორთვა">Sales ON</button>`
+        : `<button class="btn btn-sm" onclick="salesOn('${p.id}')" style="background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1" title="ფასდაკლების გააქტიურება">Sales OFF</button>`)
+    : '';
   const activeButtons = `
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
+      ${salesBtn}
       <button class="btn btn-sm" onclick="deactivateProduct('${p.id}')" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa" title="არააქტიურში გადატანა">OFF</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none">🗑 წაშლა</button>
     </div>`;
@@ -1494,6 +2126,7 @@ function productRowHTML(p, isActive) {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%">
       <button class="btn btn-secondary btn-sm" onclick="showProductInfo('${p.id}')">ℹ ინფო</button>
       <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">✏ რედ.</button>
+      ${salesBtn}
       <button class="btn btn-sm" onclick="activateProduct('${p.id}')" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0" title="აქტიურში გადატანა">ON</button>
       <button class="btn btn-sm" onclick="deleteProduct('${p.id}')" style="background:#b91c1c;color:white;border:none" title="წაშლა">🗑 წაშლა</button>
     </div>`;
@@ -1506,12 +2139,10 @@ function productRowHTML(p, isActive) {
     <div style="justify-self:start;min-width:0">
       <div class="prod-name">${p.name}</div>
       ${p.added_by ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">👤 ${p.added_by}</div>` : ''}
-      <div style="margin-top:2px">${STATUS_BADGES[p.status] || ''}</div>
-      ${p.status === 'rented' && p.specs?.renter_name ? `<div style="font-size:11px;color:var(--gray-mid);margin-top:2px">🔴 ${p.specs.renter_name}</div>` : ''}
     </div>
     <span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gray-dark)">${p.code || '—'}</span>
     <span style="font-size:13px;color:var(--gray-mid)">${p.category || '–'}</span>
-    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.daily_rate ? parseFloat(p.daily_rate).toFixed(2) + ' ₾/დღე' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}</span>
+    <span style="font-size:13px;font-weight:600;color:var(--dark);text-align:center">${p.old_price ? `<span style="font-size:11px;color:var(--gray-mid);text-decoration:line-through;display:block">${parseFloat(p.old_price).toFixed(2)} ₾</span>` : ''}${p.price ? parseFloat(p.price).toFixed(2) + ' ₾' : '<span style="font-size:11px;color:var(--gray-mid)">—</span>'}${p.unit ? `<span style="font-size:11px;color:var(--gray-mid);font-weight:400">/${p.unit}</span>` : ''}</span>
     ${isActive ? activeButtons : inactiveButtons}
   </div>`;
 }
@@ -1584,18 +2215,30 @@ window.editProduct = function(id) {
   const specs = p.specs || {};
   document.getElementById('editProdId').value = id;
   document.getElementById('editName').value = p.name || '';
-  document.getElementById('editDailyRate').value = p.daily_rate || '';
-  document.getElementById('editStatus').value = p.status || 'available';
+  document.getElementById('editPrice').value = p.old_price || p.price || '';
+  document.getElementById('editDiscount').value = p.old_price ? p.price : (p.specs?.discount_price || '');
+  document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
   document.getElementById('editCodeDisplay').value = p.code || '';
   document.getElementById('editFile').value = '';
 
-  // category + brand + specs
-  editSelectCategory(p.category || '', specs.brand || '');
-  document.getElementById('editSpecBrandModel').value = specs.brand_model || '';
-  document.getElementById('editSpecPowerSource').value = specs.power_source || '';
-  document.getElementById('editSpecWeight').value = specs.weight ?? '';
+  // type + brand + specs
+  const type = p.product_type || 'tire';
+  editSelectType(type, specs.brand || '', specs);
+
+  if (type === 'tire') {
+    document.getElementById('editAltSize').value = specs.alt_size || '';
+  } else if (type === 'oil') {
+    document.getElementById('editSpecOilType').value = specs.oil_type || '';
+    document.getElementById('editSpecViscosity').value = specs.viscosity || '';
+    document.getElementById('editSpecVolume').value = specs.volume || '';
+    document.getElementById('editSpecOilApp').value = specs.application || '';
+  } else if (type === 'filter') {
+    document.getElementById('editSpecFilterType').value = specs.filter_type || '';
+    document.getElementById('editSpecOEM').value = specs.oem || '';
+    document.getElementById('editSpecCarMake').value = specs.car_make || '';
+  }
 
   if (p.image_url) {
     showDropPreview('edit', p.image_url);
@@ -1613,9 +2256,13 @@ window.saveProductEdit = async function() {
   const id = document.getElementById('editProdId').value;
   let newCode = document.getElementById('editCodeDisplay').value.trim();
   const name = document.getElementById('editName').value.trim();
-  const category = document.getElementById('editProdCategory').value;
-  const dailyRate = parseFloat(document.getElementById('editDailyRate').value) || 0;
-  if (!name || !category || !newCode) {
+  const type = document.getElementById('editProdType').value;
+  const priceRaw = parseFloat(document.getElementById('editPrice').value) || 0;
+  const discountVal = parseFloat(document.getElementById('editDiscount').value) || 0;
+  const isSalesOn = !!productCache[id]?.old_price;
+  const price = (isSalesOn && discountVal > 0) ? discountVal : priceRaw;
+  const oldPrice = (isSalesOn && discountVal > 0) ? priceRaw : null;
+  if (!name || !type || !newCode) {
     showToast('შეავსე სავალდებულო ველები', 'error'); return;
   }
   // Check for duplicate code (excluding current product)
@@ -1634,17 +2281,28 @@ window.saveProductEdit = async function() {
     newCode = candidateCode;
     document.getElementById('editCodeDisplay').value = candidateCode;
   }
-  // collect specs (renter_name/phone/return_date are managed from the Rentals page, not this form)
-  const existingSpecs = productCache[id]?.specs || {};
-  const specs = {
-    brand: document.getElementById('editBrand').value || '',
-    brand_model: document.getElementById('editSpecBrandModel').value.trim(),
-    power_source: document.getElementById('editSpecPowerSource').value,
-    weight: document.getElementById('editSpecWeight').value ? parseFloat(document.getElementById('editSpecWeight').value) : null,
-    renter_name: existingSpecs.renter_name || null,
-    renter_phone: existingSpecs.renter_phone || null,
-    return_date: existingSpecs.return_date || null,
-  };
+  // collect specs
+  const specs = { brand: document.getElementById('editBrand').value || '' };
+  if (type === 'tire') {
+    specs.width        = document.getElementById('editSpecWidth').value;
+    specs.profile      = document.getElementById('editSpecProfile').value;
+    specs.rim          = document.getElementById('editSpecRim').value;
+    specs.season        = document.getElementById('editSpecSeason').value;
+    specs.vehicle_type  = document.getElementById('editSpecVehicleType').value || 'მსუბუქი ავტომობილი';
+    const _editAltSize = document.getElementById('editAltSize').value.trim();
+    if (_editAltSize) specs.alt_size = _editAltSize;
+  } else if (type === 'oil') {
+    specs.oil_type    = document.getElementById('editSpecOilType').value;
+    specs.viscosity   = document.getElementById('editSpecViscosity').value;
+    specs.volume      = document.getElementById('editSpecVolume').value;
+    specs.application = document.getElementById('editSpecOilApp').value;
+  } else if (type === 'filter') {
+    specs.filter_type = document.getElementById('editSpecFilterType').value;
+    specs.oem         = document.getElementById('editSpecOEM').value.trim();
+    specs.car_make    = document.getElementById('editSpecCarMake').value.trim();
+  }
+  if (discountVal > 0) specs.discount_price = discountVal;
+  const TYPE_LABELS = { tire: 'საბურავები', oil: 'ზეთები', filter: 'ფილტრები' };
   const btn = document.getElementById('saveEditBtn');
   btn.disabled = true; btn.textContent = 'ინახება...';
   try {
@@ -1653,16 +2311,25 @@ window.saveProductEdit = async function() {
     if (editFileData) {
       btn.textContent = 'ფოტო იტვირთება...';
       imageUrl = await uploadProductImage(editFileData);
-      if (oldImageUrl) deleteProductImage(oldImageUrl);
+      if (oldImageUrl) {
+        const oldMatch = oldImageUrl.match(/\/d\/([^/?]+)/) || oldImageUrl.match(/[?&]id=([^&]+)/);
+        if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+          body: JSON.stringify({ fileId: oldMatch[1] })
+        }).catch(() => {});
+      }
     }
     const { error: updateError } = await supabase.from('products').update({
       code: newCode,
       name,
-      category,
+      category: TYPE_LABELS[type] || type,
+      product_type: type,
       specs,
       country: getCountryForBrand(specs.brand) || productCache[id]?.country || null,
-      daily_rate: dailyRate,
-      status: document.getElementById('editStatus').value || 'available',
+      price,
+      old_price: oldPrice,
+      unit: document.getElementById('editUnit').value,
       description: getDescValue('editDescRows'),
       image_url: imageUrl,
     }).eq('id', id);
@@ -1679,9 +2346,17 @@ window.saveProductEdit = async function() {
 window.deleteProduct = async function(id) {
   if (!confirm('ნამდვილად წაშლა?')) return;
   const { data } = await supabase.from('products').select('image_url').eq('id', id).single();
-  const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) { showToast('წაშლის შეცდომა: ' + error.message, 'error'); return; }
-  if (data?.image_url) deleteProductImage(data.image_url);
+  await supabase.from('products').delete().eq('id', id);
+  if (data?.image_url) {
+    const match = data.image_url.match(/\/d\/([^/?]+)/) || data.image_url.match(/[?&]id=([^&]+)/);
+    if (match) {
+      fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+        body: JSON.stringify({ fileId: match[1] })
+      }).catch(() => {});
+    }
+  }
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
 };
@@ -1714,23 +2389,14 @@ window.toggleSelectAll = function(secId, checked) {
   if (compBtn) compBtn.style.display = show;
 };
 
-// Splits a list of ids into chunks so bulk requests don't blow past URL length limits (PostgREST puts `.in()` ids in the query string).
-function chunkIds(ids, size) {
-  const chunks = [];
-  for (let i = 0; i < ids.length; i += size) chunks.push(ids.slice(i, i + size));
-  return chunks;
-}
-
 window.bulkDeactivate = async function(secId) {
   const body = document.getElementById(secId + '-body');
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გაუქმდეს (OFF)?`)) return;
-  for (const chunk of chunkIds(ids, 50)) {
-    const { error } = await supabase.from('products').update({ active: false }).in('id', chunk);
-    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-    chunk.forEach(id => { if (productCache[id]) productCache[id].active = false; });
-  }
+  const { error } = await supabase.from('products').update({ active: false }).in('id', ids);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  ids.forEach(id => { if (productCache[id]) productCache[id].active = false; });
   renderProductRows(Object.values(productCache));
   showToast(`${ids.length} პროდუქტი გაუქმდა`, '');
 };
@@ -1740,11 +2406,8 @@ window.bulkDelete = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი სამუდამოდ წაიშალოს?`)) return;
-  for (const chunk of chunkIds(ids, 50)) {
-    const { error } = await supabase.from('products').delete().in('id', chunk);
-    if (error) { showToast('წაშლის შეცდომა: ' + error.message, 'error'); return; }
-    chunk.forEach(id => delete productCache[id]);
-  }
+  await supabase.from('products').delete().in('id', ids);
+  ids.forEach(id => delete productCache[id]);
   renderProductRows(Object.values(productCache));
   showToast(`🗑 ${ids.length} პროდუქტი წაიშალა`, 'error');
 };
@@ -1754,11 +2417,9 @@ window.bulkActivate = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გააქტიურდეს?`)) return;
-  for (const chunk of chunkIds(ids, 50)) {
-    const { error } = await supabase.from('products').update({ active: true }).in('id', chunk);
-    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
-    chunk.forEach(id => { if (productCache[id]) productCache[id].active = true; });
-  }
+  const { error } = await supabase.from('products').update({ active: true }).in('id', ids);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  ids.forEach(id => { if (productCache[id]) productCache[id].active = true; });
   renderProductRows(Object.values(productCache));
   showToast(`✓ ${ids.length} პროდუქტი გააქტიურდა`, 'success');
 };
@@ -1791,7 +2452,12 @@ window.bulkRecompress = async function(secId) {
       await supabase.from('products').update({ image_url: newUrl }).eq('id', id);
       if (productCache[id]) productCache[id].image_url = newUrl;
       cb.dataset.imageUrl = newUrl;
-      deleteProductImage(oldUrl);
+      const oldMatch = oldUrl.match(/\/d\/([^/?]+)/) || oldUrl.match(/[?&]id=([^&]+)/);
+      if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+        body: JSON.stringify({ fileId: oldMatch[1] })
+      }).catch(() => {});
       done++;
       if (compBtn) compBtn.textContent = `${done}/${withImage.length}...`;
     } catch(e) {
@@ -1811,6 +2477,27 @@ window.toggleSection = function(id) {
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
   chevron.textContent = open ? '▲' : '▼';
+};
+
+window.salesOn = async function(id) {
+  const p = productCache[id];
+  const discountPrice = p.specs?.discount_price;
+  if (!discountPrice) return;
+  const { error } = await supabase.from('products').update({ price: discountPrice, old_price: p.price }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  productCache[id] = { ...p, price: discountPrice, old_price: p.price };
+  renderProductRows(Object.values(productCache));
+  showToast('✓ Sales ON — ფასდაკლება გააქტიურდა', 'success');
+};
+
+window.salesOff = async function(id) {
+  const p = productCache[id];
+  if (!p.old_price) return;
+  const { error } = await supabase.from('products').update({ price: p.old_price, old_price: null }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  productCache[id] = { ...p, price: p.old_price, old_price: null };
+  renderProductRows(Object.values(productCache));
+  showToast('Sales OFF — ფასდაკლება გაუქმდა', '');
 };
 
 window.activateProduct = async function(id) {
@@ -1854,8 +2541,13 @@ window.removeBgForProduct = async function(id) {
     const noBgBlob = await removeBg(resized);
     const processed = new File([noBgBlob], 'image.png', { type: 'image/png' });
     const newUrl = await uploadProductImage(processed);
+    const oldMatch = p.image_url.match(/\/d\/([^/?]+)/) || p.image_url.match(/[?&]id=([^&]+)/);
     await supabase.from('products').update({ image_url: newUrl }).eq('id', id);
-    deleteProductImage(p.image_url);
+    if (oldMatch) fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo' },
+      body: JSON.stringify({ fileId: oldMatch[1] })
+    }).catch(() => {});
     showToast('✓ ფონი მოხსნილია!', 'success');
     loadProductsList();
   } catch(e) {
@@ -1896,20 +2588,28 @@ window.showProductInfo = function(id) {
   document.getElementById('infoModalName').textContent = p.name;
   const el = document.getElementById('infoModalDesc');
   const s = p.specs || {};
+  const type = p.product_type;
   const row = (k, v) => `<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid #e5e7eb"><span style="color:#555">${k}</span><span style="font-weight:600;text-align:right">${v}</span></div>`;
   let rows = '';
   if (s.brand) rows += row('ბრენდი', s.brand);
-  if (s.brand_model) rows += row('მოდელი', s.brand_model);
-  if (s.power_source) rows += row('კვების წყარო', s.power_source);
-  if (s.weight) rows += row('წონა', s.weight + ' კგ');
-  if (p.country) rows += row('ქვეყანა', p.country);
-  if (p.daily_rate) rows += row('დღიური ღირებულება', p.daily_rate + ' ₾');
-  if (p.status) rows += row('სტატუსი', STATUS_BADGES[p.status] || p.status);
-  if (p.status === 'rented') {
-    if (s.renter_name) rows += row('ვისზეა გაქირავებული', s.renter_name);
-    if (s.renter_phone) rows += row('ტელეფონი', s.renter_phone);
-    if (s.return_date) rows += row('დაბრუნების თარიღი', s.return_date);
+  if (type === 'tire') {
+    if (s.width && s.rim) rows += row('ზომა', `${s.profile ? s.width+'/'+s.profile+' '+s.rim : s.width+s.rim}${s.alt_size ? ' (' + s.alt_size + ')' : ''}`);
+    if (s.season) rows += row('სეზონი', s.season);
+  } else if (type === 'oil') {
+    if (s.oil_type)    rows += row('ტიპი', s.oil_type);
+    if (s.viscosity)   rows += row('სიბლანტე', s.viscosity);
+    if (s.volume)      rows += row('მოცულობა', s.volume);
+    if (s.application) rows += row('დანიშნულება', s.application);
+  } else if (type === 'filter') {
+    if (s.filter_type) rows += row('ფილტრის ტიპი', s.filter_type);
+    if (s.oem)         rows += row('OEM ნომერი', s.oem);
+    if (s.car_make)    rows += row('ავტომობ. მარკა', s.car_make);
   }
+  if (p.country) rows += row('ქვეყანა', p.country);
+  const priceVal = p.old_price
+    ? `<span style="text-decoration:line-through;color:#aaa;margin-right:6px">${p.old_price} ₾</span><span style="color:#16a34a">${p.price} ₾</span>`
+    : `${p.price} ₾`;
+  rows += row('ფასი', priceVal);
   let html = '';
   if (rows) html += `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--dark);margin-bottom:4px">სპეციფიკაცია</div>${rows}</div>`;
   if (p.description) {
@@ -1923,6 +2623,110 @@ window.showProductInfo = function(id) {
 
 window.closeInfoModal = function() {
   document.getElementById('infoModal').style.display = 'none';
+};
+
+// ─── Orders cache ───
+let ordersCache = {};
+let ordersChannel = null;
+
+function updateOrderBadge(count) {
+  const badge = document.getElementById('newOrdersBadge');
+  if (!badge) return;
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+}
+
+// ─── Demo orders ───
+const DEMO_ORDERS = [];
+
+function renderOrderRow(id, o, dateStr) {
+  ordersCache[id] = { ...o, _dateStr: dateStr };
+  const status = o.status || 'pending';
+  const isConfirmed = status === 'confirmed';
+  const isRejected  = status === 'rejected' || status === 'cancelled';
+  const td = `style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px"`;
+  const vBtn = `<button onclick="event.stopPropagation();confirmOrder('${id}')" title="დადასტურება" style="background:${isConfirmed?'#dcfce7':'none'};color:${isConfirmed?'#15803d':'#9ca3af'};border:1px solid ${isConfirmed?'#86efac':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✓</button>`;
+  const xBtn = `<button onclick="event.stopPropagation();rejectOrder('${id}')"  title="უარყოფა"   style="background:${isRejected?'#fee2e2':'none'};color:${isRejected?'#b91c1c':'#9ca3af'};border:1px solid ${isRejected?'#fca5a5':'#e5e7eb'};width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;padding:0;line-height:1;font-weight:700">✕</button>`;
+  return `<tr id="order-row-${id}" style="cursor:pointer" onclick="viewOrderPDF('${id}')" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''">
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);white-space:nowrap">${dateStr}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;font-weight:600;white-space:nowrap">${o.invoice_no || o.invoiceNo || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px">${o.buyer_name || o.buyerName || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-size:11px;color:var(--gray-mid);font-family:monospace">${o.buyer_phone || '–'}</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;font-size:11px;white-space:nowrap">${parseFloat(o.total||0).toFixed(2)} ₾</td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:center;gap:4px">${vBtn}${xBtn}</div>
+    </td>
+    <td ${td} style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border)">
+      <button onclick="event.stopPropagation();deleteOrder('${id}')" title="წაშლა" style="background:none;border:none;color:#dc2626;font-size:14px;cursor:pointer;padding:4px;border-radius:4px;line-height:1" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑</button>
+    </td>
+  </tr>`;
+}
+
+// ─── Orders ───
+async function loadOrdersList() {
+  const el = document.getElementById('ordersList');
+  el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px"><div class="spinner" style="margin:auto"></div></td></tr>';
+
+  let hasRealData = false;
+  try {
+    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if (!error && data && data.length) {
+      hasRealData = true;
+      const pendingCount = data.filter(o => !o.status || o.status === 'pending' || o.status === 'new').length;
+      document.getElementById('orderCountLabel').textContent = data.length + ' შეკვეთა · ' + pendingCount + ' განუხილველი';
+      updateOrderBadge(pendingCount);
+      el.innerHTML = data.map(o => {
+        const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ka-GE') : '–';
+        return renderOrderRow(o.id, o, date);
+      }).join('');
+    }
+  } catch(e) {}
+
+  if (!hasRealData) {
+    document.getElementById('orderCountLabel').textContent = '0 შეკვეთა';
+    el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-mid);font-size:13px">🧾 შეკვეთები ჯერ არ არის</td></tr>';
+  }
+
+  // Real-time subscription for new orders
+  if (ordersChannel) supabase.removeChannel(ordersChannel);
+  ordersChannel = supabase
+    .channel('orders-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+      loadOrdersList();
+    })
+    .subscribe();
+}
+
+window.deleteOrder = async function(id) {
+  if (!confirm('ნამდვილად გსურთ ამ შეკვეთის წაშლა?')) return;
+  await supabase.from('orders').delete().eq('id', id);
+  delete ordersCache[id];
+  loadOrdersList();
+};
+
+window.confirmOrder = async function(id) {
+  const { error } = await supabase.from('orders').update({ status: 'confirmed' }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) ordersCache[id].status = 'confirmed';
+  const row = document.getElementById('order-row-' + id);
+  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
+};
+
+window.rejectOrder = async function(id) {
+  const { error } = await supabase.from('orders').update({ status: 'rejected' }).eq('id', id);
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (ordersCache[id]) ordersCache[id].status = 'rejected';
+  const row = document.getElementById('order-row-' + id);
+  if (row) row.outerHTML = renderOrderRow(id, ordersCache[id], ordersCache[id]._dateStr);
+};
+
+
+window.viewOrderPDF = function(id) {
+  const o = ordersCache[id];
+  if (!o) return;
+  const items = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+  const dateStr = o.created_at ? fmtGeoDate(new Date(o.created_at)) : (o._dateStr || '–');
+  downloadAdminInvoicePDF(items, o.invoice_no || o.invoiceNo || '–', dateStr, o.buyer_name || o.buyerName || '', o.buyer_id || o.buyerId || '', o.buyer_phone || '');
 };
 
 // ─── Chat (Admin) ───
@@ -1943,6 +2747,24 @@ function playNotifSound() {
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.4);
   } catch(e) {}
+}
+
+function initOrdersBadgeListener() {
+  supabase.channel('global-orders-badge')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
+      supabase.from('orders').select('id').in('status', ['pending', 'new']).then(({ data }) => {
+        updateOrderBadge((data || []).length);
+      });
+      // Reload orders list if on orders page
+      if (document.getElementById('page-orders')?.classList.contains('active')) {
+        loadOrdersList();
+      }
+      // Always reload dashboard recent orders
+      supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5).then(({ data }) => {
+        if (data) renderRecentOrders(data);
+      });
+    })
+    .subscribe();
 }
 
 function initChatBadgeListener() {
@@ -2161,7 +2983,7 @@ window.openAdminChat = async function(sessionId) {
       const isAdmin = m.sender === 'admin';
       const content = _chatMsgContent(m.text);
       el.innerHTML += `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
-        <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55;white-space:pre-line">${content}</div>
+        <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${content}</div>
       </div>`;
       el.scrollTop = el.scrollHeight;
     })
@@ -2189,7 +3011,7 @@ function renderAdminChatMsgs(msgs) {
     const isAdmin = m.sender === 'admin';
     const content = _chatMsgContent(m.text);
     return `<div style="display:flex;justify-content:${isAdmin ? 'flex-end' : 'flex-start'}">
-      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55;white-space:pre-line">${content}</div>
+      <div style="max-width:75%;padding:8px 12px;border-radius:${isAdmin ? '12px 4px 12px 12px' : '4px 12px 12px 12px'};background:${isAdmin ? '#E8541A' : '#141210'};color:white;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.07);line-height:1.55">${content}</div>
     </div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
@@ -2351,14 +3173,14 @@ function initInvGen() {
   if (nameEl)  nameEl.value  = '';
   if (idEl)    idEl.value    = '';
   if (phoneEl) phoneEl.value = '';
-  invGenRows = [{ name:'', qty:1, unit:'ც', days:'', price:0 }];
+  invGenRows = [{ name:'', qty:1, unit:'ც', price:0 }];
   renderInvRows();
 }
 
 function renderInvRows() {
   const el = document.getElementById('invGenRows');
   el.innerHTML = invGenRows.map((r, i) => `
-    <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 60px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
+    <div style="display:grid;grid-template-columns:86px 1fr 70px 70px 90px 80px 32px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg)">
       <input id="inv-code-${i}" value="${r._code||''}" oninput="invRowCode(${i},this.value)"
         placeholder="კოდი..."
         style="width:100%;border:1px solid ${r._codeMatched?'#86efac':'var(--border)'};border-radius:6px;padding:6px 8px;font-size:12px;font-family:monospace;outline:none;color:var(--dark);background:${r._codeMatched?'#f0fdf4':'white'}">
@@ -2370,13 +3192,10 @@ function renderInvRows() {
       <input value="${r.unit}" oninput="invRowSet(${i},'unit',this.value)"
         placeholder="ც"
         style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:center;color:var(--dark)">
-      <input type="number" value="${r.days||''}" min="0" step="1" oninput="invRowSet(${i},'days',this.value)"
-        placeholder="დღე"
-        style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:center;color:var(--dark)">
       <input type="number" value="${r.price}" min="0" step="0.01" oninput="invRowSet(${i},'price',this.value)"
         placeholder="0.00"
         style="width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;text-align:right;color:var(--dark)">
-      <div style="text-align:right;font-weight:600;font-size:13px;color:var(--dark)">${(parseFloat(r.qty)||0) * (parseFloat(r.price)||0) * (parseFloat(r.days)||1) > 0 ? ((parseFloat(r.qty)||0)*(parseFloat(r.price)||0)*(parseFloat(r.days)||1)).toFixed(2)+' ₾' : '–'}</div>
+      <div style="text-align:right;font-weight:600;font-size:13px;color:var(--dark)">${(parseFloat(r.qty)||0) * (parseFloat(r.price)||0) > 0 ? ((parseFloat(r.qty)||0)*(parseFloat(r.price)||0)).toFixed(2)+' ₾' : '–'}</div>
       <button onclick="removeInvRow(${i})" style="background:none;border:none;color:var(--gray-mid);cursor:pointer;font-size:16px;padding:2px;line-height:1" title="წაშლა">✕</button>
     </div>`).join('');
   calcInvTotals();
@@ -2389,8 +3208,8 @@ window.invRowSet = function(i, field, val) {
   // update only the total cell for this row without full re-render (avoid losing focus)
   const rows = document.getElementById('invGenRows').children;
   if (rows[i]) {
-    const totalCell = rows[i].children[6];
-    const line = (parseFloat(invGenRows[i].qty)||0) * (parseFloat(invGenRows[i].price)||0) * (parseFloat(invGenRows[i].days)||1);
+    const totalCell = rows[i].children[5];
+    const line = (parseFloat(invGenRows[i].qty)||0) * (parseFloat(invGenRows[i].price)||0);
     totalCell.textContent = line > 0 ? line.toFixed(2) + ' ₾' : '–';
   }
 };
@@ -2415,13 +3234,26 @@ window.invRowCode = function(i, code) {
   }
   // Build full name with specs
   const s = match.specs || {};
+  const type = match.product_type;
   const parts = [];
   if (s.brand) parts.push(s.brand);
   if (match.name) parts.push(match.name);
-  if (s.brand_model) parts.push(s.brand_model);
+  if (type === 'tire') {
+    if (s.width && s.rim) parts.push(s.profile ? s.width + '/' + s.profile + ' ' + s.rim : s.width + s.rim);
+    if (s.alt_size) parts.push(s.alt_size);
+    if (s.season) parts.push(s.season);
+  } else if (type === 'oil') {
+    if (s.viscosity) parts.push(s.viscosity);
+    if (s.oil_type) parts.push(s.oil_type);
+    if (s.volume) parts.push(s.volume);
+  } else if (type === 'filter') {
+    if (s.filter_type) parts.push(s.filter_type);
+    if (s.oem) parts.push(s.oem);
+  }
   const fullName = parts.filter(Boolean).join(' ');
   invGenRows[i].name = fullName;
   invGenRows[i]._codeMatched = true;
+  if (match.unit) invGenRows[i].unit = match.unit;
   // Update DOM directly without re-rendering whole list
   const nameEl = document.getElementById('inv-name-' + i);
   if (nameEl) nameEl.value = fullName;
@@ -2432,14 +3264,14 @@ window.invRowCode = function(i, code) {
 };
 
 function calcInvTotals() {
-  const total = invGenRows.reduce((s,r) => s + (parseFloat(r.qty)||0)*(parseFloat(r.price)||0)*(parseFloat(r.days)||1), 0);
+  const total = invGenRows.reduce((s,r) => s + (parseFloat(r.qty)||0)*(parseFloat(r.price)||0), 0);
   const vat = total * 18 / 118;
   document.getElementById('invGenVat').textContent = vat.toFixed(2) + ' ₾';
   document.getElementById('invGenTotal').textContent = total.toFixed(2) + ' ₾';
 }
 
 window.addInvRow = function() {
-  invGenRows.push({ name:'', qty:1, unit:'ც', days:'', price:0 });
+  invGenRows.push({ name:'', qty:1, unit:'ც', price:0 });
   renderInvRows();
   // focus the name input of the new row
   const rows = document.getElementById('invGenRows').children;
@@ -2447,12 +3279,36 @@ window.addInvRow = function() {
 };
 
 window.removeInvRow = function(i) {
-  if (invGenRows.length === 1) { invGenRows[0] = { name:'', qty:1, unit:'ც', days:'', price:0 }; }
+  if (invGenRows.length === 1) { invGenRows[0] = { name:'', qty:1, unit:'ც', price:0 }; }
   else invGenRows.splice(i, 1);
   renderInvRows();
 };
 
 window.resetInvGen = function() { initInvGen(); };
+
+// ─── Submit Invoice as Order ───
+window.submitInvGenOrder = async function() {
+  const buyerName  = (document.getElementById('invGenBuyerName')?.value  || '').trim();
+  const buyerId    = (document.getElementById('invGenBuyerId')?.value    || '').trim();
+  const buyerPhone = (document.getElementById('invGenBuyerPhone')?.value || '').trim();
+  const validRows = invGenRows.filter(r => r.name.trim());
+  if (!buyerName) { showToast('შეავსე მყიდველის სახელი', 'error'); return; }
+  if (!validRows.length) { showToast('დაამატე მინიმუმ ერთი პროდუქტი', 'error'); return; }
+  const total = validRows.reduce((s, r) => s + (parseFloat(r.qty) || 0) * (parseFloat(r.price) || 0), 0);
+  const { error } = await supabase.from('orders').insert({
+    invoice_no: invGenNo,
+    buyer_name: buyerName,
+    buyer_id: buyerId,
+    buyer_phone: buyerPhone,
+    items: validRows,
+    total,
+    status: 'pending',
+  });
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  showToast('✓ შეკვეთა გაფორმდა!', 'success');
+  loadOrdersList();
+  initInvGen();
+};
 
 window.doAdminInvoicePDF = function() {
   const dateStr   = document.getElementById('invGenDate').textContent;
@@ -2476,6 +3332,1177 @@ window.showPage = function(name) {
 
 <script src="js/admin-invoice.js"></script>
 
+<script>
+// ─── Excel Comparison Tool ───
+let _excelAllRows = []; // { code, status }
+let _excelCurrentFilter = 'missing';
+
+async function handleExcelFile(file) {
+  if (!file) return;
+  _excelAllRows = [];
+
+  // Show loading, hide everything else
+  document.getElementById('excelLoading').style.display = 'block';
+  document.getElementById('excelSummary').style.display = 'none';
+  document.getElementById('excelTabs').style.display = 'none';
+  document.getElementById('excelResults').style.display = 'none';
+
+  try {
+    // 1. Parse Excel in browser (never leaves device)
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+
+    // Resolve column indices from UI inputs (default B for code, G for name)
+    const _excelColLetter = (document.getElementById('excelColCode')?.value || 'B').trim().toUpperCase();
+    const _excelNameLetter = (document.getElementById('excelColName')?.value || 'G').trim().toUpperCase();
+    const _excelColToIdx = s => { let n = 0; for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64); return n - 1; };
+    const _excelColIdx = _excelColToIdx(_excelColLetter);
+    const _excelNameIdx = _excelColToIdx(_excelNameLetter);
+    const colLabel = document.getElementById('excelColCodeLabel');
+    if (colLabel) colLabel.textContent = _excelColLetter;
+    const nameLabel = document.getElementById('excelColNameLabel');
+    if (nameLabel) nameLabel.textContent = _excelNameLetter;
+
+    // Extract code + name columns, one entry per Excel row.
+    // Cells with multiple codes ("A; B; C") are kept intact here;
+    // segment iteration happens during matching so each row is counted once.
+    const excelRows = rows
+      .slice(1)
+      .map((r, i) => {
+        const rawCode = String(r[_excelColIdx] ?? '').trim();
+        const name    = String(r[_excelNameIdx] ?? '').trim();
+        return { rowNum: i + 2, code: rawCode, name };
+      })
+      .filter(r => r.code);
+
+    if (excelRows.length === 0) {
+      alert(`${_excelColLetter} სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.`);
+      document.getElementById('excelLoading').style.display = 'none';
+      return;
+    }
+
+    // 2. Fetch product codes+names from Supabase filtered by selected category
+    const _excelCat = document.getElementById('excelCategory')?.value || 'tire';
+    let siteProducts = [];
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, code, name')
+        .eq('product_type', _excelCat)
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      siteProducts = siteProducts.concat(data);
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+
+    // Strip duplicate suffix like (2),(3),... → base code
+    const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
+    const normName = s => String(s || '').trim().toLowerCase();
+    const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
+    // Normalize code for comparison: keep only alphanumeric chars, uppercase
+    const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    // Build site lookup: code|name → true (primary), code → count (fallback)
+    // Also split site product codes by ";" so "RA49703; RA749702" indexes each sub-code
+    const siteCodeNameSet = new Set();
+    const siteBaseCount = {};
+    siteProducts.forEach(p => {
+      const name = normName(p.name);
+      splitCodes(p.code).forEach(code => {
+        const base = normCode(stripSuffix(code));
+        siteCodeNameSet.add(`${base}|${name}`);
+        siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
+      });
+    });
+
+    // Build excelBaseCount — strict, no stripSuffix.
+    // A DB product is only "in Excel" if its exact normalized code appears in a cell segment.
+    // This ensures duplicate DB entries like "RA49703(2)" are NOT hidden by their base code.
+    const excelBaseCount = {};
+    excelRows.forEach(r => {
+      splitCodes(r.code).forEach(seg => {
+        const nc = normCode(seg); // strict — no stripSuffix
+        excelBaseCount[nc] = (excelBaseCount[nc] || 0) + 1;
+      });
+    });
+
+    // 3. Compare — one result per Excel row.
+    // Try every segment of the code cell; mark 'uploaded' on the first segment
+    // that matches the site (by code+name, or code-only when name is absent).
+    _excelAllRows = excelRows.map(r => {
+      const nameNorm = normName(r.name);
+      let matched = false;
+      for (const seg of splitCodes(r.code)) {
+        const nc  = normCode(stripSuffix(seg));
+        const key = `${nc}|${nameNorm}`;
+        const hitByBoth = siteCodeNameSet.has(key);
+        const hitByCode = (siteBaseCount[nc] || 0) > 0;
+        if (r.name ? hitByBoth : hitByCode) { matched = true; break; }
+      }
+      return { ...r, status: matched ? 'uploaded' : 'missing' };
+    });
+
+    // Add site-only rows — strict match (no stripSuffix on DB side either).
+    // A product is "extra" only if none of its exact normalized code segments
+    // appear in the Excel. This surfaces duplicates like "RA49703(2)" when
+    // the Excel only contains "RA49703".
+    const seenSiteOnly = new Set();
+    siteProducts.forEach(p => {
+      const rawCode = String(p.code).trim();
+      if (seenSiteOnly.has(rawCode)) return;
+      const subCodes = splitCodes(rawCode);
+      const anyInExcel = subCodes.some(code => (excelBaseCount[normCode(code)] || 0) > 0); // strict
+      if (!anyInExcel) {
+        seenSiteOnly.add(rawCode);
+        _excelAllRows.push({ rowNum: '—', code: rawCode, name: p.name || '', id: p.id, status: 'site_only' });
+      }
+    });
+
+    const uploadedCount  = _excelAllRows.filter(r => r.status === 'uploaded').length;
+    const missingCount   = _excelAllRows.filter(r => r.status === 'missing').length;
+    const siteOnlyCount  = _excelAllRows.filter(r => r.status === 'site_only').length;
+    // Total = original Excel rows only (excludes site_only rows appended above)
+    const excelRowTotal  = excelRows.length;
+
+    // 4. Show summary
+    document.getElementById('excelCountUploaded').textContent  = uploadedCount;
+    document.getElementById('excelCountMissing').textContent   = missingCount;
+    document.getElementById('excelCountSiteOnly').textContent  = siteOnlyCount;
+    document.getElementById('excelCountTotal').textContent     = excelRowTotal;
+    document.getElementById('excelSummary').style.display = 'flex';
+    document.getElementById('excelTabs').style.display = 'block';
+    document.getElementById('excelResults').style.display = 'block';
+
+    // Default: show missing
+    _excelCurrentFilter = 'missing';
+    renderExcelTable();
+
+  } catch (err) {
+    alert('შეცდომა: ' + err.message);
+  } finally {
+    document.getElementById('excelLoading').style.display = 'none';
+    // Reset file input so same file can be re-uploaded
+    document.getElementById('excelFileInput').value = '';
+  }
+}
+
+function filterExcelTable(filter) {
+  _excelCurrentFilter = filter;
+  const tabs = { missing: 'excelTabMissing', site_only: 'excelTabSiteOnly', all: 'excelTabAll' };
+  Object.entries(tabs).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    const active = key === filter;
+    el.style.borderBottomColor = active ? 'var(--orange)' : 'transparent';
+    el.style.color = active ? 'var(--orange)' : 'var(--gray-mid)';
+  });
+  renderExcelTable();
+}
+
+function renderExcelTable() {
+  let rows;
+  if (_excelCurrentFilter === 'missing') rows = _excelAllRows.filter(r => r.status === 'missing');
+  else if (_excelCurrentFilter === 'site_only') rows = _excelAllRows.filter(r => r.status === 'site_only');
+  else rows = _excelAllRows;
+
+  const tbody = document.getElementById('excelTableBody');
+  if (rows.length === 0) {
+    const msg = _excelCurrentFilter === 'missing' ? '🎉 ყველა Excel-ის კოდი ატვირთულია!'
+              : _excelCurrentFilter === 'site_only' ? '🎉 საიტის ყველა პროდუქტი ექსელშიც არის!'
+              : 'შედეგი ცარიელია';
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">${msg}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const badge = r.status === 'uploaded'
+      ? `<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">✅ ატვირთულია</span>`
+      : r.status === 'missing'
+      ? `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ არ არის საიტზე</span>`
+      : `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">🔵 ექსელში არ არის</span>`;
+    const deleteBtn = r.status === 'site_only' && r.id
+      ? `<button onclick="deleteSiteOnlyProduct(${r.id}, this)"
+           style="margin-left:8px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer">
+           🗑 წაშლა
+         </button>`
+      : '';
+    const idLabel = r.status === 'site_only' && r.id
+      ? `<span style="font-size:11px;color:var(--gray-mid);margin-left:6px">id:${r.id}</span>`
+      : '';
+    const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
+    return `<tr style="${bg}" id="site-only-row-${r.id || ''}">
+      <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
+      <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}${idLabel}</td>
+      <td style="padding:9px 14px;font-size:13px;color:var(--dark)">${r.name || '—'}</td>
+      <td style="padding:9px 14px">${badge}${deleteBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportExcelResults() {
+  if (!_excelAllRows.length) return;
+  const exportData = _excelAllRows.map(r => ({
+    'კოდი': r.code,
+    'სახელი': r.name || '',
+    'სტატუსი': r.status === 'uploaded' ? 'ატვირთულია' : r.status === 'missing' ? 'არ არის საიტზე' : 'საიტზეა, ექსელში არ არის'
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'შედარება');
+  XLSX.writeFile(wb, 'product_check.xlsx');
+}
+
+async function deleteSiteOnlyProduct(id, btn) {
+  if (!confirm('ამ პროდუქტის წაშლა მონაცემთა ბაზიდან?')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) {
+    alert('შეცდომა: ' + error.message);
+    btn.disabled = false;
+    btn.textContent = '🗑 წაშლა';
+    return;
+  }
+  // Remove row from data and DOM
+  _excelAllRows = _excelAllRows.filter(r => r.id !== id);
+  const row = document.getElementById('site-only-row-' + id);
+  if (row) row.remove();
+  // Update counter
+  const siteOnlyCount = _excelAllRows.filter(r => r.status === 'site_only').length;
+  document.getElementById('excelCountSiteOnly').textContent = siteOnlyCount;
+}
+
+// ─── Price Update Tool ───
+let _priceAllRows = [];
+let _priceCurrentFilter = 'changed';
+
+async function handlePriceFile(file) {
+  if (!file) return;
+  _priceAllRows = [];
+
+  document.getElementById('priceLoading').style.display = 'block';
+  document.getElementById('priceSummary').style.display = 'none';
+  document.getElementById('priceTabs').style.display = 'none';
+  document.getElementById('priceResults').style.display = 'none';
+
+  try {
+    // 1. Parse Excel — column letters from UI inputs
+    const colLetterToIndex = s => {
+      s = s.trim().toUpperCase();
+      let n = 0;
+      for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+      return n - 1;
+    };
+    const colCode     = colLetterToIndex((document.getElementById('colCode')?.value     || 'B'));
+    const colName     = colLetterToIndex((document.getElementById('colName')?.value     || 'G'));
+    const colPrice    = colLetterToIndex((document.getElementById('colPrice')?.value    || 'AJ'));
+    const colDiscount = colLetterToIndex((document.getElementById('colDiscount')?.value || 'AI'));
+
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+
+    const excelRows = rows.slice(1)
+      .map((r, i) => {
+        const rawCode   = String(r[colCode] ?? '').trim();
+        const excelName = String(r[colName] ?? '').trim();
+        const newPrice    = parseFloat(String(r[colPrice]    ?? '').replace(/,/g, '.')) || 0;
+        const newDiscount = parseFloat(String(r[colDiscount] ?? '').replace(/,/g, '.')) || 0;
+        return { rowNum: i + 2, code: rawCode, excelName, newPrice, newDiscount };
+      })
+      .filter(r => r.code); // drop rows with no code in Column B
+
+    if (excelRows.length === 0) {
+      alert('B სვეტში კოდები ვერ მოიძებნა. შეამოწმე ფაილი.');
+      document.getElementById('priceLoading').style.display = 'none';
+      return;
+    }
+
+    // 2. Fetch products from Supabase filtered by selected category
+    const _priceCat = document.getElementById('priceCategory')?.value || 'tire';
+    let products = [];
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, code, name, price, old_price, specs')
+        .eq('product_type', _priceCat)
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      products = products.concat(data);
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+    const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
+    const normName = s => String(s || '').trim().toLowerCase();
+    const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    // Build lookup map: normCode → [products with that base code]
+    // Split DB product code by ";" so "RA131201; RA131201-(PI1120)" indexes each segment.
+    // Empty or whitespace-only segments are discarded by .filter(c => c).
+    const splitCodes = raw => String(raw || '').split(';').map(c => c.trim()).filter(c => c);
+    const productsByCode = {};
+    products.forEach(p => {
+      splitCodes(p.code).forEach(seg => {
+        const base = normCode(stripSuffix(seg));
+        if (!productsByCode[base]) productsByCode[base] = [];
+        // Warn on collision: same normalized segment maps to a different product
+        const others = productsByCode[base].filter(x => x.id !== p.id);
+        if (others.length > 0) {
+          console.warn(
+            `[Price Update] Code collision — segment "${seg}" (key: "${base}") already mapped to:`,
+            others.map(x => `"${x.name}" (id:${x.id})`).join(', '),
+            `| also matched by: "${p.name}" (id:${p.id})`,
+            '— Column G name will be used to disambiguate.'
+          );
+        }
+        productsByCode[base].push(p);
+      });
+    });
+
+    // Build base-code → count map to detect duplicates (used for hasDuplicate flag)
+    const baseCodeCount = {};
+    products.forEach(p => {
+      splitCodes(p.code).forEach(seg => {
+        const base = normCode(stripSuffix(seg));
+        baseCodeCount[base] = (baseCodeCount[base] || 0) + 1;
+      });
+    });
+
+    // 3. Compare prices — 3 passes across all code segments in the cell.
+    // Each Excel row keeps its original cell value; segments are tried in order.
+    // Pass 1: exact Column-G name match across all segments.
+    // Pass 2: partial name match across all segments (only if pass 1 found nothing).
+    // Pass 3: code-only fallback across all segments (only if passes 1-2 found nothing).
+    // Each DB product is claimed at most once (seenProductIds).
+    const seenProductIds = new Set();
+    _priceAllRows = excelRows.map(row => {
+      const segments     = splitCodes(row.code); // split "A; B; C" → ["A","B","C"]
+      const excelNameNorm = normName(row.excelName);
+      let product = null;
+      let matchedByName = false;
+
+      // Pass 1 — exact name match
+      if (row.excelName) {
+        for (const seg of segments) {
+          const base = normCode(stripSuffix(seg));
+          const hit  = (productsByCode[base] || []).find(
+            p => !seenProductIds.has(p.id) && normName(p.name) === excelNameNorm
+          );
+          if (hit) { product = hit; matchedByName = true; break; }
+        }
+      }
+
+      // Pass 2 — partial name match (one name contains the other)
+      if (!product && row.excelName) {
+        for (const seg of segments) {
+          const base = normCode(stripSuffix(seg));
+          const hit  = (productsByCode[base] || []).find(p => {
+            const pn = normName(p.name);
+            return !seenProductIds.has(p.id) && (pn.includes(excelNameNorm) || excelNameNorm.includes(pn));
+          });
+          if (hit) { product = hit; matchedByName = true; break; }
+        }
+      }
+
+      // Pass 3 — code-only fallback: first unseen product across all segments
+      if (!product) {
+        for (const seg of segments) {
+          const base = normCode(stripSuffix(seg));
+          const hit  = (productsByCode[base] || []).find(p => !seenProductIds.has(p.id));
+          if (hit) { product = hit; break; }
+        }
+      }
+
+      // hasDuplicate: true if any segment has >1 DB product and name didn't disambiguate
+      const hasDuplicate = !matchedByName &&
+        segments.some(seg => (baseCodeCount[normCode(stripSuffix(seg))] || 0) > 1);
+
+      if (!product) return { ...row, status: 'not_found', product: null };
+      if (row.newPrice === 0) return { ...row, status: 'no_price', product, hasDuplicate };
+
+      seenProductIds.add(product.id);
+      const currentRegular  = product.old_price ? parseFloat(product.old_price) : parseFloat(product.price || 0);
+      const currentDiscount = parseFloat(product.specs?.discount_price || 0);
+      const changed = Math.abs(currentRegular - row.newPrice) > 0.001 ||
+                      Math.abs(currentDiscount - row.newDiscount) > 0.001;
+      return { ...row, status: changed ? 'changed' : 'same', product, currentRegular, currentDiscount, hasDuplicate };
+    });
+
+    const changedCount  = _priceAllRows.filter(r => r.status === 'changed').length;
+    const sameCount     = _priceAllRows.filter(r => r.status === 'same').length;
+    const noPriceCount   = _priceAllRows.filter(r => r.status === 'no_price').length;
+    const notFoundCount  = _priceAllRows.filter(r => r.status === 'not_found').length;
+    const duplicateCount = _priceAllRows.filter(r => r.status === 'duplicate').length;
+
+    document.getElementById('priceCountChanged').textContent  = changedCount;
+    document.getElementById('priceCountSame').textContent     = sameCount;
+    document.getElementById('priceCountNoPrice').textContent  = noPriceCount;
+    document.getElementById('priceCountNotFound').textContent = notFoundCount;
+    document.getElementById('priceApplyBtn').style.display    = changedCount > 0 ? 'flex' : 'none';
+
+    const dupWarn = document.getElementById('priceDupWarning');
+    if (dupWarn) { dupWarn.style.display = duplicateCount > 0 ? 'block' : 'none'; dupWarn.textContent = `⚠️ ${duplicateCount} Excel row maps to an already-seen product (skipped) — check for duplicate rows in your Excel file.`; }
+    document.getElementById('priceSummary').style.display = 'flex';
+    document.getElementById('priceTabs').style.display = 'block';
+    document.getElementById('priceResults').style.display = 'block';
+
+    _priceCurrentFilter = 'changed';
+    renderPriceTable();
+
+  } catch (err) {
+    alert('შეცდომა: ' + err.message);
+  } finally {
+    document.getElementById('priceLoading').style.display = 'none';
+    document.getElementById('priceFileInput').value = '';
+  }
+}
+
+function filterPriceTable(filter) {
+  _priceCurrentFilter = filter;
+  const tabs = { changed: 'priceTabChanged', no_price: 'priceTabNoPrice', not_found: 'priceTabNotFound', all: 'priceTabAll' };
+  Object.entries(tabs).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    const active = key === filter;
+    el.style.borderBottomColor = active ? 'var(--orange)' : 'transparent';
+    el.style.color = active ? 'var(--orange)' : 'var(--gray-mid)';
+  });
+  renderPriceTable();
+}
+
+function renderPriceTable() {
+  const rows = _priceCurrentFilter === 'all'
+    ? _priceAllRows
+    : _priceAllRows.filter(r => r.status === _priceCurrentFilter);
+
+  const tbody = document.getElementById('priceTableBody');
+  if (rows.length === 0) {
+    const msgs = {
+      changed: '🎉 ყველა ფასი განახლებულია!',
+      no_price: '✅ ყველა პროდუქტს ფასი აქვს!',
+      not_found: '✅ ყველა პროდუქტი საიტზეა!',
+      all: 'შედეგი ცარიელია'
+    };
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-mid);font-size:13px">${msgs[_priceCurrentFilter] || 'შედეგი ცარიელია'}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
+    const name = r.product?.name || '—';
+
+    let currentDisplay = '—';
+    if (r.product) {
+      const reg  = r.currentRegular  ?? (r.product.old_price ? parseFloat(r.product.old_price) : parseFloat(r.product.price || 0));
+      const disc = r.currentDiscount ?? (r.product.old_price ? parseFloat(r.product.price || 0) : 0);
+      currentDisplay = disc > 0
+        ? `<span style="text-decoration:line-through;color:var(--gray-mid);font-size:11px">${reg.toFixed(2)} ₾</span><br><strong>${disc.toFixed(2)} ₾</strong>`
+        : `${reg.toFixed(2)} ₾`;
+    }
+
+    const newPriceDisplay = r.newPrice    > 0 ? `${r.newPrice.toFixed(2)} ₾`    : '<span style="color:var(--gray-mid)">—</span>';
+    const newDiscDisplay  = r.newDiscount > 0 ? `${r.newDiscount.toFixed(2)} ₾` : '<span style="color:var(--gray-mid)">—</span>';
+
+    const badges = {
+      changed:   `<span style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">🔄 შეიცვლება</span>`,
+      same:      `<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">✅ იგივეა</span>`,
+      no_price:  `<span style="background:#fefce8;color:#854d0e;border:1px solid #fef08a;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">⚠️ ფასი არ არის</span>`,
+      not_found: `<span style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">❌ საიტზე არ არის</span>`,
+      duplicate: `<span style="background:#faf5ff;color:#6b21a8;border:1px solid #e9d5ff;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">⚠️ Excel-ში დუბლი</span>`,
+    };
+
+    return `<tr style="${bg}">
+      <td style="padding:9px 14px;font-size:12px;color:var(--gray-mid)">${r.rowNum}</td>
+      <td style="padding:9px 14px;font-size:13px;font-weight:600;font-family:monospace;color:var(--dark)">${r.code}</td>
+      <td style="padding:9px 14px;font-size:13px;color:var(--dark)">${name}</td>
+      <td style="padding:9px 14px;font-size:13px;text-align:right">${currentDisplay}</td>
+      <td style="padding:9px 14px;font-size:13px;text-align:right;font-weight:600">${newPriceDisplay}</td>
+      <td style="padding:9px 14px;font-size:13px;text-align:right">${newDiscDisplay}</td>
+      <td style="padding:9px 14px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">${badges[r.status]}${r.hasDuplicate ? `<span style="background:#faf5ff;color:#6b21a8;border:1px solid #e9d5ff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600">⚠️ მექანიკურად გასასწორებელი</span>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function applyPriceUpdates() {
+  const toUpdate = _priceAllRows.filter(r => r.status === 'changed');
+  if (toUpdate.length === 0) return;
+  if (!confirm(`${toUpdate.length} პროდუქტის ფასი განახლდება. გააგრძელოთ?`)) return;
+
+  const btn = document.getElementById('priceApplyBtn');
+  btn.disabled = true;
+  btn.textContent = 'მიმდინარეობს...';
+
+  let successCount = 0, errorCount = 0;
+
+  for (const row of toUpdate) {
+    const salesIsOn = !!row.product.old_price; // preserve current Sales ON/OFF state
+    const newSpecs = { ...(row.product.specs || {}) };
+    let newFinalPrice, newOldPrice;
+
+    if (row.newDiscount > 0) {
+      newSpecs.discount_price = row.newDiscount;
+      if (salesIsOn) {
+        // Sales already ON — keep it ON with updated prices
+        newFinalPrice = row.newDiscount;
+        newOldPrice   = row.newPrice;
+      } else {
+        // Sales OFF — store discount in specs only, don't activate
+        newFinalPrice = row.newPrice;
+        newOldPrice   = null;
+      }
+    } else {
+      delete newSpecs.discount_price;
+      newFinalPrice = row.newPrice;
+      newOldPrice   = null;
+    }
+
+    const { error } = await supabase.from('products').update({
+      price: newFinalPrice,
+      old_price: newOldPrice,
+      specs: newSpecs
+    }).eq('id', row.product.id);
+
+    if (error) errorCount++;
+    else {
+      successCount++;
+      // Find the exact row by product ID (not just code) to handle duplicates correctly
+      const r = _priceAllRows.find(x => x.product?.id === row.product.id && x.status === 'changed');
+      if (r) {
+        r.status = 'same';
+        r.currentRegular  = row.newPrice;
+        r.currentDiscount = row.newDiscount;
+        r.product.price     = newFinalPrice;
+        r.product.old_price = newOldPrice;
+      }
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ფასების განახლება`;
+
+  if (errorCount === 0) showToast(`✅ ${successCount} პროდუქტის ფასი განახლდა!`, 'success');
+  else showToast(`განახლდა ${successCount}, შეცდომა ${errorCount}`, 'error');
+
+  document.getElementById('priceCountChanged').textContent = '0';
+  document.getElementById('priceApplyBtn').style.display = 'none';
+  renderPriceTable();
+}
+
+window.resetAllPrices = async function() {
+  if (!confirm('ნამდვილად გსურს ყველა პროდუქტის ფასი და ფასდაკლება განულდეს?')) return;
+  const { data: products, error: fetchErr } = await supabase.from('products').select('id');
+  if (fetchErr) { showToast('შეცდომა: ' + fetchErr.message, 'error'); return; }
+  showToast('მიმდინარეობს განულება...', 'success');
+  const { error } = await supabase.from('products').update({ price: null, old_price: null }).in('id', products.map(p => p.id));
+  if (error) showToast('შეცდომა: ' + error.message, 'error');
+  else { showToast('ყველა ფასი განულდა ✓', 'success'); _priceRows = []; renderPriceTable(); }
+};
+
+// ─── Bulk Image ───
+let _bulkImageMatches = [];
+let _bulkImageFile = null;
+
+window.bulkImageReset = function() {
+  _bulkImageMatches = [];
+  _bulkImageFile = null;
+  document.getElementById('bulkImageMatchInfo').textContent = '';
+  document.getElementById('bulkImageUploadArea').style.display = 'none';
+  document.getElementById('bulkImageResults').style.display = 'none';
+  document.getElementById('bulkImageApplyBtn').disabled = true;
+  const prev = document.getElementById('bulkImagePreview');
+  prev.innerHTML = ''; prev.textContent = '📷';
+};
+
+window.bulkImageSearch = async function() {
+  const name = document.getElementById('bulkImageName').value.trim();
+  if (!name) return;
+  bulkImageReset();
+  document.getElementById('bulkImageMatchInfo').textContent = 'მიმდინარეობს ძებნა...';
+
+  let all = [], from = 0;
+  while (true) {
+    const { data, error } = await supabase.from('products').select('id,code,name,image_url,specs')
+      .ilike('name', name).range(from, from + 999);
+    if (error || !data.length) break;
+    all = all.concat(data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+
+  _bulkImageMatches = all;
+  const info = document.getElementById('bulkImageMatchInfo');
+  if (!all.length) { info.textContent = 'პროდუქტი ვერ მოიძებნა.'; return; }
+  info.innerHTML = `<span style="color:var(--orange);font-weight:700">${all.length}</span> პროდუქტი მოიძებნა`;
+
+  // show list
+  const list = document.getElementById('bulkImageList');
+  list.innerHTML = all.map((p, i) => {
+    const bg = i % 2 === 0 ? '' : 'background:var(--gray-light)';
+    const img = p.image_url ? `<img src="${p.image_url}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">` : `<div style="width:36px;height:36px;border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>`;
+    const size = [p.specs?.width, p.specs?.profile ? p.specs.profile : null, p.specs?.rim].filter(Boolean).join('/');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;${bg}">
+      ${img}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:11px;color:var(--gray-mid)">${p.code}${size ? ' · ' + size : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('bulkImageResults').style.display = 'block';
+  document.getElementById('bulkImageUploadArea').style.display = 'block';
+};
+
+window.bulkImagePickFile = function(file) {
+  if (!file) return;
+  _bulkImageFile = file;
+  const prev = document.getElementById('bulkImagePreview');
+  const url = URL.createObjectURL(file);
+  prev.innerHTML = `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid var(--orange)">`;
+  document.getElementById('bulkImageApplyBtn').disabled = false;
+};
+
+window.bulkImageApply = async function() {
+  if (!_bulkImageFile || !_bulkImageMatches.length) return;
+  const btn = document.getElementById('bulkImageApplyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Drive-ზე იტვირთება...';
+
+  try {
+    const imageUrl = await uploadProductImage(_bulkImageFile);
+
+    btn.textContent = `პროდუქტები განახლდება (0/${_bulkImageMatches.length})...`;
+    let done = 0;
+    for (const p of _bulkImageMatches) {
+      // delete old Drive file if exists
+      const oldMatch = (p.image_url || '').match(/\/d\/([^/?]+)/) || (p.image_url || '').match(/[?&]id=([^&]+)/);
+      if (oldMatch) {
+        fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/upload-to-drive', {
+          method: 'DELETE',
+          headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileId: oldMatch[1] })
+        });
+      }
+      await supabase.from('products').update({ image_url: imageUrl }).eq('id', p.id);
+      done++;
+      btn.textContent = `განახლდება (${done}/${_bulkImageMatches.length})...`;
+    }
+
+    showToast(`✅ ${done} პროდუქტს სურათი მიენიჭა`, 'success');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> სურათის მინიჭება`;
+    btn.disabled = false;
+    // refresh list thumbnails
+    bulkImageSearch();
+  } catch(e) {
+    showToast('შეცდომა: ' + e.message, 'error');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> სურათის მინიჭება`;
+    btn.disabled = false;
+  }
+};
+
+// ─── One-time migration: add cargo rim sizes to brands table so they appear in dropdowns ───
+async function _addCargoRimsToBrands() {
+  const KEY = 'cargo_rims_brands_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const cargoRims = ['R13C', 'R14C', 'R15C', 'R16C', 'R17C'];
+  const { data: existing } = await supabase.from('brands').select('name').eq('product_type', 'tire_rim').in('name', cargoRims);
+  const existSet = new Set((existing || []).map(r => r.name));
+  const toInsert = cargoRims.filter(r => !existSet.has(r)).map(r => ({ product_type: 'tire_rim', name: r }));
+  if (toInsert.length > 0) {
+    await supabase.from('brands').insert(toInsert);
+  }
+  localStorage.setItem(KEY, '1');
+  if (toInsert.length > 0) showToast(`✅ Cargo დიამეტრები დაემატა: ${toInsert.map(r=>r.name).join(', ')}`, 'success');
+}
+
+// ─── One-time migration: fix cargo rim sizes (R13C/R14C/R15C/R16C/R17C) ───
+// Runs once after login, then marks itself done in localStorage.
+async function _migrateCargoRims() {
+  const KEY = 'cargo_rim_fix_v2';
+  if (localStorage.getItem(KEY)) return; // already done
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return; // not logged in yet
+
+  const codeToRim = {"RA149301":"R15C","ROBO11":"R15C","1010200002455":"R16C","RA138901":"R16C","6941255816685":"R13C","RA19104":"R13C","RA33303":"R13C","RA33903":"R13C","LICE001":"R14C","6941255815374":"R14C","FICE003":"R14C","30015471":"R14C","30015475":"R14C","RA19204":"R14C","RA19403":"R14C","RA19703":"R14C","RA19503":"R14C","T9232-E":"R14C","T9272-E":"R14C","6941255812434":"R14C","N1208H":"R14C","6975313251767":"R15C","6941255815404":"R15C","30015152":"R15C","N8313H":"R15C","6941255816746":"R15C","6941255816739":"R15C","1010200002300":"R15C","N1213H":"R15C","6941255824413":"R15C","1010200002451":"R15C","RA7142301":"R15C","N2512H":"R15C","1010200002525":"R15C","6941255802336":"R15C","6973803702454":"R15C","N8302H":"R16C","30016451":"R16C","N8308H":"R16C","30016457":"R16C","N8312H":"R16C","N8311H":"R16C","RBICE002":"R16C","PHD118":"R16C","N1237H":"R16C","RA140101":"R16C","3ERM535F":"R16C","3ERM435F":"R16C","N1246H":"R16C","N2515H":"R16C","N2506H":"R16C","N2510H":"R16C","RA134001":"R16C","3ERM534F":"R16C","N2513H":"R16C","N1245H":"R16C","N1206H":"R16C","3ERM267F":"R16C","11134469":"R16C","6941255824536":"R16C","RA34801":"R17C","RA34901":"R17C"};
+  const codes = Object.keys(codeToRim);
+
+  // Fetch products with these codes (paginate just in case)
+  let products = [];
+  for (let i = 0; i < codes.length; i += 100) {
+    const batch = codes.slice(i, i + 100);
+    const { data, error } = await supabase.from('products').select('id, code, specs').in('code', batch);
+    if (!error && data) products = products.concat(data);
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const correctRim = codeToRim[String(p.code).trim()];
+    if (!correctRim) continue;
+    const currentRim = p.specs?.rim || '';
+    if (currentRim === correctRim) continue; // already correct
+    const newSpecs = { ...(p.specs || {}), rim: correctRim };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} პროდუქტის Cargo R ზომა გასწორდა`, 'success');
+}
+
+// ─── One-time migration: add 6 missing cargo products ───
+async function _addMissingCargoProducts() {
+  const KEY = 'cargo_add_v1';
+  if (localStorage.getItem(KEY)) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const toAdd = [
+    { code:'6941255816685', name:'RW501', size:'165R13C',   width:'165', profile:'',   rim:'R13C', season:'ზამთარი',        brand:'KAPSEN',     price:153, discount:130 },
+    { code:'RA19104',        name:'RA 350', size:'155R13C', width:'155', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:153, discount:130 },
+    { code:'RA33303',        name:'RA 350', size:'165R13C', width:'165', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:165, discount:140 },
+    { code:'RA33903',        name:'RA 350', size:'175R13C', width:'175', profile:'',   rim:'R13C', season:'ზაფხული M+S',    brand:'ROADCRUZA',  price:165, discount:140 },
+    { code:'RA34801',        name:'RA 350', size:'215/60R17C', width:'215', profile:'60', rim:'R17C', season:'ზაფხული M+S', brand:'ROADCRUZA',  price:230, discount:195 },
+    { code:'RA34901',        name:'RA 350', size:'235/60R17C', width:'235', profile:'60', rim:'R17C', season:'ზაფხული M+S', brand:'ROADCRUZA',  price:271, discount:230 },
+  ];
+
+  // Check which ones already exist
+  const { data: existing } = await supabase.from('products').select('code').in('code', toAdd.map(p => p.code));
+  const existCodes = new Set((existing || []).map(p => p.code));
+
+  let added = 0;
+  for (const p of toAdd) {
+    if (existCodes.has(p.code)) continue;
+    const specs = {
+      brand: p.brand,
+      width: p.width,
+      profile: p.profile,
+      rim: p.rim,
+      season: p.season,
+      vehicle_type: 'სატვირთო',
+      discount_price: p.discount,
+    };
+    const { error } = await supabase.from('products').insert({
+      code: p.code,
+      name: p.name,
+      product_type: 'tire',
+      category: 'საბურავები',
+      country: '🇨🇳 ჩინეთი',
+      price: p.price,
+      old_price: null,
+      unit: 'ც',
+      active: false,
+      specs,
+    });
+    if (!error) added++;
+  }
+
+  localStorage.setItem(KEY, '1');
+  if (added > 0) showToast(`✅ ${added} Cargo პროდუქტი დაემატა (inactive)`, 'success');
+}
+
+// ─── One-time fix: add missing category+country to the 6 manually seeded cargo products ───
+async function _fixCargoProductsMeta() {
+  const KEY = 'cargo_meta_fix_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const codes = ['6941255816685','RA19104','RA33303','RA33903','RA34801','RA34901'];
+  const { data } = await supabase.from('products').select('id,category,country').in('code', codes);
+  let fixed = 0;
+  for (const p of (data || [])) {
+    if (p.category && p.country) continue;
+    const { error } = await supabase.from('products').update({
+      category: 'საბურავები',
+      country: '🇨🇳 ჩინეთი',
+    }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} Cargo პროდუქტს კატეგორია/ქვეყანა დაემატა`, 'success');
+}
+
+// ─── One-time migration: set vehicle_type = 'მსუბუქი სატვირთო' for all cargo rim products ───
+async function _migrateCargoVehicleType() {
+  const KEY = 'cargo_vtype_v1';
+  if (localStorage.getItem(KEY)) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const cargoRims = ['R13C','R14C','R15C','R16C','R17C'];
+  let products = [];
+  let from = 0;
+  const PAGE = 1000;
+  while (true) {
+    const { data, error } = await supabase.from('products')
+      .select('id, specs')
+      .eq('product_type', 'tire')
+      .range(from, from + PAGE - 1);
+    if (error) break;
+    products = products.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const rim = p.specs?.rim || '';
+    if (!cargoRims.includes(rim)) continue;
+    if (p.specs?.vehicle_type === 'მსუბუქი სატვირთო') continue;
+    const newSpecs = { ...(p.specs || {}), vehicle_type: 'მსუბუქი სატვირთო' };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} პროდუქტს მიენიჭა "მსუბუქი სატვირთო"`, 'success');
+}
+
+// ─── One-time migration: set profile = "80" for R13C tires with empty profile ───
+async function _fixR13CProfile() {
+  const KEY = 'r13c_profile_fix_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  let products = [], from = 0;
+  while (true) {
+    const { data, error } = await supabase.from('products')
+      .select('id, specs').eq('product_type', 'tire').range(from, from + 999);
+    if (error || !data.length) break;
+    products = products.concat(data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const rim = (p.specs?.rim || '').trim();
+    const profile = (p.specs?.profile ?? '');
+    if (rim !== 'R13C' || profile !== '') continue;
+    const newSpecs = { ...(p.specs || {}), profile: '80' };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ R13C: ${fixed} პროდუქტს profile=80 დაემატა`, 'success');
+}
+
+// ─── One-time migration: fix season values that have " , " instead of " " ───
+async function _fixSeasonComma() {
+  const KEY = 'season_comma_fix_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  // Map wrong → correct
+  const fixes = {
+    'ზაფხული , M+S A/T': 'ზაფხული M+S A/T',
+    'ზაფხული , M+S R/T': 'ზაფხული M+S R/T',
+    'ზაფხული , M+S X/T': 'ზაფხული M+S X/T',
+  };
+
+  let total = 0;
+  for (const [wrong, correct] of Object.entries(fixes)) {
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase.from('products')
+        .select('id, specs')
+        .eq('product_type', 'tire')
+        .range(from, from + 999);
+      if (error || !data.length) break;
+      for (const p of data) {
+        if ((p.specs?.season || '') !== wrong) continue;
+        const newSpecs = { ...(p.specs || {}), season: correct };
+        const { error: e } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+        if (!e) total++;
+      }
+      if (data.length < 1000) break;
+      from += 1000;
+    }
+  }
+  localStorage.setItem(KEY, '1');
+  if (total > 0) showToast(`✅ ${total} პროდუქტის სეზონი გასწორდა`, 'success');
+}
+
+// ─── One-time migration: set vehicle_type = 'ჯიპი/პიკაპი' for tires with LT width ───
+async function _fixLTVehicleType() {
+  const KEY = 'lt_vehicle_type_v1';
+  if (localStorage.getItem(KEY)) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  let products = [], from = 0;
+  while (true) {
+    const { data, error } = await supabase.from('products')
+      .select('id, specs').eq('product_type', 'tire').range(from, from + 999);
+    if (error || !data.length) break;
+    products = products.concat(data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+
+  let fixed = 0;
+  for (const p of products) {
+    const width = (p.specs?.width || '').trim();
+    if (!width.startsWith('LT')) continue;
+    if (p.specs?.vehicle_type === 'ჯიპი/პიკაპი') continue;
+    const newSpecs = { ...(p.specs || {}), vehicle_type: 'ჯიპი/პიკაპი' };
+    const { error } = await supabase.from('products').update({ specs: newSpecs }).eq('id', p.id);
+    if (!error) fixed++;
+  }
+  localStorage.setItem(KEY, '1');
+  if (fixed > 0) showToast(`✅ ${fixed} LT პროდუქტს მიენიჭა "ჯიპი/პიკაპი"`, 'success');
+}
+
+// ─── Card Generator ───
+let _cgProduct = null;
+const _cgCache = {}; // local cache for card-gen search results
+const _CG_FLAG_CODES = {'გერმანია':'de','საფრანგეთი':'fr','იაპონია':'jp','აშშ':'us','იტალია':'it','სამხრეთ კორეა':'kr','ბრიტანეთი':'gb','ნიდერლანდი':'nl','რუსეთი':'ru','ჩინეთი':'cn','თურქეთი':'tr','ავსტრია':'at','შვედეთი':'se','ჩეხეთი':'cz','პოლონეთი':'pl','ბელგია':'be','ინდოეთი':'in','ბრაზილია':'br','უკრაინა':'ua','საქართველო':'ge'};
+
+window.cgSearch = async function() {
+  const qCode = (document.getElementById('cgCodeInput').value || '').trim();
+  const qName = (document.getElementById('cgNameInput').value || '').trim();
+  const el = document.getElementById('cgSearchResults');
+  if (!qCode && !qName) { el.style.display = 'none'; return; }
+
+  el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--gray-mid)">⏳ იტვირთება...</div>';
+  el.style.display = 'block';
+
+  try {
+    let query = window.supabase
+      .from('products')
+      .select('id, code, name, image_url, specs, price, old_price, unit, product_type, country');
+    if (qCode) query = query.ilike('code', `%${qCode}%`);
+    if (qName) query = query.ilike('name', `%${qName}%`);
+    const { data, error } = await query.limit(10);
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--gray-mid)">ვერ მოიძებნა</div>';
+    } else {
+      data.forEach(p => { _cgCache[p.id] = p; });
+      el.innerHTML = data.map(p => `
+        <div onclick="cgSelect('${p.id}')" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);font-size:13px"
+          onmouseenter="this.style.background='#fdf5f1'" onmouseleave="this.style.background=''">
+          ${p.image_url ? `<img src="${p.image_url}" style="width:34px;height:34px;object-fit:contain;border-radius:4px;flex-shrink:0">` : `<span style="font-size:22px;flex-shrink:0">📦</span>`}
+          <div><div style="font-weight:600">${p.name}</div><div style="color:var(--gray-mid);font-size:11px">${p.code||''}</div></div>
+        </div>`).join('');
+    }
+  } catch(e) {
+    el.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--accent)">შეცდომა: ' + e.message + '</div>';
+  }
+};
+
+window.cgSelect = async function(id) {
+  const p = _cgCache[id];
+  if (!p) return;
+  _cgProduct = p;
+  document.getElementById('cgCodeInput').value = p.code || '';
+  document.getElementById('cgNameInput').value = p.name || '';
+  document.getElementById('cgSearchResults').style.display = 'none';
+  document.getElementById('cgSelectedName').textContent = p.name;
+  document.getElementById('cgSelectedInfo').style.display = 'block';
+  document.getElementById('cgPreviewWrap').style.display = 'block';
+  document.getElementById('cgDownloadBtn').textContent = '⏳ გენერირება...';
+  document.getElementById('cgDownloadBtn').disabled = true;
+  await cgRender(p);
+  document.getElementById('cgDownloadBtn').textContent = '⬇ PNG გადმოწერა';
+  document.getElementById('cgDownloadBtn').disabled = false;
+};
+
+window.cgDownload = function() {
+  if (!_cgProduct) return;
+  const a = document.createElement('a');
+  a.href = document.getElementById('cgCanvas').toDataURL('image/png');
+  a.download = (_cgProduct.name || 'product').replace(/[^\w\s]/g,'') + '_card.png';
+  a.click();
+};
+
+async function cgRender(p) {
+  await document.fonts.ready;
+  const W = 760, H = 1060;
+  const canvas = document.getElementById('cgCanvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = '380px'; canvas.style.height = '530px';
+  const ctx = canvas.getContext('2d');
+  const specs = p.specs || {};
+  const cx = 28, cy = 28, cw = W-56, ch = H-56, cr = 32;
+
+  function rr(x,y,w,h,r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();
+  }
+
+  // outer bg
+  ctx.fillStyle = '#EDE8E0'; ctx.fillRect(0,0,W,H);
+
+  // card shadow + body
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,0.18)'; ctx.shadowBlur=50; ctx.shadowOffsetY=10;
+  rr(cx,cy,cw,ch,cr); ctx.fillStyle='white'; ctx.fill(); ctx.restore();
+  // card border
+  rr(cx,cy,cw,ch,cr); ctx.strokeStyle='#1A1714'; ctx.lineWidth=2; ctx.stroke();
+
+  // image area (cream, rounded top only)
+  const imgH = 400;
+  ctx.save(); ctx.beginPath();
+  ctx.moveTo(cx+cr,cy); ctx.lineTo(cx+cw-cr,cy); ctx.arcTo(cx+cw,cy,cx+cw,cy+cr,cr);
+  ctx.lineTo(cx+cw,cy+imgH); ctx.lineTo(cx,cy+imgH); ctx.lineTo(cx,cy+cr); ctx.arcTo(cx,cy,cx+cr,cy,cr);
+  ctx.closePath(); ctx.fillStyle='#F5F1EB'; ctx.fill(); ctx.restore();
+
+
+  // product image
+  const imgPad = 44;
+  if (p.image_url) {
+    try {
+      const img = await new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=p.image_url; });
+      const sc = Math.min((cw-imgPad*2)/img.width, (imgH-imgPad*2)/img.height);
+      const dw=img.width*sc, dh=img.height*sc;
+      ctx.drawImage(img, cx+(cw-dw)/2, cy+(imgH-dh)/2, dw, dh);
+    } catch(e) {
+      ctx.font='120px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('🛞', cx+cw/2, cy+imgH/2);
+    }
+  } else {
+    ctx.font='120px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillText('📦', cx+cw/2, cy+imgH/2);
+  }
+
+  // discount badge (top-right of image area)
+  if (p.old_price) {
+    const badgeText = 'ფასდაკლება';
+    ctx.font = 'bold 26px "Noto Sans Georgian",sans-serif';
+    const bw = ctx.measureText(badgeText).width + 32;
+    const bh = 44, bx = cx + cw - 20 - bw, by = cy + 20, br = 10;
+    ctx.save();
+    ctx.fillStyle = '#E8541A';
+    ctx.beginPath();
+    ctx.moveTo(bx+br,by); ctx.lineTo(bx+bw-br,by); ctx.arcTo(bx+bw,by,bx+bw,by+br,br);
+    ctx.lineTo(bx+bw,by+bh-br); ctx.arcTo(bx+bw,by+bh,bx+bw-br,by+bh,br);
+    ctx.lineTo(bx+br,by+bh); ctx.arcTo(bx,by+bh,bx,by+bh-br,br);
+    ctx.lineTo(bx,by+br); ctx.arcTo(bx,by,bx+br,by,br);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'white'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(badgeText, bx+16, by+bh/2);
+    ctx.restore();
+  }
+
+  // vehicle + season icons (bottom-right of image)
+  const vt = specs.vehicle_type || 'მსუბუქი ავტომობილი';
+  const vEmoji = vt==='ჯიპი/პიკაპი'?'🚙': vt==='სატვირთო'?'🚛': vt==='მსუბუქი სატვირთო'?'🚐':'🚗';
+  const season = specs.season || '';
+  const sEmoji = season.includes('ზამთ')?'❄️': (season.includes('ზაფხ')||season.includes('M+S'))?'☀️': (/4|ყველ/i.test(season)?'⛅':'');
+  ctx.font='54px serif'; ctx.textAlign='right'; ctx.textBaseline='bottom';
+  const ir = cx+cw-18, ib = cy+imgH-14;
+  if (sEmoji) { ctx.fillText(sEmoji, ir, ib); ctx.fillText(vEmoji, ir-62, ib); }
+  else         { ctx.fillText(vEmoji, ir, ib); }
+
+  // text area
+  const tx = cx+40; let ty = cy+imgH+34;
+  ctx.textAlign='left'; ctx.textBaseline='top';
+
+  const catMap = {tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები'};
+  ctx.font='bold 26px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
+  ctx.fillText((catMap[p.product_type]||p.category||'').toUpperCase(), tx, ty); ty+=38;
+
+  ctx.font='bold 36px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+  ctx.fillText(p.name||'', tx, ty); ty+=52;
+
+  const row = (lbl,val) => {
+    if (!val) return;
+    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(lbl+':', tx, ty);
+    ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714'; ctx.fillText(String(val), tx+210, ty);
+    ty+=40;
+  };
+
+  if (p.product_type==='tire') {
+    const w=specs.width||'', pr=specs.profile||'', rim=specs.rim||'';
+    row('ბრენდი', specs.brand);
+    row('ზომა', pr ? `${w}/${pr} ${rim}` : `${w} ${rim}`.trim());
+    row('სეზონი', season);
+    row('ავტომობ. ტიპი', vt);
+  } else if (p.product_type==='oil') {
+    row('ბრენდი', specs.brand); row('ტიპი', specs.oil_type);
+    row('სიბლანტე', specs.viscosity); row('მოცულობა', specs.volume);
+    row('დანიშნულება', specs.application);
+  } else if (p.product_type==='filter') {
+    row('ბრენდი', specs.brand); row('ფილტრის ტიპი', specs.filter_type); row('ავტ. მარკა', specs.car_make);
+  }
+  // country row with flag image
+  if (p.country) {
+    const countryName = p.country.split(' ').slice(1).join(' ');
+    const flagCode = _CG_FLAG_CODES[countryName];
+    ctx.font='22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+    ctx.fillText('ქვეყანა:', tx, ty);
+    if (flagCode) {
+      try {
+        const flagImg = await new Promise((res, rej) => {
+          const fi = new Image(); fi.crossOrigin='anonymous';
+          fi.onload = () => res(fi); fi.onerror = rej;
+          fi.src = `https://flagicons.lipis.dev/flags/4x3/${flagCode}.svg`;
+        });
+        const fh = 26, fw = Math.round(fh * 4/3);
+        ctx.drawImage(flagImg, tx+210, ty, fw, fh);
+        ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+        ctx.fillText(countryName, tx+210+fw+8, ty);
+      } catch {
+        ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+        ctx.fillText(countryName, tx+210, ty);
+      }
+    } else {
+      ctx.font='bold 22px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+      ctx.fillText(countryName, tx+210, ty);
+    }
+    ty+=40;
+  }
+
+  ty+=4;
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(cx+cw-40,ty); ctx.stroke(); ty+=26;
+
+  if (p.price) {
+    // If discount active: show old price crossed out above, then discounted price
+    if (p.old_price) {
+      ctx.font='28px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+      const oldStr = parseFloat(p.old_price).toFixed(2)+' ₾';
+      const oldWidth = ctx.measureText(oldStr).width;
+      ctx.fillText(oldStr, tx, ty);
+      // strikethrough line
+      ctx.save(); ctx.strokeStyle='#1A1714'; ctx.lineWidth=2;
+      const oldMetrics = ctx.measureText(oldStr);
+      const strikeY = ty + 14;
+      ctx.beginPath(); ctx.moveTo(tx, strikeY); ctx.lineTo(tx + oldMetrics.width, strikeY); ctx.stroke();
+      ctx.restore();
+      ty += 38;
+    }
+    ctx.font='bold 52px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#E8541A';
+    const prStr = parseFloat(p.price).toFixed(2)+' ₾';
+    const prWidth = ctx.measureText(prStr).width;
+    ctx.fillText(prStr, tx, ty);
+    if (p.unit) {
+      ctx.font='bold 24px "Noto Sans Georgian",sans-serif'; ctx.fillStyle='#1A1714';
+      ctx.fillText('/ '+(p.unit==='ც'?'ცალი':p.unit), tx+prWidth+10, ty+20);
+    }
+  }
+}
+
+
+</script>
 
 
 </body>

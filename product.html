@@ -178,39 +178,33 @@ tailwind.config = {
 <div id="productContent" class="hidden max-w-7xl mx-auto px-6 py-10">
 
   <!-- Top section -->
-  <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-x-10 mb-12">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
 
-    <!-- Left column: image + description (grouped as one flex column on desktop, independent height from the right column) -->
-    <div class="contents md:flex md:flex-col md:gap-4 md:w-1/2">
-      <!-- Image ("ხელსაწყოები") -->
-      <div class="order-1 bg-white border border-gray-800 rounded-xl relative overflow-hidden">
+    <!-- Image -->
+    <div class="flex flex-col gap-4">
+      <div class="bg-white border border-gray-800 rounded-xl relative overflow-hidden">
         <div id="productBadge" class="hidden absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10"></div>
         <div id="productImage" class="h-96 flex items-center justify-center bg-cream"></div>
       </div>
-
-      <!-- Other info ("სხვა ინფორმაცია") -->
-      <div id="productDescContainer" class="hidden order-7 border border-gray-800 rounded-xl p-4">
-        <div class="text-sm font-bold tracking-[2px] text-dark uppercase mb-2">სხვა ინფორმაცია</div>
+      <div id="productDescContainer" class="hidden border border-gray-800 rounded-xl p-4">
+        <div class="text-[10px] font-bold tracking-[2px] text-dark uppercase mb-2">სხვა ინფორმაცია</div>
         <p id="productDesc" class="text-sm text-dark leading-relaxed whitespace-pre-line"></p>
       </div>
     </div>
 
-    <!-- Right column: name, price, code, specs, meta (grouped as one flex column on desktop) -->
-    <div class="contents md:flex md:flex-col md:gap-4 md:w-1/2">
-      <!-- Category + Name -->
-      <div class="order-2">
-        <div id="productCategory" class="text-[13px] font-bold text-orange uppercase mb-2"></div>
-        <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
-      </div>
+    <!-- Info -->
+    <div class="flex flex-col">
+      <div id="productCategory" class="text-[10px] font-bold tracking-[2px] text-orange uppercase mb-2"></div>
+      <h1 id="productName" class="font-bold text-2xl text-dark mb-3 leading-snug"></h1>
 
-      <!-- Price + Booking -->
-      <div id="productPriceBlock" class="order-3"></div>
+      <!-- Price -->
+      <div id="productPriceBlock" class="mb-4"></div>
       <!-- Code -->
-      <div id="productCode" class="hidden order-4 border-t border-gray-800 pt-3"></div>
+      <div id="productCode" class="hidden border-t border-gray-800 pt-3 mb-3"></div>
       <!-- Specs -->
-      <div id="productSpecs" class="hidden order-5 border border-gray-800 rounded-xl p-4"></div>
+      <div id="productSpecs" class="hidden border border-gray-800 rounded-xl p-4 mb-4"></div>
       <!-- Meta -->
-      <div class="order-6 border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
+      <div class="border-t border-gray-800 pt-4 space-y-2" id="productMeta"></div>
     </div>
   </div>
 
@@ -295,7 +289,7 @@ tailwind.config = {
       <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
         <li style="display:flex;gap:8px;align-items:center">
           <span style="color:#E8541A;font-weight:700">•</span>
-          <a href="tel:+995568082541" style="color:#1A1714;text-decoration:none;font-weight:600;font-size:14px">(+995) 568-08-25-41</a>
+          <a href="tel:+995595194999" style="color:#1A1714;text-decoration:none;font-weight:600;font-size:14px">(+995) 595-19-49-99</a>
         </li>
         <li style="display:flex;gap:8px;align-items:center">
           <span style="color:#E8541A;font-weight:700">•</span>
@@ -370,17 +364,14 @@ const id = params.get('id');
 async function init() {
   if (!id) { showError(); return; }
   try {
-    const SB_URL = 'https://orvhvhhstwfkfsloqsuf.supabase.co';
-    const SB_KEY = 'sb_publishable_Iv8vPVoqq5-gu2IgZHNr6w_bcQweWrp';
-    const REST = `${SB_URL}/rest/v1/products`;
-    const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
-    const [productRows, allData] = await Promise.all([
-      fetch(`${REST}?select=*&id=eq.${id}`, { cache: 'no-store', headers }).then(r => r.json()),
-      fetch(`${REST}?select=*&active=eq.true&order=created_at.desc`, { cache: 'no-store', headers }).then(r => r.json())
+    const FUNC = 'https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products';
+    const APIKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo';
+    const [product_data, allData] = await Promise.all([
+      fetch(`${FUNC}?id=${id}`, { headers: { apikey: APIKEY, Authorization: `Bearer ${APIKEY}` } }).then(r => r.json()),
+      fetch(FUNC, { headers: { apikey: APIKEY, Authorization: `Bearer ${APIKEY}` } }).then(r => r.json())
     ]);
-    const product_data = Array.isArray(productRows) ? productRows[0] : null;
-    if (!product_data) { showError(); return; }
-    product = { ...product_data, imageUrl: product_data.image_url };
+    if (!product_data || product_data.error) { showError(); return; }
+    product = { ...product_data, imageUrl: product_data.image_url, oldPrice: product_data.old_price || null };
     allProducts = (Array.isArray(allData) ? allData : []).map(p => ({ ...p, imageUrl: p.image_url }));
     renderProduct();
   } catch(e) {
@@ -401,7 +392,7 @@ function renderProduct() {
   document.title = product.name + ' — UniCraft';
   document.getElementById('breadcrumbName').textContent = product.name;
   const _CAT_DISPLAY = { tire:'საბურავები', oil:'ზეთები', filter:'ფილტრები' };
-  document.getElementById('productCategory').textContent = product.category || _CAT_DISPLAY[product.product_type] || 'სხვა';
+  document.getElementById('productCategory').textContent = _CAT_DISPLAY[product.product_type] || product.category || 'სხვა';
   document.getElementById('productName').textContent = product.name;
   const descText = (product.description || '').trim();
   const descContainer = document.getElementById('productDescContainer');
@@ -414,10 +405,9 @@ function renderProduct() {
   }
 
   const b = document.getElementById('productBadge');
-  if (product.status) {
+  if (product.oldPrice) {
     b.classList.remove('hidden');
-    b.textContent = product.status !== 'available' ? 'მიუწვდომელი' : 'ხელმისაწვდომი';
-    b.style.background = product.status !== 'available' ? '#dc2626' : '#16a34a';
+    b.textContent = 'ფასდაკლება';
   } else if (product.badge) {
     b.classList.remove('hidden');
     b.textContent = product.badge;
@@ -436,7 +426,7 @@ function renderProduct() {
   const _vehicleSrc = _isTire ? (_vt === 'სატვირთო' ? './icons/truck.svg' : _vt === 'ჯიპი/პიკაპი' ? './icons/jeep.svg' : './icons/car.svg') : '';
   const _existingSeasonBadge = document.getElementById('productSeasonBadge');
   if (_existingSeasonBadge) _existingSeasonBadge.remove();
-  if (_vehicleSrc || _seasonSrc) {
+  if (_vehicleSrc || _seasonIcon) {
     const _sb = document.createElement('div');
     _sb.id = 'productSeasonBadge';
     _sb.style.cssText = 'position:absolute;bottom:12px;right:12px;display:flex;gap:4px;align-items:center';
@@ -506,11 +496,6 @@ function renderProduct() {
     if (specs.oem)         specsRows.push(['OEM ნომერი', specs.oem]);
     if (specs.car_make)    specsRows.push(['ავტომობ. მარკა', specs.car_make]);
     if (product.country)   specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
-  } else {
-    if (specs.brand_model)  specsRows.push(['მოდელი', specs.brand_model]);
-    if (specs.power_source) specsRows.push(['კვების წყარო', specs.power_source]);
-    if (specs.weight)       specsRows.push(['წონა', specs.weight + ' კგ']);
-    if (product.country)    specsRows.push(['ქვეყანა', `${flagImg(product.country, 20)} <span style="vertical-align:middle">${product.country.split(' ').slice(1).join(' ')}</span>`]);
   }
   const specsEl = document.getElementById('productSpecs');
   if (specsEl) {
@@ -528,22 +513,12 @@ function renderProduct() {
   }
 
   const priceBlock = document.getElementById('productPriceBlock');
-  if (product.daily_rate) {
+  if (product.price) {
     priceBlock.innerHTML = `
       <div class="border border-gray-800 rounded-xl p-4">
-        <div class="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div class="flex items-baseline gap-3 flex-wrap">
-              <span class="text-2xl font-bold text-orange">${parseFloat(product.daily_rate).toFixed(2)} ₾<span class="text-sm font-bold text-dark ml-1">/ დღეში</span></span>
-            </div>
-            <div class="text-xs text-dark mt-2 pt-2 border-t border-gray-200 space-y-0.5 text-left">
-              <div class="font-semibold text-left">ფასდაკლება ხანგრძლივ ჯავშანზე:</div>
-              <div class="text-left">8–14 დღე — <span class="font-semibold text-orange">10%</span> ფასდაკლება</div>
-              <div class="text-left">15–29 დღე — <span class="font-semibold text-orange">30%</span> ფასდაკლება</div>
-              <div class="text-left">30+ დღე — <span class="font-semibold text-orange">50%</span> ფასდაკლება</div>
-            </div>
-          </div>
-          <div id="productBookingBlock" class="flex-shrink-0"></div>
+        <div class="flex items-baseline gap-3 flex-wrap">
+          ${product.oldPrice ? `<span class="text-sm text-dark line-through">${parseFloat(product.oldPrice).toFixed(2)} ₾</span>` : ''}
+          <span class="text-2xl font-bold text-orange">${parseFloat(product.price).toFixed(2)} ₾${product.unit ? `<span class="text-sm font-bold text-dark ml-1">/ ცალი</span>` : ''}</span>
         </div>
       </div>`;
   } else {
@@ -553,76 +528,10 @@ function renderProduct() {
       </div>`;
   }
 
-  renderBookingBlock();
-
   document.getElementById('loadingState').classList.add('hidden');
   document.getElementById('productContent').classList.remove('hidden');
 }
 
-function calcBookingTotal(days) {
-  if (!(days > 0)) return null;
-  const base = days * (product.daily_rate || 0);
-  const discountPct = days >= 30 ? 50 : (days >= 15 ? 30 : (days > 7 ? 10 : 0));
-  const total = base * (1 - discountPct / 100);
-  return { days, total, discountPct };
-}
-
-function renderBookingBlock() {
-  const el = document.getElementById('productBookingBlock');
-  if (!el) return;
-  if (!product.daily_rate) { el.innerHTML = ''; return; }
-  if (product.status && product.status !== 'available') {
-    el.innerHTML = `<div class="text-sm text-dark max-w-[180px]">
-      🔴 ამჟამად მიუწვდომელია — დაგვიკავშირდით ხელმისაწვდომობის დასაზუსტებლად.
-    </div>`;
-    return;
-  }
-  el.innerHTML = `
-    <div class="flex items-end gap-2">
-      <div style="width:80px">
-        <div class="text-sm font-semibold text-dark mb-1">დღეები</div>
-        <input type="number" id="bookDays" min="1" step="1" value="1" oninput="updateBookingTotal()"
-          class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-dark text-center outline-none focus:border-orange">
-      </div>
-      <button onclick="bookNow()" class="bg-orange text-white font-bold text-sm rounded-lg py-1.5 px-5 hover:opacity-90 transition-opacity">დაჯავშნა</button>
-    </div>
-    <div id="bookTotalDisplay" class="text-sm text-dark mt-2 text-right"></div>`;
-  updateBookingTotal();
-}
-
-window.updateBookingTotal = function() {
-  const daysEl = document.getElementById('bookDays');
-  const displayEl = document.getElementById('bookTotalDisplay');
-  if (!daysEl || !displayEl) return;
-  const days = Math.round(parseFloat(daysEl.value));
-  if (!(days > 0)) { displayEl.innerHTML = `<span class="text-red-600">შეიყვანეთ დღეების რაოდენობა</span>`; return; }
-  const calc = calcBookingTotal(days);
-  displayEl.innerHTML = `
-    <div>${days} დღე${calc.discountPct ? ` (${calc.discountPct}% ფასდაკლება)` : ''}</div>
-    <div class="font-bold text-orange">${calc.total.toFixed(2)} ₾</div>`;
-};
-
-window.bookNow = function() {
-  const daysEl = document.getElementById('bookDays');
-  const days = daysEl ? Math.round(parseFloat(daysEl.value)) : 0;
-  const calc = calcBookingTotal(days);
-  if (!calc) { showToast('შეიყვანეთ დღეების რაოდენობა'); return; }
-  const msg = `დაინტერესებული ვარ ჯავშნით: ${product.name}${product.code ? ' (კოდი: ' + product.code + ')' : ''}\n` +
-    `ხანგრძლივობა: ${calc.days} დღე\n` +
-    `სავარაუდო ღირებულება: ${calc.total.toFixed(2)} ₾`;
-  _pendingBookingMsg = msg;
-  const showingOffHours = chatOpen && document.getElementById('chatOffHours')?.style.display === 'flex' && !chatChannel;
-  if (!chatOpen) {
-    toggleChat();
-  } else if (showingOffHours) {
-    toggleChat(); toggleChat();
-  }
-  if (chatUserInfo && chatChannel) {
-    document.getElementById('chatInput').value = _pendingBookingMsg;
-    _pendingBookingMsg = null;
-    sendChatMsg();
-  }
-};
 
 function showError() {
   document.getElementById('loadingState').classList.add('hidden');
@@ -641,7 +550,6 @@ init();
 let chatSessionId = localStorage.getItem('uc_chat_session');
 if (!chatSessionId) { chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2,6); localStorage.setItem('uc_chat_session', chatSessionId); }
 let chatChannel = null, chatOpen = false;
-let _pendingBookingMsg = null;
 let chatUserInfo = JSON.parse(localStorage.getItem('uc_chat_user') || 'null');
 let _chatUserName = chatUserInfo?.name || '', _chatUserPhone = chatUserInfo?.phone || '';
 let _customerIp = null;
@@ -718,7 +626,7 @@ window.toggleChat = function() {
   if (chatOpen) {
     document.getElementById('chatUnreadBadge').style.display = 'none';
     document.getElementById('chatStatusDot').style.background = isWorkingHours() ? '#22c55e' : '#ef4444';
-    if (!isWorkingHours() && !_pendingBookingMsg) {
+    if (!isWorkingHours()) {
       document.getElementById('chatOffHours').style.display = 'flex';
       document.getElementById('chatOffHours').style.flexDirection = 'column';
       document.getElementById('chatIntro').style.display = 'none';
@@ -785,18 +693,13 @@ async function initChatSession(name, phone) {
     chatChannel = supabase.channel('chat-' + chatSessionId)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${chatSessionId}` }, payload => {
         const el = document.getElementById('chatMessages'), m = payload.new, isAdmin = m.sender === 'admin';
-        el.innerHTML += `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55;white-space:pre-line">${_chatFileContent(m.text)}</div></div>`;
+        el.innerHTML += `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55">${_chatFileContent(m.text)}</div></div>`;
         el.scrollTop = el.scrollHeight;
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chats', filter: `id=eq.${chatSessionId}` }, payload => {
         if (payload.new.status === 'banned') showChatBanned();
         else if (payload.new.status === 'closed') showChatClosed();
       }).subscribe();
-    if (_pendingBookingMsg) {
-      document.getElementById('chatInput').value = _pendingBookingMsg;
-      _pendingBookingMsg = null;
-      sendChatMsg();
-    }
   } catch(e) {
     try {
       const { data: cd } = await supabase.from('chats').select('status').eq('id', chatSessionId).maybeSingle();
@@ -856,7 +759,7 @@ window.restartChat = async function() {
 
 function renderChatMsgs(msgs) {
   const el = document.getElementById('chatMessages');
-  el.innerHTML = msgs.map(m => { const isAdmin = m.sender==='admin'; return `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55;white-space:pre-line">${_chatFileContent(m.text)}</div></div>`; }).join('');
+  el.innerHTML = msgs.map(m => { const isAdmin = m.sender==='admin'; return `<div style="display:flex;justify-content:${isAdmin?'flex-start':'flex-end'}"><div style="max-width:82%;padding:8px 11px;border-radius:${isAdmin?'4px 12px 12px 12px':'12px 4px 12px 12px'};background:${isAdmin?'#141210':'#E8541A'};color:white;font-size:13px;line-height:1.55">${_chatFileContent(m.text)}</div></div>`; }).join('');
   el.scrollTop = el.scrollHeight;
 }
 

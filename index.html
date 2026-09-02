@@ -320,7 +320,13 @@ tailwind.config = {
   </div>
   <div id="mobileFilterSpecs"></div>
   <div class="mt-3">
-    <div class="text-sm font-bold text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">დღიური ღირებულება</div>
+    <div class="text-sm font-bold text-gray-700 uppercase mb-2 pb-2 border-b-2 border-orange block">ფასი</div>
+    <div class="mb-3">
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" id="mobileDiscountCheck" onchange="setDiscountFilter(this.checked)" class="w-4 h-4 accent-orange cursor-pointer">
+        <span class="text-xs font-bold text-dark">ფასდაკლება</span>
+      </label>
+    </div>
     <div class="flex items-end gap-2 mt-1">
       <div class="flex-1">
         <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
@@ -366,7 +372,13 @@ tailwind.config = {
 
     <!-- Price -->
     <div class="pb-10">
-      <div class="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">დღიური ღირებულება</div>
+      <div class="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b-2 border-orange block">ფასი</div>
+      <div class="mb-3">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="sidebarDiscountCheck" onchange="setDiscountFilter(this.checked)" class="w-4 h-4 accent-orange cursor-pointer">
+          <span class="text-xs font-bold text-dark">ფასდაკლება</span>
+        </label>
+      </div>
       <div class="flex items-end gap-2 mt-1">
         <div class="flex-1">
           <div class="text-[10px] font-semibold text-dark mb-1 text-center">საწყისი</div>
@@ -518,7 +530,7 @@ tailwind.config = {
       <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
         <li style="display:flex;gap:8px;align-items:center">
           <span style="color:#E8541A;font-weight:700">•</span>
-          <a href="tel:+995568082541" style="color:#1A1714;text-decoration:none;font-weight:600;font-size:14px">(+995) 568-08-25-41</a>
+          <a href="tel:+995595194999" style="color:#1A1714;text-decoration:none;font-weight:600;font-size:14px">(+995) 595-19-49-99</a>
         </li>
         <li style="display:flex;gap:8px;align-items:center">
           <span style="color:#E8541A;font-weight:700">•</span>
@@ -646,6 +658,7 @@ let allProducts = [];
 let activeCategory = '';
 let activeSpecs = {};
 let activePrice = null;
+let activeDiscountOnly = false;
 let searchQ = '';
 let filteredProducts = [];
 let currentPage = 1;
@@ -654,19 +667,17 @@ const PAGE_SIZE = 40;
 const SPEC_LABELS = {
   brand:'ბრენდი', vehicle_type:'ავტომ. ტიპი', season:'სეზონი', width:'სიგანე', profile:'პროფილი', rim:'დიამეტრი',
   oil_type:'ტიპი', viscosity:'სიბლანტე', volume:'მოცულობა',
-  application:'დანიშნულება', filter_type:'ფილტრის ტიპი', car_make:'ავტომ. მარკა',
-  power_source:'კვების წყარო'
+  application:'დანიშნულება', filter_type:'ფილტრის ტიპი', car_make:'ავტომ. მარკა'
 };
 const TIRE_SPECS   = ['brand','vehicle_type','season','width','profile','rim'];
 const OIL_SPECS    = ['brand','oil_type','viscosity','volume','application'];
 const FILTER_SPECS = ['brand','filter_type','car_make'];
-const RENTAL_SPECS = ['brand','power_source'];
 
 function getSpecKeys(cat) {
   if (cat === 'tire') return TIRE_SPECS;
   if (cat === 'oil') return OIL_SPECS;
   if (cat === 'filter') return FILTER_SPECS;
-  return RENTAL_SPECS;
+  return [...new Set([...TIRE_SPECS,...OIL_SPECS,...FILTER_SPECS])];
 }
 
 const TIRE_WIDTHS   = ['155','165','175','185','195','205','215','225','235','245','255','265','275','285','295','305'];
@@ -714,7 +725,7 @@ function buildSpecFilterHTML(prods, cat, isMobile) {
     if (skipKeys.has(key)) return;
     const sel = activeSpecs[key] || '';
     let vals;
-    if (key === 'vehicle_type' && isTire) {
+    if (key === 'vehicle_type') {
       vals = ['მსუბუქი ავტომობილი', 'ჯიპი/პიკაპი', 'მსუბუქი სატვირთო', 'სატვირთო'];
     } else {
       vals = [...new Set(prods.map(p => p.specs?.[key]).filter(Boolean))].sort();
@@ -762,10 +773,6 @@ function getCardSpecs(p) {
     if (s.oil_type)  rows.push(['ტიპი', s.oil_type]);
   } else if (type === 'filter') {
     if (s.filter_type) rows.push(['ტიპი', s.filter_type]);
-  } else {
-    if (s.brand_model) rows.push(['მოდელი', s.brand_model]);
-    if (s.power_source) rows.push(['კვების წყარო', s.power_source]);
-    if (s.weight) rows.push(['წონა', s.weight + ' კგ']);
   }
   if (!rows.length) return '';
   return `<div class="mt-1.5 space-y-0.5">${rows.map(([k,v])=>`
@@ -845,7 +852,7 @@ function renderPage() {
   grid.innerHTML = pageItems.map(p => `
     <div class="card-hover bg-white border border-gray-800 cursor-pointer relative overflow-hidden flex flex-col rounded-xl" onclick="goProduct('${p.id}')">
       <div class="card-top-bar absolute top-0 left-0 right-0 h-0.5 bg-orange"></div>
-      <div class="absolute top-2 right-2 ${p.status && p.status !== 'available' ? 'bg-red-600' : 'bg-green-600'} text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10">${p.status && p.status !== 'available' ? 'მიუწვდომელი' : 'ხელმისაწვდომი'}</div>
+      ${p.oldPrice ? `<div class="absolute top-2 right-2 bg-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide z-10">ფასდაკლება</div>` : ''}
       <div class="h-44 bg-cream flex items-center justify-center overflow-hidden flex-shrink-0 relative">
         ${p.imageUrl
           ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-contain p-2" onerror="this.parentElement.innerHTML='<span style=font-size:3rem;opacity:.4>${p.emoji||'📦'}</span>'">`
@@ -859,9 +866,10 @@ function renderPage() {
         ${p.country ? `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-dark text-[11px]">ქვეყანა:</span>${flagImg(p.country,16)}<span class="text-[11px] text-dark font-medium">${p.country.split(' ').slice(1).join(' ')}</span></div>` : ''}
         <div style="flex:1;min-height:10px"></div>
         <div class="pt-2 border-t border-dark">
-          ${p.daily_rate
+          ${p.price
             ? `<div class="flex items-baseline gap-2 flex-wrap">
-                <span class="text-[14px] font-bold text-orange">${parseFloat(p.daily_rate).toFixed(2)} <span class="text-[17px]">₾</span><span class="text-[11px] font-bold text-dark ml-0.5">/ დღეში</span></span>
+                ${p.oldPrice ? `<span class="text-[11px] text-dark line-through">${parseFloat(p.oldPrice).toFixed(2)} ₾</span>` : ''}
+                <span class="text-[14px] font-bold text-orange">${parseFloat(p.price).toFixed(2)} <span class="text-[17px]">₾</span>${p.unit ? `<span class="text-[11px] font-bold text-dark ml-0.5">/ ცალი</span>` : ''}</span>
               </div>`
             : `<div class="text-[14px] text-dark italic">ფასი დააზუსტეთ დილერთან</div>`}
         </div>
@@ -920,7 +928,6 @@ function applyFilters() {
     normalizeSearch(p.description).includes(searchQ) ||
     normalizeSearch(p.code).includes(searchQ) ||
     normalizeSearch(p.specs?.brand).includes(searchQ) ||
-    normalizeSearch(p.specs?.brand_model).includes(searchQ) ||
     normalizeSearch(p.specs?.rim).includes(searchQ)
   );
   // When searching by text, skip spec filters so results aren't hidden by active rim/season/type filters
@@ -934,9 +941,19 @@ function applyFilters() {
       }
     });
   }
-  if (activePrice) list = list.filter(p => p.daily_rate >= activePrice[0] && p.daily_rate <= activePrice[1]);
+  if (activePrice) list = list.filter(p => p.price >= activePrice[0] && p.price <= activePrice[1]);
+  if (activeDiscountOnly) list = list.filter(p => p.oldPrice);
   renderProducts(list);
 }
+
+window.setDiscountFilter = function(checked) {
+  activeDiscountOnly = checked;
+  const other = document.getElementById('sidebarDiscountCheck') === document.activeElement
+    ? document.getElementById('mobileDiscountCheck')
+    : document.getElementById('sidebarDiscountCheck');
+  if (other) other.checked = checked;
+  applyFilters();
+};
 
 window.updatePriceInputs = function(src) {
   const sMin = document.getElementById('sidebarPriceMin');
@@ -1096,19 +1113,16 @@ async function loadProducts() {
 
   // Load from Supabase in background
   try {
-    const SB_URL = 'https://orvhvhhstwfkfsloqsuf.supabase.co';
-    const SB_KEY = 'sb_publishable_Iv8vPVoqq5-gu2IgZHNr6w_bcQweWrp';
-    const res = await fetch(`${SB_URL}/rest/v1/products?select=*&active=eq.true&order=created_at.desc`, {
-      cache: 'no-store',
+    const res = await fetch('https://fobnuromfiznouecmrlg.supabase.co/functions/v1/get-products', {
       headers: {
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYm51cm9tZml6bm91ZWNtcmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTAxOTIsImV4cCI6MjA4OTQyNjE5Mn0.DEJY9bj3vxbjV4NKx7wncmTGlRdGXuCfJUHfDFFvZyo'
       }
     });
     const data = await res.json();
     window._productsLoading = false;
     if (Array.isArray(data) && data.length > 0) {
-      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url }));
+      allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
       // Shuffle for random display order on user side
       allProducts = allProducts.slice().sort(() => Math.random() - 0.5);
       buildSidebar();
