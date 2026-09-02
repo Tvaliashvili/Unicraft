@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unicraft — Shop</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">Unicraft</a>
+    <div class="search-bar">
+      <input type="search" id="search-input" placeholder="Search products…" autocomplete="off" />
+    </div>
+    <button class="cart-toggle" id="cart-toggle" aria-label="Open cart">
+      🛒 Cart <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<nav class="category-bar">
+  <div class="container" id="category-list">
+    <!-- category chips injected by app.js -->
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+    <h2 class="section-title" id="results-title">All Products</h2>
+    <div id="product-grid" class="product-grid">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Product detail modal -->
+<div class="overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal__header">
+      <h2>Product Details</h2>
+      <button class="modal__close" id="product-modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal__body" id="product-modal-body">
+      <!-- injected by app.js -->
+    </div>
+  </div>
+</div>
+
+<!-- Cart / checkout drawer -->
+<div class="backdrop" id="backdrop"></div>
+<aside class="cart-drawer" id="cart-drawer">
+  <div class="cart-drawer__header">
+    <h3 id="cart-drawer-title">Your Cart</h3>
+    <button class="modal__close" id="cart-close" aria-label="Close cart">&times;</button>
+  </div>
+
+  <!-- Cart items view -->
+  <div id="cart-view">
+    <div class="cart-drawer__items" id="cart-items">
+      <!-- injected by app.js -->
+    </div>
+    <div class="cart-drawer__footer">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn btn-primary" id="checkout-btn" disabled>Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- Checkout form view -->
+  <div id="checkout-view" hidden>
+    <form id="checkout-form" class="modal__body">
+      <div class="form-group">
+        <label for="customer-name">Full Name</label>
+        <input type="text" id="customer-name" name="customer_name" required />
+      </div>
+      <div class="form-group">
+        <label for="customer-phone">Phone Number</label>
+        <input type="tel" id="customer-phone" name="customer_phone" required />
+      </div>
+      <div class="form-group">
+        <label for="delivery-address">Delivery Address</label>
+        <textarea id="delivery-address" name="delivery_address" required></textarea>
+      </div>
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="checkout-total">$0.00</span>
+      </div>
+      <div id="checkout-error" class="form-error" hidden></div>
+      <button type="button" class="btn btn-secondary" id="back-to-cart" style="margin-bottom:10px; width:100%;">← Back to Cart</button>
+      <button type="submit" class="btn btn-primary" id="place-order-btn">Place Order</button>
+    </form>
+
+    <div id="checkout-success" class="checkout-success" hidden>
+      <h3>Order placed! 🎉</h3>
+      <p>We'll contact you shortly to confirm delivery.</p>
+      <button class="btn btn-primary" id="continue-shopping-btn">Continue Shopping</button>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
