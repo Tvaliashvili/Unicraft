@@ -281,7 +281,12 @@
               </div>
               <!-- Discount -->
               <div class="form-group">
-                <label class="form-label">ფასდაკლება (₾)</label>
+                <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                  ფასდაკლება (₾)
+                  <label style="font-size:12px;color:var(--orange);font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;margin:0">
+                    <input type="checkbox" id="prodSaleActive" style="cursor:pointer"> ფასდაკლების ჩვენება
+                  </label>
+                </label>
                 <input class="form-input" id="prodDiscount" type="number" min="0" step="0.01" placeholder="0.00">
               </div>
               <!-- Unit -->
@@ -880,7 +885,12 @@
         </div>
         <!-- Discount -->
         <div class="form-group">
-          <label class="form-label">ფასდაკლება (₾)</label>
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+            ფასდაკლება (₾)
+            <label style="font-size:12px;color:var(--orange);font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;margin:0">
+              <input type="checkbox" id="editSaleActive" style="cursor:pointer"> ფასდაკლების ჩვენება
+            </label>
+          </label>
           <input class="form-input" id="editDiscount" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
         <!-- Unit -->
@@ -1606,8 +1616,9 @@ window.addProduct = async function() {
     }
     const priceRaw = parseFloat(document.getElementById('prodPrice').value) || 0;
     const discountPrice = parseFloat(document.getElementById('prodDiscount').value) || 0;
-    const finalPrice = discountPrice > 0 ? discountPrice : priceRaw;
-    const oldPriceVal = discountPrice > 0 ? priceRaw : null;
+    const saleActive = document.getElementById('prodSaleActive').checked;
+    const finalPrice = (saleActive && discountPrice > 0) ? discountPrice : priceRaw;
+    const oldPriceVal = (saleActive && discountPrice > 0) ? priceRaw : null;
     if (discountPrice > 0) specs.discount_price = discountPrice;
     const { error } = await supabase.from('products').insert({
       name,
@@ -1640,6 +1651,8 @@ window.clearForm = function() {
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const autoCodeCheck = document.getElementById('autoCodeCheck');
   if (autoCodeCheck) { autoCodeCheck.checked = false; }
+  const saleActiveCheck = document.getElementById('prodSaleActive');
+  if (saleActiveCheck) { saleActiveCheck.checked = false; }
   const specCustomCode = document.getElementById('specCustomCode');
   if (specCustomCode) { specCustomCode.style.display = ''; }
   document.getElementById('prodUnit').value = 'ც';
@@ -1793,6 +1806,7 @@ window.editProduct = function(id) {
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editPrice').value = p.old_price || p.price || '';
   document.getElementById('editDiscount').value = p.old_price ? p.price : (p.specs?.discount_price || '');
+  document.getElementById('editSaleActive').checked = !!p.old_price;
   document.getElementById('editUnit').value = p.unit || 'ც';
   renderDescRows('editDescRows', p.description || '');
   document.getElementById('editExistingImage').value = p.image_url || '';
@@ -1822,7 +1836,7 @@ window.saveProductEdit = async function() {
   const category = document.getElementById('editCategory').value;
   const priceRaw = parseFloat(document.getElementById('editPrice').value) || 0;
   const discountVal = parseFloat(document.getElementById('editDiscount').value) || 0;
-  const isSalesOn = !!productCache[id]?.old_price;
+  const isSalesOn = document.getElementById('editSaleActive').checked;
   const price = (isSalesOn && discountVal > 0) ? discountVal : priceRaw;
   const oldPrice = (isSalesOn && discountVal > 0) ? priceRaw : null;
   if (!name || !category || !newCode) {
