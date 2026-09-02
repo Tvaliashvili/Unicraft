@@ -11,8 +11,8 @@
 <!-- Login screen -->
 <div class="login-screen" id="login-screen">
   <form class="login-card" id="login-form">
-    <h1 class="brand" style="margin-bottom: 4px;">Unicraft Admin</h1>
-    <p style="color: var(--color-text-muted); margin: 0 0 20px; font-size: 0.9rem;">Sign in to manage products and orders.</p>
+    <img class="brand-logo brand-logo--lg" src="logo.svg" alt="Unicraft" />
+    <p style="color: var(--color-text-muted); margin: 0 0 20px; font-size: 0.9rem; text-align: center;">Admin — sign in to manage products and orders.</p>
     <div class="form-group">
       <label for="login-email">Email</label>
       <input type="email" id="login-email" required autocomplete="username" />
@@ -30,7 +30,7 @@
 <div id="admin-app" hidden>
   <header class="site-header">
     <div class="container">
-      <span class="brand">Unicraft Admin</span>
+      <a href="admin.html" class="brand"><img class="brand-logo" src="logo.svg" alt="Unicraft" /></a>
       <nav class="admin-tabs">
         <button class="admin-tab active" data-tab="products">Products</button>
         <button class="admin-tab" data-tab="orders">Orders</button>

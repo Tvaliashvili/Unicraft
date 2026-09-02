@@ -8,8 +8,10 @@
   --color-border: #e5e5e0;
   --color-text: #1a1a1a;
   --color-text-muted: #6b6b66;
-  --color-primary: #1f6f50;
-  --color-primary-hover: #185a40;
+  --color-primary: #e8541a;
+  --color-primary-hover: #c8460f;
+  --color-dark: #1c1c1c;
+  --color-success: #1f6f50;
   --color-danger: #b3261e;
   --color-danger-hover: #8f1e18;
   --color-warning: #b8860b;
@@ -76,6 +78,18 @@ button {
   color: var(--color-primary);
   text-decoration: none;
   white-space: nowrap;
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+  border-radius: 6px;
+  display: block;
+}
+
+.brand-logo--lg {
+  height: 64px;
+  margin: 0 auto 16px;
 }
 
 .search-bar {
@@ -741,7 +755,7 @@ main {
 
 .badge-delivered {
   background: #e6f4ec;
-  color: var(--color-primary);
+  color: var(--color-success);
 }
 
 .status-select {
