@@ -58,16 +58,9 @@ async function init() {
   bindProductFormEvents();
   bindOrderEvents();
 
-  const { data } = await supabase.auth.getSession();
-  console.log('[debug] initial getSession ->', data.session ? 'has session' : 'no session');
-  if (data.session) {
-    showDashboard();
-  } else {
-    showLogin();
-  }
-
-  supabase.auth.onAuthStateChange((event, session) => {
-    console.log('[debug] onAuthStateChange event =', event, 'session =', session ? 'present' : 'null');
+  // onAuthStateChange fires immediately with the current session (event
+  // INITIAL_SESSION) once subscribed, so a separate getSession() call isn't needed.
+  supabase.auth.onAuthStateChange((_event, session) => {
     if (session) {
       showDashboard();
     } else {
@@ -84,11 +77,10 @@ function bindAuthEvents() {
     el.loginBtn.disabled = true;
     el.loginBtn.textContent = 'Signing in…';
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: el.loginEmail.value.trim(),
       password: el.loginPassword.value,
     });
-    console.log('[debug] signInWithPassword result -> error:', error, 'session:', data?.session ? 'present' : 'null');
 
     el.loginBtn.disabled = false;
     el.loginBtn.textContent = 'Sign In';
