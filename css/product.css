@@ -1,0 +1,15 @@
+html { font-size: clamp(16px, 1.25vw, 28px); }
+body { font-family: 'Noto Sans Georgian', sans-serif; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+.font-display { font-family: 'Bebas Neue', sans-serif; }
+.card-hover { transition: transform .2s, box-shadow .2s; }
+.card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
+.card-hover:hover .card-top-bar { transform: scaleX(1); }
+.card-top-bar { transition: transform .25s; transform: scaleX(0); transform-origin: left; }
+.toast-show { transform: translateX(-50%) translateY(0) !important; }
+.drawer-enter { transform: translateX(0) !important; }
+.overlay-enter { opacity: 1 !important; pointer-events: all !important; }
+.modal-enter { opacity: 1 !important; pointer-events: all !important; }
+.modal-enter .modal-box { transform: translateY(0) !important; }
