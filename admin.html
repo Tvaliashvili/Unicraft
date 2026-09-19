@@ -2391,12 +2391,27 @@ window.toggleSelectAll = function(secId, checked) {
   if (compBtn) compBtn.style.display = show;
 };
 
+// Supabase puts every id in the query string, so a large selection makes a URL
+// long enough for the server to drop the request ("Failed to fetch"). Run the
+// ids through in small batches and merge the results.
+const ID_CHUNK = 80;
+async function _inChunks(ids, fn) {
+  let rows = [];
+  for (let i = 0; i < ids.length; i += ID_CHUNK) {
+    const { data, error } = await fn(ids.slice(i, i + ID_CHUNK));
+    if (error) return { rows, error };
+    rows = rows.concat(data || []);
+  }
+  return { rows, error: null };
+}
+
 window.bulkDeactivate = async function(secId) {
   const body = document.getElementById(secId + '-body');
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გაუქმდეს (OFF)?`)) return;
-  const { error } = await supabase.from('products').update({ active: false }).in('id', ids);
+  const { error } = await _inChunks(ids, batch =>
+    supabase.from('products').update({ active: false }).in('id', batch));
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   ids.forEach(id => { if (productCache[id]) productCache[id].active = false; });
   renderProductRows(Object.values(productCache));
@@ -2412,8 +2427,8 @@ window.bulkDelete = async function(secId) {
 
   // .select() makes the deleted rows come back, so a silent RLS filter
   // (delete matches nothing, no error raised) can't look like success.
-  const { data: deleted, error } = await supabase
-    .from('products').delete().in('id', ids).select('id');
+  const { rows: deleted, error } = await _inChunks(ids, batch =>
+    supabase.from('products').delete().in('id', batch).select('id'));
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
 
   const deletedIds = (deleted || []).map(r => String(r.id));
@@ -2442,7 +2457,8 @@ window.bulkActivate = async function(secId) {
   const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი გააქტიურდეს?`)) return;
-  const { error } = await supabase.from('products').update({ active: true }).in('id', ids);
+  const { error } = await _inChunks(ids, batch =>
+    supabase.from('products').update({ active: true }).in('id', batch));
   if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
   ids.forEach(id => { if (productCache[id]) productCache[id].active = true; });
   renderProductRows(Object.values(productCache));
