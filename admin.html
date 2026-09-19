@@ -602,7 +602,7 @@
           <div class="page-title">Excel შედარება</div>
           <div class="page-subtitle">ატვირთე Excel ფაილი და შეადარე კოდები საიტის პროდუქტებს</div>
         </div>
-        <button id="fixCodesBtn" onclick="fixProductCodes()" class="btn" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:13px">🔧 კოდების გასწორება (.00)</button>
+        <button id="repairBtn" onclick="repairExistingProducts()" class="btn" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:13px">🔧 არსებულების გასწორება</button>
       </div>
 
       <div class="card" style="max-width:860px">
@@ -3659,48 +3659,108 @@ function renderExcelTable() {
   }).join('');
 }
 
-// One-off repair for products imported before _excelCleanCode existed: their
-// numeric codes were stored with the decimal tail XLSX handed over, so
-// "1010200001726" sits in the database as "1010200001726.00" and matches nothing.
-// Rewrites only the codes that actually carry such a tail.
-async function fixProductCodes() {
-  const btn = document.getElementById('fixCodesBtn');
+// Repair for the products imported before the sheet's other columns were read.
+// They carry three faults: the name holds the ბრენდი instead of the პროტექტორი,
+// specs are empty, and numeric codes kept the decimal tail XLSX handed over.
+//
+// Matching is by code ALONE — the comparison above pairs on code *and* name, and
+// every stored name is wrong, so it reads the whole sheet as missing. Codes are
+// run through _excelCleanCode on both sides so "1010200001726.00" in the database
+// still meets "1010200001726" in the sheet.
+//
+// The name is overwritten because it is known-wrong; everything else only fills a
+// blank, so an edit made by hand in the admin is never undone.
+async function repairExistingProducts() {
+  if (_excelAllRows.length === 0) { showToast('ჯერ ატვირთე Excel ფაილი', 'error'); return; }
+
+  const btn = document.getElementById('repairBtn');
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'იტვირთება...';
+
+  const norm = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
 
   // Page through every product — the row cap means one request won't see them all
   let all = [], from = 0;
   const PAGE = 1000;
   while (true) {
-    const { data, error } = await supabase.from('products').select('id, code').range(from, from + PAGE - 1);
-    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+    const { data, error } = await supabase.from('products')
+      .select('id, code, name, specs, country, unit').range(from, from + PAGE - 1);
+    if (error) { btn.disabled = false; btn.textContent = label; showToast('შეცდომა: ' + error.message, 'error'); return; }
     all = all.concat(data);
     if (data.length < PAGE) break;
     from += PAGE;
   }
 
-  const toFix = [];
+  // Index by every cleaned sub-code, so a row holding "A; B" is found by either
+  const byCode = {};
   all.forEach(p => {
-    const cleaned = _excelCleanCode(p.code);
-    if (cleaned && cleaned !== String(p.code).trim()) toFix.push({ id: p.id, from: p.code, to: cleaned });
+    _excelCleanCode(p.code).split(';').forEach(seg => {
+      const k = norm(stripSuffix(seg));
+      if (k && !byCode[k]) byCode[k] = p;
+    });
   });
 
-  if (toFix.length === 0) { showToast('გასასწორებელი კოდი არ მოიძებნა ✓', 'success'); return; }
+  // Work out every change first, so the confirm can show what will happen
+  const plan = [];
+  for (const r of _excelAllRows) {
+    if (r.status === 'site_only') continue;
+    const key = norm(stripSuffix(_excelCleanCode(r.code).split(';')[0]));
+    const p = byCode[key];
+    if (!p) continue;
 
-  const sample = toFix.slice(0, 5).map(x => `${x.from} → ${x.to}`).join('\n');
-  if (!confirm(`${toFix.length} კოდი გასწორდება.\n\nმაგალითად:\n${sample}\n\nგააგრძელოთ?`)) return;
+    const patch = {};
+    const cleanCode = _excelCleanCode(p.code);
+    if (cleanCode && cleanCode !== String(p.code).trim()) patch.code = cleanCode;
+    if (r.name && r.name !== p.name) patch.name = r.name;
 
-  btn.disabled = true;
-  const label = btn.textContent;
-  let done = 0, failed = 0;
-  for (const x of toFix) {
-    const { error } = await supabase.from('products').update({ code: x.to }).eq('id', x.id);
-    if (error) failed++;
-    else { done++; if (done % 50 === 0) btn.textContent = `${done}/${toFix.length}...`; }
+    const want = _excelRowToSpecs(r);
+    const specs = { ...(p.specs || {}) };
+    let specsChanged = false;
+    Object.entries(want).forEach(([k, v]) => {
+      if (specs[k] === undefined || specs[k] === null || specs[k] === '') { specs[k] = v; specsChanged = true; }
+    });
+    if (specsChanged) patch.specs = specs;
+    if (!p.country) patch.country = COUNTRY;
+    if (!p.unit)    patch.unit    = 'ც';
+
+    if (Object.keys(patch).length) plan.push({ p, patch });
   }
+
+  if (plan.length === 0) {
+    btn.disabled = false; btn.textContent = label;
+    showToast('გასასწორებელი არაფერია ✓', 'success');
+    return;
+  }
+
+  const codes = plan.filter(x => x.patch.code).length;
+  const names = plan.filter(x => x.patch.name).length;
+  const specs = plan.filter(x => x.patch.specs).length;
+  const ok = confirm(
+    `${plan.length} პროდუქტი გასწორდება:\n\n` +
+    `· კოდი — ${codes}\n· სახელი — ${names}\n· მახასიათებლები — ${specs}\n\n` +
+    `მაგალითი:\n${plan.slice(0, 3).map(x => `${x.p.name} → ${x.patch.name || x.p.name}`).join('\n')}\n\nგააგრძელოთ?`
+  );
+  if (!ok) { btn.disabled = false; btn.textContent = label; return; }
+
+  btn.textContent = 'ვამატებ სიებს...';
+  const newOptions = await _syncOptionLists(_excelAllRows.filter(r => r.status !== 'site_only'));
+
+  let done = 0, failed = 0;
+  for (const { p, patch } of plan) {
+    const { error } = await supabase.from('products').update(patch).eq('id', p.id);
+    if (error) failed++;
+    else { done++; if (done % 25 === 0) btn.textContent = `${done}/${plan.length}...`; }
+  }
+
   btn.disabled = false;
   btn.textContent = label;
 
-  if (failed === 0) showToast(`✅ ${done} კოდი გასწორდა`, 'success');
-  else showToast(`გასწორდა ${done}, შეცდომა ${failed}`, 'error');
+  const msg = [`გასწორდა ${done}`];
+  if (newOptions) msg.push(`ახალი ვარიანტი ${newOptions}`);
+  if (failed)     msg.push(`შეცდომა ${failed}`);
+  showToast((failed ? '' : '✅ ') + msg.join(' · '), failed ? 'error' : 'success');
 }
 
 // Sync the button's count, hiding it when there's neither anything to add nor
