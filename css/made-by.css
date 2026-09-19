@@ -48,9 +48,20 @@
 .made-by-name { color: var(--text, inherit); font-weight: 400; }
 .made-by-name b { font-weight: 700; }
 
-/* The strip the badge sits in. dark.black, the header's shade — a step darker
-   than the trust bar above it on the catalogue page, so it reads as the page's
-   baseline rather than more trust bar. */
+/* Inside the catalogue's trust bar, under the three promises. It brings no
+   ground of its own — the bar already has one — just a hairline in the same
+   shade as the dividers between the promises, so it reads as the bar's last
+   row rather than a second footer stacked beneath it. */
+.made-by-row {
+  display: flex;
+  justify-content: center;
+  padding: 16px 16px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+/* Still the footer on the product page, which has no trust bar to sit in.
+   dark.black, the header's shade. */
 .made-by-bar {
   display: flex;
   justify-content: center;
