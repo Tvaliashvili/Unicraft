@@ -602,6 +602,7 @@
           <div class="page-title">Excel შედარება</div>
           <div class="page-subtitle">ატვირთე Excel ფაილი და შეადარე კოდები საიტის პროდუქტებს</div>
         </div>
+        <button id="fixCodesBtn" onclick="fixProductCodes()" class="btn" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:13px">🔧 კოდების გასწორება (.00)</button>
       </div>
 
       <div class="card" style="max-width:860px">
@@ -3656,6 +3657,50 @@ function renderExcelTable() {
       <td style="padding:9px 14px">${badge}${deleteBtn}</td>
     </tr>`;
   }).join('');
+}
+
+// One-off repair for products imported before _excelCleanCode existed: their
+// numeric codes were stored with the decimal tail XLSX handed over, so
+// "1010200001726" sits in the database as "1010200001726.00" and matches nothing.
+// Rewrites only the codes that actually carry such a tail.
+async function fixProductCodes() {
+  const btn = document.getElementById('fixCodesBtn');
+
+  // Page through every product — the row cap means one request won't see them all
+  let all = [], from = 0;
+  const PAGE = 1000;
+  while (true) {
+    const { data, error } = await supabase.from('products').select('id, code').range(from, from + PAGE - 1);
+    if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+
+  const toFix = [];
+  all.forEach(p => {
+    const cleaned = _excelCleanCode(p.code);
+    if (cleaned && cleaned !== String(p.code).trim()) toFix.push({ id: p.id, from: p.code, to: cleaned });
+  });
+
+  if (toFix.length === 0) { showToast('გასასწორებელი კოდი არ მოიძებნა ✓', 'success'); return; }
+
+  const sample = toFix.slice(0, 5).map(x => `${x.from} → ${x.to}`).join('\n');
+  if (!confirm(`${toFix.length} კოდი გასწორდება.\n\nმაგალითად:\n${sample}\n\nგააგრძელოთ?`)) return;
+
+  btn.disabled = true;
+  const label = btn.textContent;
+  let done = 0, failed = 0;
+  for (const x of toFix) {
+    const { error } = await supabase.from('products').update({ code: x.to }).eq('id', x.id);
+    if (error) failed++;
+    else { done++; if (done % 50 === 0) btn.textContent = `${done}/${toFix.length}...`; }
+  }
+  btn.disabled = false;
+  btn.textContent = label;
+
+  if (failed === 0) showToast(`✅ ${done} კოდი გასწორდა`, 'success');
+  else showToast(`გასწორდა ${done}, შეცდომა ${failed}`, 'error');
 }
 
 // Sync the button's count, hiding it when there's neither anything to add nor
