@@ -2355,7 +2355,9 @@ window.saveProductEdit = async function() {
 window.deleteProduct = async function(id) {
   if (!confirm('ნამდვილად წაშლა?')) return;
   const { data } = await supabase.from('products').select('image_url').eq('id', id).single();
-  await supabase.from('products').delete().eq('id', id);
+  const { data: gone, error } = await supabase.from('products').delete().eq('id', id).select('id');
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+  if (!gone || gone.length === 0) { showToast('წაშლა ვერ მოხერხდა — უფლებები შეამოწმე', 'error'); return; }
   if (data?.image_url) deleteProductImage(data.image_url);
   showToast('პროდუქტი წაიშალა', 'error');
   loadProductsList();
@@ -2403,13 +2405,36 @@ window.bulkDeactivate = async function(secId) {
 
 window.bulkDelete = async function(secId) {
   const body = document.getElementById(secId + '-body');
-  const ids = [...body.querySelectorAll('.prod-check:checked')].map(cb => cb.dataset.id);
+  const checked = [...body.querySelectorAll('.prod-check:checked')];
+  const ids = checked.map(cb => cb.dataset.id);
   if (!ids.length) return;
   if (!confirm(`${ids.length} პროდუქტი სამუდამოდ წაიშალოს?`)) return;
-  await supabase.from('products').delete().in('id', ids);
-  ids.forEach(id => delete productCache[id]);
-  renderProductRows(Object.values(productCache));
-  showToast(`🗑 ${ids.length} პროდუქტი წაიშალა`, 'error');
+
+  // .select() makes the deleted rows come back, so a silent RLS filter
+  // (delete matches nothing, no error raised) can't look like success.
+  const { data: deleted, error } = await supabase
+    .from('products').delete().in('id', ids).select('id');
+  if (error) { showToast('შეცდომა: ' + error.message, 'error'); return; }
+
+  const deletedIds = (deleted || []).map(r => String(r.id));
+  if (deletedIds.length === 0) {
+    showToast('წაშლა ვერ მოხერხდა — უფლებები შეამოწმე', 'error');
+    return;
+  }
+
+  // Clean up the storage files of the rows that actually went
+  checked.forEach(cb => {
+    if (deletedIds.includes(String(cb.dataset.id)) && cb.dataset.imageUrl) {
+      deleteProductImage(cb.dataset.imageUrl);
+    }
+  });
+
+  if (deletedIds.length < ids.length) {
+    showToast(`წაიშალა ${deletedIds.length}/${ids.length} — ნაწილი ვერ წაიშალა`, 'error');
+  } else {
+    showToast(`🗑 ${deletedIds.length} პროდუქტი წაიშალა`, 'error');
+  }
+  loadProductsList(); // re-read from the DB rather than trusting the cache
 };
 
 window.bulkActivate = async function(secId) {
