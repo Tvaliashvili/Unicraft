@@ -24,6 +24,7 @@ tailwind.config = {
 }
 </script>
 <link rel="stylesheet" href="css/product.css">
+<link rel="stylesheet" href="css/made-by.css">
 <style>
 @keyframes chatGlow { 0%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0.6)} 35%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 14px rgba(232,84,26,0)} 50%,100%{box-shadow:0 4px 16px rgba(232,84,26,0.45),0 0 0 0 rgba(232,84,26,0)} }
 #deliveryToggleBtn { animation: chatGlow 4s ease-out infinite; animation-delay: 0s; }
@@ -216,6 +217,17 @@ tailwind.config = {
 <div id="errorState" class="hidden max-w-7xl mx-auto px-6 py-24 text-center text-gray-400">
   <p class="font-semibold text-dark text-lg mb-2">პროდუქტი ვერ მოიძებნა</p>
   <a href="index.html" class="text-orange text-sm hover:underline">← კატალოგში დაბრუნება</a>
+</div>
+
+<!-- ══ MAKER'S MARK ══ -->
+<div class="made-by-bar">
+  <a class="made-by" href="https://gridly.ge" target="_blank" rel="noopener" aria-label="Gridly">
+    <span class="made-by-mark" aria-hidden="true">G</span>
+    <span class="made-by-text">
+      <span class="made-by-label">დამზადებულია</span>
+      <span class="made-by-name"><b>Gridly</b>-ს მიერ</span>
+    </span>
+  </a>
 </div>
 
 
