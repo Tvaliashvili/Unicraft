@@ -3479,7 +3479,7 @@ async function handleExcelFile(file) {
       .slice(firstDataRow)
       .map((r, i) => ({
         rowNum: i + firstDataRow + 1,
-        code:   at(r, col.code),
+        code:   _excelCleanCode(at(r, col.code)),
         name:   at(r, col.name),
         brand:  at(r, col.brand),
         season: at(r, col.season),
@@ -3671,6 +3671,22 @@ function updateAddMissingBtn() {
 
 // Everything imported is Chinese stock, same as the products seeded by hand.
 const COUNTRY = '🇨🇳 ჩინეთი';
+
+// A code cell holding only digits comes back through XLSX as a formatted number,
+// so "1010200001726" arrives as "1010200001726.00". Left alone the zeros become
+// part of the code and it no longer matches the supplier's. Only a purely
+// decimal tail is dropped — a code that genuinely contains a dot is left alone.
+function _excelCleanCode(raw) {
+  return String(raw ?? '')
+    .split(';')
+    .map(seg => {
+      const s = seg.trim();
+      const m = s.match(/^(\d+)\.0+$/);
+      return m ? m[1] : s;
+    })
+    .filter(Boolean)
+    .join('; ');
+}
 
 // Turn one Excel row into the specs object the product form would have written.
 function _excelRowToSpecs(r) {
