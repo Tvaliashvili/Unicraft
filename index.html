@@ -413,20 +413,20 @@ tailwind.config = {
 
 <!-- ══ TRUST BAR ══ -->
 <div class="bg-dark border-t-2 border-orange mt-auto">
-  <div class="trust-bar-grid max-w-screen-2xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+  <div class="trust-bar-grid max-w-screen-2xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5">
     <div class="flex items-center justify-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">სწრაფი მიტანა</div></div></div>
     <div class="flex items-center justify-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">დაბალი ფასები</div></div></div>
     <div class="flex items-center justify-center gap-3 px-4 py-5"><div class="w-1.5 h-1.5 bg-orange flex-shrink-0"></div><div><div class="text-white text-sm font-semibold">უფასო კონსულტაცია</div></div></div>
-  </div>
-  <!-- ══ MAKER'S MARK ══ -->
-  <div class="made-by-row">
-    <a class="made-by" href="https://gridly.ge" target="_blank" rel="noopener" aria-label="Gridly">
-      <span class="made-by-mark" aria-hidden="true">G</span>
-      <span class="made-by-text">
-        <span class="made-by-label">დამზადებულია</span>
-        <span class="made-by-name"><b>Gridly</b>-ს მიერ</span>
-      </span>
-    </a>
+    <!-- ══ MAKER'S MARK ══ — a fourth cell of the bar, not a row of its own -->
+    <div class="made-by-cell flex items-center justify-center px-4 py-5">
+      <a class="made-by" href="https://gridly.ge" target="_blank" rel="noopener" aria-label="Gridly">
+        <span class="made-by-mark" aria-hidden="true">G</span>
+        <span class="made-by-text">
+          <span class="made-by-label">დამზადებულია</span>
+          <span class="made-by-name"><b>Gridly</b>-ს მიერ</span>
+        </span>
+      </a>
+    </div>
   </div>
 </div>
 
