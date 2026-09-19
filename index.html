@@ -1117,6 +1117,23 @@ window.showToast = function(msg) {
 };
 
 // ── Load products ──
+async function fetchAllProducts(SB_URL, SB_KEY) {
+  const headers = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+  const PAGE = 1000;
+  const out = [];
+  for (let from = 0; ; from += PAGE) {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/products?select=*&active=eq.true&order=created_at.desc,id.desc`,
+      { cache: 'no-store', headers: { ...headers, 'Range-Unit': 'items', 'Range': `${from}-${from + PAGE - 1}` } }
+    );
+    const page = await res.json();
+    if (!Array.isArray(page) || page.length === 0) break;
+    out.push(...page);
+    if (page.length < PAGE) break;
+  }
+  return out;
+}
+
 async function loadProducts() {
   window._productsLoading = true;
   allProducts = MOCK_PRODUCTS;
@@ -1127,14 +1144,11 @@ async function loadProducts() {
   try {
     const SB_URL = 'https://orvhvhhstwfkfsloqsuf.supabase.co';
     const SB_KEY = 'sb_publishable_Iv8vPVoqq5-gu2IgZHNr6w_bcQweWrp';
-    const res = await fetch(`${SB_URL}/rest/v1/products?select=*&active=eq.true&order=created_at.desc`, {
-      cache: 'no-store',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`
-      }
-    });
-    const data = await res.json();
+    // PostgREST answers with at most 1000 rows however many match, so the
+    // catalogue is read a page at a time. Without this the site shows only the
+    // first 1000 products and the rest look like they never imported.
+    // created_at alone is not unique enough to page on, so id breaks the ties.
+    const data = await fetchAllProducts(SB_URL, SB_KEY);
     window._productsLoading = false;
     if (Array.isArray(data) && data.length > 0) {
       allProducts = data.map(p => ({ ...p, imageUrl: p.image_url, oldPrice: p.old_price || null }));
