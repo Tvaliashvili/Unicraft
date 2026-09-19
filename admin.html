@@ -648,6 +648,10 @@
               📋 <span id="excelCountTotal">0</span> სულ
             </div>
           </div>
+          <button id="excelAddMissingBtn" onclick="addMissingProducts()" class="btn btn-primary" style="flex-shrink:0;display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            საიტზე დამატება (<span id="excelAddMissingCount">0</span>)
+          </button>
           <button onclick="exportExcelResults()" class="btn btn-primary" style="flex-shrink:0;display:flex;align-items:center;gap:6px">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Excel-ში გამოტანა
@@ -3460,6 +3464,7 @@ async function handleExcelFile(file) {
     document.getElementById('excelCountMissing').textContent   = missingCount;
     document.getElementById('excelCountSiteOnly').textContent  = siteOnlyCount;
     document.getElementById('excelCountTotal').textContent     = excelRowTotal;
+    updateAddMissingBtn();
     document.getElementById('excelSummary').style.display = 'flex';
     document.getElementById('excelTabs').style.display = 'block';
     document.getElementById('excelResults').style.display = 'block';
@@ -3527,6 +3532,70 @@ function renderExcelTable() {
       <td style="padding:9px 14px">${badge}${deleteBtn}</td>
     </tr>`;
   }).join('');
+}
+
+// Sync the "add missing" button's count, hiding it when there's nothing to add.
+function updateAddMissingBtn() {
+  const n = _excelAllRows.filter(r => r.status === 'missing').length;
+  const btn = document.getElementById('excelAddMissingBtn');
+  if (!btn) return;
+  document.getElementById('excelAddMissingCount').textContent = n;
+  btn.style.display = n > 0 ? 'flex' : 'none';
+}
+
+// Insert every ❌ "არ არის საიტზე" row as an inactive product (code + name only),
+// so they can be filled in and published from the Products page afterwards.
+async function addMissingProducts() {
+  const toAdd = _excelAllRows.filter(r => r.status === 'missing');
+  if (toAdd.length === 0) return;
+  if (!confirm(`${toAdd.length} პროდუქტი დაემატება საიტზე (გამორთული, ფასის გარეშე). გააგრძელოთ?`)) return;
+
+  const btn = document.getElementById('excelAddMissingBtn');
+  btn.disabled = true;
+  btn.textContent = 'მიმდინარეობს...';
+
+  // Category label comes from the picker's own option text ("🛞 საბურავები" → "საბურავები")
+  const sel = document.getElementById('excelCategory');
+  const prodType = sel?.value || 'tire';
+  const catLabel = (sel?.selectedOptions[0]?.textContent || '').replace(/[^\p{L}\s]/gu, '').trim() || 'საბურავები';
+
+  const payload = toAdd.map(r => ({
+    code: r.code,
+    name: r.name || r.code,   // name is NOT NULL — fall back to the code
+    product_type: prodType,
+    category: catLabel,
+    price: 0,
+    old_price: null,
+    unit: 'ც',
+    active: false,
+    specs: {},
+  }));
+
+  let added = 0, failed = 0;
+  const CHUNK = 500;
+  for (let i = 0; i < payload.length; i += CHUNK) {
+    const slice = payload.slice(i, i + CHUNK);
+    const { error } = await supabase.from('products').insert(slice);
+    if (error) failed += slice.length;
+    else {
+      added += slice.length;
+      slice.forEach(p => {
+        const r = _excelAllRows.find(x => x.status === 'missing' && x.code === p.code);
+        if (r) r.status = 'uploaded';
+      });
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> საიტზე დამატება (<span id="excelAddMissingCount">0</span>)`;
+
+  document.getElementById('excelCountUploaded').textContent = _excelAllRows.filter(r => r.status === 'uploaded').length;
+  document.getElementById('excelCountMissing').textContent  = _excelAllRows.filter(r => r.status === 'missing').length;
+  updateAddMissingBtn();
+  renderExcelTable();
+
+  if (failed === 0) showToast(`✅ ${added} პროდუქტი დაემატა (გამორთული)`, 'success');
+  else showToast(`დაემატა ${added}, შეცდომა ${failed}`, 'error');
 }
 
 function exportExcelResults() {
