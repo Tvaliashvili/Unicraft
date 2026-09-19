@@ -3367,6 +3367,68 @@ window.showPage = function(name) {
 // ─── Excel Comparison Tool ───
 let _excelAllRows = []; // { code, status }
 let _excelCurrentFilter = 'missing';
+let _excelSiteByCode = {}; // normalised code → the site's product row, for backfilling
+
+// Header names we know, in the spellings the supplier's exports use.
+const EXCEL_HEADERS = {
+  code:   ['კოდები', 'კოდი', 'code'],
+  name:   ['პროტექტორი', 'დასახელება', 'სახელი', 'name'],
+  brand:  ['ბრენდი', 'brand'],
+  season: ['სეზონი', 'season'],
+  size:   ['ზომა', 'size'],
+  rim:    ['რადიუსი', 'radius', 'rim'],
+};
+
+// Find the header row and each column's index by name. Exports of the same sheet
+// differ in whether they carry a leading index column and a row of letters above
+// the headers, so a fixed letter lands on the wrong column half the time.
+// Returns {} when no header row is recognisable, leaving the letter inputs in charge.
+function _excelDetectColumns(rows) {
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const cells = (rows[i] || []).map(c => String(c ?? '').trim().toLowerCase());
+    const found = {};
+    Object.entries(EXCEL_HEADERS).forEach(([key, names]) => {
+      const idx = cells.findIndex(c => c && names.includes(c));
+      if (idx !== -1) found[key] = idx;
+    });
+    // Three hits is enough to be sure it's the header row and not a data row
+    if (Object.keys(found).length >= 3) return { ...found, headerRow: i };
+  }
+  return {};
+}
+
+// Split a ზომა cell into სიგანე / პროფილი / დიამეტრი, plus დამატებითი ზომა.
+// The column mixes four shapes:
+//   145/80R13                    plain metric
+//   LT175/70R14                  light-truck prefix
+//   205/50ZR16                   speed rating in the middle
+//   30x9.50R15LT (245/80R15)     American, with the metric equivalent bracketed
+// The American one is the case that needs both: the inch size is what's printed
+// on the tire and goes to alt_size, while the bracketed metric drives the filters.
+function parseTireSize(raw) {
+  let s = String(raw || '').trim();
+  if (!s) return {};
+  // "R15(C)" is the same thing as "R15C" — unbracket it so it doesn't read as
+  // an American size whose bracketed half happens not to be a metric one.
+  s = s.replace(/\(\s*C\s*\)\s*$/i, 'C');
+
+  // American first — its bracketed half is what the metric pattern should read
+  const us = s.match(/^(.+?)\s*\(\s*(\d{2,3})\s*\/\s*(\d{2,3})\s*Z?R\s*(\d{2}(?:\.\d)?C?)\s*\)\s*$/i);
+  if (us) {
+    return { alt_size: us[1].trim(), width: us[2], profile: us[3], rim: 'R' + us[4].toUpperCase() };
+  }
+
+  // Metric, with an optional LT prefix and an optional speed letter before the R
+  const m = s.match(/^(?:LT)?\s*(\d{2,3})\s*\/\s*(\d{2,3})\s*[A-Z]?R\s*(\d{2}(?:\.\d)?C?)\s*$/i);
+  if (m) return { width: m[1], profile: m[2], rim: 'R' + m[3].toUpperCase() };
+
+  // Profile-less form like "LT195R15C" — width and rim, no aspect ratio
+  const noProfile = s.match(/^(?:LT)?\s*(\d{2,3})\s*[A-Z]?R\s*(\d{2}(?:\.\d)?C?)\s*$/i);
+  if (noProfile) return { width: noProfile[1], rim: 'R' + noProfile[2].toUpperCase() };
+
+  // Anything else is kept verbatim rather than guessed at
+  return { alt_size: s };
+}
 
 async function handleExcelFile(file) {
   if (!file) return;
@@ -3396,16 +3458,34 @@ async function handleExcelFile(file) {
     const nameLabel = document.getElementById('excelColNameLabel');
     if (nameLabel) nameLabel.textContent = _excelNameLetter;
 
-    // Extract code + name columns, one entry per Excel row.
+    // Prefer the header row's own names over the letter inputs: exports differ in
+    // whether they carry a leading index column, which shifts every letter by one.
+    const detected = _excelDetectColumns(rows);
+    const col = {
+      code:   detected.code   ?? _excelColIdx,
+      name:   detected.name   ?? _excelNameIdx,
+      brand:  detected.brand,
+      season: detected.season,
+      size:   detected.size,
+      rim:    detected.rim,
+    };
+    const firstDataRow = detected.headerRow != null ? detected.headerRow + 1 : 1;
+
+    // Extract one entry per Excel row.
     // Cells with multiple codes ("A; B; C") are kept intact here;
     // segment iteration happens during matching so each row is counted once.
+    const at = (r, idx) => idx == null ? '' : String(r[idx] ?? '').trim();
     const excelRows = rows
-      .slice(1)
-      .map((r, i) => {
-        const rawCode = String(r[_excelColIdx] ?? '').trim();
-        const name    = String(r[_excelNameIdx] ?? '').trim();
-        return { rowNum: i + 2, code: rawCode, name };
-      })
+      .slice(firstDataRow)
+      .map((r, i) => ({
+        rowNum: i + firstDataRow + 1,
+        code:   at(r, col.code),
+        name:   at(r, col.name),
+        brand:  at(r, col.brand),
+        season: at(r, col.season),
+        size:   at(r, col.size),
+        rim:    at(r, col.rim),
+      }))
       .filter(r => r.code);
 
     if (excelRows.length === 0) {
@@ -3422,7 +3502,7 @@ async function handleExcelFile(file) {
     while (true) {
       const { data, error } = await supabase
         .from('products')
-        .select('id, code, name')
+        .select('id, code, name, specs, price, country, unit, description')
         .eq('product_type', _excelCat)
         .range(from, from + PAGE - 1);
       if (error) throw error;
@@ -3442,12 +3522,15 @@ async function handleExcelFile(file) {
     // Also split site product codes by ";" so "RA49703; RA749702" indexes each sub-code
     const siteCodeNameSet = new Set();
     const siteBaseCount = {};
+    _excelSiteByCode = {};
     siteProducts.forEach(p => {
       const name = normName(p.name);
       splitCodes(p.code).forEach(code => {
         const base = normCode(stripSuffix(code));
         siteCodeNameSet.add(`${base}|${name}`);
         siteBaseCount[base] = (siteBaseCount[base] || 0) + 1;
+        // Kept whole so the apply step can fill in whatever the product is missing
+        if (!_excelSiteByCode[base]) _excelSiteByCode[base] = p;
       });
     });
 
@@ -3575,56 +3658,145 @@ function renderExcelTable() {
   }).join('');
 }
 
-// Sync the "add missing" button's count, hiding it when there's nothing to add.
+// Sync the button's count, hiding it when there's neither anything to add nor
+// anything on the site that could still be filled in.
 function updateAddMissingBtn() {
-  const n = _excelAllRows.filter(r => r.status === 'missing').length;
+  const missing  = _excelAllRows.filter(r => r.status === 'missing').length;
+  const onSite   = _excelAllRows.filter(r => r.status === 'uploaded').length;
   const btn = document.getElementById('excelAddMissingBtn');
   if (!btn) return;
-  document.getElementById('excelAddMissingCount').textContent = n;
-  btn.style.display = n > 0 ? 'flex' : 'none';
+  document.getElementById('excelAddMissingCount').textContent = missing;
+  btn.style.display = (missing + onSite) > 0 ? 'flex' : 'none';
 }
 
-// Insert every ❌ "არ არის საიტზე" row as an inactive product (code + name only),
-// so they can be filled in and published from the Products page afterwards.
+// Everything imported is Chinese stock, same as the products seeded by hand.
+const COUNTRY = '🇨🇳 ჩინეთი';
+
+// Turn one Excel row into the specs object the product form would have written.
+function _excelRowToSpecs(r) {
+  const size = parseTireSize(r.size);
+  const specs = {};
+  if (r.brand)  specs.brand   = r.brand;
+  if (r.season) specs.season  = r.season;
+  if (size.width)    specs.width    = size.width;
+  if (size.profile)  specs.profile  = size.profile;
+  // The რადიუსი column wins over the one parsed out of ზომა when both are there
+  const rim = r.rim || size.rim;
+  if (rim)           specs.rim      = rim;
+  if (size.alt_size) specs.alt_size = size.alt_size;
+  return specs;
+}
+
+// The option dropdowns are all rows in `brands`, scoped by product_type. A value
+// that only exists on a product and not in its list would be invisible to the
+// filters, so anything new the Excel introduces gets added to the list too.
+async function _syncOptionLists(rows) {
+  const wanted = { tire: new Set(), tire_season: new Set(), tire_width: new Set(), tire_profile: new Set(), tire_rim: new Set() };
+  rows.forEach(r => {
+    const s = _excelRowToSpecs(r);
+    if (s.brand)   wanted.tire.add(s.brand);
+    if (s.season)  wanted.tire_season.add(s.season);
+    if (s.width)   wanted.tire_width.add(s.width);
+    if (s.profile) wanted.tire_profile.add(s.profile);
+    if (s.rim)     wanted.tire_rim.add(s.rim);
+  });
+
+  let created = 0;
+  for (const [type, names] of Object.entries(wanted)) {
+    if (names.size === 0) continue;
+    const { data: existing } = await supabase.from('brands').select('name').eq('product_type', type);
+    const have = new Set((existing || []).map(b => b.name));
+    const toInsert = [...names].filter(n => !have.has(n))
+      .map(n => ({ product_type: type, name: n, ...(type === 'tire' ? { country: COUNTRY } : {}) }));
+    if (toInsert.length) {
+      const { error } = await supabase.from('brands').insert(toInsert);
+      if (!error) created += toInsert.length;
+    }
+  }
+  return created;
+}
+
+// Two jobs behind one button:
+//   · every ❌ "არ არის საიტზე" row becomes a new, inactive product
+//   · every ✅ row already on the site has its *empty* fields filled from the Excel
+// Existing values are never overwritten — a field the Excel disagrees with is the
+// admin's own edit, and the import has no business undoing it.
 async function addMissingProducts() {
-  const toAdd = _excelAllRows.filter(r => r.status === 'missing');
-  if (toAdd.length === 0) return;
-  if (!confirm(`${toAdd.length} პროდუქტი დაემატება საიტზე (გამორთული, ფასის გარეშე). გააგრძელოთ?`)) return;
+  const toAdd    = _excelAllRows.filter(r => r.status === 'missing');
+  const onSite   = _excelAllRows.filter(r => r.status === 'uploaded');
+  if (toAdd.length === 0 && onSite.length === 0) return;
+
+  const parts = [];
+  if (toAdd.length)  parts.push(`${toAdd.length} ახალი პროდუქტი დაემატება (გამორთული)`);
+  if (onSite.length) parts.push(`${onSite.length} არსებულს შეევსება ცარიელი ველები`);
+  if (!confirm(parts.join('\n') + '\n\nგააგრძელოთ?')) return;
 
   const btn = document.getElementById('excelAddMissingBtn');
   btn.disabled = true;
   btn.textContent = 'მიმდინარეობს...';
 
-  // Category label comes from the picker's own option text ("🛞 საბურავები" → "საბურავები")
   const sel = document.getElementById('excelCategory');
   const prodType = sel?.value || 'tire';
   const catLabel = (sel?.selectedOptions[0]?.textContent || '').replace(/[^\p{L}\s]/gu, '').trim() || 'საბურავები';
 
-  const payload = toAdd.map(r => ({
-    code: r.code,
-    name: r.name || r.code,   // name is NOT NULL — fall back to the code
-    product_type: prodType,
-    category: catLabel,
-    price: 0,
-    old_price: null,
-    unit: 'ც',
-    active: false,
-    specs: {},
-  }));
+  const newOptions = await _syncOptionLists([...toAdd, ...onSite]);
 
+  // ── 1. Insert the missing ones ──────────────────────────────────
   let added = 0, failed = 0;
-  const CHUNK = 500;
-  for (let i = 0; i < payload.length; i += CHUNK) {
-    const slice = payload.slice(i, i + CHUNK);
-    const { error } = await supabase.from('products').insert(slice);
-    if (error) failed += slice.length;
-    else {
-      added += slice.length;
-      slice.forEach(p => {
-        const r = _excelAllRows.find(x => x.status === 'missing' && x.code === p.code);
-        if (r) r.status = 'uploaded';
-      });
+  if (toAdd.length) {
+    const payload = toAdd.map(r => ({
+      code: r.code,
+      name: r.name || r.code,   // name is NOT NULL — fall back to the code
+      product_type: prodType,
+      category: catLabel,
+      country: COUNTRY,
+      price: 0,
+      old_price: null,
+      unit: 'ც',
+      active: false,
+      specs: _excelRowToSpecs(r),
+    }));
+
+    const CHUNK = 500;
+    for (let i = 0; i < payload.length; i += CHUNK) {
+      const slice = payload.slice(i, i + CHUNK);
+      const { error } = await supabase.from('products').insert(slice);
+      if (error) failed += slice.length;
+      else {
+        added += slice.length;
+        slice.forEach(p => {
+          const r = _excelAllRows.find(x => x.status === 'missing' && x.code === p.code);
+          if (r) r.status = 'uploaded';
+        });
+      }
     }
+  }
+
+  // ── 2. Backfill the ones already on the site ────────────────────
+  const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const stripSuffix = c => c.replace(/\(\d+\)$/, '').trim();
+  let filled = 0;
+  for (const r of onSite) {
+    const key = normCode(stripSuffix(String(r.code).split(';')[0]));
+    const p = _excelSiteByCode[key];
+    if (!p) continue;
+
+    const wantSpecs = _excelRowToSpecs(r);
+    const specs = { ...(p.specs || {}) };
+    let changed = false;
+    Object.entries(wantSpecs).forEach(([k, v]) => {
+      if (specs[k] === undefined || specs[k] === null || specs[k] === '') { specs[k] = v; changed = true; }
+    });
+
+    const patch = {};
+    if (changed) patch.specs = specs;
+    if (!p.country) patch.country = COUNTRY;
+    if (!p.unit)    patch.unit    = 'ც';
+    if (Object.keys(patch).length === 0) continue;
+
+    const { error } = await supabase.from('products').update(patch).eq('id', p.id);
+    if (error) failed++;
+    else { filled++; Object.assign(p, patch); }
   }
 
   btn.disabled = false;
@@ -3635,8 +3807,12 @@ async function addMissingProducts() {
   updateAddMissingBtn();
   renderExcelTable();
 
-  if (failed === 0) showToast(`✅ ${added} პროდუქტი დაემატა (გამორთული)`, 'success');
-  else showToast(`დაემატა ${added}, შეცდომა ${failed}`, 'error');
+  const msg = [];
+  if (added)      msg.push(`დაემატა ${added}`);
+  if (filled)     msg.push(`შეივსო ${filled}`);
+  if (newOptions) msg.push(`ახალი ვარიანტი ${newOptions}`);
+  if (failed)     msg.push(`შეცდომა ${failed}`);
+  showToast(msg.length ? '✅ ' + msg.join(' · ') : 'ცვლილება არ იყო', failed ? 'error' : 'success');
 }
 
 function exportExcelResults() {
